@@ -1,0 +1,22 @@
+CONF = ../CONF
+COMMON = ../../COMMON
+
+include $(CONF)/rules.make
+
+include $(CONF)/config.make
+
+lib = libdo.l
+
+all: $(lib)
+
+ifdef dataout
+subdir = $(dataout)
+endif
+
+$(lib): $(subdir) dataout.stamp
+	merge $(addsuffix /lib.l,$(subdir)) >-$@
+
+$(subdir): FORCE
+	$(MAKE) -C $@ all
+
+.PHONY: FORCE

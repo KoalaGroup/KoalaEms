@@ -1,0 +1,198 @@
+prefix := @prefix@
+exec_prefix := @exec_prefix@
+BIN_DIR     := $(exec_prefix)/bin
+LIB_DIR     := $(exec_prefix)/lib
+COMMONVER    := @COMMONVER@
+CLIENTLIBVER := @CLIENTLIBVER@
+SUPPORTVER   := @SUPPORTVER@
+PROCLIBVER   := @PROCLIBVER@
+SELFVER      := @SELFVER@
+
+srcdir := @srcdir@
+VPATH  := @srcdir@
+@SET_MAKE@
+
+machname = @target@
+
+COMMON_INCLUDE    := @EMSCOMMON@
+COMMON_EX_INCLUDE := @EMSEXCOMMON@
+COMMON_LIB        := @EMSCOMMONLIB@
+SUPPORT_INCLUDE   := @EMSSUPPORT@
+SUPPORT_LIB       := @EMSSUPPORTLIB@
+CLIENTLIB_INCLUDE := @EMSCLIENT@
+CLIENTLIB_LIB     := @EMSCLIENTLIB@
+PROCLIB_INCLUDE   := @EMSPROC@
+PROCLIB_LIB       := @EMSPROCLIB@
+TCL_INCLUDE       := @TCL@
+TCL_LIB           := @TCLLIB@
+TK_INCLUDE        := @TK@
+TK_LIB            := @TKLIB@
+#X11_INCLUDE       := @x_includes@
+X11_LIB           := -L@x_libraries@ -lX11
+EXTRALIBS         := @EXTRALIBS@ -lm
+
+CXX := @CXX@
+CXXFLAGS    := @CXXFLAGS@
+LDFLAGS     :=
+LDOFLAGS    := @LDOFLAGS@
+SHLIBSUFFIX := @SHLIBSUFFIX@
+
+INSTALL = @INSTALL@
+INSTALL_DATA = @INSTALL_DATA@
+RANLIB = @RANLIB@
+
+CPPFLAGS = @CPPFLAGS@ -I$(srcdir) -I. -I$(COMMON_INCLUDE)  \
+	-I$(COMMON_EX_INCLUDE)  -I$(SUPPORT_INCLUDE) -I$(CLIENTLIB_INCLUDE)  \
+	-I$(PROCLIB_INCLUDE) -I$(TCL_INCLUDE) -I$(TK_INCLUDE)  \
+	-DHAVE_CONFIG_H
+
+EMSMAINSRC := emsAppInit.cc
+EMSMAINOBJS := $(EMSMAINSRC:.cc=.o)
+EMSMAINWOBJS := $(EMSMAINSRC:.cc=_w.o)
+EMSSRC	:= emstcl.cc emstcl_ved.cc emstcl_confir.cc emstcl_vedcomm.cc  \
+    emstcl_is.cc emstcl_iscomm.cc emstcl_formatter.cc ems_xdr.cc
+EMSOBJS := $(EMSSRC:.cc=.o)
+FONTSRC	:= tkfont.cc
+FONTOBJS := $(FONTSRC:.cc=.o)
+HISTOMAINSRC := histoAppInit.cc
+HISTOMAINOBJS := $(HISTOMAINSRC:.cc=.o)
+HISTOSRC	:= histotcl.cc histowin.cc newhistoarr.cc pairarr_mem.cc  \
+    pairarr_map.cc pairarr_file.cc pairarr.cc
+HISTOOBJS := $(HISTOSRC:.cc=.o)
+TIMESRC	:= time.cc
+TIMEOBJS := $(TIMESRC:.cc=.o)
+SUPPSRC := findstring.cc tcl_cxx.cc
+SUPPOBJS := $(SUPPSRC:.cc=.o)
+
+SOURCES := $(EMSMAINSRC) $(EMSSRC) $(HISTOMAINSRC) $(HISTOSRC) \
+  $(SUPPSRC)
+  # $(TIMESRC)
+
+EXEC := emssh emswish histowish #histscan
+LIBSUFFIX := @LIBSUFFIX@
+
+# zu erzeugende Bibliotheken
+libs := libemstcl.$(SELFVER) libtclhisto.$(SELFVER)  \
+	libtclsupp.$(SELFVER) libtcltime.$(SELFVER)
+LIBS = $(libs:=${LIBSUFFIX})
+
+INSTHDR =emstcl.hxx emstcl_is.hxx emstcl_ved.hxx histotcl.hxx
+
+emsldeps := ./libemstcl.$(SELFVER) ./libtcltime.$(SELFVER)  \
+	./libtclsupp.$(SELFVER)
+
+emsl := -lemstcl.$(SELFVER) -ltcltime.$(SELFVER) -ltclsupp.$(SELFVER)  \
+	-lproc.$(PROCLIBVER) -lemscommxx.$(CLIENTLIBVER)  \
+	-lsupp.$(SUPPORTVER) -lcommon.$(COMMONVER)
+
+EMSLDEPS := $(emsldeps:=${LIBSUFFIX})
+EMSL := -L. -L$(PROCLIB_LIB) -L$(CLIENTLIB_LIB) -L$(COMMON_LIB) -L$(SUPPORT_LIB)  \
+	$(emsl)
+
+# libraries needed for histosh:
+histol := ./libtclhisto.$(SELFVER) ./libtclsupp.$(SELFVER)
+HISTOL := $(histol:=${LIBSUFFIX})
+
+.PHONY: all
+all: $(EXEC) $(LIBS)
+
+emssh: $(EMSMAINOBJS) $(EMSLDEPS)
+	$(CXX) $(LDFLAGS) -o $@ $(EMSMAINOBJS) $(EMSL) $(TCL_LIB)  \
+	-lm $(EXTRALIBS)
+
+emswish: $(EMSMAINWOBJS) $(EMSLDEPS)
+	$(CXX) $(LDFLAGS) -o $@ $(EMSMAINWOBJS) $(EMSL) $(TK_LIB)  \
+	$(TCL_LIB) $(X11_LIB) $(EXTRALIBS)
+
+histowish: $(HISTOMAINOBJS) $(HISTOL)
+	$(CXX) $(LDFLAGS) -o $@ $(HISTOMAINOBJS) $(HISTOL) $(EMSL) $(TK_LIB)  \
+	$(TCL_LIB) -lm $(X11_LIB) $(EXTRALIBS)
+
+histscan: histscan.o
+	$(CXX) $(LDFLAGS) -o $@ $^  \
+	-L$(SUPPORT_LIB) -lsupp -L$(COMMON_LIB) -lcommon -lm
+
+# statische Archive
+libemstcl.$(SELFVER).a: $(EMSOBJS)
+	$(AR) cr $@ $^
+	$(RANLIB) $@
+
+libtclhisto.$(SELFVER).a: $(HISTOOBJS)
+	$(AR) cr $@ $^
+	$(RANLIB) $@
+
+libtcltime.$(SELFVER).a: $(TIMEOBJS)
+	$(AR) cr $@ $^
+	$(RANLIB) $@
+
+libtclsupp.$(SELFVER).a: $(SUPPOBJS)
+	$(AR) cr $@ $^
+	$(RANLIB) $@
+
+# shared objects
+# %$(LIBSUFFIX): %.a libtclsupp.so
+# 	(tcsh -c "$(LD) $(LDOFLAGS) -o $@ $^ $(NOLIBS) |& demangle")
+
+libemstcl.$(SELFVER)$(SHLIBSUFFIX): $(EMSOBJS)  \
+	libtclsupp.$(SELFVER)$(SHLIBSUFFIX)
+	$(CXX) $(CXXFLAGS) $(LDOFLAGS) -o $@ $^ @LDONONEFLAG@ $(TCL_LIB)  \
+	-L. -ltclsupp.$(SELFVER)  \
+	-L$(PROCLIB_LIB) -lproc.$(PROCLIBVER)  \
+	-L$(SUPPORT_LIB) -lsupp.$(SUPPORTVER)  \
+	-L$(CLIENTLIB_LIB) -lemscommxx.$(CLIENTLIBVER)  \
+	-L$(COMMON_LIB) -lcommon.$(COMMONVER) -lm
+
+libtclhisto.$(SELFVER)$(SHLIBSUFFIX): $(HISTOOBJS)  \
+		libtclsupp.$(SELFVER)$(SHLIBSUFFIX)
+	$(CXX) $(CXXFLAGS) $(LDOFLAGS) -o $@ $^ @LDONONEFLAG@ $(TCL_LIB)  \
+	$(TK_LIB) \
+	-L. -ltclsupp.$(SELFVER)  \
+	-lX11 -lm
+
+libtcltime.$(SELFVER)$(SHLIBSUFFIX): $(TIMEOBJS)
+	$(CXX) $(CXXFLAGS) $(LDOFLAGS) -o $@ $^ @LDONONEFLAG@ $(TCL_LIB) -lm
+
+libtclsupp.$(SELFVER)$(SHLIBSUFFIX): $(SUPPOBJS)
+	$(CXX) $(CXXFLAGS) $(LDOFLAGS) -o $@ $^ @LDONONEFLAG@ $(TCL_LIB) -lm
+
+emsAppInit_w.o:	emsAppInit.cc
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -DUSE_TK -c -o $@ $^
+
+depend: sed.in
+	cp Makefile Makefile.bak
+	sed -e '/^# DO NOT DELETE THIS LINE/,$$d' < Makefile.bak > Makefile
+	echo '# DO NOT DELETE THIS LINE' >> Makefile
+	echo ' ' >> Makefile
+	for i in $(SOURCES); do \
+	  echo checking $$i ; \
+	  #$(CXX) -M $(CPPFLAGS) $(CXXFLAGS) $(srcdir)/$$i|sed -f sed.in>> Makefile ; \
+	  $(CXX) -M $(CPPFLAGS) $(CXXFLAGS) $(srcdir)/$$i >> Makefile ; \
+	done
+
+#sed.in:
+#	echo 's|/usr/include/[^ ]*||g' >sed.in
+#	echo '/.*: $$/d' >>sed.in
+#	echo '/^ *\\ *$$/d' >>sed.in
+
+sed.in:
+	echo '\|/usr/include/|d' >sed.in
+
+clean:
+	rm -f *.o *.a *.so $(EXEC) core sed.in
+
+realclean: clean
+
+distclean: realclean
+	rm -f Makefile Makefile.bak config.cache config.log config.status
+
+local: all
+	-mkdir $(machname)
+	$(INSTALL) $(lib) $(libxx) $(machname)
+
+install: all
+	for i in $(EXEC) ; do \
+	  $(INSTALL) $$i $(BIN_DIR)/$$i ; \
+	done
+	for i in $(LIBS) ; do \
+	  $(INSTALL_DATA) $$i $(LIB_DIR)/$$i ; \
+	done

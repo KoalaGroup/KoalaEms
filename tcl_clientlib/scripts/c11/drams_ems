@@ -1,0 +1,26 @@
+#####################################################################################
+# camac drams
+
+puts "open c08"
+rename [ems_open ikpc08] c08
+
+puts "init c08"
+c08 modullist create $DRAMS_ML
+#c08 command1 ResetTrigger 4
+
+rename [c08 is create 1 3] is3
+is3 memberlist create $DRAMS_IS
+#is3 readoutlist create 1 1 {DRAMS_Readout {}}
+is3 readoutlist create 1 1 {Timestamp {}}
+#c08 var create 1 6144
+is3 command1 DRAMS_zero_ped
+is3 command1 DRAMS_zero_thresh
+#is3 command1 DRAMS_set_ped 1 2500
+#is3 command1 DRAMS_prepare
+#c08 trigger create GSI_Trig 4 0 50 25
+c08 trigger create Immer 1
+
+puts "start c08"
+c08 readout start
+
+#####################################################################################

@@ -1,0 +1,17 @@
+CONF = ../../../CONF
+COMMON = ../../../../COMMON
+
+include $(COMMON)/rules.make
+
+cfiles = V24.r
+
+all: lib.l
+
+lib.l: $(cfiles)
+	merge $^ >-lib.l
+
+#############################################################################
+
+$(cfiles): errorcodes.h modultypes.h ../../../LOWLEVEL/VME/vme.h \
+           ../../../OBJECTS/VAR/variables.h \
+           $(CONF)/sconf.h $(COMMON)/debug.h

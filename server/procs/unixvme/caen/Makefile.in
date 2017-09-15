@@ -1,0 +1,39 @@
+# procs/unixvme/caen/Makefile.in
+# $ZEL: Makefile.in,v 1.15 2011/08/03 17:58:19 wuestner Exp $
+# created 06.Sep.2002 PW
+
+CONF = ../../../conf
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+include $(CONF)/rules.make
+include $(CONF)/config.make
+
+cfiles = v259.c v262.c v265.c v462.c v512.c v550.c v556.c v560.c \
+        v729a.c v729a_n.c v775.c v785.c v830.c \
+        v1729.c v1190.c v1290.c
+        # v792.c v785_792.c
+
+ofiles = $(cfiles:.c=.o)
+depfiles = $(cfiles)
+
+UNIXVMETYPES = $(shell echo $(unixvme)|tr '[:lower:]' '[:upper:]')
+UNIXVMEFLAGS=$(foreach typ,$(UNIXVMETYPES),-DUNIXVME_$(typ) )
+CFLAGS += $(UNIXVMEFLAGS)
+
+lib = ../../libprocs.a
+
+all: $(lib)
+
+$(lib): $(lib)($(ofiles))
+	$(RANLIB) $@
+
+clean:
+	-$(RM) *.o
+
+depend: xdepend
+
+.PHONY: depend
+
+#############################################

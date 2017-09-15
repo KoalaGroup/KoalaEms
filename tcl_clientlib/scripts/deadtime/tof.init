@@ -1,0 +1,17 @@
+set host ikptof07
+set port 4096
+
+set master t01
+array set ranges {
+    t01 2000
+    t02 2000
+    t03 2000
+    t04 2000
+    t05 2000
+    t06 2000
+}
+
+#set gaprange 6500
+set gapscale 1
+set gapbins 65535
+set tdtrange 10000

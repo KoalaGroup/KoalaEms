@@ -1,0 +1,31 @@
+# lowlevel/sync/pci_zel/Makefile.in
+# $ZEL: Makefile.in,v 1.3 2002/11/06 15:36:51 wuestner Exp $
+
+CONF = ../../../conf
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+include $(CONF)/rules.make
+include $(CONF)/config.make
+
+CPPFLAGS := $(CPPFLAGS) @AUXINC@
+cfiles = synchrolib.c syncmod.c
+ofiles = $(cfiles:.c=.o)
+depfiles = $(cfiles)
+
+lib = ../../libll.a
+
+all: $(lib)
+
+$(lib): $(lib)($(ofiles))
+	$(RANLIB) $@
+
+clean:
+	-$(RM) *.o
+
+depend: xdepend
+
+.PHONY: depend
+
+#############################################

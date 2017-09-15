@@ -1,0 +1,28 @@
+# Generated automatically from Makefile.in by configure.
+# procs/test/delayedread/Makefile.in
+# $ZEL: Makefile.in,v 1.1 2005/04/12 19:03:21 wuestner Exp $
+
+CONF = ../../../conf
+
+srcdir = .
+
+include $(CONF)/rules.make
+include $(CONF)/config.make
+
+cfiles = delayread.c
+ofiles = $(cfiles:.c=.o)
+depfiles = $(cfiles)
+
+lib = ../../libprocs.a
+
+all: $(lib)
+
+$(lib): $(lib)($(ofiles))
+	$(RANLIB) $@
+
+depend: xdepend
+
+.PHONY: depend
+
+#############################################################################
+

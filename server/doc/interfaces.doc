@@ -1,0 +1,254 @@
+\begindata{text,18048272}
+\textdsversion{12}
+\template{default}
+\define{keyword
+}
+\define{function
+}
+Schnittstellen innerhalb des EMS-Server-Programmes
+
+
+
+Kommunikation
+
+
+extern msgheader header
+
+extern int connected
+
+
+errcode _init_comm(char *port)
+
+errcode _done_comm()
+
+
+Request get_request(int **reqbuf, int *size)
+
+Request get_request_noblock(int **reqbuf, int *size)
+
+void send_confirmation(msgheader *header, int *confbuf, int size)
+
+
+void free_msg(int *msg)
+
+
+
+Datenausgabe
+
+
+extern int *outptr
+
+
+int buffer_free
+
+int *next_databuf
+
+
+errcode dataout_init(char *arg)
+
+errcode dataout_done()
+
+errcode start_dataout()
+
+errcode stop_dataout()
+
+
+OS-9: int *get_dataout_addr()
+
+
+void schau_nach_speicher()
+
+void flush_databuf(int *ptr)
+
+
+errcode get_last_databuf()
+
+
+
+Dataout-Objekte
+
+
+int outputerror_occured
+
+
+void handle_outputerror()
+
+errcode windtape(int idx, int offset)
+
+errcode writeoutput(int idx, int header, int *data)
+
+errcode getoutputstatus(int idx)
+
+errcode enableoutput(int idx)
+
+errcode disableoutput(int idx)
+
+
+errcode init_dataout_handler()
+
+errcode done_dataout_handler()
+
+
+
+Lowlevel
+
+
+errcode xxx_low_init(char *arg)
+
+errcode xxx_low_done()
+
+
+errcode init_lam()
+
+errcode done_lam()
+
+int get_lam_mask(int index)
+
+void enable_lam(int index, int arg)
+
+void disable_lam(int index)
+
+
+int get_lam()
+
+
+
+Requests
+
+
+errcode xxx(int *p, int len)
+
+
+
+Prozeduren
+
+
+extern int *outptr;
+
+extern int wirbrauchen;
+
+
+plerrcode proc_xxx(int *ptr)
+
+plerrcode test_proc_xxx(int *ptr)
+
+
+char name_proc_xxx[]
+
+int ver_proc_xxx
+
+
+
+Triggerprozeduren
+
+
+extern ems_u32 eventcnt
+
+
+plerrcode init_trig_xxx(int *ptr)
+
+plerrcode done_trig_xxx()
+
+
+int get_trig_xxx()
+
+void reset_trig_xxx()
+
+
+char name_trig_xxx[]
+
+int ver_trig_xxx
+
+
+
+Nutzbare Routinen/Makros/Variablen
+
+
+XDR-Strings
+
+
+int xdrstrlen(int *xdrstr)
+
+int xdrstrclen(int *xdrstr)
+
+int strxdrlen(char *str)
+
+
+int *outstring(int *xdrstrbuf, char *str)
+
+int *outnstring(int *xdrstrbuf, char *str, int len)
+
+int *extractstring(char *strbuf, int *xdrstr)
+
+
+Byteanordnung
+
+
+void swap_falls_noetig(int *buf, int len)
+
+void swap_words_falls_noetig(int *buf, int len)
+
+
+Prozedurlisten
+
+
+errcode test_proclist(int *list, int len, int *dataspace)
+
+errcode scan_proclist(int *list)
+
+extern int *memberlist
+
+
+CAMAC
+
+
+camadr_t
+
+int CAMACslot(int n)
+
+camadr_t CAMACaddr(int N, int A, int F)
+
+camadr_t CAMACinc(camadr_t addr)
+
+
+int CAMACread(camadr_t addr)
+
+void CAMACwrite(camadr_t addr, int data)
+
+voit CAMACcntl(camadr_t addr)
+
+int *CAMACblread(int *databuf, camadr_t addr, int len)
+
+\keyword{int} *\function{CAMACblreadQstop}(int *databuf, camadr_t addr, int 
+maxlen);
+
+\keyword{int} *\function{CAMACblreadAddrScan}(int *databuf, camadr_t addr, 
+int len);
+
+\keyword{int} *\function{CAMACblwrite}(camadr_t addr, int *data, int len);
+
+\keyword{int} *\function{CAMACblread16}(camadr_t addr, int *data, int len);
+
+
+int CAMACval(int data)
+
+int CAMACgotQ(int data)
+
+int CAMACgotX(int data)
+
+
+Profibus
+
+
+int activate_client_sap(int nr, int remstation)
+
+int deactivate_sap(int nr)
+
+int do_sda(int sap, int remstation, int remsap, char *data, int len)
+
+int do_srd(int sap, int remstation, int remsap, char *senddata, int 
+sendlen, char *recvdata, int *recvlen)
+
+int profi_getlas(char *buf, int *len)
+
+\enddata{text,18048272}

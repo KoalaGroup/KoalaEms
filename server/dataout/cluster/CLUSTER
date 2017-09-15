@@ -1,0 +1,205 @@
+                                                                May 09 2001
+
+Cluster:
+--------
+
+
+- Notation aehnlich XDR (rfc 1014)
+- Abweichung: Daten werden nicht als "Big Endien" uebertragen, sondern der
+  Architektur des erzeugenden Rechners entsprechend. Die Unterscheidung ist
+  mit Hilfe des Feldes endientest moeglich.
+
+enum clustertypes {
+    clusterty_events=0,
+    clusterty_ved_info,
+    clusterty_text,
+    clusterty_wendy_setup,
+    clusterty_file,
+    clusterty_async_data,
+    clusterty_no_more_data=0x10000000
+};
+
+struct subevent {
+  int IS_ID;
+  int data<>;
+};
+
+struct event {
+  int size;
+  int evno;
+  int trigno;
+  subevent subevents<>;
+};
+
+struct is_info {
+    int ID;
+    int importance;
+    int decoding_hints; /* 0x0: no hint 0x1: lvds-superevent */
+};
+
+struct ved_info1 {
+  int VEDid;
+  int IS_IDs<>;
+};
+
+struct ved_info2 {
+  int VEDid;
+  int importance;
+  int IS_IDs<>;
+};
+
+struct ved_info3 {
+  int VEDid;
+  is_info is_infos<>;
+};
+
+struct wheader {
+  int subtype; /* =no_of_records<<16+record_no */
+  int is_type;
+  int run_number;
+};
+
+typedef enum {
+  wtype_main=1,     /* main header record */
+  wtype_hwconf,     /* hardware configuration file */
+  wtype_mdtype,     /* module type file */
+  wtype_sync,       /* save file of the synchronisation system */
+  wtype_is,         /* save files of configured instrumentation */
+  wtype_user        /* user files */
+} wtypes;
+
+typedef enum {
+  fera_sys=1      /* camac fera system */
+  fbmb_sys,       /* fastbus multiblock readout ssystem */
+  dl350_sys,      /* struck dl350 fadc system */
+  tdc2277_sys,    /* camac lecroy tdc2277 system */
+  fb_lecroy_sys,  /* fastbus lecroy system, cosy#11 */
+  ca_scaler_sys,  /* camac lecroy scaler system */
+  zel_discr_sys,  /* zel discriminator system */
+  fb_kinetic_sys, /* fastbus kinetic system */
+  ca_drams_sys,   /* camac drams system */
+  tdc2228_sys,    /* camac lecroy tdc2228 system */
+  mp_sys,         /* multi purpose system */
+};
+
+struct w_main_data {
+  wheader head;
+  string date<28>;
+  string label<80>;
+  string user_label<80>;
+};
+
+struct w_hwconf_data {
+  wheader head;
+  string<> lines<>;
+};
+
+struct w_mdtype_data {
+  wheader head;
+  string<> lines<>;
+};
+
+struct w_sync_data {
+  wheader head;
+  string<> lines<>;
+};
+
+struct w_is_data {
+  wheader head;
+  string<> lines<>;
+};
+
+struct w_user_data {
+  wheader head;
+  string<> lines<>;
+};
+
+options:
+  0 int size
+  1 wenn optionsize!=0: optionflags (1: timestamp 2: checksum 4: ...)
+  2,3 wenn vorhanden timestamp (struct timeval)
+  ab 2 od. 4 wenn vorhanden checksum
+
+struct checksum {
+    int type; // 'MD4' 'MD5' ..
+    int data<>;
+};
+
+flags:
+           0: nothing special
+  0x00000001: fragmented
+  0x00000010: further fragments following
+
+struct cluster {
+  int size;                        // Anzahl aller folgenden Worte
+  const int endiantest=0x12345678;
+  union switch (clustertypes type) {
+    case clusterty_events:
+      struct {
+        int options<>;               //
+        int flags;                   // noch nicht benutzt
+        int VED_ID;
+        int fragment_id;             // z.Z.==0; noch keine Fragmente
+        event events<>;              // da sind die Daten drin
+      } event_data;
+    case clusterty_ved_info:
+      /*XXX version should be part of ved_info1[123], not part of cluster */
+      struct {
+        int options<>;
+        union switch (version) {     // Version of ved_info
+          case 0x80000001: ved_info1 info<>;
+          case 0x80000002: ved_info2 info<>; /* not used? */
+          case 0x80000003: ved_info3 info<>; /* not yet used */
+        }
+      } ved_info_data;
+    case clusterty_text:
+      struct {
+        int options<>;
+        int flags;                   // noch nicht benutzt
+        int fragment_id;             // z.Z.==0; noch keine Fragmente
+        string<> lines<>;            // Text in einzelnen Strings
+      } text_data;
+    case clusterty_file:
+      struct {
+        int options<>;
+        int flags;              // 3: further fragments follow 1: last fragment
+        int fragment_id;
+        string<> name;
+        int ctime;
+        int mtime;
+        int perm;
+        int size;
+        opaque content<>;
+      } file_data;
+    case clusterty_wendy_setup:
+      struct {
+        int options<>;
+        int flags;                   // noch nicht benutzt
+        int fragment_id;             // z.Z.==0; noch keine Fragmente
+        union switch (type) {
+          case wtype_main:   w_main_data w_main;
+          case wtype_hwconf: w_hwconf_data w_hwconf;
+          case wtype_mdtype: w_mdtype_data w_mdtype;
+          case wtype_sync:   w_sync_data w_sync;
+          case wtype_is:     w_is_data w_is;
+          case wtype_user:   w_user_data w_user;
+        } wendy_setup_data;
+      } wendy_data;
+    case clusterty_async_data:
+      struct {
+        int options<>;
+        int flags;                   // noch nicht benutzt
+        int fragment_id;             // z.Z.==0; noch keine Fragmente
+        opaque data<>;
+      } async_data;
+    case clusterty_no_more_data:
+      int options<>;
+  } content;
+};
+
+Der erste Cluster eines Datenstromes sollte vom Typ clusterty_ved_info sein.
+Der letzte Cluster ist vom Typ clusterty_no_more_data.
+
+Angaben ohne Gewaehr; von Blumenspenden bitte absehen;
+
+PW

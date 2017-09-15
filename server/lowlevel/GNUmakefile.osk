@@ -1,0 +1,38 @@
+CONF = ../CONF
+COMMON = ../../COMMON
+
+include $(CONF)/rules.make
+
+include $(CONF)/config.make
+
+cfiles = lowlevel_init.r
+lib = libll.l
+subdirs = $(lowlevel)
+
+ifdef lowlevel
+all: $(lib)
+else
+all:
+endif
+
+$(lib): $(cfiles) $(subdirs) lowlevel.stamp
+	merge $(cfiles) $(addsuffix /lib.l,$(subdirs)) >-$@
+
+$(subdirs): FORCE
+	$(MAKE) -C $@ all
+
+lowlevel_init.c: lowlibs
+
+lowlibs: lowlevel.stamp
+	-$(RM) $@
+	$(foreach l,$(lowlevel),echo lowlib($l) >+$@;)
+
+.PHONY: FORCE
+
+clean:
+	-$(RM) lowlevel_init.c
+	-$(RM) lowlibs
+
+########################################################
+
+lowlevel_init.r: $(COMMON)/errorcodes.h

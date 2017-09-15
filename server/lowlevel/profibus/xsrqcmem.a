@@ -1,0 +1,21 @@
+*Ersatz fuer srqcmem bei Link-Problemen wegen short jump zu _sysret
+
+	psect xsrqcmem_a,0,0,0,0,0
+
+xsrqcmem:
+  movem.l  d1/a2,-(sp)
+  os9 F$SRqCMem
+  bcs.b error
+  move.l a2,d0
+  movem.l (sp)+,d1/a2
+  rts
+
+error
+  and.l #$ffff,d1
+  move.l d1,(errno,a6)
+  clr.l d0
+  movem.l (sp)+,d1/a2
+  rts
+ 
+	ends
+	end

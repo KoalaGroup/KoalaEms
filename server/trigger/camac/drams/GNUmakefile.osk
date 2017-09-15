@@ -1,0 +1,15 @@
+CONF = ../../../CONF
+COMMON = ../../../../COMMON
+
+include $(COMMON)/rules.make
+
+cfiles = dramstrigger.r
+
+all: lib.l
+
+lib.l: $(cfiles)
+	merge $^ >-$@
+
+#############################################
+
+dramstrigger.r: errorcodes.h ../../../LOWLEVEL/CAMAC/camac.h

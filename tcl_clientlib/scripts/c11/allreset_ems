@@ -1,0 +1,47 @@
+# fastbus
+puts "reset f03"
+rename [ems_open ikpf03] f03
+if [catch {f03 readout reset} mist] {puts "f03: $mist"}
+f03 reset
+
+puts "reset f04"
+rename [ems_open ikpf04] f04
+if [catch {f04 readout reset} mist] {puts "f04: $mist"}
+f04 reset
+
+# camac drams
+puts "reset c08"
+rename [ems_open ikpc08] c08
+if [catch {c08 readout reset} mist] {puts "c08: $mist"}
+c08 reset
+
+# camac scaler
+puts "reset q02"
+rename [ems_open ikpq02] q02
+if [catch {q02 readout reset} mist] {puts "q02: $mist"}
+q02 reset
+
+# ser1 (fastbus)
+puts "reset v05"
+rename [ems_open ikpv05] v05
+if [catch {v05 readout reset} mist] {puts "v05: $mist"}
+v05 reset
+
+# ser2 (camac)
+puts "reset v06"
+rename [ems_open ikpv06] v06
+if [catch {v06 readout reset} mist] {puts "v06: $mist"}
+v06 reset
+
+# eventbuilder
+puts "reset v15"
+rename [ems_open ikpv15] v15
+if [catch {v15 readout reset} mist] {puts "v15: $mist"}
+v15 reset
+
+# pc
+puts "reset z27"
+rename [ems_open z27] z27
+if [catch {z27 readout reset} mist] {puts "z27: $mist"}
+z27 reset
+

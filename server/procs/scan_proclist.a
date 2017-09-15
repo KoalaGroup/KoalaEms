@@ -1,0 +1,51 @@
+	use <errorcodes.d>
+
+        psect scan_proclist_a,0,0,0,0,0
+
+*struct listproc
+        org 0
+proc            do.l 1
+test_proc       do.l 1
+name_proc       do.l 1
+var_proc        do.l 1
+
+scan_proclist:
+*d0: Listenpointer
+  movem.l d0-d2/a2,-(sp)
+  move.l d0,a2
+  move.l (a2)+,d2  Anzahl
+  bra.b los
+
+weiter
+  move.l (a2)+,d1  Index
+  lsl.l #4,d1  *sizeof(struct listproc)
+  move.l a2,d0  Parameter
+  jsr ([Proc,a6,d1])
+  tst.l d0
+  bne.b fehler
+  move.l (a2)+,d1  Anzahl der Parameter
+  lea.l (a2,d1.w*4),a2
+los
+  dbf d2,weiter
+  clr.l d0
+raus
+  add.l #4,sp  d0 bleibt
+  movem.l (sp)+,d1-d2/a2
+  rts
+
+fehler
+  move.l a1,-(sp)
+  move.l 4(sp),a1  altes d0
+  move.l (a1),d1  Anzahl
+  move.l (sp)+,a1
+  sub.l d2,d1  Position in der Liste
+  move.l (outptr,a6),a2
+  move.l d1,(a2)+
+  move.l d0,(a2)+  Fehlercode
+  move.l a2,(outptr,a6)
+  move.l #Err_ExecProcList,d0
+  bra.b raus
+
+        ends
+        end
+

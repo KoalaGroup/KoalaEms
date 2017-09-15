@@ -1,0 +1,120 @@
+prefix := @prefix@
+exec_prefix := @exec_prefix@
+INCLUDE_DIR := $(prefix)/include
+LIB_DIR     := $(exec_prefix)/lib
+COMMONVER    := @COMMONVER@
+CLIENTLIBVER := @CLIENTLIBVER@
+SELFVER      := @SELFVER@
+
+srcdir := @srcdir@
+VPATH  := @srcdir@
+@SET_MAKE@
+
+machname = @target@
+
+COMMON_INCLUDE    := @EMSCOMMON@
+COMMON_EX_INCLUDE := @EMSEXCOMMON@
+COMMON_LIB        := @EMSCOMMONLIB@
+CXX               := @CXX@
+CXXFLAGS_old      := @CXXFLAGS@ -Wall -Woverloaded-virtual -Wsign-promo
+CXXFLAGS          := $(CXXFLAGS_old) -Wold-style-cast
+INSTALL           := @INSTALL@
+INSTALL_DATA      := @INSTALL_DATA@
+RANLIB            := @RANLIB@
+CPPFLAGS := -I. -I$(srcdir) -I$(COMMON_INCLUDE) -I$(COMMON_EX_INCLUDE) @DEFS@
+SHLIBSUFFIX := @SHLIBSUFFIX@
+LDOFLAGS    := @LDOFLAGS@
+
+SRC     := readargs.cc errors.cc ems_errors.cc buf.cc inbuf.cc outbuf.cc  \
+	   sockets.cc stringlist.cc xdrstrdup.cc xferbuf.cc iopathes.cc  \
+           debuglevel.cc mkpath.cc compressed_io.cc
+OBJS    := $(SRC:.cc=.o)
+VEDSRC  := ved_addr.cc
+VEDOBJS := $(VEDSRC:.cc=.o)
+TSRC    := hitest.cc argtest.cc
+TOBJS   := $(TSRC:.cc=.o)
+TESTS   := $(TSRC:.cc=)
+
+NONECOMMON := -L$(COMMON_LIB) -lcommon.$(COMMONVER)
+NONESUPP   := -L. -lsupp.$(SELFVER)
+
+libs  := libsupp.$(SELFVER).a libvedsupp.$(SELFVER).a
+slibs := $(libs:.a=$(SHLIBSUFFIX))
+
+VEDHDR := ved_addr.hxx
+SUPPHDR := errors.hxx ems_errors.hxx nocopy.hxx buf.hxx inbuf.hxx outbuf.hxx  \
+	readargs.hxx sockets.hxx stringlist.hxx xdrstrdup.hxx xferbuf.hxx  \
+        iopathes.hxx debuglevel.hxx mkpath.hxx compressed_io.hxx
+
+.PHONY: all
+all: $(libs) @SLIBS@
+test: all $(TESTS)
+
+hitest: hitest.o libsupp.$(SELFVER).a
+	$(CXX) $(CXXFLAGS) -o $@ hitest.o  \
+        -L. -lsupp.$(SELFVER) -L$(COMMON_LIB) -lcommon.$(COMMONVER) -lm
+
+argtest: argtest.o libsupp.$(SELFVER).a
+	$(CXX) $(CXXFLAGS) -o $@ argtest.o  \
+        -L. -lsupp.$(SELFVER) -L$(COMMON_LIB) -lcommon.$(COMMONVER)
+
+libsupp.$(SELFVER).a: $(OBJS)
+	$(AR) cr $@ $^
+	$(RANLIB) $@
+
+libvedsupp.$(SELFVER).a: $(VEDOBJS)
+	$(AR) cr $@ $^
+	$(RANLIB) $@
+
+libsupp.$(SELFVER)$(SHLIBSUFFIX): $(OBJS)
+	$(CXX) $(CXXFLAGS) $(LDOFLAGS) -o $@ $^ @LDONONEFLAG@  \
+	@NONECOMMON@
+
+libvedsupp.$(SELFVER)$(SHLIBSUFFIX): $(VEDOBJS)
+	$(CXX) $(CXXFLAGS) $(LDOFLAGS) -o $@ $^ @LDONONEFLAG@  \
+	@NONECOMMON@ @NONESUPP@
+
+compressed_io.o: $(srcdir)/compressed_io.cc
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS_old) -c -o $@ $<
+
+.PHONY: depend
+depend: sed.in
+	cp Makefile Makefile.bak
+	sed -e '/^# DO NOT DELETE THIS LINE/,$$d' < Makefile.bak > Makefile
+	echo '# DO NOT DELETE THIS LINE' >> Makefile
+	echo ' ' >> Makefile
+	for i in $(SRC) $(VEDSRC); do \
+	  echo checking $$i; \
+	  $(CXX) -MM $(CPPFLAGS) $(CXXFLAGS) $(srcdir)/$$i|sed -f sed.in>> Makefile ; \
+	done
+
+sed.in:
+	echo 's|/usr/include/[^ ]*||g' >sed.in
+	echo '/.*: $$/d' >>sed.in
+	echo '/^ *\\ *$$/d' >>sed.in
+
+.PHONY: 
+clean:
+	rm -f *.o *.a *.so
+
+.PHONY: 
+realclean: clean
+
+.PHONY: distclean
+distclean: realclean
+	rm -f Makefile Makefile.bak config.cache config.log config.status config.h
+
+.PHONY: install
+install: install_binaries install_header
+
+.PHONY: install_binaries
+install_binaries: all
+	for i in $(libs) @SLIBS@ ; do \
+	$(INSTALL_DATA) $$i $(LIB_DIR)/$$i ; \
+	done
+
+.PHONY: install_header
+install_header:
+	for i in $(SUPPHDR) $(VEDHDR)  ; do \
+	$(INSTALL_DATA) $(srcdir)/$$i $(INCLUDE_DIR)/$$i ; \
+	done

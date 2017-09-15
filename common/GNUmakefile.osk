@@ -1,0 +1,62 @@
+srcdir = .
+VPATH = $(srcdir)
+
+SYSDEV = /dd
+LOCAL = /dd/LOCAL
+INCDIR = $(SYSDEV)/DEFS
+EXTRAINCDIR = $(LOCAL)/DEFS
+
+CFILES = swap.r xdrstring.r getcap.r strdup.r
+
+GENINC = requesttypes.inc
+GENCHDR = requesttypes.h errorcodes.h  \
+	modultypes.h unsoltypes.h intmsgtypes.h
+GENAHDR = errorcodes.d unsoltypes.d
+GENHDR = $(GENCHDR) $(GENAHDR)
+GENSRC =
+M4SRC = requesttypes.h.m4 errorcodes.h.m4 \
+	modultypes.h.m4 unsoltypes.h.m4 intmsgtypes.h.m4
+
+M4INC = requesttypes.inc errorcodes.inc modultypes.inc unsoltypes.inc  \
+	intmsgtypes_02.inc
+
+CPPFLAGS = -DWORDS_BIGENDIAN
+
+ifeq ($(CC),cc)
+
+CPPFLAGS += -v=$(srcdir) -v=. -v=$(INCDIR) -v=$(EXTRAINCDIR) -Dconst=
+CFLAGS = -k=2
+
+%.r : %.c
+	$(CC) $(CPPFLAGS) $(CFLAGS) $< -r=$(RDIR)
+
+else
+
+CC = gcc2
+CPPFLAGS += -I$(srcdir) -I. -I$(EXTRAINCDIR)
+#CFLAGS = -O2 -mc68020 -mremote -mnostack-check -fomit-frame-pointer  \
+#	-finline-functions -fstrength-reduce -funroll-loops
+#LF = -mc68020
+CFLAGS := -O2 -mremote -mnostack-check -fomit-frame-pointer  \
+	-finline-functions -fstrength-reduce -funroll-loops
+LF :=
+
+endif
+
+M4FLAGS = -DEMSDEFS=$(srcdir)
+
+.PHONY: all
+all: $(GENINC) $(GENHDR) $(GENSRC) common.l
+
+common.l: $(CFILES)
+	merge $^ >-$@
+
+$(GENHDR) $(GENSRC): $(M4SRC) $(M4INC)
+	m4 $(M4FLAGS) <$(srcdir)/$@.m4 >$@
+
+requesttypes.inc:
+	copy $(srcdir)/requesttypes_02.inc requesttypes.inc
+
+clean:
+	-$(RM) *.r *.l
+	-$(RM) $(GENINC) $(GENHDR) $(GENSRC)

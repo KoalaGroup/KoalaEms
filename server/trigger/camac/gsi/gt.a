@@ -1,0 +1,74 @@
+*******************************************************************************
+*                                                                             *
+* gt.a                                                                        *
+*                                                                             *
+* OS9                                                                         *
+*                                                                             *
+* 30.03.94                                                                    *
+*                                                                             *
+*******************************************************************************
+
+MISMATCH        equ $40
+DT_CLEAR        equ $20
+EV_IRQ_CLEAR    equ $8000
+
+        use <errorcodes.d>
+        use <unsoltypes.d>
+
+        psect gt_a,0,0,0,0,0
+
+get_trig_gsi:
+  move.l a0,-(sp)
+  move.l (stat_r,a6),a0
+  move.l (a0),d0
+  tst.w d0
+  bmi.b weiter
+  clr.l d0
+  move.l (sp)+,a0
+  rts
+weiter
+  movem.l d1-d2,-(sp)
+  move.l (a0),d0
+  cmp.b #MISMATCH,d0
+  bcc.b fehler
+  move.w d0,d1
+  lsr.w #8,d1
+  move.l (eventcnt,a6),d2
+  eor.b d2,d1
+  andi.b #$1f,d1
+  bne.b fehler
+  add.l #1,d2
+  move.l d2,(eventcnt,a6)
+  and.l #$f,d0
+  movem.l (sp)+,d1-d2/a0
+  rts
+
+fehler
+  sub.l #12,a7
+  move.l #rtErr_Trig,(a7)
+  move.l (eventcnt,a6),4(a7)
+  move.l d0,8(a7)
+  move.l #Unsol_RuntimeError,d0
+  move.l a7,d1
+  move.l #3,-(a7)
+  bsr.l send_unsolicited
+  move.l #-3,(readout_active,a6)
+  add.l #16,a7
+  clr.l d0
+  movem.l (sp)+,d1-d2/a0
+  rts
+
+reset_trig_gsi:
+  move.l a0,-(sp)
+  move.l (stat_w,a6),a0
+  move.l #EV_IRQ_CLEAR,(a0)
+  move.l #DT_CLEAR,(a0)
+  move.l (sp)+,a0
+  rts
+
+        ends
+        end
+
+*******************************************************************************
+*******************************************************************************
+

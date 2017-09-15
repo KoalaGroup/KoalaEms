@@ -1,0 +1,169 @@
+\subsection{\path{camac/fera}}
+
+\begin{procdesc}{FERAsetup}{Vorbereitung eines FERA-Doppelbuffer-Systems für Readout}
+\args{Timeout für FSC, Readout-Delay für FSC, Singleevent-Flag für FSC, Pedestals}
+\descr{
+	Das FERA-System wird zurückgesetzt, die FSC-Parameter und Pedestals der
+	Digitalisierungsmodule werden geladen. Das Singleevent-Flag entscheidet, ob im
+	FSC-CSR das Singleevent-Bit gesetzt wird. Die Module werden in den
+	ECL-Readout-Modus geschaltet, VSNs (Virtual Station Numbers) werden,
+	mit 1 beginnend, aufsteigend in der Reihenfolge der Module in der
+	Instrumentierungssystem-Modulliste vergeben. Das Readout erfolgt komprimiert über den
+	FERA-ECL-Bus.\\
+	Die Pedestals unterscheiden sich in Anzahl und Format, je nach dem Typ des
+	Digitalisierungsmodules. Sie werden als Argumente in der Reihenfolge der Module in der
+	Instrumentierungssystem-Modulliste übergeben. Es werden folgende Modultypen
+	unterstützt:
+	\begin{list}{}{\renewcommand{\makelabel}[1]{##1:}}
+	\item[FERA\_ADC\_4300B]	Standard-FERA-ADC (10 oder 11 bit). Es werden 16
+	Argumente benötigt, je ein Pedestal-Wert für jeden Kanal. Die FERA-Module werden für
+	Pedestal-Subtraktion, aber ohne Überlauf-Unterdrückung eingestellt.
+	\item[FERA\_TDC\_4300B] Wie oben, nur wird im FERA-Modul zusätzlich die
+	Überlauf-Unterdrückung eingestellt. Das ist sinnvoll, wenn der ADC zusammen mit einem
+	TFC als TDC-System verwendet wird.
+	\item[SILENA\_ADC\_4418V] Spannungsempfindlicher SILENA-ADC. Es werden 25
+	Parameter benötigt:
+		\begin{itemize}
+		\item common Threshhold
+		\item lower Threshhold für 8 Kanäle
+		\item upper Threshhold für 8 Kanäle
+		\item Offset für 8 Kanäle
+		\end{itemize}
+	Pedestal-Abzug wird eingeschaltet, Überlauf wird nicht unterdrückt.
+	\item[BIT\_PATTERN\_UNIT] 256-Kanal-Bit-Pattern-Unit des ZEL. Es wird 1
+	Parameter benötigt, die Anzahl der maximal auszulesenden Kanäle.
+	\item[CNRS\_QDC\_1612F] 8-Kanal-, 2-Bereichs-QDC von Gan'Elec. Dieses Modul
+	belegt 2 VSNs, je eine für 4 Eingänge. Es werden 18 Parameter benötigt:
+		\begin{itemize}
+		\item Mastergatelänge in Mikrosekunden, maximal 16
+		\item common Pedestal
+		\item individual Pedestals, 2 pro Kanal (jeweils für schmales/breites Gate)
+		\end{itemize}
+	Es werden die individuellen Gate-Eingänge verwendet. Pedestal-Abzug wird eingeschaltet,
+	Überlauf wird nicht unterdrückt.
+	\item[CNRS\_TDC\_812F] 8-Kanal-TDC von Gan'Elec. Es werden 9 Parameter benötigt:
+		\begin{itemize}
+		\item Zeitbereichswahl (siehe Tabelle im Modulhandbuch)
+		\item Pedestals für 8 Kanäle
+		\end{itemize}
+	Pedestal-Abzug wird eingeschaltet, Überlauf wird nicht unterdrückt.
+	\end{list}
+}
+\errors{nichtunterstützte Modultypen, falsche Anzahl der Parameter}
+\rem{Die Modultypinformationen müssen geladen sein.}
+\end{procdesc}
+
+\begin{procdesc}{StandardFERAsetup}{
+	Vorbereitung eines einfachen FERA-Systems für Readout
+}
+\args{Pedestals}
+\descr{
+	Das FERA-System wird zurückgesetzt, die Pedestals der Digitalisierungsmodule werden
+	geladen. Die Module werden in den ECL-Readout-Modus geschaltet, VSNs (Virtual Station
+	Numbers) werden, mit 1 beginnend, aufsteigend in der Reihenfolge der Module in der
+	Instrumentierungssystem-Modulliste vergeben. Das Readout erfolgt komprimiert über den
+	FERA-ECL-Bus.\\
+	Die Pedestals unterscheiden sich in Anzahl und Format, je nach dem Typ des
+	Digitalisierungsmodules. Sie werden als Argumente in der Reihenfolge der Module in der
+	Instrumentierungssystem-Modulliste übergeben. Die unterstützten Modultypen und die
+	Formate der jeweiligen Initialisierungsparameter entsprechen denen der Funktion
+	`\proc{FERAsetup}'.
+}
+\errors{nichtunterstützte Modultypen, falsche Anzahl der Parameter}
+\rem{Die Modultypinformationen müssen geladen sein.}
+\end{procdesc}
+
+\begin{procdesc}{FERAmesspeds}{
+	Ermittlung der Pedestals der Digitalisierungsmodule eines FERA-Doppelbuffer-Systems
+}
+\args{Timeout für FSC, Readout-Delay für FSC}
+\descr{
+	Diese Prozedur mißt die Pedestals der ADC-Module durch wiederholte Messung und
+	Mittelwertbildung. Dabei entsteht ein Datenblock, der (evtl. nach Nachbearbeitung) als
+	Parameterfeld für die Prozedur `\proc{FERAsetup}' dienen kann. Die Mittelwertbildung erfolgt
+	nur bei Modutypen, bei denen das sinnvoll ist; sonst werden default-Werte in das Datenfeld
+	eingetragen. Zur Messung müssen die Signale von den ADC-Eingängen getrennt und der
+	FSC mit einer Triggerquelle verbunden werden. Es werden mindestens 100 Events
+	ausgewertet. Zur Zeit werden folgende Modultypen unterstützt:
+	\begin{list}{}{\renewcommand{\makelabel}[1]{##1:}}
+	\item[FERA\_ADC\_4300B, FERA\_TDC\_4300B] Es werden Mittelwerte gebildet.
+	\item[SILENA\_ADC\_4418V] Es werden default-Werte ausgegeben:
+		\begin{itemize}
+		\item common Theshhold: 10
+		\item lower Theshhold: 50
+		\item upper Theshhold: 255
+		\item Offset: 128
+		\end{itemize}
+	\item[BIT\_PATTERN\_UNIT] Für die Kanalzahl wird eine `255' erzeugt.
+	\end{list}
+}
+\data{
+	Datenfeld, das dem Eingabeformat von `\proc{FERAsetup}' entspricht. Die FSC-Parameter
+	entsprechen den Argumenten dieses Kommandos, das Singleevent-Flag steht auf `0'. Die
+	Pedestals entsprechen den gemessenen Mittelwerten bzw. Defaults.
+}
+\rand{Ein eventuelles Setup ser Module wird zerstört.}
+\errors{nichtunterstützte Modultypen, keine Trigger (FERA-Memory in 30 Sekunden nicht gefüllt)}
+\rem{Die Modultypinformationen müssen geladen sein.}
+\end{procdesc}
+
+\begin{procdesc}{StandardFERAmesspeds}{
+	Ermittlung der Pedestals der Digitalisierungsmodule eines einfachen FERA-Systems
+}
+\descr{
+	Diese Prozedur mißt die Pedestals der ADC-Module durch wiederholte Messung und
+	Mittelwertbildung. Dabei entsteht ein Datenblock, der (evtl. nach Nachbearbeitung) als
+	Parameterfeld für die Prozedur `\proc{StandardFERAsetup}' dienen kann. Die Mittelwertbildung
+	erfolgt nur bei Modutypen, bei denen das sinnvoll ist; sonst werden default-Werte in das
+	Datenfeld eingetragen. Zur Messung müssen die Signale von den ADC-Eingängen getrennt
+	und der FSC mit einer Triggerquelle verbunden werden. Es werden mindestens 100 Events
+	ausgewertet. Die unterstützten Modultypen und deren Behandlung entsprechen denen der
+	Funktion `\proc{FERAmesspeds}'.
+}
+\data{
+	Datenfeld, das dem Eingabeformat von `\proc{StandardFERAsetup}' entspricht. Die Pedestals
+	entsprechen den gemessenen Mittelwerten bzw. Defaults.
+}
+\rand{Ein eventuelles Setup der Module wird zerstört.}
+\errors{nichtunterstützte Modultypen, keine Trigger (FERA-Memory in 30 Sekunden nicht gefüllt)}
+\rem{Die Modultypinformationen müssen geladen sein.}
+\end{procdesc}
+
+
+\begin{procdesc}{FERAreadout}{
+	Readout eines FERA-Doppelbuffer-Systems im Singleevent-Modus
+}
+\descr{
+	Ein Memory-Modul eines FERA-Doppelbuffer-Systems wird ausgelesen. Um zu ermitteln,
+	welches der beiden Memories auszulesen ist, werden die LAMs des FSCs gepollt. Nach
+	dem Auslesen und Zurücksetzen des Speichers wird dem FSC das nun freie
+	Memory-Modul mitgeteilt. Der FSC wird dabei in den Singleevent-Modus gesetzt.
+}
+\data{Daten des ausgelesenen Speichermoduls}
+\errors{kein Speicher frei nach 100000 Pollversuchen $\rightarrow$ \plerr{HW}}
+\end{procdesc}
+
+\begin{procdesc}{FERAreadoutC}{
+	Readout eines FERA-Doppelbuffer-Systems im Multievent-Modus
+}
+\descr{
+	Die Prozedur liest die LAM-Flags im FSC, ob eines der beiden Memory-Module gefüllt ist.
+	Wenn ja, wird dieses Modul ausgelesen, zurückgesetzt und dem FSC als frei gemeldet. Wenn
+	nein, werden die Füllstände beider Speichermodule gelesen, auf 16 Bit maskiert und in den
+	Ausgabestrom geschrieben.
+}
+\data{
+	entweder Daten des ausgelesenen Speichers (zu erkennen an den gesetzten oberen Bits,
+	d.h., X und Q) oder 2 Speicherpositionen (in der Reihenfolge der
+	Instrumentierungssystem-Modulliste)
+}
+\end{procdesc}
+
+
+\begin{procdesc}{FERAreadoutM}{Ein FERA-Memory wird ausgelesen}
+\args{n (Position des Speichermoduls im Instrumentierungssystem)}
+\descr{
+	Das Modul wird in den CAMAC-Modus geschalten, ausgelesen und in den ECL-Modus
+	zurückgesetzt. Der Counter wird auf `0' gestellt.
+}
+\end{procdesc}

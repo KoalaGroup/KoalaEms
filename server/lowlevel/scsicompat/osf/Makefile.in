@@ -1,0 +1,29 @@
+# lowlevel/scsicompat/osf/Makefile.in
+# $ZEL: Makefile.in,v 1.4 2007/09/17 00:35:51 wuestner Exp $
+
+CONF = ../../../conf
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+@SET_MAKE@
+
+include $(CONF)/rules.make
+include $(CONF)/config.make
+CFLAGS := $(CFLAGS) -std -DSCSICOMPAT_@SCSICOMPAT@
+
+cfiles = scsicompat_osf.c
+ofiles = $(cfiles:.c=.o)
+depfiles = $(cfiles)
+
+lib = ../libscsicompat.a
+
+all: $(lib)
+
+$(lib): $(lib)($(ofiles))
+	$(RANLIB) $@
+
+depend: xdepend
+
+.PHONY: depend
+
+######################################################

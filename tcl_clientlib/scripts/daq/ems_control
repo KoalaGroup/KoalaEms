@@ -1,0 +1,141 @@
+#! /bin/sh
+#\
+exec emswish $0 $*
+# $ZEL: ems_control,v 1.19 2009/08/19 16:58:54 wuestner Exp $
+# copyright 1998, 1999, 2001, 2004
+#   Peter Wuestner; Zentralinstitut fuer Elektronik; Forschungszentrum Juelich
+#
+
+# Vorbereitung fuer 'autoload' von Prozeduren
+if {[info exists env(EMSTCL_HOME)]} {
+    set EMSTCL_HOME $env(EMSTCL_HOME)
+} else {
+    set EMSTCL_HOME /usr/local/ems/lib
+}
+puts "EMSTCL_HOME is $EMSTCL_HOME"
+set control_library $EMSTCL_HOME/daq
+set common_library $EMSTCL_HOME/common
+lappend auto_path $control_library $common_library
+set saved_auto_path $auto_path
+
+# readonly attribute for "entry"
+if {[info tclversion]>8.3} {
+    set entry_ro {readonly}
+} else {
+    set entry_ro {disabled}
+}
+
+# Kommandozeilenargumente verarbeiten
+process_args
+set global_verbose [info exists namedarg(verbose)]
+if {$global_verbose} printargs
+
+set global_verbose 1
+
+if [info exists namedarg(help)] {
+  printhelp
+  exit
+}
+
+bind Entry <Delete> {
+       tkEntryBackspace %W
+}
+
+# option database
+set_options
+
+set tcl_precision 17
+
+set global_display [display_name]
+set global_setupfile(base) daq_control_rc
+set global_setupfile(default) ~/.$global_setupfile(base)
+
+if [info exists namedarg(setup)] {
+  set num_setup_files [llength [glob -nocomplain -- $namedarg(setup)]]
+  if {$num_setup_files!=1} {
+    if {$num_setup_files==0} {
+      puts "no file $namedarg(setup)"
+    } else {
+      puts "filename $namedarg(setup) ambigous"
+    }
+  exit
+  }
+  set global_setupfile(restored) $namedarg(setup)
+  set global_setupfile(save) $namedarg(setup)
+  set global_setupfile(use_default) 0
+} else {
+  set files0 [glob -nocomplain -- .$global_setupfile(base)]
+  set files1 [glob -nocomplain -- ~/.$global_setupfile(base)]
+  set files2 [glob -nocomplain -- ~/$global_setupfile(base)]
+  if {[llength $files0]>0} {
+    set file [lindex $files0 0]
+  } elseif {[llength $files1]>0} {
+    set file [lindex $files1 0]
+  } elseif {[llength $files2]>0} {
+    set file [lindex $files2 0]
+  } else {
+    set file ""
+  }
+  if {"$file"!=""} {
+    set global_setupfile(restored) $file
+    set global_setupfile(save) $file
+  } else {
+    set global_setupfile(restored) ""
+    set global_setupfile(save) ~/.$global_setupfile(base)
+  }
+  set global_setupfile(use_default) 1
+}
+if {$global_setupfile(restored)!=""} {
+  restore_setup $global_setupfile(restored)
+} else {
+  puts "no setupfile found, new file will be $global_setupfile(save)"
+}
+
+# und, wenn noetig, Setup vervollstaendigen
+correct_setup
+use_args
+
+set maintitle $global_setup(maintitle)
+if [regexp #.* [winfo name .] number] {
+  append maintitle "$number"
+}
+wm title . $maintitle
+wm maxsize . 10000 10000
+tk_focusFollowsMouse
+
+# proc namespacedummies is called in order to load bgerror, daq_ende and all
+#   procedures in namespaces
+namespacedummies
+
+source $global_setup(share_dir)/requestarr.tcl
+source $global_setup(share_dir)/errorarrs.tcl
+
+set global_intsize [calculate_intsize]
+if {$global_intsize==0} {
+  puts "this system has more than 128 bit??"
+  set global_intsize 32
+}
+
+set clockformat $global_setup(clockformat)
+puts "clockformat is $clockformat"
+set spacename rootspace
+
+set global_lasttime 0
+change_status uninitialized "Init never called"
+set global_daq(_run_nr) {0}
+set global_daq(starttime) {}
+set global_daq(stoptime) {}
+set global_daq(autoreset) 0
+set t0 [doubletime]
+start_gui
+run_nr::get_new_run_nr
+
+# set ln 0
+# proc logloop {} {
+#   global ln
+#   output "aaaa $ln"
+#   incr ln
+#   after 3000 logloop
+# }
+# 
+# logloop

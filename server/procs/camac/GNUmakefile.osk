@@ -1,0 +1,15 @@
+CONF = ../../CONF
+COMMON = ../../../COMMON
+
+include $(CONF)/rules.make
+
+cfiles = primitiv.r esone.r quick.r tovariable.r
+lib = lib.l
+
+all: $(lib)
+
+$(lib): $(cfiles)
+	merge $^ >-$@
+
+primitiv.r esone.r quick.r tovariable.r response.r: debug.stamp  \
+	errorcodes.h ../../LOWLEVEL/CAMAC/camac.h ../procprops.h

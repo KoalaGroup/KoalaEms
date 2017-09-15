@@ -1,0 +1,11 @@
+/* config.h.in.  Generated automatically from configure.in by autoheader.  */
+
+/* Define if your processor stores words with the most significant
+   byte first (like Motorola and SPARC, unlike Intel and VAX).  */
+#undef WORDS_BIGENDIAN
+
+/* Gibt es <sys/cdefs.h>? */
+#undef HAVE_SYS_CDEFS_H
+
+/* Define if you have the cgetcap function.  */
+#undef HAVE_CGETCAP

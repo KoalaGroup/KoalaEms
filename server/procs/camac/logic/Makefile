@@ -1,0 +1,33 @@
+# Generated automatically from Makefile.in by configure.
+# procs/camac/mlu/Makefile.in
+# $ZEL: Makefile.in,v 1.2 2011/01/13 21:36:22 wuestner Exp $
+
+CONF = ../../../conf
+
+srcdir = .
+
+include $(CONF)/rules.make
+include $(CONF)/config.make
+CFLAGS += $(extracflags)
+
+cfiles = camacmlu.c lc4508.c
+ofiles = $(cfiles:.c=.o)
+depfiles = $(cfiles)
+
+CAMACTYPES = $(shell echo $(camac)|tr '[:lower:]' '[:upper:]')
+CAMACFLAGS=$(foreach typ,$(CAMACTYPES),-DCAMAC_$(typ) )
+CFLAGS += $(CAMACFLAGS)
+
+lib = ../../libprocs.a
+
+all: $(lib)
+
+$(lib): $(lib)($(ofiles))
+	$(RANLIB) $@
+
+depend: xdepend
+
+.PHONY: depend
+
+#############################################
+

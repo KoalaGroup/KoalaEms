@@ -1,0 +1,51 @@
+# VEDs:
+#     fera    p23  {FERA, Side detector}
+#     sfi     p19  {Fastbus}
+#     mwpc    p20  {MWPC, side detector}
+#     vme     p21b {VME, triggermaster}
+#     scaler  p16  {Scaler}
+#     fwd     p27  {MWPC1,2, forward detector}
+#     spec    p28s {Spectator, detector}
+#     ndmwpc  p33  {MWPC6,7 Nd}
+#     nd      p36  {FERA, Nd}
+    
+set host ikpp02-zdf
+set port 4096
+
+# vme.wad     p21b
+# scaler.wad  p16
+# fwd2.wad    p18
+# sfi.wad     p19
+# fera.wad    p23
+# fwd.wad     p27
+# ndmwpc.wad  p33
+# fwdf1.wad   p34
+# nd.wad      p36
+
+set master p21b
+# set ranges(p16) 20000
+# set ranges(p18) 20000
+# set ranges(p19) 20000
+# set ranges(p20) 20000
+# set ranges(p21b) 20000
+# set ranges(p23) 20000
+# set ranges(p27) 20000
+# set ranges(p28) 20000
+# set ranges(p33) 20000
+# set ranges(p34) 20000
+# set ranges(p36) 20000
+set ranges(p16)  200000
+# set ranges(p18)  200000
+set ranges(p19)  200000
+# set ranges(p20)  200000
+set ranges(p21b) 200000
+set ranges(p23)  200000
+# set ranges(p27)  200000
+# set ranges(p28)  200000
+# set ranges(p33)  200000
+# set ranges(p34)  200000
+# set ranges(p36)  200000
+
+set numbins 10000
+set gapscale [scale_from_range 20000 $numbins]
+set tdtscale [scale_from_range 200000 $numbins]

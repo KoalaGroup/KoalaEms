@@ -1,0 +1,148 @@
+*******************************************************************************
+*                                                                             *
+* doreadout.a                                                                 *
+*                                                                             *
+* OS9                                                                         *
+*                                                                             *
+* 05.09.93                                                                    *
+*                                                                             *
+*******************************************************************************
+
+*struct isreadoutinfo
+        org 0
+isid                    do.l 1
+members                 do.l 1
+readoutlist             do.l 1
+sizeofisreadoutinfo     do.b 1
+
+        use <errorcodes.d>
+        use <unsoltypes.d>
+
+        psect doreadout_a,0,0,0,0,0
+
+_nichtfrei
+  bsr.l schau_nach_speicher
+  movem.l (sp)+,d2-d3/a2-a4
+  rts
+
+doreadout:
+  movem.l d2-d3/a2-a4,-(sp)
+  tst.l (buffer_free,a6)
+  beq.b _nichtfrei
+  jsr ([get_trigger,a6])
+  tst.l d0
+  beq.w _raus
+
+  move.l (next_databuf,a6),a4
+  move.l (eventcnt,a6),(a4)+
+  move.l d0,(a4)+
+
+  move.l (readoutcnt,a6,d0*4),d2  Anzahl der IS
+  move.l d2,(a4)+
+  beq.b _nichts
+
+  move.l (readoutinfo,a6,d0*4),a3
+
+readweiter
+  move.l members(a3),(memberlist,a6)
+  move.l isid(a3),(a4)+
+  addq.l #4,a4
+  move.l a4,a2  help - fuer Blockgroesse
+  move.l a4,(outptr,a6)
+
+  move.l readoutlist(a3),d0
+  bsr.l scan_proclist
+
+  move.l (outptr,a6),a4
+
+  tst.l d0
+  bne.b fehler
+weiter
+
+  move.l a4,d0
+  sub.l a2,d0
+  lsr.l #2,d0
+  move.l d0,-4(a2)
+
+  subq.b #1,d2
+  beq.b _readende
+
+  add.l #sizeofisreadoutinfo,a3
+  bra.b readweiter
+
+_nichts
+  move.l a4,(outptr,a6)
+_readende
+  jsr ([reset_trigger,a6])
+  move.l a4,d0
+  bsr.l flush_databuf
+_raus
+  movem.l (sp)+,d2-d3/a2-a4
+  rts
+
+fehler
+  move.l (onreadouterror,a6),d1
+  cmp.l #1,d1
+  bgt.w _fende
+  movem.l d0/d2,-(sp)
+  move.l a4,d0
+  sub.l a2,d0
+  move.l d0,d2
+  add.l #20,d0
+  bsr.l malloc
+  tst.l d0
+  beq.w _nomem
+  move.l d0,-(sp)
+  move.l d0,a0
+  move.l #rtErr_ExecProcList,(a0)
+  move.l (eventcnt,a6),4(a0)
+  move.l 4(sp),8(a0) war d0=res
+  move.l isid(a3),12(a0)
+  moveq.l #4,d0
+  move.l ([next_databuf,a6],d0.l),16(a0) Triggerid
+  lea.l 20(a0),a0
+  move.l a2,a1
+  lsr.l #2,d2
+  move.l d2,d0
+  bra.b _cplp
+_cpla
+  move.l (a1)+,(a0)+
+_cplp
+  dbf d0,_cpla
+  move.l d2,d0
+  add.l #5,d0
+  move.l d0,-(sp)
+  move.l #Unsol_RuntimeError,d0
+  move.l 4(sp),d1
+  bsr.l send_unsolicited
+  lea.l 4(sp),sp
+  move.l (sp)+,d0
+  bsr.l free
+  movem.l (sp)+,d0/d2
+  tst.l (onreadouterror,a6)
+  bne.b _fende
+  move.l #-3,(readout_active,a6)
+  bra.w _raus
+_fende
+  lea.l -8(a4),a4
+  bra.w weiter
+
+_nomem
+  sub.l #8,sp
+  move.l #rtErr_Other,(sp)
+  move.l #Err_NoMem,4(sp)
+  move.l #Unsol_RuntimeError,d0
+  move.l sp,d1
+  move.l #2,-(sp)
+  bsr.l send_unsolicited
+  lea.l 12(sp),sp
+  move.l #-3,(readout_active,a6)
+  movem.l (sp)+,d0/d2
+  bra.w _raus
+
+        ends
+        end
+
+*******************************************************************************
+*******************************************************************************
+

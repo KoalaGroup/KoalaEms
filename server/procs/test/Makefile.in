@@ -1,0 +1,30 @@
+# procs/test/Makefile.in
+# $ZEL: Makefile.in,v 1.10 2013/01/17 22:43:45 wuestner Exp $
+
+CONF = ../../conf
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+include $(CONF)/rules.make
+include $(CONF)/config.make
+
+cfiles = debuglevel.c delay.c error.c exit.c random.c unsol.c \
+  onreadouterror.c chstdout.c maxevcount.c readoutprior.c printevent.c \
+  select_statist.c xprintf.c
+ofiles = $(cfiles:.c=.o)
+depfiles = $(cfiles)
+
+lib = ../libprocs.a
+
+all: $(lib)
+
+$(lib): $(lib)($(ofiles))
+	$(RANLIB) $@
+
+depend: xdepend
+
+.PHONY: depend
+
+#####################################################
+

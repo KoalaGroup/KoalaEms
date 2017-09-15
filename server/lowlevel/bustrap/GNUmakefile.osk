@@ -1,0 +1,15 @@
+CONF = ../../CONF
+COMMON = ../../../COMMON
+
+include $(CONF)/rules.make
+
+cfiles = bustrap_c.r bustrap_a.r symtab.r
+
+all: lib.l
+
+lib.l: $(cfiles)
+	merge $^ >-$@
+
+######################################################
+
+bustrap_c.r: debug.h errorcodes.h bustrap.h

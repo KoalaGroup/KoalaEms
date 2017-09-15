@@ -1,0 +1,6 @@
+set host ikptof07
+set port 4096
+
+set targets {t02 t03 t04 t06}
+
+set trigger {}

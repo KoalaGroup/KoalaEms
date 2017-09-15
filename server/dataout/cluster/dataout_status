@@ -1,0 +1,39 @@
+dataout status tape:
+
+0  do_status==Do_error?dataout_clX(do_idx).errorcode:0
+1  do_status
+2  doswitch
+3  xxx (27)
+4  clusters
+5  words
+6  events
+7  suspensions
+8  clusters
+9  cluster_num
+10 xxx (20)
+11 fertig (a5)
+12 disable (77)
+13 xxx (17)
+14 error code
+15 sense key
+16 add sense code
+17 add sense code qualifier
+18 internal status code
+19 tape motion hours
+20 power on hours
+
+21 total rewrites
+22 total errors corrected
+23 total bytes processed
+24 "                   "
+25 total uncorrected errors
+
+26 write compr. ratio
+27 MBytes transferred from host
+28 Bytes transferred from host
+29 MBytes written to tape
+30 Bytes written to tape
+
+31 BOP
+32 EOP
+33 first block location

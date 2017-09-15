@@ -1,0 +1,93 @@
+#! /bin/sh
+# $Id: discrim,v 1.1 2000/03/24 17:13:21 wuestner Exp $\
+exec emswish $0 $*
+
+# Vorbereitung fuer 'autoload' von Prozeduren
+if [info exists env(EMSTCL_HOME)] {
+  set discrim_library $env(EMSTCL_HOME)/discrim
+  set common_library $env(EMSTCL_HOME)/common
+  set EMSTCL_HOME $env(EMSTCL_HOME)
+} else {
+  set discrim_library /usr/local/ems/lib/discrim
+  set common_library /usr/local/ems/lib/common
+  set EMSTCL_HOME /usr/local/ems/lib
+}
+lappend auto_path $discrim_library $common_library
+
+# Kommandozeilenargumente verarbeiten
+process_args
+set global_verbose [info exists namedarg(verbose)]
+if {$global_verbose} printargs
+
+if [info exists namedarg(help)] {
+  printhelp
+  exit
+}
+
+set global_display [display_name]
+set global_setupfile(base) discr_rc
+set global_setupfile(default) ~/.$global_setupfile(base)
+
+if [info exists namedarg(setup)] {
+  set num_setup_files [llength [glob -nocomplain -- $namedarg(setup)]]
+  if {$num_setup_files!=1} {
+    if {$num_setup_files==0} {
+      puts "no file $namedarg(setup)"
+    } else {
+      puts "filename $namedarg(setup) ambigous"
+    }
+  exit
+  }
+  set global_setupfile(restored) $namedarg(setup)
+  set global_setupfile(save) $namedarg(setup)
+  set global_setupfile(use_default) 0
+} else {
+  set files0 [glob -nocomplain -- .$global_setupfile(base)]
+  set files1 [glob -nocomplain -- ~/.$global_setupfile(base)]
+  set files2 [glob -nocomplain -- ~/$global_setupfile(base)]
+  if {[llength $files0]>0} {
+    set file [lindex $files0 0]
+  } elseif {[llength $files1]>0} {
+    set file [lindex $files1 0]
+  } elseif {[llength $files2]>0} {
+    set file [lindex $files2 0]
+  } else {
+    set file ""
+  }
+  if {"$file"!=""} {
+    set global_setupfile(restored) $file
+    set global_setupfile(save) $file
+  } else {
+    set global_setupfile(restored) ""
+    set global_setupfile(save) ~/.$global_setupfile(base)
+  }
+  set global_setupfile(use_default) 1
+}
+if {$global_setupfile(restored)!=""} {
+  restore_setup $global_setupfile(restored)
+} else {
+  puts "there exists no setupfile $global_setupfile(save), but it is needed."
+  exit
+}
+
+correct_setup
+use_args
+
+set maintitle $global_setup(maintitle)
+if [regexp #.* [winfo name .] number] {
+  append maintitle "$number"
+}
+
+wm title . $maintitle
+wm maxsize . 10000 10000
+tk_focusFollowsMouse
+
+# proc namespacedummies is called in order to load bgerror and all
+#   procedures in namespaces
+  namespacedummies
+
+if {[init_commu_and_ved]<0} {
+  exit
+}
+
+start_gui

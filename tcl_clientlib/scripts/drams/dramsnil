@@ -1,0 +1,19 @@
+#!/usr/local/bin/klient
+open drams
+downloaddomain ml 0 7 $DRAMS_CONTROL 8 $DRAMS_RECEIVER 9 $DRAMS_EVENT 4 $T_TRIG
+ResetTrigger(4)
+
+createis 1 11
+downloadismodullist 7 8 9 17
+downloadreadoutlist 20 1 {DRAMS_Readout()}
+createvariable 1 2048
+writevariable 1 </usr/users/diart/data/pedestals
+DRAMS_set_ped(1,2500)
+#DRAMS_zero_ped()
+#DRAMS_zero_thresh()
+DRAMS_prepare()
+
+downloaddomain trig 0 GSI_Trig 4 1 30 10
+downloaddomain dataout 0 ringbuffer 30000 0 null
+start ro
+flush

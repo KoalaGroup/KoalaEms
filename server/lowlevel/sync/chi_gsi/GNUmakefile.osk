@@ -1,0 +1,16 @@
+CONF = ../../CONF
+COMMON = ../../../COMMON
+
+include $(CONF)/rules.make
+
+cfiles = chi_gsi.r
+
+all: lib.l
+
+lib.l: $(cfiles)
+	merge $^ >-$@
+
+######################################################
+
+chi_gsi.r: debug.h errorcodes.h ../BUSTRAP/bustrap.h  \
+	../../TRIGGER/CHI/GSI/gsitrigger.h

@@ -1,0 +1,46 @@
+Status der Datain- und Dataout-Objekte:
+
+Flags: configured active     connected
+
+       0          0          0         (0)   blank
+       0          0          1              illegal
+       0          1          0              illegal
+       0          1          1              illegal
+       1          0          0         (1)   inactive
+       1          0          1         (2)   inactive, connected
+       1          1          0         (3)   active
+       1          1          1         (4)   active, connected
+       1          .          .         (e)   error
+
+typ socket, active:
+
+   init start stop resume reset connect fehler remove
+
+0  1    x     x    x      x     x       x      x
+
+1  x    3,4   x    3      1     x       x      0
+
+2  x    4     x    4      1     x       e      x
+
+3  x    x     1    x      1     4       e      x
+
+4  x    x     2    x      1     x       e      x
+
+e  x    x     x    x      x     x       x      0
+
+
+typ socket, passiv:
+
+   init start stop resume reset accept fehler remove
+
+0  1    x     x    x      x     x       x      x
+
+1  x    3     x    3      1     2       x      0
+
+2  x    4     x    4      1     x       e      x
+
+3  x    x     1    x      1     4       e      x
+
+4  x    x     2    x      1     x       e      x
+
+e  x    x     x    x      x     x       x      0

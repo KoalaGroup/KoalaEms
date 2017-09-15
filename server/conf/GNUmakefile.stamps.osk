@@ -1,0 +1,9 @@
+include config.make.alt
+help := $($(var))
+$(var) =
+include config.make
+
+all:
+ifneq ($($(var)),$(help))
+	touch $(var).stamp
+endif

@@ -1,0 +1,4 @@
+#! /bin/sh
+#\
+exec tclsh $0 $*
+auto_mkindex . *.tcl

@@ -1,0 +1,11 @@
+CONF = ../../CONF
+COMMON = ../../../COMMON
+
+include $(COMMON)/rules.make
+
+cfiles = vicrawlib.r
+
+all: lib.l
+
+lib.l: $(cfiles)
+	merge $^ >-$@

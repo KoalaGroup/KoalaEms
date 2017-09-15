@@ -1,0 +1,104 @@
+*******************************************************************************
+*                                                                             *
+* fbsingle_a.a                                                                *
+*                                                                             *
+* OS9                                                                         *
+*                                                                             *
+* created: 12.10.94                                                           *
+* last changed: 26.10.94                                                      *
+*                                                                             *
+* PW                                                                          *
+*                                                                             *
+*******************************************************************************
+
+  use "chi_map.d"
+  psect fbsinglea_a,0,0,0,0,0
+
+*******************************************************************************
+
+* int FRCa(int pa, int sa)
+FRCa:
+  move.l  (P_BASE_A,a6),a0
+  move.l  d0,CGEO(a0)
+FRCa_p:
+  move.l  d1,SECAD(a0)
+  move.l  RNDM(a0),d0
+  rts
+
+*******************************************************************************
+
+* int FRDa(int pa, int sa)
+FRDa:
+  move.l  (P_BASE_A,a6),a0
+  move.l  d0,DGEO(a0)
+FRDa_p:
+  move.l  d1,SECAD(a0)
+  move.l  RNDM(a0),d0
+  rts
+
+*******************************************************************************
+
+* void FWCa(int pa, int sa, int data)
+FWCa:
+  move.l  (P_BASE_A,a6),a0
+  move.l  d0,CGEO(a0)
+FWCa_p:
+  move.l  d1,SECAD(a0)
+  move.l  4(a7),RNDM(a0)
+  rts
+
+*******************************************************************************
+
+* void FWDa(int pa, int sa, int data)
+FWDa:
+  move.l  (P_BASE_A,a6),a0
+  move.l  d0,DGEO(a0)
+FWDa_p:
+  move.l  d1,SECAD(a0)
+  move.l  4(a7),RNDM(a0)
+  rts
+
+*******************************************************************************
+
+* int FRCMa(int ba)
+FRCMa:
+  move.l  (P_BASE_A,a6),a0
+  move.l  d0,CBREG(a0)
+FRCMa_p:
+  move.l  RNDM(a0),d0
+  rts
+
+*******************************************************************************
+
+* int FRDMa(int ba)
+FRDMa:
+  move.l  (P_BASE_A,a6),a0
+  move.l  d0,DBREG(a0)
+FRDMa_p:
+  move.l  RNDM(a0),d0
+  rts
+
+*******************************************************************************
+
+* void FWCMa(int ba, int data)
+FWCMa:
+  move.l  (P_BASE_A,a6),a0
+  move.l  d0,CBREG(a0)
+FWCMa_p:
+  move.l  d1,RNDM(a0)
+  rts
+
+*******************************************************************************
+
+* void FWDMa(int ba, int data)
+FWDMa:
+  move.l  (P_BASE_A,a6),a0
+  move.l  d0,DBREG(a0)
+FWDMa_p:
+  move.l  d1,RNDM(a0)
+  rts
+
+  ends
+
+*******************************************************************************
+*******************************************************************************

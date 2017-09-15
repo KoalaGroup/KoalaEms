@@ -1,0 +1,11 @@
+/*
+ * common/emssocktypes.h.in
+ * $ZEL: emssocktypes.h.in,v 1.1 2006/03/10 14:14:57 wuestner Exp $
+ */
+
+#ifndef _emssocktypes_h_
+#define _emssocktypes_h_
+
+typedef @SOCKLEN_TYPE@ ems_socklen_t;
+
+#endif

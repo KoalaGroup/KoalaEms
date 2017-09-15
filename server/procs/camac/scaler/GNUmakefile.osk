@@ -1,0 +1,37 @@
+################################################################################
+#                                                                              #
+# GNUmakefile.osk                                                              #
+#                                                                              #
+# OS9                                                                          #
+#                                                                              #
+# 27.01.95                                                                     #
+#                                                                              #
+################################################################################
+
+CONF = ../../../CONF
+COMMON = ../../../../COMMON
+
+include $(COMMON)/rules.make
+
+cfiles = scaler.r addlong.r
+
+all: lib.l
+
+lib.l: $(cfiles)
+	merge $^ >-lib.l
+
+################################################
+
+scaler4434.r: errorcodes.h ../../../LOWLEVEL/CAMAC/camac.h  \
+	../../../OBJECTS/VAR/variables.h
+
+scaler2551.r: errorcodes.h ../../../LOWLEVEL/CAMAC/camac.h  \
+	../../../OBJECTS/VAR/variables.h addlong.r
+
+scaler_n1.r: errorcodes.h ../../../LOWLEVEL/CAMAC/camac.h  \
+	../../../OBJECTS/VAR/variables.h  ../../../OBJECTS/VAR/variables.h  \
+	../../procprops.h modultypes.h debug.h $(CONF)/debug.stamp addlong.r
+
+scaler_n2.r: errorcodes.h ../../../LOWLEVEL/CAMAC/camac.h  \
+	../../../OBJECTS/VAR/variables.h  ../../../OBJECTS/VAR/variables.h  \
+	../../procprops.h modultypes.h debug.h $(CONF)/debug.stamp addlong.r

@@ -1,0 +1,13 @@
+CONF = ../../CONF
+COMMON = ../../../COMMON
+
+include $(CONF)/rules.make
+
+cfiles = socketcomm.r
+
+all: lib.l
+
+lib.l: $(cfiles)
+	merge $^ >-$@
+
+socketcomm.r: sconf.h debug.h errorcodes.h swap.h

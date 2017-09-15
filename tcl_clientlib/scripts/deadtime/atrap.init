@@ -1,0 +1,2 @@
+    puts "atrap not yet defined"
+    return -1

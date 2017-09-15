@@ -1,0 +1,18 @@
+CONF = ../../CONF
+COMMON = ../../../COMMON
+
+include $(CONF)/rules.make
+
+cfiles = Echo.r IdentIS.r timestamp.r dumpcommands.r
+lib = lib.l
+
+all: $(lib)
+
+$(lib): $(cfiles)
+	merge $^ >-$@
+
+###################################################
+
+Echo.r: errorcodes.h
+IdentIS.r: ../../OBJECTS/IS/is.h errorcodes.h
+timestamp.r: errorcodes.h

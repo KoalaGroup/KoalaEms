@@ -1,0 +1,35 @@
+# commu/Makefile.in
+# $ZEL: Makefile.in,v 1.5 2009/08/27 01:26:42 wuestner Exp $
+
+CONF = ../conf
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+@SET_MAKE@
+
+include $(CONF)/rules.make
+
+include $(CONF)/config.make
+
+cfiles = command_interp.c commu.c unsol.c
+ofiles = $(cfiles:.c=.o)
+depfiles = $(cfiles)
+
+subdir = $(commu)
+
+lib = libcommu.a
+
+all: $(lib)
+
+$(lib):$(lib)($(ofiles)) $(subdir) commu.stamp
+	$(RANLIB) $@
+
+$(subdir): FORCE
+	$(MAKE) -C $@ all
+
+depend: xdepend
+	$(MAKE) -C $(subdir) depend
+
+.PHONY: FORCE depend
+
+##################################################################

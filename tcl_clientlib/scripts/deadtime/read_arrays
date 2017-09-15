@@ -1,0 +1,253 @@
+#! /bin/sh
+#\
+exec emssh $0 $*
+
+proc scale_from_range {range bins} {
+  # range in us;
+  set res [expr round($range*10./double($bins))]
+  #puts "range=$range us; bins=$bins; scale=$res"
+  return $res
+}
+
+proc init {facility} {
+    #global host port
+    global master slaves gapscale tdtscale ranges scales
+    global ldtbins gapbins tdtbins
+
+    set suffix init
+    if [string equal $facility {}] {
+        set facilities [glob -types f *.${suffix}]
+        set l [string length ${suffix}]
+        incr l -1
+        puts -nonewline {valid facilities are:}
+        foreach f $facilities {
+            set f [string range $f 0 [expr [string last ${suffix} $f]-2]]
+            puts -nonewline "  $f"
+        }
+        puts {}
+        return -1
+    }
+
+    # defaults
+    set ldtbins 10000
+    set gapbins $ldtbins
+    set tdtbins $ldtbins
+
+    catch {unset gapscale}
+    catch {unset tdtscale}
+    catch {unset gaprange}
+    catch {unset tdtrange}
+
+    if [catch {source $facility.${suffix}}] {
+        global errorInfo
+        puts "cannot init $facility"
+        set error [lindex [split $errorInfo \n] 0]
+        puts $error
+        return -1
+    }
+
+    if {![info exists gapscale]} {
+        if {[info exists gaprange]} {
+            set gapscale [scale_from_range $gaprange $gapbins]
+        } else {
+            puts "either gapscale or gaprange must be given"
+            return -1
+        }
+    } 
+    if {![info exists tdtscale]} {
+        if {[info exists tdtrange]} {
+            set tdtscale [scale_from_range $tdtrange $tdtbins]
+        } else {
+            puts "either tdtscale or tdtrange must be given"
+            return -1
+        }
+    } 
+
+    set slaves [array names ranges]
+    set idx [lsearch -exact $slaves $master]
+    set slaves [lreplace $slaves $idx $idx]
+
+    foreach ved [concat $master $slaves] {
+        set scales($ved) [scale_from_range $ranges($ved) $ldtbins]
+    }
+
+if {1} {
+    puts "master=$master"
+    puts "slaves=$slaves"
+    puts "gapscale=$gapscale"
+    puts "tdtscale=$tdtscale"
+    foreach ved [concat $master $slaves] {
+        puts "scale $ved: $scales($ved)"
+    }
+}
+    ems_connect $host $port
+    foreach ved [concat $master $slaves] {
+        global $ved
+        set $ved [ems_open $ved]
+    }
+    return 0
+}
+
+proc set_and_clear_ved {ved mask bins scale} {
+    puts "set_and_clear $ved $mask $bins $scale"
+    $ved command1 SetSyncStatist $mask $bins $scale
+    $ved command1 ClearSyncStatist $mask
+}
+
+proc set_and_clear {} {
+    global master slaves scales gapscale tdtscale
+    global ldtbins gapbins tdtbins
+
+    global $master
+    set ved [set $master]
+    set_and_clear_ved $ved 4 $gapbins $gapscale
+    set_and_clear_ved $ved 2 $tdtbins $tdtscale
+    set_and_clear_ved $ved 1 $ldtbins $scales($master)
+
+    foreach slave $slaves {
+        global $slave
+        set ved [set $slave]
+        set_and_clear_ved $ved 1 $ldtbins $scales($slave)
+    }
+}
+
+proc save_histo {time dirname vedname name binsize leer hist} {
+    #puts "save_histo vedname=$vedname name=$name binsize=$binsize leer=$leer hist=$hist"
+    global facility
+
+    file mkdir $dirname
+    set linkname {}
+    catch "set linkname [file readlink current_$facility]"
+    if {![string equal $linkname $dirname]} {
+        catch "file delete current_$facility"
+        exec /bin/ln -sf $dirname current_$facility
+    }
+    set fname ${dirname}/${vedname}_${name}
+
+    set l [llength $hist]
+    set sum 0
+    for {set i 0} {$i<$l} {incr i} {
+        incr sum [lindex $hist $i]
+    }
+
+    if {($sum==0) || ($binsize==0)} {
+        puts "ved $vedname: $name sum=$sum binsize=$binsize"
+#         set_and_clear_exx $vedname
+#         #puts "$hist"
+        return -1
+#     }
+
+    set f [open $fname {WRONLY CREAT TRUNC} 0666]
+    puts $f "# ved $vedname"
+    puts $f "# type $name"
+    puts $f "# time $time"
+    puts $f "# ftime [clock format $time]"
+    puts $f "# binsize $binsize us"
+    puts $f "# sum $sum"
+
+    set bin 0.
+    for {set i 0} {$i<$leer} {incr i} {
+        puts $f "$bin 0"
+        set bin [expr $bin+$binsize]
+    }
+    set c [expr 1./double($sum)/$binsize]
+    for {set i 0} {$i<$l} {incr i} {
+        puts $f "$bin [expr double([lindex $hist $i])*$c]"
+        set bin [expr $bin+$binsize]
+    }
+    close $f
+    return 0
+}
+
+proc read_and_save_histo {name mask dirname} {
+    global $name
+
+    set ved [set $name]
+    puts "send $ved command1 GetSyncStatist $mask 0 0 0"
+
+    set time [clock seconds]
+    set l [$ved command1 GetSyncStatist $mask 0 0 0]
+    #puts $l
+    set len [lindex $l 0]
+    set event [lindex $l 1]
+    set hrejected [lindex $l 2]
+    set lrejected [lindex $l 3]
+    set num [lindex $l 4]
+    set rl [lrange $l 5 end]
+    for {set i 0} {$i<$num} {incr i} {
+        set typ [lindex $rl 0]
+        switch $typ {
+            1 {set hname ldt}
+            2 {set hname tdt}
+            4 {set hname gaps}
+        }
+        puts "type=$hname"
+        set Entries [lindex $rl 1]
+        set Overflows [lindex $rl 2]
+        set Minimum [lindex $rl 3]
+        set Maximum [lindex $rl 4]
+        set hsumme [lindex $rl 5]
+        set lsumme [lindex $rl 6]
+        set hqsumme [lindex $rl 7]
+        set lqsumme [lindex $rl 8]
+        set histsize [lindex $rl 9]
+        set histscale [lindex $rl 10]
+        set wanted [lindex $rl 11]
+        set leer [lindex $rl 12]
+        puts "Entries=$Entries"
+        puts "Overflows=$Overflows"
+        #puts "Minimum=$Minimum"
+        #puts "Maximum=$Maximum"
+        #puts "hsumme=$hsumme"
+        #puts "lsumme=$lsumme"
+        #puts "hqsumme=$hqsumme"
+        #puts "lqsumme=$lqsumme"
+        puts "histsize=$histsize"
+        puts "histscale=$histscale"
+        if {$histscale==0} {set histscale 1.}
+        #puts "wanted=$wanted"
+        #puts "leer=$leer"
+        #puts "rl: $rl"
+        set hist [lrange $rl 13 [expr $wanted-$leer+12]]
+        #puts "hist: $hist"
+        set binsize [expr double($histscale)/10.]
+        save_histo $time $dirname $name $hname $binsize $leer $hist
+        #puts "len=[llength $hist]"
+        set rl [lrange $rl [expr $wanted-$leer+13] end]
+    }
+}
+proc read_and_save_histos {} {
+    global master slaves facility
+
+    set time [clock seconds]
+    set dir ${facility}/${facility}_[clock format $time -format {%Y-%m-%d_%H:%M} -gmt 1]
+    read_and_save_histo $master 7 $dir
+    foreach ved $slaves {
+        read_and_save_histo $ved 1 $dir
+    }
+}
+
+proc main {} {
+    global argc argv0 argv facility
+
+    if {$argc<1} {
+        puts "usage: $argv0 facility \[clear\]"
+        set facility {}
+    } else {
+        set facility [lindex $argv 0]
+    }
+
+    set res [init $facility]
+    if {$res<0} return
+
+    if {($argc>1) && [string equal [lindex $argv 1] "clear"]} {
+        puts "clear all"
+        set_and_clear
+    } else {
+        read_and_save_histos
+    }
+
+    return 0
+}
+
+main

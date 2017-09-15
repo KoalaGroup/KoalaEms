@@ -1,0 +1,29 @@
+# Generated automatically from Makefile.in by configure.
+# trigger/pci/plxsync/Makefile.in
+# $ZEL: Makefile.in,v 1.1 2007/08/07 11:23:33 wuestner Exp $
+# created 2007-Jun-23 PW
+
+CONF = ../../../conf
+
+srcdir = .
+
+include $(CONF)/rules.make
+include $(CONF)/config.make
+
+cfiles = plxsync.c
+ofiles = $(cfiles:.c=.o)
+depfiles = $(cfiles)
+
+lib = ../../libtrig.a
+
+all: $(lib)
+
+$(lib): $(lib)($(ofiles))
+	$(RANLIB) $@
+
+depend: xdepend
+
+.PHONY: depend
+
+#############################################
+

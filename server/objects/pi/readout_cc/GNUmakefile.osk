@@ -1,0 +1,17 @@
+CONF = ../../../CONF
+COMMON = ../../../../COMMON
+
+include $(CONF)/rules.make
+
+cfiles = readout.r
+asmfiles = doreadout.r
+lib = sublib.l
+
+all: $(lib)
+
+$(lib): $(cfiles) $(asmfiles)
+	merge $^ >-$@
+
+###############################################
+
+readout.r: sconf.h ../../IS/is.h debug.h errorcodes.h

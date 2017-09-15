@@ -1,0 +1,85 @@
+#! /bin/sh
+#\
+exec emswish $0 $*
+
+# $Id: monitor,v 1.1 1998/09/13 19:19:30 wuestner Exp $
+# © 1998 P. Wüstner; Zentrallabor für Elektronik; Forschungszentrum Jülich
+#
+
+# Vorbereitung fuer 'autoload' von Prozeduren; die Variable monitor_library
+# muss an die konkrete Installation angepasst werden.
+if [info exists env(EMSTCL_HOME)] {
+  set monitor_library $env(EMSTCL_HOME)/monitor
+  set common_library $env(EMSTCL_HOME)/common
+} else {
+  set monitor_library /usr/local/ems/lib/monitor
+  set common_library /usr/local/ems/lib/common
+}
+lappend auto_path $monitor_library $common_library
+
+# Kommandozeilenargumente verarbeiten
+process_args
+set global_verbose [info exists namedarg(verbose)]
+if {$global_verbose} printargs
+
+if [info exists namedarg(help)] {
+  printhelp
+  exit
+}
+
+bind Entry <Delete> {
+       tkEntryBackspace %W
+}
+#bind Entry <apLineDel> {
+#       if [%W selection present] {
+#      %W delete sel.first sel.last
+#  } else {
+#      %W delete insert
+#  }
+#}
+wm withdraw .
+set_options
+set maintitle "VED Monitor"
+if [regexp #.* [winfo name .] number] {
+  append maintitle $number
+}
+wm title . $maintitle
+wm maxsize . 10000 10000
+
+tk_focusFollowsMouse
+
+# proc namespacedummies is called in order to load bgerror and all
+#   procedures in namespaces
+  namespacedummies
+
+set global_display [display_name]
+set global_setupfile(default) [setupfile_name $global_display]
+
+if [info exists namedarg(setup)] {
+  set num_setup_files [llength [glob -nocomplain -- $namedarg(setup)]]
+  if {$num_setup_files!=1} {
+    if {$num_setup_files==0} {
+      puts "no file $namedarg(setup)"
+    } else {
+      puts "filename $namedarg(setup) ambigous"
+    }
+  exit
+  }
+  set global_setupfile(restored) $namedarg(setup)
+} else {
+  set global_setupfile(restored) [find_setupfile $global_setupfile(default) $global_display ~/monitorrc]
+}
+if {$global_setupfile(restored)!=""} {
+  restore_setup $global_setupfile(restored)
+}
+
+# und, wenn noetig, Setup vervollstaendigen
+correct_setup
+use_args
+
+# User-Interface starten
+start_gui
+restart_outer_loop
+
+###############################################################################
+###############################################################################

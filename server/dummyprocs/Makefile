@@ -1,0 +1,49 @@
+# Generated automatically from Makefile.in by configure.
+# dummyprocs/Makefile.in
+# $ZEL: Makefile.in,v 1.4 2002/11/06 15:36:33 wuestner Exp $
+
+CONF = ../conf
+
+srcdir = .
+
+
+RANLIB = ranlib
+
+include $(CONF)/rules.make
+include $(CONF)/config.make
+
+ofiles = $(addsuffix .o,$(dummyprocs)) get_mod_type.o
+depfiles = get_mod_type.c
+
+all: libdummy.a
+
+libdummy.a: $(ofiles) mergefile dummyprocs.stamp
+	$(AR) rc $@ `cat mergefile`
+	$(RANLIB) $@
+
+addall: $(dummyprocs)
+
+$(dummyprocs):
+	echo $@.o >>mergefile
+
+mergefile: dummyprocs.stamp
+	-$(RM) $@
+	$(MAKE) addall
+	echo get_mod_type.o >>$@
+
+$(addsuffix .c,$(dummyprocs)): template.sed
+	sed s/DUMMYPROC/$(basename $@)/g $< >$@
+
+depend: xdepend
+
+.PHONY: addall $(dummyprocs) depend
+
+clean:
+	-cp get_mod_type.c get_mod_type.sav
+	-$(RM) *.c mergefile
+	-cp get_mod_type.sav get_mod_type.c
+	-$(RM) get_mod_type.sav
+
+$(addsuffix .o,$(dummyprocs)): debug.stamp debug.h errorcodes.h
+
+############################################################

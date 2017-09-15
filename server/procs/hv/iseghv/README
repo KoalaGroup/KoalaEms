@@ -1,0 +1,41 @@
+Zugriff auf das High Voltage Power Supply von Iseg Spezialelektronik GmbH
+
+am Beispiel der zel110
+
+1. Server starten
+
+cd ~/ems/build/canbus
+./server.canbus
+
+2. Kommunikationsprozess starten
+
+/home/peterka/ems/build/commu
+
+3. in neuem Fenster emssh starten
+
+cd ~/ems/build/tcl_clientlib
+./emssh
+
+cd ~/ems/build/client/iseghv_io
+./iseghv_io canbus
+
+4. Initialisierung
+
+ems_veds -> liefert verfuegbare devices zb canbus
+ems_open canbus -> liefert name des geöffnet devices zb ved_canbus
+ved_canbus caplist -> liste der verfuegbaren befehle
+ved_canbus command1 iseghv_init -> initialisieren des Treibes (Dauer 10s)
+
+5. Kanäle anschalten
+
+ved_canbus command1 iseghv_rw 1 2 0xcc 2 0xff 0xff
+
+6. Fehlerbehebung bei Stromüberschreitung
+
+a) ved_canbus command1 iseghv_rw 1 2 0xc8 0
+b) ved_canbus command1 iseghv_rw 1 2 0xcc 2 0xff 0xff
+c) ved_canbus command1 iseghv_rw 0 2 0xcc 0 
+	<- gibt zurück, welche kanäle an/aus sind
+
+ggf. wiederholen,
+wenn nicht beim ersten durchlauf gewünschter erfolg erzielt wird

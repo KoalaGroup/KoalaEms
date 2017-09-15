@@ -1,0 +1,22 @@
+CONF = ../../../CONF
+COMMON = ../../../../COMMON
+
+include $(CONF)/rules.make
+
+cfiles = gsitrigger.r gsitrigmod.r
+asmfiles = gt.r
+lib = lib.l
+
+all: $(lib)
+
+$(lib): $(cfiles) $(asmfiles)
+	merge $^ >-$@
+
+###################################################
+
+gsitrigger.r: debug.stamp $(COMMON)/errorcodes.h unsoltypes.h  \
+	modultypes.h ../../../LOWLEVEL/CAMAC/camac.h gsitrigger.h
+
+gt.r: $(COMMON)/errorcodes.d unsoltypes.d
+
+gsitrigmod.r: debug.stamp $(COMMON)/errorcodes.h modultypes.h

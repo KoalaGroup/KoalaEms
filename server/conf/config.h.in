@@ -1,0 +1,73 @@
+/* conf/config.h.in.  Generated automatically from configure.in by autoheader.  */
+
+#ifndef _config_h_
+#define _config_h_
+
+/* Define as the return type of signal handlers (int or void).  */
+#undef RETSIGTYPE
+
+/* Define if you have the ANSI C header files.  */
+#undef STDC_HEADERS
+
+/* Define if you can safely include both <sys/time.h> and <time.h>.  */
+#undef TIME_WITH_SYS_TIME
+
+/* Define if your processor stores words with the most significant
+   byte first (like Motorola and SPARC, unlike Intel and VAX).  */
+#undef WORDS_BIGENDIAN
+
+/* Gibt es <sys/cdefs.h>? */
+#undef HAVE_SYS_CDEFS_H
+
+/* Define if you have sys/statfs.h */
+#undef HAVE_SYS_STATFS_H
+
+/* Ist "char *strdup()" nicht deklariert? */
+#undef NEED_STRDUP
+
+/* Ist "char *index()" nicht deklariert? */
+#undef NEED_INDEX
+
+/* Versteht der Compiler "volatile" nicht? */
+#undef volatile
+
+/* Sind Konstruktionen wie "(char)a++" nicht zulaessig? */
+#undef NO_LHS_CASTS
+
+/* Define if you have the gettimeofday function.  */
+#undef HAVE_GETTIMEOFDAY
+
+/* Define if you have the strerror function.  */
+#undef HAVE_STRERROR
+
+/* Define if you have the <fcntl.h> header file.  */
+#undef HAVE_FCNTL_H
+
+/* Define if you have the <sys/ioctl.h> header file.  */
+#undef HAVE_SYS_IOCTL_H
+
+/* Define if you have the <sys/time.h> header file.  */
+#undef HAVE_SYS_TIME_H
+
+/* Define if you have the <unistd.h> header file.  */
+#undef HAVE_UNISTD_H
+
+/* Define if you have the netinet library (-lnetinet).  */
+#undef HAVE_LIBNETINET
+
+/* Define if you have the cgetcap function.  */
+#undef HAVE_CGETCAP
+
+/* Define if you have the MD4Init function.  */
+#undef HAVE_MD4INIT
+
+/* Define if you have the MD5Init function.  */
+#undef HAVE_MD5INIT
+
+#ifndef __unix__
+#if defined(__NetBSD__)
+#define __unix__
+#endif
+#endif
+
+#endif

@@ -1,0 +1,44 @@
+#!/usr/bin/perl
+$_ = shift(ARGV);
+
+if ($_)  {
+    $procdir = $_;
+    s|/|.|g;
+    $docfile = "procs.$_.tex";
+}
+else {
+    print "usage: makeprocdoc proc-dir\n";
+    exit;
+}
+
+if (!open(cfgfile,"../procs/$procdir/procedures.config")) {
+    print STDERR "Could not open procedures.config file.\n";
+    exit;
+}
+
+if (-e $docfile) {
+    print STDERR "Target file exists.\n";
+    exit;
+}
+if(!open(outfile,"> $docfile")) {
+    print STDERR "Could not create target file.\n";
+    exit;
+}
+
+$_ = $procdir;
+s|_|\\_|g;
+if (/\//) {
+	print outfile "\\subsection{\\path{$_}}\n";
+} else {
+	print outfile "\\section{\\path{$_}}\n";
+}
+
+while ($_ = <cfgfile>) {
+	($d1,$procn) = split(/\(|\)/,$_);
+	if ($d1 && ($d1 eq "proc")) {
+		$_ = $procn;
+		s|_|\\_|g;
+		print outfile "\n\\begin{procdesc}{$_}{}\n";
+		print outfile "\\end{procdesc}\n";
+	}
+}

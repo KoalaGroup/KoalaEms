@@ -1,0 +1,563 @@
+
+/****************************************************************************/
+/*                                                                          */
+/* Prozeduren fuer die Motorsteuerung                                       */
+/*                                                                          */
+/* Erstellungsdatum : 24.05. '93                                            */
+/*                                                                          */
+/* letzte Aenderung : 18.08. '93                                            */
+/*                                                                          */
+/* Autor : Twardowski                                                       */
+/*                                                                          */
+/****************************************************************************/
+
+
+#include <errorcodes.h>
+#include <modultypes.h>
+#include <debug.h>
+#include <config.h>
+#include <types.h>
+#include "../../OBJECTS/VAR/variables.h"
+#include "../../LOWLEVEL/VME/vme.h
+#include "./m_function.h"
+#include "./list.h"
+#include "../../MAIN/signals.h"
+extern u_char CNTR_r[8];
+extern R1_[],R2_[],R3_[],R4_[],R5_[],R6_[],R7_[];
+
+/* die Variablen fuer die verkettete Liste */
+extern listpointer *head,*ptr,*c_n;
+extern stdelement element;
+
+/* ein Pointer der sich die Position des CurrentPointers nach */
+/* dem locate(sigcode) merkt */
+listpointer *point;
+
+/* Pointer, der auf die zu dem Motor gehoerige Variable gesetzt wird. */
+int *var_ptr;
+
+/****************************************************************************/
+/*                                                                          */
+/* Procedure createliste                                                    */
+/*                                                                          */
+/****************************************************************************/
+void createliste()
+{
+head=0;
+c_n=0;
+}
+
+/****************************************************************************/
+/*                                                                          */
+/* Procedure insertafter(a)                                                 */
+/*                                                                          */
+/****************************************************************************/
+void insertafter(a)
+stdelement a;
+{
+
+ptr=(listpointer *)malloc(sizeof(listpointer)); 
+ptr->element=a;
+
+if ( head!=0 ) {
+   ptr->next=c_n->next;
+   c_n->next=ptr;
+   c_n=ptr;
+}
+else {
+   ptr->next=0;
+   head=ptr;
+}
+c_n=ptr;
+}
+/****************************************************************************/
+/*                                                                          */
+/* retrieve                                                                 */
+/*                                                                          */
+/****************************************************************************/
+
+void retrieve(elm)
+stdelement elm;
+{
+elm=c_n->element;
+}
+
+/****************************************************************************/
+/*                                                                          */
+/* find_next                                                                */
+/*                                                                          */
+/****************************************************************************/
+
+void find_next( fail )
+
+int fail;
+{
+fail=0;
+if ( c_n->next != 0 ) c_n=c_n->next;
+else fail=1;
+}
+
+/****************************************************************************/
+/*                                                                          */
+/* locate                                                                   */
+/*                                                                          */
+/****************************************************************************/
+
+void locate( sig,fail )
+
+int sig;
+int fail;
+{
+fail=0;
+c_n=head;
+retrieve(element);
+while (!fail&&(element.signal_timeout!=sig)&&(element.signal_look!=sig)) {
+   find_next(fail);
+   retrieve(element);
+}
+}
+
+/****************************************************************************/
+/*                                                                          */
+/* delete                                                                   */
+/*                                                                          */
+/****************************************************************************/
+
+void delete()
+{
+if ( c_n!=head ) {
+   ptr=head;
+   while ( ptr->next != c_n ) {
+      ptr=ptr->next;
+   }
+   ptr->next=c_n->next;
+}
+else head=head->next;
+
+free(c_n);
+c_n=head;
+
+}
+
+/****************************************************************************/
+/*                                                                          */
+/* Procedure loadr(adr,r,value)                                             */
+/*                                                                          */
+/*           Adresse  = Basisadresse (input)                                */ 
+/*           r        = Numer des Bytes der Felder                          */
+/*           value    = Wert, der geladen werden soll                       */
+/*                                                                          */
+/****************************************************************************/
+
+void loadr(adr,r,value)
+
+int adr;
+u_char r;
+int value;
+{ 
+u_char bl=0,bm=0,bh=0;
+u_char *byte3;
+
+byte3=(u_char *)malloc(4*sizeof(byte3));
+
+byte3=MAKBYT(3,value);
+bl=byte3[1];
+bm=byte3[2];
+*A_Addr(adr,0)=CNTR_r[r];
+*A_Addr(adr,1)=bl;
+*A_Addr(adr,2)=bm;
+
+free(byte3);
+}
+
+
+/****************************************************************************/
+/*                                                                          */
+/* Procedure loadpulse(adr,value)                                           */
+/*                                                                          */
+/*           Adresse  = Basisadresse (input)                                */ 
+/*           value    = Wert, der geladen werden soll                       */
+/*                                                                          */
+/****************************************************************************/
+
+void loadpulse(adr,value)
+
+int adr;
+int value;
+{ 
+u_char bl=0,bm=0,bh=0;
+u_char *byte3;
+
+byte3=(u_char *)malloc(4*sizeof(byte3));
+
+byte3=MAKBYT(3,value);
+bl=byte3[1];
+bm=byte3[2];
+bh=byte3[3];
+
+*A_Addr(adr,0)=CNTR_pulse;
+*A_Addr(adr,1)=bl;
+*A_Addr(adr,2)=bm;
+*A_Addr(adr,3)=bh;
+
+free(byte3);
+}
+
+/****************************************************************************/
+/*                                                                          */
+/* Procedure getpulse(adr)                                                  */
+/*                                                                          */
+/*           Adresse  = Basisadresse (input)                                */ 
+/*                                                                          */
+/****************************************************************************/
+
+int getpulse(adr)
+
+int adr;
+{ 
+u_char bl=0,bm=0,bh=0;
+
+*A_Addr(adr,0)=CNTR_pulse;
+bl=*A_Addr(adr,1);
+bm=*A_Addr(adr,2);
+bh=*A_Addr(adr,3);
+
+return( (bh*265+bm)*265+bl );
+}
+
+
+/****************************************************************************/
+/*                                                                          */
+/* Procedure encoderwert(adr)                                               */
+/*                                                                          */
+/*           Adresse  = Basisadresse (input)                                */ 
+/*                                                                          */
+/****************************************************************************/
+
+int encoderwert(adr)
+
+int adr;
+{ 
+int wert,altwert,rep=0;
+u_char bl,bm,bh;
+
+do { } while( *A_Addr(adr,3) != 255 );
+
+bl = *A_Addr(adr,0);
+bm = *A_Addr(adr,1);
+bh = *A_Addr(adr,2);
+   
+bh = bh & 1;
+
+altwert = bh*256*256+bm*256+bl;
+
+do {
+   do { } while( *A_Addr(adr,3) != 255 );
+
+   bl = *A_Addr(adr,0);
+   bm = *A_Addr(adr,1);
+   bh = *A_Addr(adr,2);
+   
+   bh = bh & 1;
+
+   wert = bh*256*256+bm*256+bl;
+
+   if (wert==altwert) {
+      rep=10;
+   }
+   else {
+      rep=rep+1;
+      altwert=wert;
+   }
+} while(rep<10);
+
+if (wert==altwert) return(wert);
+else return(-1); 
+
+}
+
+/****************************************************************************/
+/*                                                                          */
+/* Prozeduren fuer die Interceptroutine                                     */
+/*                                                                          */
+/****************************************************************************/
+
+
+/****************************************************************************/
+/*                                                                          */
+/* faehrt den Motor langsam in positiver Richtung                           */
+/*                                                                          */
+/****************************************************************************/
+drive_slow_pos()
+{
+
+/* --- zuletzt positiv gefahren -------------------------------------- */
+point->element.direction=1;
+
+*A_Addr(point->element.motoradresse,0)=CNTR_reset;
+*A_Addr(point->element.motoradresse,0)=CNTR_master;
+loadr(point->element.motoradresse,1,R1_[1]);
+loadr(point->element.motoradresse,7,R7_[1]);
+loadpulse(point->element.motoradresse,point->element.dif);
+*A_Addr(point->element.motoradresse,0)=CNTR_steppos; 
+*A_Addr(point->element.motoradresse,0)=GO_slow;
+
+point->element.rep=point->element.try;
+}
+/****************************************************************************/
+/*                                                                          */
+/* faehrt den Motor in positiver Richtung                                   */
+/*                                                                          */
+/****************************************************************************/
+drive_pos()
+{
+point->element.direction=1;
+printf("Langsame Fahrt positiv Adresse=%x\n",point->element.motoradresse);
+*A_Addr(point->element.motoradresse,0)=CNTR_reset;
+*A_Addr(point->element.motoradresse,0)=CNTR_master;
+loadr(point->element.motoradresse,1,R1_[3]);
+loadr(point->element.motoradresse,7,R7_[3]);
+loadpulse(point->element.motoradresse,point->element.dif);
+*A_Addr(point->element.motoradresse,0)=CNTR_steppos; 
+*A_Addr(point->element.motoradresse,0)=GO_slow;
+}
+/****************************************************************************/
+/*                                                                          */
+/* faehrt den Motor langsam in negativer Richtung                           */
+/*                                                                          */
+/****************************************************************************/
+drive_slow_neg()
+{
+
+/* --- zuletzt negativ gefahren -------------------------------------- */
+point->element.direction=0;
+
+*A_Addr(point->element.motoradresse,0)=CNTR_reset;
+*A_Addr(point->element.motoradresse,0)=CNTR_master;
+loadr(point->element.motoradresse,1,R1_[1]);
+loadr(point->element.motoradresse,7,R7_[1]);
+loadpulse(point->element.motoradresse,-(point->element.dif));
+*A_Addr(point->element.motoradresse,0)=CNTR_stepneg; 
+*A_Addr(point->element.motoradresse,0)=GO_slow;
+
+point->element.rep=point->element.try;
+}
+/****************************************************************************/
+/*                                                                          */
+/* faehrt den Motor in negativer Richtung                                   */
+/*                                                                          */
+/****************************************************************************/
+drive_neg()
+{
+point->element.direction=0;
+*A_Addr(point->element.motoradresse,0)=CNTR_reset;
+*A_Addr(point->element.motoradresse,0)=CNTR_master;
+loadr(point->element.motoradresse,1,R1_[3]);
+loadr(point->element.motoradresse,7,R7_[3]);
+loadpulse(point->element.motoradresse,-(point->element.dif));
+*A_Addr(point->element.motoradresse,0)=CNTR_stepneg; 
+*A_Addr(point->element.motoradresse,0)=GO_slow;
+}
+/****************************************************************************/
+/*                                                                          */
+/* faehrt den Motor nochmals von der positiven Richtung an                  */
+/*                                                                          */
+/****************************************************************************/
+drive_again()
+{
+
+/* --- letzte gefahrene Richtung feststellen und so fahren, dass das --- */
+/* --- Ziel immer von positiver Richtung angefahren wird. -------------- */ 
+if ( !point->element.direction ) {
+      printf("drive_again : Einzelschritte negativ\n");
+      *A_Addr(point->element.motoradresse,0)=CNTR_reset;
+      *A_Addr(point->element.motoradresse,0)=CNTR_master;
+      loadr(point->element.motoradresse,1,R1_[1]);
+      loadr(point->element.motoradresse,7,R7_[1]);
+      loadpulse(point->element.motoradresse,10);
+      *A_Addr(point->element.motoradresse,0)=CNTR_stepneg; 
+      *A_Addr(point->element.motoradresse,0)=GO_slow;
+
+      *A_Addr(point->element.motoradresse,0)=CNTR_reset;
+      *A_Addr(point->element.motoradresse,0)=CNTR_master;
+      loadr(point->element.motoradresse,1,R1_[1]);
+      loadr(point->element.motoradresse,7,R7_[1]);
+      loadpulse(point->element.motoradresse,10);
+      *A_Addr(point->element.motoradresse,0)=CNTR_steppos; 
+      *A_Addr(point->element.motoradresse,0)=GO_slow;
+
+} /* if direction */
+point->element.rep=point->element.try;
+}   
+/****************************************************************************/
+/*                                                                          */
+/* wird vom Signalhandler angesprungen und                                  */
+/* uebernimmt das nachjustieren des Motors.                                 */
+/*                                                                          */
+/****************************************************************************/
+
+int sighand(sigcode,arg)
+
+int sigcode;
+ClientData arg;
+{
+
+
+ 
+/* --- suche das Signal in der Liste; die Struktur wird auf -------------- */
+/* --- die globale Variable element abgebildet --------------------------- */
+locate(sigcode);
+
+/* --- merke die Position des Currentpointers in der Liste ---------------- */
+point=c_n;
+
+
+/* --- setzte Pointer auf die zu dem Motor gehoerige Variable ------------- */
+var_ptr=(int *)var_list[point->element.var].var.ptr;
+
+/* --- Signal: TimeoutSignal der Motor wird gestoppt ---------------------- */
+if ( sigcode==point->element.signal_timeout ) {
+
+/* --- der Motor wird gestoppt vorher Pulsregister auslesen --------------- */
+   var_ptr[1]=getpulse(point->element.motoradresse);
+   *A_Addr(point->element.motoradresse,0)=CNTR_reset;
+
+/* --- die Alarme fuer diesen Motor werden geloescht ---------------------- */
+   alm_delete(point->element.alm_cycle_id);
+   alm_delete(point->element.alm_set_id);
+
+/* --- Das Timeout- und LookSignal wird wieder freigegeben. --------------- */
+   remove_signalhandler(point->element.signal_timeout);
+   remove_signalhandler(point->element.signal_look);
+
+/* --- Status: Timeout, Motor fertig -------------------------------------- */
+   var_ptr[5]=1;
+   var_ptr[3]=1;
+   var_ptr[0]=encoderwert(point->element.encoderadresse);
+   var_ptr[2]=(-1); /* wo zum Teufel ist das Statusregister ??? */
+
+/* --- der Motor wird aus der verketteten Liste entfernt ------------------ */
+   delete();
+}
+
+/* --- Signal: siehe nach, ob der Motor noch laeuft ----------------------- */
+if ( sigcode==point->element.signal_look ) {
+
+/* --- Pulsregister wird ausgelesen und ggf. nachjustiert ----------------- */
+   if ( !getpulse(point->element.motoradresse) ) {
+
+/* --- Status: Motor steht, Encoderwert, Motorpulse, Statusregister ------- */ 
+      var_ptr[4]=0;
+      var_ptr[0]=encoderwert(point->element.encoderadresse);
+      var_ptr[1]=getpulse(point->element.motoradresse);
+      var_ptr[2]=(-1); /* wo zum Teufel ist das Statusregister ??? */
+
+/* --- wenn ohne nachjustieren, dann hier abbrechen ----------------------- */
+      if ( !point->element.justieren ) {
+
+/* --- Status: Motorpulse, Encoderwert, Status, Motor fertig, ------------- */
+/* ---         nicht nachjustiert ----------------------------------------- */ 
+         var_ptr[0]=encoderwert(point->element.encoderadresse);
+         var_ptr[1]=getpulse(point->element.motoradresse);
+         var_ptr[2]=(-1); /* wo zum Teufel ist das Statusregister ??? */
+         var_ptr[4]=0;
+         var_ptr[3]=1;
+         var_ptr[6]=0;
+
+/* --- die Alarme fuer diesen Motor werden geloescht ---------------------- */
+         alm_delete(point->element.alm_cycle_id);
+         alm_delete(point->element.alm_set_id);
+
+/* --- Das Timeout- und LookSignal wird wieder freigegeben. --------------- */
+         remove_signalhandler(point->element.signal_timeout);
+         remove_signalhandler(point->element.signal_look);
+
+/* --- der Motor wir aus der verketteten Liste entfernt ------------------- */
+         delete();
+      }
+
+/* --- ansonsten wird nachjustiert ---------------------------------------- */
+      else {
+
+/* --- Status: nachjustiert, Pulse, Encoderwert, Statusregister, Motor steht*/
+            var_ptr[0]=encoderwert(point->element.encoderadresse);
+            var_ptr[1]=getpulse(point->element.motoradresse);
+            var_ptr[2]=(-1); /* wo zum Teufel ist das Statusregister ??? */
+            var_ptr[6]=1;
+         
+/* --- Encoder auslesen und Richtung und Geschwindigkeit waehlen ---------- */
+         point->element.encoder = encoderwert(point->element.encoderadresse);
+         point->element.dif=point->element.ziel-point->element.encoder;
+
+
+/* --- Ist der Motor im EPS-Bereich oder die Anzahl der Justierversuche --- */
+/* --- erreicht, wird ggf. nochmals von der richtigen Seite angefahren ---- */
+         if ( (point->element.rep>=point->element.try)
+            || (abs(point->element.dif)<=EPS) ) {
+
+/* --- Ist der Motor schon einmal im EPS-Bereich gewesen und somit schon -- */
+/* --- von der positiven Seite positioniert, kann hier abgebrochen werden - */
+            if ( point->element.again ) {
+               
+/* --- die Alarme fuer diesen Motor werden geloescht ---------------------- */
+               alm_delete(point->element.alm_cycle_id);
+               alm_delete(point->element.alm_set_id);
+
+/* --- Das Timeout- und LookSignal wird wieder freigegeben. --------------- */
+               remove_signalhandler(point->element.signal_timeout);
+               remove_signalhandler(point->element.signal_look);
+
+/* --- Status: Motorpulse, Encoderwert, Status, Motor fertig, Motor steht - */
+               var_ptr[0]=encoderwert(point->element.encoderadresse);
+               var_ptr[1]=getpulse(point->element.motoradresse);
+               var_ptr[2]=(-1); /* wo zum Teufel ist das Statusregister ??? */
+               var_ptr[3]=1;
+               var_ptr[4]=0;
+
+/* --- der Motor wir aus der verketteten Liste entfernt ------------------- */
+               delete();
+            }
+/* --- sonst wird das Ziel von der positiven Seite angefahren ------------- */
+            else {
+               point->element.again=1;
+               drive_again();
+
+/* --- Status: Motor faehrt ----------------------------------------------- */
+               var_ptr[4]=1;
+            }
+         }
+         else {
+            if ( point->element.dif>EPS ) {
+               if ( point->element.dif<=10 ) {
+                  drive_slow_pos();
+               }
+               else {
+                  drive_pos();
+               }
+
+/* --- Status: Motor faehrt ----------------------------------------------- */
+               var_ptr[4]=1;
+            }
+            else {
+
+               if ( point->element.dif < (-EPS) ) {
+                  if ( point->element.dif > (-10) ) {
+                     drive_slow_neg();
+                  }
+                  else {
+                     drive_neg();
+                  }
+
+/* --- Status: Motor faehrt ----------------------------------------------- */
+                  var_ptr[4]=1;
+               }
+               else point->element.rep=point->element.try;
+            }/* else */
+         }/* else */
+         point->element.rep=point->element.rep +1;
+      } 
+   } /*if */
+}/* if look */
+
+
+} /*sighand*/

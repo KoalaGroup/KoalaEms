@@ -1,0 +1,14 @@
+CONF = ../../../CONF
+COMMON = ../../../../COMMON
+
+include $(CONF)/rules.make
+
+cfiles = lam.r
+lib = sublib.l
+
+all: $(lib)
+
+$(lib): $(cfiles)
+	merge $^ >-$@
+
+lam.r: sconf.h errorcodes.h debug.h objecttypes.h

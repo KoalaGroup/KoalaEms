@@ -1,0 +1,16 @@
+CONF = ../../../CONF
+COMMON = ../../../../COMMON
+
+include $(CONF)/rules.make
+
+cfiles = ReadRaw.r WriteRaw.r
+
+all: lib.l
+
+lib.l: $(cfiles)
+	merge $^ >-lib.l
+
+#############################################################################
+
+ReadRaw.r: sconf.h debug.h errorcodes.h
+WriteRaw.r: sconf.h debug.h errorcodes.h ../../../OBJECTS/VAR/variables.h

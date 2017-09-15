@@ -1,0 +1,47 @@
+Verwaltung:
+  ved
+  namelist {}
+  domlist {}
+  dataindom  {}
+  dataoutdom {}
+  dataoutobj {}
+  tobjects {ro dom_di dom_do obj_do}
+  downcount 4 --> 0
+  ready   0|1
+
+fuer alle:
+  status                  ro(status)
+  eventcount              ro(events) + ro(time)
+  
+readout cc:
+  eventrate               ro(revents)
+  suspensions             ro(susp)
+  suspensions/s           ro(rsusp)
+  estimated ev-size       ro(evsize)
+  copies                  ro(copies)
+  copies/s                ro(rcopies)
+
+readout em:
+  fuer alle datains:
+    status                di#(status)      
+    suspensions           di#(susp)
+    suspensions/s         di#(rsusp)
+    cluster               di#(clust)
+    cluster/s             di#(rclust)
+    events                di#(events)
+    events/s              di#(revents)
+    byte                  di#(bytes)
+    byte/s                di#(rbytes)
+
+dataout
+  fuer alle dataouts
+    status                do#(status)
+    switch                do#(switch)
+    suspensions           do#(susp)
+    suspensions/s         do#(rsusp)
+    cluster               do#(clust)
+    cluster/s             do#(rclust)
+    events                do#(events)
+    events/s              do#(revents)
+    byte                  do#(bytes)
+    byte/s                do#(rbytes)

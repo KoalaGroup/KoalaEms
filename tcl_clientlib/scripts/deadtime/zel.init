@@ -1,0 +1,12 @@
+set host zelas3
+set port 4096
+
+set master 393
+array set ranges {
+    393 10000
+}
+
+set numbins 1000
+#set gapscale [scale_from_range 20000 $numbins]
+set gapscale 1
+set tdtscale [scale_from_range 10000 $numbins]

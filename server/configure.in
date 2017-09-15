@@ -1,0 +1,164 @@
+dnl Process this file with autoconf to produce a configure script.
+AC_REVISION($ZEL: configure.in,v 1.13 2011/04/06 20:30:21 wuestner Exp $)
+
+AC_INIT(objects/ved/ved.c)
+
+AC_PREFIX_DEFAULT(/usr/local/ems)
+
+AC_CONFIG_AUX_DIR(../confsupp)
+
+lems=/usr/local/ems
+
+AC_CANONICAL_SYSTEM
+
+AC_ARG_WITH(scsi_compat, [  --with-scsi-compat use scsi compatibility library],
+	scsicompat=$withval, scsicompat="")
+
+if test "$scsicompat" = "" ; then
+  case $target_os in
+    osf*)
+      SCSICOMPAT=osf
+    ;;
+    netbsd*)
+      SCSICOMPAT=bsd
+    ;;
+    linux*)
+      SCSICOMPAT=linux
+    ;;
+    *)
+      SCSICOMPAT=unknown
+    ;;
+  esac
+else
+  SCSICOMPAT=$scsicompat
+fi
+AC_SUBST(SCSICOMPAT)
+
+dnl Checks for programs.
+AC_PROG_CC
+AC_PROG_CPP
+AC_PROG_MAKE_SET
+AC_PROG_INSTALL
+
+dnl Checks for libraries.
+
+EMS_SEARCH_COMMON
+EMS_SEARCH_COMMONLIB(.a)
+AC_SUBST(EMSCOMMON)
+AC_SUBST(EMSEXCOMMON)
+AC_SUBST(EMSCOMMONLIB)
+
+AUXINC=''
+AC_ARG_WITH(pci_bsd, [  --with-pci_bsd=DIR include for pci],
+        pci_bsd=$withval, pci_bsd='no')
+if test -n "$pci_bsd" -a \( "$pci_bsd" != "no" \) ; then
+  echo "pci_bsd : $pci_bsd"
+  if test $pci_bsd = yes ; then
+    AUXINC="$AUXINC -I/usr/local/lkmx/sys"
+  else
+    AUXINC="$AUXINC -I$pci_bsd"
+  fi
+fi
+
+AC_ARG_WITH(auxinc, [  --with-auxinc=DIRS auxiliary include files (xxx:yyy:...)],
+	auxinc=$withval, auxinc='')
+if test -n "$auxinc" -a \( "$auxinc" != "no" \) ; then
+  auxinc1=`echo $auxinc | sed 's/:/ /g'`
+  for i in $auxinc1 ; do
+    AUXINC="$AUXINC -I$i"
+  done
+fi
+echo auxiliary includes: $AUXINC
+AC_SUBST(AUXINC)
+
+AC_CHECK_LIB(netinet,inet_addr)
+
+dnl Checks for header files.
+AC_HEADER_STDC
+AC_CHECK_HEADERS(fcntl.h sys/ioctl.h sys/time.h unistd.h sys/statfs.h)
+AC_CHECK_HEADER(sys/cdefs.h,AC_DEFINE(HAVE_SYS_CDEFS_H))
+AC_EGREP_CPP(strdup,strings.h,,AC_DEFINE(NEED_STRDUP))
+AC_EGREP_CPP(index,strings.h,,AC_DEFINE(NEED_INDEX))
+AC_CHECK_FUNCS(cgetcap)
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+AC_HEADER_TIME
+dnl AC_C_CROSS merged into AC_PROG_CC
+if test "$cross_compiling" = "yes" ; then
+	AR=$target-ar
+	RANLIB=$target-ranlib
+	case $target_cpu in
+		i386 | i486 ) ;;
+		m68k ) AC_DEFINE(WORDS_BIGENDIAN) ;;
+		* ) AC_MSG_ERROR(kann target-byteorder nicht bestimmen) ;;
+	esac
+else
+	AR=ar
+	AC_PROG_RANLIB
+	AC_C_BIGENDIAN
+fi
+AC_SUBST(AR)
+
+AC_MSG_CHECKING(ob der Compiler "volatile" kennt)
+AC_TRY_COMPILE(,[
+		volatile int a;
+	],
+	AC_MSG_RESULT(ja),
+	AC_MSG_RESULT(nein)
+	AC_DEFINE(volatile,)
+)
+
+AC_MSG_CHECKING(ob der Compiler lhs-Casts zulaesst)
+AC_TRY_COMPILE(,[
+		int a;
+		((char)a)++;
+	],
+	AC_MSG_RESULT(ja),
+	AC_MSG_RESULT(nein)
+	AC_DEFINE(NO_LHS_CASTS)
+)
+
+dnl Checks for library functions.
+AC_TYPE_SIGNAL
+AC_CHECK_FUNCS(gettimeofday strerror MD4Init MD5Init)
+
+if test "$GCC" = yes ; then
+  CFLAGS=""
+  CFLAGS="$CFLAGS -Werror -Wall -Wextra"
+  CFLAGS="$CFLAGS -Wcomment"
+  CFLAGS="$CFLAGS -Wformat"
+  CFLAGS="$CFLAGS -Wimplicit"
+  CFLAGS="$CFLAGS -Wmissing-declarations"
+  CFLAGS="$CFLAGS -Wmissing-prototypes"
+  CFLAGS="$CFLAGS -Wstrict-prototypes"
+  CFLAGS="$CFLAGS -Wparentheses"
+  CFLAGS="$CFLAGS -Wpointer-arith"
+  CFLAGS="$CFLAGS -Wreturn-type"
+  CFLAGS="$CFLAGS -Wunused"
+else
+  case $target_os in
+    osf*)
+      CFLAGS="$CFLAGS"" -verbose -w2 -warnprotos -std1 -non_shared -ansi_args"
+    ;;
+  esac
+fi
+for i in commu conf dataout dummyprocs lowlevel main objects procs trigger ; do
+	stdmf="$stdmf $i/Makefile"
+done
+for i in ved domain is pi pi/readout_cc pi/readout_em pi/readout_em_cluster pi/readout_eventfilter pi/lam var do ; do
+	omf="$omf objects/$i/Makefile"
+done
+cmf=`cd $srcdir ; echo commu/*/Makefile.in | sed 's/\.in//g'`
+domf=`cd $srcdir ; find  dataout/* -name Makefile.in -print | sed 's/\.in$//g'`
+lmf=`cd $srcdir ; find lowlevel/* -name Makefile.in -print | sed 's/\.in$//g'`
+pmf=`cd $srcdir ; find procs/* -name Makefile.in -print | sed 's/\.in$//g'`
+tmf=`cd $srcdir ; find trigger/* -name Makefile.in -print | sed 's/\.in$//g'`
+for i in $domf $lmf $pmf $tmf ; do
+    p=`dirname $i`
+    if test ! -d $p ; then
+	mkdir -p $p
+    fi
+done
+
+AC_CONFIG_HEADER(conf/config.h)
+AC_OUTPUT(conf/rules.make Makefile $stdmf $omf $cmf $domf $lmf $pmf $tmf)

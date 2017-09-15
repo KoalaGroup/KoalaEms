@@ -1,0 +1,16 @@
+CONF = ../../CONF
+COMMON = ../../../COMMON
+
+include $(CONF)/rules.make
+
+cfiles = variables.r
+lib = lib.l
+
+all: $(lib)
+
+$(lib): $(cfiles)
+	merge $^ >-$@
+
+#########################################################
+
+variables.r: errorcodes.h debug.h limits.stamp

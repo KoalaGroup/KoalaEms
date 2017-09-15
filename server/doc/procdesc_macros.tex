@@ -1,0 +1,44 @@
+\newcommand{\path}[1]{\mbox{\textsf{#1}}}
+\newcommand{\proc}[1]{\mbox{\textbf{#1}}}
+\newcommand{\plerr}[1]{\mbox{\texttt{plErr\_#1}}}
+
+\newenvironment{procdesc}[2]{
+	\bigskip
+	\noindent
+	
+	\noindent{\large$\bullet\hspace{3mm}$\textbf{#1}}
+	\procindex{#1}
+	\nopagebreak\medskip
+
+	\noindent\textbf{Funktion:} #2
+
+	\def\targs{keine}
+	\def\tdescr{--}
+	\def\tdata{keine}
+	\def\trand{keine}
+	\def\terrors{--}
+	\def\trem{--}
+	\newcommand{\args}[1]{\def\targs{##1}}
+	\newcommand{\descr}[1]{\def\tdescr{##1}}
+	\newcommand{\data}[1]{\def\tdata{##1}}
+	\newcommand{\rand}[1]{\def\trand{##1}}
+	\newcommand{\errors}[1]{\def\terrors{##1}}
+	\newcommand{\rem}[1]{\def\trem{##1}}
+
+}{
+	\noindent\textbf{Argumente:} \targs
+	\medskip
+
+	\noindent\textbf{Beschreibung:} \tdescr
+	\medskip
+
+	\noindent\textbf{Datenerzeugung:} \tdata
+	
+	\noindent\textbf{Nebeneffekte:} \trand
+
+	\noindent\textbf{Fehlermeldungen:} \terrors
+
+	\noindent\textbf{Bemerkungen:} \trem
+
+	\medskip
+}

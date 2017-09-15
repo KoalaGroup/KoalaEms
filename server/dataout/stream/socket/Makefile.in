@@ -1,0 +1,28 @@
+# dataout/stream/socket/Makefile.in
+# $ZEL: Makefile.in,v 1.3 2002/11/06 15:36:33 wuestner Exp $
+
+CONF = ../../../conf
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+include $(CONF)/rules.make
+include $(CONF)/config.make
+
+cfiles = sockstream.c
+ofiles = $(cfiles:.c=.o)
+depfiles = $(cfiles)
+
+lib = ../../libdo.a
+
+all: $(lib)
+
+$(lib): $(lib)($(ofiles))
+	$(RANLIB) $@
+
+depend: xdepend
+
+.PHONY: depend
+
+#######################################
+

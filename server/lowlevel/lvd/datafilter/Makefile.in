@@ -1,0 +1,33 @@
+# lowlevel/lvd/datafilter/Makefile.in
+# $ZEL: Makefile.in,v 1.2 2010/04/20 10:03:47 wuestner Exp $
+
+CONF = ../../../conf
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+include $(CONF)/rules.make
+include $(CONF)/config.make
+
+cfiles = lvd_datafilter.c datafilter.c  \
+         filter_qdc_sparse.c \
+         filter_add_header.c \
+         filter_sync_statist.c
+ofiles = $(cfiles:.c=.o)
+depfiles = $(cfiles)
+
+LVDTYPES = $(shell echo $(lvd)|tr '[:lower:]' '[:upper:]')
+LVDFLAGS=$(foreach typ,$(LVDTYPES),-DLVD_$(typ) )
+CFLAGS += $(LVDFLAGS)
+export LVDFLAGS
+
+lib = ../../libll.a
+
+all: $(lib)
+
+$(lib): $(lib)($(ofiles))
+	$(RANLIB) $@
+
+depend: xdepend
+
+.PHONY: depend

@@ -1,0 +1,5 @@
+#!/usr/local/bin/klient
+open drams
+reset ro
+resetved
+flush

@@ -1,0 +1,8 @@
+
+/* HLRAL_VERSION */
+/*
+#define HLRAL_ANKE 1
+#define HLRAL_ATRAP 2
+*/
+#define _GNU_SOURCE
+

@@ -1,0 +1,14 @@
+CONF = ../../../CONF
+COMMON = ../../../../COMMON
+
+include $(CONF)/rules.make
+
+cfiles = GetVar.r SetIntVar.r IncIntVar.r histo.r GetVarRange.r
+
+all: lib.l
+
+lib.l: $(cfiles)
+	merge $^ >-lib.l
+
+#############################################################################
+

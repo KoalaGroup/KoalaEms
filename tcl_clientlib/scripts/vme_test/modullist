@@ -1,0 +1,9 @@
+set modullist {}
+lappend modullist {vme 0x29a36000 0x0 0}
+lappend modullist {none}
+lappend modullist {vme 0x24a38010 0x2000 0}
+lappend modullist {vme 0x24a38010 0x3000 0}
+lappend modullist {vme 0x24a38010 0x4000 0}
+lappend modullist {vme 0x24a38000 0x5000 0}
+lappend modullist {vme 0x24a38000 0x6000 0}
+lappend modullist {vme 0x24a38000 0x7000 0}

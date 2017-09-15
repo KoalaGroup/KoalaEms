@@ -1,0 +1,16 @@
+
+Blockreadout, ueber ECL-Eingang im SFI gestartet:
+  einmal waehrend der Initialisierung: SFI_FRDBload
+  vor jedem Run:                       SFI_FRDBinit
+  nach jedem Run:                      SFIseqrest
+  waehrend des Readouts:
+    nur eine Prozedur:                 SFI_FRDBreadinit
+    auch andere FB-Prozeduren:           SFI_FRDBread
+                                         ... (andere Prozeduren)
+                                         SFI_FRDBinit
+
+SFI_FRDBload      seq. addr., pa, sa, count
+SFI_FRDBinit      seq. addr.
+SFI_FRDBread      void
+SFI_FRDBreadinit  seq. addr.
+SFIseqrest        void

@@ -1,0 +1,29 @@
+# Generated automatically from Makefile.in by configure.
+# lowlevel/can/peakpci/Makefile.in
+# $ZEL: Makefile.in,v 1.1 2006/04/20 08:47:13 peterka Exp $
+
+CONF = ../../../conf
+
+srcdir = .
+
+include $(CONF)/rules.make
+
+cfiles = peakpci.c libpcan.c
+ofiles = $(cfiles:.c=.o)
+depfiles = $(cfiles)
+
+CFLAGS += $(CANFLAGS)
+
+lib = ../../libll.a
+
+all: $(lib)
+
+$(lib): $(lib)($(ofiles))
+	$(RANLIB) $@
+
+depend: xdepend
+
+.PHONY: depend
+
+######################################################
+

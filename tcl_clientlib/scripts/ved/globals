@@ -1,0 +1,24 @@
+global_setup(offline) {0}                     0|1
+global_setup(autosave) {1}                    0|1
+global_setup(slist_font) {-*-courier-medium-r-*-*-12-*-*-*-*-*-*-*}
+global_setup(vedtype_font) {-*-courier-medium-r-*-*-12-*-*-*-*-*-*-*}
+global_setup(list_font) {-*-courier-medium-r-*-*-14-*-*-*-*-*-*-*}
+
+commu
+global_setup(commu_autoconnect) {1}
+global_setup(commu_transport) {default}       default|??
+global_setup(commu_port) {4096}
+global_setup(commu_host) {zelas3}
+global_setup(commu_socket) {/var/tmp/emscomm}
+
+veds
+global_setup(veds) {ved_commu ved_c09 ved_c09#1}
+global_setup(ved_commu) {commu controller}
+global_setup(ved_c09) {c09 camac}
+global_setup(ved_c09#1) {c09 controller}
+//global_setup(ved_commu#1) {commu controller}
+//global_setup(ved_disc) {disc controller}
+
+iss
+set global_setup(iss) {is_c09_4}
+set global_setup(is_c09_4) {ved_c09 4 1}

@@ -1,0 +1,33 @@
+CONF = ../CONF
+COMMON = ../../COMMON
+
+include $(CONF)/rules.make
+
+include $(CONF)/config.make
+
+cfiles = trigprocs.r
+lib = libtrig.l
+subdirs = $(trigger)
+
+all: $(lib)
+
+$(lib): $(cfiles) $(subdirs) trigger.stamp
+	merge $(cfiles) $(addsuffix /lib.l,$(subdirs)) >-$@
+
+$(subdirs): FORCE
+	$(MAKE) -C $@ all
+
+trigprocs.c: procedures
+
+procedures: trigger.stamp
+	merge $(addsuffix /trigprocs.config,$(trigger)) >-$@
+
+clean:
+	-$(RM) trigprocs.c
+	-$(RM) procedures
+
+.PHONY: FORCE
+
+###############################################################
+
+trigprocs.r: trigprocs.h ../OBJECTS/DOMAIN/dom_trigger.h $(COMMON)/debug.h

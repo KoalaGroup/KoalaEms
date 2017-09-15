@@ -1,0 +1,32 @@
+/* Kommandocodes fuer UELxxx */
+
+#define V_GET_UI0	0x00
+#define V_GET_UI01	0x01
+#define V_GET_UI2	0x02
+#define V_GET_UI3	0x03
+#define V_GET_UI4	0x04
+#define V_GET_UI5	0x05
+#define V_GET_UI6	0x06
+#define V_GET_UI7	0x07
+#define V_GET_T0	0x08
+#define V_GET_T1	0x09
+#define V_GET_FAN	0x10
+#define V_GET_RANGE	0x18
+#define V_GET_STATUS	0x19
+#define V_GET_ADDRESS	0x1b
+#define V_POWER_ON	0x84
+#define V_POWER_OFF	0x85
+#define V_VME_RESET	0x86
+#define C_NET_LED_ON	0x8b
+#define C_NET_LED_OFF	0x8c
+#define V_SET_FAN	0x8d
+#define H_GetConfig	0x1e
+#define H_SetConfig	0x90
+#define H_SetUcal	0xa6
+#define H_GetUcal	0xa7
+#define H_SetIcal	0xac
+#define H_GetIcal	0xad
+#define H_ID		0x49
+#define H_TRANSPARENT	0xff
+#define H_GetId		0x1d
+#define H_SetId		0x8f

@@ -1,0 +1,20 @@
+set host ikptof07
+set port 4096
+
+set master t01
+array set ranges {
+    t01 2000
+    t02 2000
+    t03 2000
+    t04 2000
+    t05 2000
+    t06 2000
+}
+
+set ldtbins 10000
+set gapbins $ldtbins
+set tdtbins $ldtbins
+
+#set gapscale [scale_from_range 6500 $gapbins]
+set gapscale 1
+set tdtscale [scale_from_range 10000 $tdtbins]

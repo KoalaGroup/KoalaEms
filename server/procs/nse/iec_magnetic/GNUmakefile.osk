@@ -1,0 +1,19 @@
+CONF = ../../../CONF
+COMMON = ../../../../COMMON
+
+include $(COMMON)/rules.make
+
+cfiles  = iec.r iec_basic.r
+
+all: lib.l 
+
+lib.l: $(cfiles)
+	merge $^ >-lib.l
+
+#############################################################################
+
+$(cfiles): errorcodes.h modultypes.h $(CONF)/sconf.h \
+           $(COMMON)/debug.h tms.h iec.h
+
+
+

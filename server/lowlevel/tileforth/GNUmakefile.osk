@@ -1,0 +1,34 @@
+CONF = ../../CONF
+COMMON = ../../../COMMON
+
+include $(COMMON)/rules.make
+
+CFLAGS += -g
+
+cfiles = nforth.r startup.r init.r kernel.r memory.r error.r  \
+	in.r nout.r names.r
+
+all: lib.l
+
+lib.l: $(cfiles)
+	merge $^ >-$@
+
+################################################################################ 
+init.r: errorcodes.h nforth.h startup.h
+nforth.r: kernel.h error.h memory.h out.h in.h nforth.h
+kernel.r: kernel.h memory.h error.h in.h out.h compiler.v.c locals.v.c  \
+	string.v.c float.v.c memory.v.c queues.v.c multi_tasking.v.c  \
+	exceptions.v.c xdrstring.v.c procedures.v.c errorcodes.h  \
+	../../MAIN/requests.h ../../../COMMON/requesttypes.h  \
+	../../PROCS/listprocs.h xdrstring.h swap.h
+memory.r: kernel.h memory.h out.h
+error.r: kernel.h memory.h error.h out.h
+memory.r: kernel.h memory.h out.h
+error.r: kernel.h memory.h error.h out.h
+in.r: in.h 
+startup.r: nforth.h out.h names.h ../../../COMMON/requesttypes.h  \
+	../../PROCS/listprocs.h
+names.r: names.c ../../../COMMON/requesttypes.h
+names.c: names.c.m4 ../../../COMMON/errorcodes.inc  \
+	../../../COMMON/requesttypes.inc
+	m4 names.c.m4 >$@

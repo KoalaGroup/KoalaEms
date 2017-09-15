@@ -1,0 +1,89 @@
+proc status_SIS3600 {ved module} {
+  set status [$ved command1 VMEread $addr 4 1]
+  set irqcontrol [$ved command1 VMEread [expr $addr+4] 4 1]
+  set fcw [$ved command1 VMEread [expr $addr+8] 4 1]
+  set frequency [$ved command1 VMEread [expr $addr+0xc] 4 1]
+  puts "status:"
+  puts "  user LED            : [expr $status&1]"
+  puts "  FIFO test           : [expr ($status>>1)&1]"
+  puts "  output mode         : [expr ($status>>2)&3]"
+  puts "  enable output pulses: [expr ($status>>4)&1]"
+  puts "  pipeline mode       : [expr ($status>>5)&1]"
+  puts "  broadcast mode      : [expr ($status>>6)&1]"
+  puts "  broadcast handshake : [expr ($status>>7)&1]"
+  puts "  FIFO empty          : [expr ($status>>8)&1]"
+  puts "  FIFO almost empty   : [expr ($status>>9)&1]"
+  puts "  FIFO half full      : [expr ($status>>10)&1]"
+  puts "  FIFO almost full    : [expr ($status>>11)&1]"
+  puts "  FIFO full           : [expr ($status>>12)&1]"
+  puts "  enable fast clear   : [expr ($status>>14)&1]"
+  puts "  enable next logic   : [expr ($status>>15)&1]"
+  puts "  enable ext. next    : [expr ($status>>16)&1]"
+  puts "  enable ext. clear   : [expr ($status>>17)&1]"
+  puts "  latch gate          : [expr ($status>>18)&1]"
+  puts "  coincidence mode    : [expr ($status>>19)&1]"
+  puts "  enable IRQ          : [expr ($status>>20)&0xf]"
+  puts "  internal VME IRQ    : [expr ($status>>26)&1]"
+  puts "  VME IRQ             : [expr ($status>>27)&1]"
+  puts "  IRQ source          : [expr ($status>>28)&0xf]"
+  set fcw_ns [expr (($fcw&0xff)+1)*100+120]
+  puts "Fast Clear Window : $fcw_ns ns"
+  set frequency_ns [expr (($frequency&0xffffff)+1)*100]
+  puts "Frequency Register: $frequency_ns ns"
+  return 0
+}
+
+proc status_SIS3801 {ved addr} {
+  set status [$ved command1 VMEread $addr 4 1]
+  set irqcontrol [$ved command1 VMEread [expr $addr+4] 4 1]
+  set cdr [$ved command1 VMEread [expr $addr+0xc] 4 1]
+  puts "status: ([format {0x%08x} $status])"
+  puts "  user LED            : [expr $status&1]"
+  puts "  FIFO test           : [expr ($status>>1)&1]"
+  puts "  input mode          : [expr ($status>>2)&3]"
+  puts "  25 MHz pulses       : [expr ($status>>4)&1]"
+  puts "  input test mode     : [expr ($status>>5)&1]"
+  puts "  10 MHx to LNE presc.: [expr ($status>>6)&1]"
+  puts "  enable LNE presc.   : [expr ($status>>7)&1]"
+  puts "  FIFO empty          : [expr ($status>>8)&1]"
+  puts "  FIFO almost empty   : [expr ($status>>9)&1]"
+  puts "  FIFO half full      : [expr ($status>>10)&1]"
+  puts "  FIFO almost full    : [expr ($status>>11)&1]"
+  puts "  FIFO full           : [expr ($status>>12)&1]"
+  puts "  enable ref. pulser  : [expr ($status>>13)&1]"
+  puts "  enable next logic   : [expr ($status>>15)&1]"
+  puts "  enable ext. next    : [expr ($status>>16)&1]"
+  puts "  enable ext. clear   : [expr ($status>>17)&1]"
+  puts "  external disable    : [expr ($status>>18)&1]"
+  puts "  disable counting    : [expr ($status>>19)&1]"
+  puts "  enable IRQ          : [expr ($status>>20)&0xf]"
+  puts "  internal VME IRQ    : [expr ($status>>26)&1]"
+  puts "  VME IRQ             : [expr ($status>>27)&1]"
+  puts "  IRQ source          : [expr ($status>>28)&0xf]"
+  puts "Copy Disable Register : [format {0x%08x} $cdr]"
+  if {[$ved command1 VMEprobe [expr $addr+0x80] 4]!=0} {
+    puts "LNE prescale factor   : does not exist"
+  } else {
+  set lneprescale [$ved command1 VMEread [expr $addr+0x80] 4 1]
+  puts "LNE prescale factor     : $lneprescale"
+  }
+  return 0
+}
+
+proc status_SIS3xxx {ved addr} {
+  if {[$ved command1 VMEprobe $addr 4]!=0} {
+    puts "address [format {0x%x} $addr] is not accessible"
+    return -1
+  }
+  set v_4 [$ved command1 VMEread [expr $addr+4] 4 1]
+  set modultype [format {%04x} [expr ($v_4>>16)&0xffff]]
+  set version [expr ($v_4>>12)&0xf]
+  puts [format {SIS%s Version %x} $modultype $version]
+  switch $modultype {
+    3600 {status_SIS3600 $ved $addr}
+    3800 {status_SIS3801 $ved $addr}
+    3801 {status_SIS3801 $ved $addr}
+    default {puts "nothing known about SIS$modultype"}
+  }
+}
+

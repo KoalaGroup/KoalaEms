@@ -1,0 +1,3 @@
+proc close_veds {} {
+ foreach v [ems_openveds] {$v close}
+}

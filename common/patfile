@@ -1,0 +1,5 @@
+\.[ch]$			csimple
+\.m4$			m4simple
+\.inc$			nl
+\./GNUmakefile(\.osk)$	nl
+\./.*			notdir

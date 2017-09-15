@@ -1,0 +1,25 @@
+# $Id: modultypes.tcl,v 1.1 2004/11/26 14:55:24 wuestner Exp $
+# copyright:
+# 1999 P. Wüstner; Zentrallabor für Elektronik; Forschungszentrum Jülich
+#
+
+array set fastbus_modules {
+0x10C2  PH_ADC_10C2
+0x10C6  PH_TDC_10C6
+0x68A0  STR_330
+0xF100  GSI_TRIGGER_FB
+0x68B7  FVSBI
+0x100A  KIN_ADC_F465
+0x1008  KIN_TDC_F432
+0x1039  LC_CAT_1810
+0x1036  LC_TDC_1872A
+0x1049  LC_TDC_1875
+0x1037  LC_TDC_1875A
+0x103B  LC_TDC_1876
+0x103C  LC_TDC_1877
+0x1035  LC_TDC_1879
+0x104B  LC_ADC_1881
+0x104F  LC_ADC_1881M
+0x1045  LC_ADC_1885F
+0x6854  STR_197
+}

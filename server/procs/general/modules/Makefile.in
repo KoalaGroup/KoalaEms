@@ -1,0 +1,28 @@
+# procs/general/modules/Makefile.in
+# $ZEL: Makefile.in,v 1.2 2011/08/13 20:21:16 wuestner Exp $
+
+CONF = ../../../conf
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+include $(CONF)/rules.make
+include $(CONF)/config.make
+
+cfiles = IdentIS.c ModuleParams.c dump_mlist.c
+ofiles = $(cfiles:.c=.o)
+depfiles = $(cfiles)
+
+lib = ../../libprocs.a
+
+all: $(lib)
+
+$(lib): $(lib)($(ofiles))
+	$(RANLIB) $@
+
+depend: xdepend
+
+.PHONY: depend
+
+###################################################
+

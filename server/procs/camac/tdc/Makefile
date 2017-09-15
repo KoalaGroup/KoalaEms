@@ -1,0 +1,32 @@
+# Generated automatically from Makefile.in by configure.
+# procs/camac/tdc/Makefile.in
+# $ZEL: Makefile.in,v 1.4 2002/11/06 15:37:21 wuestner Exp $
+
+CONF = ../../../conf
+
+srcdir = .
+
+include $(CONF)/rules.make
+include $(CONF)/config.make
+
+cfiles = tdc.c
+ofiles = $(cfiles:.c=.o)
+depfiles = $(cfiles)
+
+CAMACTYPES = $(shell echo $(camac)|tr '[:lower:]' '[:upper:]')
+CAMACFLAGS=$(foreach typ,$(CAMACTYPES),-DCAMAC_$(typ) )
+CFLAGS += $(CAMACFLAGS)
+
+lib = ../../libprocs.a
+
+all: $(lib)
+
+$(lib): $(lib)($(ofiles))
+	$(RANLIB) $@
+
+depend: xdepend
+
+.PHONY: depend
+
+#############################################
+

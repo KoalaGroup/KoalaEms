@@ -1,0 +1,34 @@
+# Generated automatically from Makefile.in by configure.
+# procs/fastbus/sis3100/Makefile.in
+# $ZEL: Makefile.in,v 1.1 2004/04/02 13:50:46 wuestner Exp $
+
+CONF = ../../../conf
+
+srcdir = .
+
+include $(CONF)/rules.make
+include $(CONF)/config.make
+
+cfiles = sis3100sfi_dsp.c fb_dspprocs.c
+ofiles = $(cfiles:.c=.o)
+depfiles = $(cfiles)
+
+FASTBUSTYPES = $(shell echo $(fastbus)|tr '[:lower:]' '[:upper:]')
+FASTBUSFLAGS=$(foreach typ,$(FASTBUSTYPES),-DFASTBUS_$(typ) )
+CFLAGS += $(FASTBUSFLAGS)
+
+lib = ../../libprocs.a
+
+all: $(lib)
+
+$(lib): $(lib)($(ofiles))
+	$(RANLIB) $@
+
+clean:
+	-$(RM) *.o
+
+depend: xdepend
+
+.PHONY: depend
+
+#############################################

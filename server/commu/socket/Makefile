@@ -1,0 +1,28 @@
+# Generated automatically from Makefile.in by configure.
+# commu/socket/Makefile.in
+# $ZEL: Makefile.in,v 1.5 2007/09/17 00:35:50 wuestner Exp $
+
+CONF = ../../conf
+
+srcdir = .
+
+include $(CONF)/rules.make
+include $(CONF)/config.make
+
+cfiles = socketcomm.c sockselectcomm.c
+ofiles = $(cfiles:.c=.o)
+depfiles = $(cfiles)
+
+lib = ../libcommu.a
+
+all: $(lib)
+
+$(lib): $(lib)($(ofiles))
+	$(RANLIB) $@
+
+depend: xdepend
+
+.PHONY: depend
+
+#######################################
+

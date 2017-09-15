@@ -1,0 +1,16 @@
+/****************************************************************/
+
+Die Statusvariable fuer die VED Motor sieht zur Zeit 
+folgendermassen aus:
+
+VED_Var : size 3 (3*4 Byte)
+_______________________________
+| Byte |    Bedeutung         |
+-------------------------------
+|  0   | Statusregister       |
+|  1   | Pulsregister         |
+|  2   | Encoderwert          |       
+-------------------------------
+
+Diese Informationen werden in eine VEDVariablen abgelegt. Sie koennen mit
+der Prozedure M_E362_status abgeholt werden.

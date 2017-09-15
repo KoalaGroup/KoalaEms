@@ -1,0 +1,84 @@
+/*
+ * cc_sis3100.config
+ * only sis3100, for linux
+ * 09.01.2002
+ */
+
+%define DEBUG
+%define NOLAMPOLL
+
+#include "defaults.inc"
+
+/* %define MAXEVCOUNT 100001 */
+
+%define SCHED_TRIGGER
+%define SELECTCOMM
+%define SELECT_STATIST
+
+%define READOUT_PRIOR 1000
+%define EVENT_MAX 16380
+%define DEFPORT 2048
+
+%define CLUSTER_NUM 100
+%define CLUSTERBUFFER "cc_clusters"
+%define CLUSTER_MAX 16380
+%define CLUSTER_MALLOC
+%define EXTRA_DO_DATA
+
+%define TAPEHANDLER "auftape"
+%define OBJ_VAR
+%define MAX_VAR 100
+/* %define ISVARS */
+%define MAX_TRIGGER 16
+%define MAX_IS 30
+
+%undef  OUT_MAX
+%define OUT_MAX 1048576
+
+%define OBJ_DO
+%define OBJ_PI
+%define PI_READOUT
+%define READOUT_CC
+
+%define OBJ_IS
+
+%define OBJ_DOMAIN
+%define DOM_ML
+%define DOM_TRIGGER
+%define DOM_EVENT
+%define DOM_DATAOUT
+%define DATAOUT_MULTI
+%define MAX_DATAOUT 1
+%define OBJ_DO
+
+%define PROCS
+%define TRIGGER
+%define LOWLEVEL
+%define MODULTEST_VME
+extralflags = -g -lm
+/*
+ * extracflags = -Wreturn-type -Wunused -Wcomment -Wformat -Wparentheses -Wpointer-arith -Wconversion
+ */
+
+trigger = general
+
+procs = general
+procs += general/struct
+procs += general/vars
+procs += test
+procs += internals/sched
+procs += internals/cluster
+procs += unixvme
+procs += unixvme/sis3800
+
+%define UNIXVME_SIS
+%define UNIXVME_DRV
+dummyprocs = $(immerdummys)
+lowlevel = oscompat unixvme unixvme/sis3100 unixvme/drv
+
+objects = var pi domain is do
+invocations = readout_cc
+domains = ml trigger event dataout
+commu = socket
+dataout = cluster
+clusterdataouts = null socket file

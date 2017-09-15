@@ -1,0 +1,12 @@
+CONF = ../../../CONF
+COMMON = ../../../../COMMON
+
+include $(CONF)/rules.make
+
+cfiles = sched.r
+lib = lib.l
+
+all: $(lib)
+
+$(lib): $(cfiles)
+	merge $^ >-lib.l

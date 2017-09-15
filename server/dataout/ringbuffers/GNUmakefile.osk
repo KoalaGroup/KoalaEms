@@ -1,0 +1,49 @@
+CONF = ../../CONF
+COMMON = ../../../COMMON
+
+include $(CONF)/rules.make
+
+LF += -g 
+
+cfiles = interface.r ringbuffers.r handler.r
+
+outputhandler = aufexa aufexa_f8500 aufexat_f8500 infile insocket  \
+	inlocalsocket hauwech keinband
+
+all: lib.l $(outputhandler)
+
+lib.l: $(cfiles)
+	merge $^ >-$@
+
+aufexa: aufexa.r
+	$(CC) $(LF) $^ $(SCSILIB) $(PPIDLIB) -L$(GNULIB) -o $@
+
+keinband: keinband.r
+	$(CC) $(LF) $^ $(SCSILIB) $(PPIDLIB) -L$(GNULIB) -o $@
+
+aufexa_f8500: aufexa_f8500.r
+	$(CC) $(LF) $^ $(SCSILIB) $(PPIDLIB) -L$(GNULIB) -o $@ -n aufexa
+
+aufexa_f8500.r: aufexa.c
+	$(CC) $(CFLAGS) -DFORCEDENS=0x15 -c $^ -o $@
+
+aufexat_f8500: aufexat_f8500.r
+	$(CC) $(LF) $^ $(SCSILIB) $(PPIDLIB) -L$(GNULIB) -o $@ -n aufexa
+
+aufexat_f8500.r: aufexat.c
+	$(CC) $(CFLAGS) -DFORCEDENS=0x15 -c $^ -o $@
+
+infile: infile.r
+	$(CC) $(LF) $^ $(IOLIB) -L$(GNULIB) -o $@
+
+insocket: insocket.r
+	$(CC) $(LF) $^ $(NETLIB) $(SSMLIB) -L$(GNULIB) -o $@
+
+inlocalsocket: inlocalsocket.r
+	$(CC) $(LF) $^ $(NETLIB) -L$(GNULIB) -o $@
+
+hauwech: hauwech.r
+	$(CC) $(LF) $^ -L$(GNULIB) -o $@
+
+###############################################################
+

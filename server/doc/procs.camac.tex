@@ -1,0 +1,174 @@
+\section{\path{camac}}
+
+\subsection{Allgemeines}
+
+Im folgenden ist mit `N' immer eine CAMAC-Slotnummer, mit `A' eine CAMAC-Subadresse und mit `F' ein CAMAC-Funktionscode gemeint.
+Ein `n' ist innerhalb eines Instrumentierungssystems eine relative Slotnummer. Im Pseudo-Instrumentierungssystem `0' oder falls keine
+Instrumentierungssysteme in den Server konfiguriert sind, entspricht `n', falls von der Prozedur zugelassen, der absoluten Slotnummer `N'.
+
+Funktionscodes von `0' bis `7' bewirken Lesezyklen, `16' bis `24' Schreibzyklen, alle anderen Kontrollzyklen.
+
+Angesprochene Module teilen durch X- und Q-Responses die Gültigkeit des Zugriffs mit. Während eine fehlende X-Response meist einen ernsthaften Fehler anzeigt, werden Q-Responses auch zur Synchronisation von Blocktransfers oder zur Mitteilung eines Zustandes des Moduls verwendet. Zur Zeit wird nur
+der CAMAC-Controller VCC 2117 unterst"utzt.
+
+\begin{procdesc}{CFSA}{einzelner CAMAC-Zyklus (volle Wortlänge)}
+\args{N, A, F, bei Schreibzyklen zusätzlich Datenwort}
+\descr{Diese Routine entspricht der gleichnamigen ESONE-Funktion.}
+\data{bei Lesezugriffen Datenwort (24 Bit gültig)}
+\errors{überschrittene Wertebereiche von N, A, F liefern \plerr{ArgRange}}
+\rem{vom VCC2117 werden bei Lesezugriffen in den Bits 30/31 die X- bzw. Q-Responses abgelegt}
+\end{procdesc}
+
+\begin{procdesc}{CFUBC}{CAMAC-Blocktransfer (konstante Adresse, volle Wortlänge)}
+\args{N, A, F, Blocklänge, bei Schreibzugriffen zusätzlich Datenworte (Anzahl=Blocklänge)}
+\descr{
+	Diese Routine entspricht der gleichnamigen ESONE-Funktion, es werden
+	jedoch keine speziellen Modi (Q-Stop, Adress-Scan o.ä.) unterstützt.
+}
+\data{bei Lesezugriffen Datenworte (Anzahl=Blocklänge)}
+\errors{überschrittene Wertebereiche von N, A, F liefern \plerr{ArgRange}}
+\rem{
+	vom VCC2117 werden bei Lesezugriffen in den Bits 30/31 die X- bzw. Q-Responses
+	abgelegt, es werden "`Burst-Nowait"'-Zyklen erzeugt
+}
+\end{procdesc}
+
+\begin{procdesc}{CSUBC}{CAMAC-Blocktransfer (konstante Adresse, kurze Wortlänge)}
+\args{N, A, F, Blocklänge, bei Schreibzugriffen zusätzlich Datenworte (Anzahl=Blocklänge)}
+\descr{Diese Routine entspricht der gleichnamigen ESONE-Funktion.}
+\data{
+	bei Lesezugriffen Datenworte (Anzahl=Blocklänge/2, aufgerundet),
+	jeweils 2 gelesene (16-Bit-)CAMAC-Register in einem Wort - zuerst
+	gelesener Wert steht im höherwertigen Teil
+}
+\errors{überschrittene Wertebereiche von N, A, F liefern \plerr{ArgRange}}
+\rem{
+	Vom VCC2117 werden "`Burst-Nowait'"-Zyklen erzeugt. Die halbe Wortlänge
+	wird nur bei Lesezugriffen verwendet. Das erzeugte Datenformat h"angt vom
+	Byte-Ordering des kontrollierenden Prozessors ab.
+}
+\end{procdesc}
+
+\begin{procdesc}{CCCC}{CAMAC-Clear-Zyklus}
+\descr{Diese Routine entspricht der gleichnamigen ESONE-Funktion.}
+\end{procdesc}
+
+\begin{procdesc}{CCCZ}{CAMAC-Zero-Zyklus}
+\descr{Diese Routine entspricht der gleichnamigen ESONE-Funktion.}
+\end{procdesc}
+
+\begin{procdesc}{CCCI}{Setzen / Löschen des CAMAC-Inhibit-Bits}
+\args{Flag: !=0 bewirkt Setzen, ==0 Löschen des I-Bits}
+\descr{Diese Routine entspricht der gleichnamigen ESONE-Funktion.}
+\end{procdesc}
+
+\begin{procdesc}{nAFread}{einzelner CAMAC-Lesezyklus (volle Wortlänge)}
+\args{n (Position des Moduls im Instrumentierungssystem), A, F}
+\rem{
+	funktioniert auch, wenn keine Instrumentierungssysteme konfiguriert oder definiert
+	sind (interpretiert n dann als absolute Slotadresse N), vom VCC2117 werden in den
+	Bits 30/31 die X- bzw. Q-Responses abgelegt
+}
+\end{procdesc}
+
+\begin{procdesc}{nAFwrite}{einzelner CAMAC-Schreibzyklus (volle Wortlänge)}
+\args{n (Position des Moduls im Instrumentierungssystem), A, F, Datenwort}
+\rem{
+	funktioniert auch, wenn keine Instrumentierungssysteme konfiguriert oder definiert
+	sind (interpretiert n dann als absolute Slotadresse N)
+}
+\end{procdesc}
+
+\begin{procdesc}{nAFcntl}{einzelner CAMAC-Kontrollzyklus}
+\args{n (Position des Moduls im Instrumentierungssystem), A, F}
+\rem{
+	funktioniert auch, wenn keine Instrumentierungssysteme konfiguriert oder definiert
+	sind (interpretiert n dann als absolute Slotadresse N)
+}
+\end{procdesc}
+
+\begin{procdesc}{nAFblread}{CAMAC-Blocklesetransfer (konstante Adresse, volle Wortlänge)}
+\args{n (Position des Moduls im Instrumentierungssystem), A, F, Blocklänge}
+\data{Datenworte (Anzahl=Blocklänge)}
+\rem{
+	funktioniert auch, wenn keine Instrumentierungssysteme konfiguriert oder definiert
+	sind (interpretiert n dann als absolute Slotadresse N), vom VCC2117 werden in den
+	Bits 30/31 die X- bzw. Q-Responses abgelegt, es werden "`Burst-Nowait"'-Zyklen erzeugt
+}
+\end{procdesc}
+
+\begin{procdesc}{nAFreadQstop}{
+	CAMAC-Blocklesetransfer (konstante Adresse, volle Wortlänge, Q-Stop-Modus)
+}
+\args{n (Position des Moduls im Instrumentierungssystem), A, F, maximale Blocklänge}
+\data{
+	Datenworte (maximale Anzahl durch Argument vorgegeben), danach 1 ungültiges
+	(d.h., ohne Q-Response) Abschlußwort
+}
+\rand{
+	Falls nach der vorgegebenen Anzahl von Lesezyklen noch kein Datenwort ohne
+	Q-Response gelesen wurde, wird als Abschlußwort eine `0' erzeugt. Es werden
+	dann weiter Daten von der CAMAC-Adresse gelesen (und verworfen), bis keine
+	Q-Response mehr erfolgt, höchstens aber 1000 Zyklen.
+}
+\rem{
+	funktioniert auch, wenn keine Instrumentierungssysteme konfiguriert oder definiert
+	sind (interpretiert n dann als absolute Slotadresse N), vom VCC2117 werden in den
+	Bits 30/31 die X- bzw. Q-Responses abgelegt, eine maximale Blocklänge
+	von `0' ist nicht zulässig
+}
+\end{procdesc}
+
+\begin{procdesc}{nAFreadAddrScan}{
+	CAMAC-Blocklesetransfer (volle Wortlänge, Adreß-Scan-Modus)
+}
+\args{n (Position des Moduls im Instrumentierungssystem), A, F, Blocklänge}
+\rem{
+	funktioniert auch, wenn keine Instrumentierungssysteme konfiguriert oder definiert
+	sind (interpretiert n dann als absolute Slotadresse N), vom VCC2117 werden in den
+	Bits 30/31 die X- bzw. Q-Responses abgelegt
+}
+\end{procdesc}
+
+\begin{procdesc}{nAFreadIntVar}{
+	einzelner CAMAC-Lesezyklus (volle Wortlänge) in eine EMS-Variable
+}
+\args{Variablennummer, n (Position des Moduls im Instrumentierungssystem), A, F}
+\rem{
+	funktioniert auch, wenn keine Instrumentierungssysteme konfiguriert oder definiert
+	sind (interpretiert n dann als absolute Slotadresse N), vom VCC2117 werden in den
+	Bits 30/31 die X- bzw. Q-Responses abgelegt. Die Variable muß die Länge `1' haben.
+}
+\end{procdesc}
+
+\begin{procdesc}{nAFwriteIntVar}{
+	einzelner CAMAC-Schreibzyklus (volle Wortlänge) aus einer EMS-Variablen
+}
+\args{n (Position des Moduls im Instrumentierungssystem), A, F, Variablennummer}
+\rem{
+	funktioniert auch, wenn keine Instrumentierungssysteme konfiguriert oder definiert
+	sind (interpretiert n dann als absolute Slotadresse N). Die Variable muß die Länge `1' haben.
+}
+\end{procdesc}
+
+\begin{procdesc}{nAFblreadVar}{
+	CAMAC-Blocklesetransfer (volle Wortlänge) in eine EMS-Variable
+}
+\args{Variablennummer, n (Position des Moduls im Instrumentierungssystem), A, F, Blocklänge}
+\rem{
+	funktioniert auch, wenn keine Instrumentierungssysteme konfiguriert oder definiert
+	sind (interpretiert n dann als absolute Slotadresse N). Die Variable muß eine Länge
+	größer als `1' haben.
+}
+\end{procdesc}
+
+\begin{procdesc}{nAFblreadAddVar}{
+	CAMAC-Blocklesetransfer (volle Wortlänge), Aufaddieren in eine EMS-Variable
+}
+\args{Variablennummer, n (Position des Moduls im Instrumentierungssystem), A, F, Blocklänge}
+\rem{
+	funktioniert auch, wenn keine Instrumentierungssysteme konfiguriert oder definiert
+	sind (interpretiert n dann als absolute Slotadresse N). Die Variable muß eine Länge
+	größer als `1' haben.
+}
+\end{procdesc}

@@ -1,0 +1,22 @@
+dnl common/unsoltypes.inc
+dnl $ZEL: unsoltypes.inc,v 2.9 2009/08/27 01:26:02 wuestner Exp $
+
+Unsol(None)
+Unsol(ServerDisconnect)
+Unsol(Bye)
+Unsol(Test)
+Unsol(LAM)
+Unsol(LogText)
+Unsol(LogMessage)
+Unsol(RuntimeError)
+Unsol(Data)
+Unsol(Text)
+Unsol(Warning)
+Unsol(Patience)
+Unsol(StatusChanged)
+Unsol(ActionCompleted)
+Unsol(DeviceDisconnect)
+Unsol(HeartBeat)
+Unsol(RestartDAQ)
+Unsol(Alarm)
+version(1)

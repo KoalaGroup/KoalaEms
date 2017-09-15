@@ -1,0 +1,88 @@
+# $Id: modultypes.dat,v 1.1 2004/11/26 14:55:23 wuestner Exp $
+# copyright:
+# 1999 P. Wüstner; Zentrallabor für Elektronik; Forschungszentrum Jülich
+#
+
+
+
+
+set FERA_ADC_4300B     0x1214300B
+set FERA_TDC_4300B     0x1314300B
+set FERA_DRV_4301      0x16104301
+set FERA_MEM_4302      0x17104302
+set FERA_TFC_4303      0x1f104303
+set FSC                0x16f043FC
+set BIT_PATTERN_UNIT   0x19f043BE
+set LC_TDC_2277        0x13102277
+set LC_TDC_2228        0x1312228A
+set LC_TDC_2229        0x13102229
+set SILENA_ADC_4418V   0x11204418
+set CNRS_QDC_1612F     0x12F1612F
+set CNRS_TDC_812F      0x13F0812F
+set RAL11X_RDOUT	 0x18f0011a
+
+set LC_SCALER_2551     0x14102551
+set LC_SCALER_4434     0x14104434
+set VCC2117            0x1c602117
+
+set GSI_TRIGGER        0x1A70C100
+set DRAMS_RECEIVER     0x1180D512
+set DRAMS_CONTROL      0x168000DC
+set DRAMS_EVENT        0x18800ECD
+
+set SCALER_JEA20       0x19000010
+set CES_HSM2170        0x19000011
+set CES_HM2161         0x19000012
+set IM_JIR10           0x19000013
+
+set CAEN_DISC_C193     0x1f90C193
+set LC_LOGIC_4516      0x18104516
+set LC_DISC_4413       0x1f104413
+set LC_REGISTER_2371   0x1f102371
+
+set CAENNET_SLOW       0x1690c139
+
+set IGOR               0x1f403060
+set CAEN_PROG_IO       0x1890C219
+
+
+set PH_ADC_10C2        0x415010C2
+set PH_TDC_10C6        0x435010C6
+set STR_330            0x4C3068A0
+set GSI_TRIGGER_FB     0x4A70F100
+set FVSBI              0x466068B7
+set KIN_ADC_F465       0x4140100A
+set KIN_TDC_F432       0x43401008
+set LC_CAT_1810        0x48101039
+set LC_TDC_1872A       0x43101036
+set LC_TDC_1875        0x43101049
+set LC_TDC_1875A       0x43101037
+set LC_TDC_1876        0x4310103B
+set LC_TDC_1877        0x4310103C
+set LC_TDC_1879        0x43101035
+set LC_ADC_1881        0x4110104B
+set LC_ADC_1881M       0x4110104F
+set LC_ADC_1885F       0x41101045
+set STR_197            0x4F306854
+
+
+set FIC_8232           0x2C608232
+set FIC_8234           0x2C608234
+set ELTEC_E6           0x2CF000E6
+set GSI_TRIGGER_VME    0x2A70E100
+set CES_8251           0x2F608251
+
+
+set NE526              526
+set E217               217
+set E362               362
+set ESSI               422
+set LED_2800           2800
+set ROC717             717
+set E233_0             2330
+set E233_1             2331
+set CHANNEL            123
+set ILL_CHANNEL        30
+set IEC                100
+
+

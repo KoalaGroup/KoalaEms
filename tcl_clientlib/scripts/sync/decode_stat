@@ -1,0 +1,26 @@
+#! /bin/sh
+#\
+exec emssh $0 $*
+
+set stat [lindex $argv 0]
+
+if {$stat&0x00000001} {puts Master}
+if {$stat&0x00000002} {puts Go}
+if {$stat&0x00000004} {puts T4Latch}
+if {$stat&0x00000008} {puts {enable Trigger acceptance window}}
+if {$stat&0x00000070} {puts "Aux out: [expr ($stat>>4)&7]"}
+if {$stat&0x00000080} {puts Aux0RstTrigg}
+if {$stat&0x00003f00} {puts [format {Enable IRQ: 0x%x} [expr ($stat>>8)&0x3f]]}
+if {$stat&0x00004000} {puts {(frei)}}
+if {$stat&0x00008000} {puts {GSI Mode}}
+if {$stat&0x000f0000} {puts "Trigger: [expr ($stat>>16)&0xf]"}
+if {$stat&0x00100000} {puts {Go Ring}}
+if {$stat&0x00200000} {puts Veto}
+if {$stat&0x00400000} {puts {Subevent invalid}}
+if {$stat&0x00800000} {puts {local inhibit}}
+if {$stat&0x07000000} {puts "Aux in: [expr ($stat>>24)&7]"}
+if {$stat&0x08000000} {puts {End of Conversion}}
+if {$stat&0x10000000} {puts {Subevent invalid from Ring}}
+if {$stat&0x20000000} {puts {Gap data valid}}
+if {$stat&0x40000000} {puts {Tdt from Ring}}
+if {$stat&0x80000000} {puts {(reset trigger)}}

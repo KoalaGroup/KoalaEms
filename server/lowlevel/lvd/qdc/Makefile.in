@@ -1,0 +1,30 @@
+# lowlevel/lvd/qdc/Makefile.in
+# $ZEL: Makefile.in,v 1.3 2012/09/11 23:39:17 wuestner Exp $
+
+CONF = ../../../conf
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+include $(CONF)/rules.make
+include $(CONF)/config.make
+
+cfiles = lvd_qdc.c qdc.c qdc8.c cardstat_qdc.c cardstat_qdc8.c
+ofiles = $(cfiles:.c=.o)
+depfiles = $(cfiles)
+
+LVDTYPES = $(shell echo $(lvd)|tr '[:lower:]' '[:upper:]')
+LVDFLAGS=$(foreach typ,$(LVDTYPES),-DLVD_$(typ) )
+CFLAGS += $(LVDFLAGS)
+export LVDFLAGS
+
+lib = ../../libll.a
+
+all: $(lib)
+
+$(lib): $(lib)($(ofiles))
+	$(RANLIB) $@
+
+depend: xdepend
+
+.PHONY: depend

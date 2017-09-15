@@ -1,0 +1,62 @@
+/*
+ * tcl_clientlib/config.h.in
+ * created 28.07.96 PW
+ * 
+ * $ZEL: config.h.in,v 1.7 2003/09/10 21:38:08 wuestner Exp $
+ */
+
+#ifndef _config_h_
+#define _config_h_
+
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+
+#ifndef _BSD_SOURCE
+#define _BSD_SOURCE
+#endif
+
+#ifdef __linux__
+/*
+ * #define _LARGEFILE_SOURCE
+ * #define _LARGEFILE64_SOURCE
+ * #define _FILE_OFFSET_BITS 64
+ */
+#define LINUX_LARGEFILE O_LARGEFILE
+#else
+#define LINUX_LARGEFILE 0
+#endif
+
+#include <emsctypes.h>
+
+/* Define if you have the String.h header file */
+#undef HAVE_STRING_H
+
+/* Define if you have the string header file */
+#undef HAVE_STRING
+
+/* Define if you have namespaces */
+#undef HAVE_NAMESPACES
+
+/* Define if you dont have a valid declaration for gettimeofday() */
+#undef NEED_GETTIMEOFDAYDEF
+
+/* Define if you dont have a valid declaration for rint() */
+#undef NEED_RINTDEF
+
+/* Define if you dont have a valid declaration for lockf() */
+#undef NEED_LOCKFDEF
+
+/* Define if you dont have a valid declaration for ftruncate() */
+#undef NEED_FTRUNCATEDEF
+
+/* Define if you dont have bool type */
+#undef NEED_BOOL
+
+/* Gibt es <sys/cdefs.h>? */
+#undef HAVE_SYS_CDEFS_H
+
+#endif /* _config_h_ */
+
+/*****************************************************************************/
+/*****************************************************************************/

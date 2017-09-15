@@ -1,0 +1,102 @@
+#####################################################################################
+#####################################################################################
+# camac drams definitions
+set T_TRIG         0x1a70c100
+set DRAMS_CONTROL  0x168000DC
+set DRAMS_RECEIVER 0x1180D512
+set DRAMS_EVENT    0x18800ECD
+set CAEN_IO        0x1890C219
+set DRAMS_ML      " 7 $DRAMS_CONTROL   8 $DRAMS_RECEIVER  9 $DRAMS_RECEIVER \
+                   10 $DRAMS_RECEIVER  4 $T_TRIG         17 $CAEN_IO"
+set DRAMS_IS      " 7  8  9 10 17"
+
+#####################################################################################
+# camac scaler definitions
+set SCAL_4434      0x14104434
+set DATA_REG       0x1f102371
+set SCAL_ML       " 2 $T_TRIG         16 $SCAL_4434 \
+                    8 $DATA_REG        9 $DATA_REG"
+set SCAL_IS       "16"
+set DREG_IS       " 8  9"
+
+#####################################################################################
+# fastbus definitions
+set LC_CAT_1810    0x48101039
+set LC_TDC_1875    0x43101049
+set LC_TDC_1875A   0x43101037
+set LC_TDC_1876    0x4310103b
+set LC_TDC_1877    0x4310103c
+set LC_TDC_1879    0x43101035
+set LC_ADC_1881    0x4110104b
+set LC_ADC_1881M   0x4110104f
+set LC_ADC_1885F   0x41101045
+
+set Tdc1875A      " 3 $LC_TDC_1875A    4 $LC_TDC_1875A    5 $LC_TDC_1875A \
+                    6 $LC_TDC_1875A    7 $LC_TDC_1875A    8 $LC_TDC_1875A"
+#set Tdc1875A      " 8 $LC_TDC_1875A"
+set Tdc1879       "19 $LC_TDC_1879    20 $LC_TDC_1879"
+set FB03_ML       "$Tdc1875A $Tdc1879"
+set IS_75A        " 3  4  5  6  7  8"
+#set IS_75A        " 8"
+set IS_79         "19 20"
+set FB03_IS       "$IS_75A $IS_79"
+
+
+set Adc1881       " 3 $LC_ADC_1881     4 $LC_ADC_1881     5 $LC_ADC_1881 \
+                    6 $LC_ADC_1881     7 $LC_ADC_1881     8 $LC_ADC_1881"
+set Tdc1877       "16 $LC_TDC_1877    17 $LC_TDC_1877    18 $LC_TDC_1877 \
+                   19 $LC_TDC_1877    20 $LC_TDC_1877"
+set Cat1810       "25 $LC_CAT_1810"
+#set Adc1881       " 3 $LC_ADC_1881"
+#set Tdc1877       "20 $LC_TDC_1877"
+set FB04_ML       "$Adc1881 $Tdc1877 $Cat1810"
+set IS_81         " 3  4  5  6  7  8"
+set IS_77         "16 17 18 19 20"
+set IS_10         "25"
+#set IS_81         " 3"
+#set IS_77         "20"
+set FB04_IS       "$IS_81 $IS_77 $IS_10"
+
+
+#####################################################################################
+# fastbus setup parameter
+set PAR_75A       " 1    0    0   64    1    0"
+set PAR_79        " 0    0    0    3   31"
+
+set PAR_81p       " 1    0    0    0    0    2    0"
+set PAR_81r       " 1    0    0    1    0    2   64"
+set PAR_81_00     "$PAR_81r   $ped_81_00"
+set PAR_81_01     "$PAR_81r   $ped_81_01"
+set PAR_81_02     "$PAR_81r   $ped_81_02"
+set PAR_81_03     "$PAR_81r   $ped_81_03"
+set PAR_81_04     "$PAR_81r   $ped_81_04"
+set PAR_81_05     "$PAR_81r   $ped_81_05"
+set PAR_81_06     "$PAR_81r   $ped_81_06"
+set PAR_81_07     "$PAR_81r   $ped_81_07"
+set PAR_81_08     "$PAR_81r   $ped_81_08"
+set PAR_81_12     "$PAR_81r   $ped_81_12"
+set PAR_81_16     "$PAR_81r   $ped_81_16"
+set PAR_81_20     "$PAR_81r   $ped_81_20"
+set PAR_81_24     "$PAR_81r   $ped_81_24"
+set PAR_81_28     "$PAR_81r   $ped_81_28"
+set PAR_81_32     "$PAR_81r   $ped_81_32"
+set PAR_81_40     "$PAR_81r   $ped_81_40"
+set PAR_81_48     "$PAR_81r   $ped_81_48"
+set PAR_81_56     "$PAR_81r   $ped_81_56"
+set PAR_81_64     "$PAR_81r   $ped_81_64"
+
+set PAR_77        " 0    1    2    0    0    0    1    0 4095    0"
+set PAR_10        "10  131    0"
+
+set setup_1875A   " 6 $PAR_75A   $PAR_75A   $PAR_75A   $PAR_75A   $PAR_75A   $PAR_75A"
+#set setup_1875A   " 1 $PAR_75A"
+set setup_1879    " 2 $PAR_79    $PAR_79"
+                
+set setup_1881r   " 6 $PAR_81_01 $PAR_81_01 $PAR_81_01 $PAR_81_01 $PAR_81_01 $PAR_81_01"
+set setup_1877    " 5 $PAR_77 2  $PAR_77 3  $PAR_77 3  $PAR_77 3  $PAR_77 1"
+set setup_1810    " 1 $PAR_10"
+#set setup_1881r   " 1 $PAR_81_01"
+#set setup_1877    " 1 $PAR_77 0"
+
+#####################################################################################
+#####################################################################################

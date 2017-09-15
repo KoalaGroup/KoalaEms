@@ -1,0 +1,44 @@
+enum {REQ=1, RES=2} commands;
+enum {OK=0, PROT_ERR=0x11, NO_ACCESS=0x12} error_codes;
+enum {RD=1, WR=2} operations;
+enum {TBIT=1,
+      TBYTE=2,
+      TCHAR=3,
+      TDOUBLE=4,
+      TFLOAT=5,
+      TWORD=6,
+      TDWORD=7,
+      TRAW=8} wincc_types;
+enum {0=SUCCESS} var_errors;
+
+struct
+  {
+  int length;
+  commands command;
+  error_codes error_code;
+  int sequence_number;
+  } pdu_hdr;
+
+struct
+  {
+  string name<>;
+  operations operation;
+  var_errors var_error;
+  union switch (wincc_types)
+    {
+    case TBIT:    int result;
+    case TBYTE:   int result;
+    case TCHAR:   int result;
+    case TDOUBLE: double result;
+    case TFLOAT:  float result;
+    case TWORD:   int result;
+    case TDWORD:  int result;
+    case TRAW:    opaque result<>;
+    }
+  } var_spec;
+
+struct
+  {
+  pdu_hdr header;
+  var_spec vars<64>;
+  } pdu;

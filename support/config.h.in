@@ -1,0 +1,155 @@
+/*
+ * support/config.h.in
+ * created 28.07.96 PW
+ * 
+ * $ZEL: config.h.in,v 2.15 2009/10/08 11:52:18 wuestner Exp $
+ */
+
+#ifndef _config_h_
+#define _config_h_
+
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+
+#ifndef _BSD_SOURCE
+#define _BSD_SOURCE
+#endif
+
+#ifdef __linux__
+
+#define LINUX_LARGEFILE O_LARGEFILE
+
+#else
+
+#define LINUX_LARGEFILE 0
+
+#endif
+
+#include <emsctypes.h>
+#include "config_types.h"
+
+/* Define as the return type of signal handlers (int or void).  */
+#undef RETSIGTYPE
+
+/* Define if you have the ANSI C header files.  */
+#undef STDC_HEADERS
+
+/* Define if you can safely include both <sys/time.h> and <time.h>.  */
+#undef TIME_WITH_SYS_TIME
+
+/* Define if you have the sys/cdefs header file */
+#undef HAVE_SYS_CDEFS_H
+
+/* Define if you have the String.h header file */
+#undef HAVE_STRING_H
+
+/* Define if you have the string header file */
+#undef HAVE_STRING
+
+/* Define if you have namespaces */
+#undef HAVE_NAMESPACES
+
+/* Define if you have the gettimeofday function.  */
+#undef HAVE_GETTIMEOFDAY
+
+/* Define if you have the select function.  */
+#undef HAVE_SELECT
+
+/* Define if you have the socket function.  */
+#undef HAVE_SOCKET
+
+/* Define if you have the socket function.  */
+#undef HAVE_CONNECT
+
+/* Define if you have the strerror function.  */
+#undef HAVE_STRERROR
+
+/* Define if you have the <sys/time.h> header file.  */
+#undef HAVE_SYS_TIME_H
+
+/* Define if you have the <unistd.h> header file.  */
+#undef HAVE_UNISTD_H
+
+/* Define if you dont have a valid declaration for gettimeofday() */
+#undef NEED_GETTIMEOFDAYDEF
+
+/* Define if you dont have a valid declaration for gethostbyname() */
+#undef NEED_GETHOSTBYNAMEDEF
+
+/* Define if you dont have a valid declaration for gethostname() */
+#undef NEED_GETHOSTNAMEDEF
+
+/* Define if you dont have a valid declaration for ntohl() and htons() */
+#undef NEED_NTOHLDEF
+
+/* Define if you dont have a valid declaration for bzero() */
+#undef NEED_BZERODEF
+
+/* Define if you dont have a valid declaration for select() */
+#undef NEED_SELECTDEF
+
+/* Define if you dont have a valid declaration for socket() */
+#undef NEED_SOCKETDEF
+
+/* Define if you dont have a valid declaration for connect() */
+#undef NEED_CONNECTDEF
+
+/* Define if you dont have a valid declaration for setsockopt() */
+#undef NEED_SETSOCKOPTDEF
+
+/* Define if you dont have a valid declaration for inet_addr() */
+#undef NEED_INET_ADDRDEF
+
+/* Define if you dont have a valid declaration for listen() */
+#undef NEED_LISTENDEF
+
+/* Define if you dont have a valid declaration for bind() */
+#undef NEED_BINDDEF
+
+/* Define if you dont have a valid declaration for accept() */
+#undef NEED_ACCEPTDEF
+
+/* Define if you dont have a valid declaration for getrusage() */
+#undef NEED_GETRUSAGEDEF
+
+/* Define if you dont have bool type */
+#undef NEED_BOOL
+
+/* Define if you dont have a valid declaration for strcasecmp */
+#undef NEED_STRCASECMP
+
+/* Define if you dont have a valid declaration for trunc */
+#undef NEED_TRUNCDEF
+
+/* Define if you have typeinfo() */
+#undef HAVE_TYPEINFO
+
+/* Define sizeof char */
+#undef SIZEOF_CHAR
+
+/* Define sizeof short */
+#undef SIZEOF_SHORT
+
+/* Define sizeof int */
+#undef SIZEOF_INT
+
+/* Define sizeof long */
+#undef SIZEOF_LONG
+
+/* Define sizeof void_p */
+#undef SIZEOF_VOID_P
+
+/* Define sizeof float */
+#undef SIZEOF_FLOAT
+
+/* Define sizeof double */
+#undef SIZEOF_DOUBLE
+
+/* Define sizeof long_long */
+#undef SIZEOF_LONG_LONG
+
+/* Define sizeof long_double */
+#undef SIZEOF_LONG_DOUBLE
+
+#endif /* _config_h_ */

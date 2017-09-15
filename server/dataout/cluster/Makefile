@@ -1,0 +1,79 @@
+# Generated automatically from Makefile.in by configure.
+# dataout/cluster/Makefile.in
+# $ZEL: Makefile.in,v 1.9 2011/04/06 20:30:21 wuestner Exp $
+
+CONF = ../../conf
+
+srcdir = .
+
+include $(CONF)/rules.make
+include $(CONF)/config.make
+
+cfiles = cl_interface.c cluster.c do_cluster.c checksum.c clusterpool.c
+
+ifneq (,$(findstring socket,$(clusterdataouts)))
+  cfiles += do_cluster_sock.c
+  DODEFS += -DDO_SOCKET
+endif
+ifneq (,$(findstring tape,$(clusterdataouts)))
+  cfiles += do_cluster_tape.c
+  handlerc += auftape.c
+  handlers += ../../auftape
+  DODEFS += -DDO_TAPE
+endif
+ifneq (,$(findstring file,$(clusterdataouts)))
+  cfiles += do_cluster_file.c
+  DODEFS += -DDO_FILE
+endif
+ifneq (,$(findstring autosocket,$(clusterdataouts)))
+  cfiles += do_cluster_autosock.c
+  DODEFS += -DDO_AUTOSOCKET
+endif
+ifneq (,$(findstring null,$(clusterdataouts)))
+  cfiles += do_dummy.c
+  DODEFS += -DDO_NULL
+endif
+
+ofiles = $(cfiles:.c=.o)
+depfiles = $(cfiles) $(handlerc)
+
+lib = ../libdo.a
+SCSICOMPAT = ../../lowlevel/scsicompat
+OSCOMPAT   = ../../lowlevel/oscompat
+COMMONLIB  := -L$(EXCOMMON) -lcommon
+
+all: $(lib) $(handlers)
+
+$(lib): $(lib)($(ofiles))
+	$(RANLIB) $@
+
+../../auftape: auftape.o  \
+	$(OSCOMPAT)/datamodule.o  \
+	$(SCSICOMPAT)/libscsicompat.a
+	$(CC) $(CFLAGS)  \
+	auftape.o  \
+	$(OSCOMPAT)/datamodule.o  \
+	-L$(SCSICOMPAT) \
+        $(COMMONLIB) \
+        -lscsicompat \
+        -o $@ 
+
+auftape.o: auftape.c
+	$(CC) $(CPPFLAGS) $(CFLAGS) -DSCSICOMPAT_linux -c -o $@ $<
+
+$(SCSICOMPAT)/libscsicompat.a: FORCE
+	$(MAKE) -C $(SCSICOMPAT) all
+
+FORCE:
+
+cl_interface.o: cl_interface.c
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(DODEFS) -c -o $@ $<
+
+depend: xdepend
+ifneq (,$(findstring tape,$(clusterdataouts)))
+	$(MAKE) -C $(SCSICOMPAT) depend
+endif
+
+.PHONY: depend FORCE
+
+#######################################

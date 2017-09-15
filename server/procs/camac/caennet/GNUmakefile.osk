@@ -1,0 +1,15 @@
+CONF = ../../../CONF
+COMMON = ../../../../COMMON
+
+include $(COMMON)/rules.make
+
+cfiles = caennet.r
+
+all: lib.l
+
+lib.l: $(cfiles)
+	merge $^ >-lib.l
+
+################################################
+
+scaler.r: errorcodes.h ../../../LOWLEVEL/CAMAC/camac.h

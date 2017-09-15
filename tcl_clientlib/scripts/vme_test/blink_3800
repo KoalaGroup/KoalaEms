@@ -1,0 +1,31 @@
+proc led_on {ved addr} {
+  #puts "$ved command1 VMEwrite $addr 4 1 1"
+  $ved command1 VMEwrite $addr 4 1 1
+}
+proc led_off {ved addr} {
+  #puts "$ved command1 VMEwrite $addr 4 1 0x100"
+  $ved command1 VMEwrite $addr 4 1 0x100
+}
+
+
+
+
+
+
+proc blink_3800 {ved args} {
+  set last 0
+  for {set i 0} {$i<100} {incr i} {
+    foreach i $args {
+      set addr [expr 0x1000*$i]
+      led_off $ved $last
+      led_on $ved $addr
+      set last $addr
+      after 100
+    }
+  }
+}
+
+proc blink {} {
+  blink_3800 ved_393 0 2 3 4 5 6 7
+}
+

@@ -1,0 +1,28 @@
+# Generated automatically from Makefile.in by configure.
+# lowlevel/asynch_io/Makefile.in
+# $ZEL: Makefile.in,v 1.2 2007/11/03 16:00:23 wuestner Exp $
+
+CONF = ../../conf
+
+srcdir = .
+
+
+include $(CONF)/rules.make
+include $(CONF)/config.make
+
+cfiles = aio_tools.c
+ofiles = $(cfiles:.c=.o)
+depfiles = $(cfiles)
+
+lib = ../libll.a
+
+all: $(lib)
+
+$(lib): $(lib)($(ofiles))
+	$(RANLIB) $@
+
+depend: xdepend
+
+.PHONY: depend
+
+######################################################

@@ -1,0 +1,18 @@
+proc sis3801_init {ved addr} {
+  $ved command1 VMEwrite [expr $addr+0x60] 4 1 0 ;# reset
+  $ved command1 VMEwrite [expr $addr+0x20] 4 1 0 ;# FIFO clear
+  $ved command1 VMEwrite [expr $addr+0x28] 4 1 0 ;# enable next logic
+}
+proc sis3801_clock {ved addr} {
+  $ved command1 VMEwrite [expr $addr+0x24] 4 1 0 ;# next clock
+}
+
+proc sis3801_read {ved addr} {
+  set count 40
+  while {$count && !([$ved command1 VMEread $addr 4 1]&0x100)} {
+    set res [$ved command1  VMEread [expr $addr+0x100] 4 1]
+    puts "$res"
+    incr count -1
+  }
+  puts "read [expr 40-$count] words"
+}

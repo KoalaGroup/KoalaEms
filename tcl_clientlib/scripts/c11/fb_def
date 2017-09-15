@@ -1,0 +1,42 @@
+set LC_CAT_1810  0x48101039
+set LC_TDC_1875  0x43101049
+set LC_TDC_1875A 0x43101037
+set LC_TDC_1876  0x4310103b
+set LC_TDC_1877  0x4310103c
+set LC_TDC_1879  0x43101035
+set LC_ADC_1881  0x4110104b
+set LC_ADC_1881M 0x4110104f
+set LC_ADC_1885F 0x41101045
+
+set Cat1810    25 $LC_CAT_1810
+set Tdc1875A    9 $LC_TDC_1875A 10 $LC_TDC_1875A 11 $LC_TDC_1875A 12 $LC_TDC_1875A 13 $LC_TDC_1875A 14 $LC_TDC_1875A
+set Tdc1877    16 $LC_TDC_1877  20 $LC_TDC_1877	 21 $LC_TDC_1877  22 $LC_TDC_1877
+set Tdc1879    17 $LC_TDC_1879  18 $LC_TDC_1879  19 $LC_TDC_1879
+set Adc1881     3 $LC_ADC_1881   4 $LC_ADC_1881   5 $LC_ADC_1881   6 $LC_ADC_1881   7 $LC_ADC_1881   8 $LC_ADC_1881
+
+set IS_10      25
+set IS_75A      9  10  11  12  13  14
+set IS_77      21  22
+set IS_79      17  18  19
+set IS_81       3   4   5   6   7   8
+
+set PAR_10    10  131    0
+set PAR_75A    1    0    0   64    0    0 
+set PAR_77     0    1    2    0    0    0    2    0 4095    0    0
+set PAR_79     1    0    0    3   31
+set PAR_81p    1    0    0    0    0    2    0
+set PAR_81r    1    0    0    1    0    2   64
+set PAR_85F    1    1    0   96    0    0
+set PAR_81_03  $PAR_81r  <ped00.tst
+set PAR_81_04  $PAR_81r  <ped00.tst
+set PAR_81_05  $PAR_81r  <ped00.tst
+set PAR_81_06  $PAR_81r  <ped00.tst
+set PAR_81_07  $PAR_81r  <ped00.tst
+set PAR_81_08  $PAR_81r  <ped00.tst
+
+set setup_1810  1 $PAR_10
+set setup_1875A 6 $PAR_75A   $PAR_75A   $PAR_75A   $PAR_75A   $PAR_75A   $PAR_75A
+set setup_1877  2 $PAR_77    $PAR_77
+set setup_1879  3 $PAR_79    $PAR_79    $PAR_79
+set setup_1881p 6 $PAR_81p   $PAR_81p   $PAR_81p   $PAR_81p   $PAR_81p   $PAR_81p
+set setup_1881r 6 $PAR_81_03 $PAR_81_04 $PAR_81_05 $PAR_81_06 $PAR_81_07 $PAR_81_08

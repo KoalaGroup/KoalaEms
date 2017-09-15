@@ -1,0 +1,17 @@
+CONF = ../../CONF
+COMMON = ../../../COMMON
+
+include $(COMMON)/rules.make
+
+cfiles = forth.r
+
+all: lib.l
+
+lib.l: $(cfiles)
+	merge $^ >-lib.l
+
+#####################################################
+
+$(cfiles): sconf.h debug.h errorcodes.h
+forth.o: ../../lowlevel/tileforth/nforth.h   \
+	../../lowlevel/tileforth/out.h

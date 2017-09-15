@@ -1,0 +1,36 @@
+#!/usr/local/bin/tclsh
+# usage: rate <name> <interval> 
+
+proc sendname {name} {
+global path
+puts $path "name $name"
+}
+
+proc sendval {} {
+global path
+global val
+global zeit
+puts $path "[expr [clock seconds]+0] $val"
+incr zeit
+flush $path
+}
+
+set path [socket localhost 1234]
+puts $path
+
+sendname [lindex $argv 0]
+set d [lindex $argv 1]
+set d [expr [lindex $argv 1] * 1000]
+puts $d
+
+set val 0
+set zeit [clock seconds]
+set inc 1
+
+while {1} {
+sendval
+if {$val==100} {set inc -1}
+if {$val==0} {set inc 1}
+incr val $inc
+after $d
+}

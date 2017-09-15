@@ -1,0 +1,25 @@
+CONF = ../CONF
+COMMON = ../../COMMON
+
+include $(CONF)/rules.make
+
+include $(CONF)/config.make
+
+cfiles = command_interp.r commu.r
+
+subdir = $(commu)
+
+all: libcommu.l
+
+libcommu.l: $(cfiles) $(subdir) commu.stamp
+	merge $(cfiles) $(subdir)/lib.l >-$@
+
+$(subdir): FORCE
+	$(MAKE) -C $@ all
+
+.PHONY: FORCE
+
+##################################################################
+
+commu.r: $(CONF)/sconf.h $(COMMON)/debug.h $(COMMON)/requesttypes.h \
+	$(COMMON)/unsoltypes.h $(COMMON)/msg.h

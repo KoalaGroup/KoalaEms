@@ -1,0 +1,39 @@
+# objects/pi/Makefile.in
+# $ZEL: Makefile.in,v 1.3 2002/11/06 15:37:04 wuestner Exp $
+
+CONF = ../../conf
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+@SET_MAKE@
+
+include $(CONF)/rules.make
+
+include $(CONF)/config.make
+
+ofiles = pi.o
+depfiles = pi.c
+
+lib = ../libobj.a
+subdirs = $(invocations)
+
+all: $(lib)
+
+$(lib): $(lib)($(ofiles)) $(subdirs) invocations.stamp
+	$(RANLIB) $@
+
+$(subdirs): FORCE
+	$(MAKE) -C $@ all
+
+clean:
+	-rm -rf tmp
+
+depend: xdepend
+	for i in $(subdirs) ; do \
+	  echo checking directory $$i ; \
+	  $(MAKE) -C $$i depend ; \
+	done
+
+.PHONY: FORCE depend
+
+#########################################

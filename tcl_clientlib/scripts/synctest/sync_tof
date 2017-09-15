@@ -1,0 +1,82 @@
+#! /bin/sh
+#\
+exec emssh $0 $*
+
+set vednames {t01 t02 t03 t04 t05 t06}
+array set syncpath {
+    t01 '/tmp/sync0'
+    t02 '/tmp/pcisync0'
+    t03 '/tmp/pcisync0'
+    t04 '/tmp/pcisync0'
+    t05 '/tmp/pcisync0'
+    t06 '/tmp/pcisync0'
+}
+set ems_host ikptof07
+set ems_port 4096
+
+set regs_to_be_printed {
+    MASTER
+    GO          
+    T4LATCH     
+    TAW_ENA     
+    AUX_OUT     
+    AUX0_RST_TRIG
+    EN_INT_AUX  
+    EN_INT_EOC  
+    EN_INT_SI   
+    EN_INT_TRIGG
+    EN_INT_GAP  
+    GSI         
+    TRIG        
+    GO_RING     
+    VETO        
+    SI          
+    INH         
+    AUX_IN      
+    EOC         
+    SI_RING     
+    RES_TRIGINT 
+    GAP         
+    TDT_RING    
+}
+
+source syncregs.tcl
+
+ems_connect $ems_host $ems_port
+
+foreach i $vednames {
+    set ved($i) [ems_open $i]
+    puts "try $i"
+    set sync_id($i) [$ved($i) command1 SyncOpen $syncpath($i)]
+}
+
+foreach i $vednames {
+    set status [$ved($i) command1 StatusPCITrigger $sync_id($i) 0 0]
+    set stat($i) [lindex $status 0]
+}
+
+puts -nonewline {register     }
+foreach i $vednames {
+    puts -nonewline " $i"
+}
+puts {}
+foreach reg $regs_to_be_printed {
+    puts -nonewline $regname($reg)
+    set mask $regmask($reg)
+    set shift $regshift($reg)
+    foreach i $vednames {
+        set v $stat($i)
+        if {$v&$mask} {
+            set vv [expr ($v&$mask)>>$shift]
+            puts -nonewline [format { %3x} $vv]
+        } else {
+            puts -nonewline {   0}
+        }
+    }
+    puts {}
+}
+
+foreach i $vednames {
+    $ved($i) command1 SyncClose $sync_id($i)
+}
+

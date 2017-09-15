@@ -1,0 +1,13 @@
+\.[ad]$				nl
+\.config$			nl
+\.sed$				nl
+/GNUmakefile.*(\.osk)$	nl
+^\./conf/rules.make(\.osk)$	nl
+^\./conf/config.h(\.osk)$	nl
+^\./conf/.*\.inc$		nl
+\.m4$				m4simple
+\.[ch]$				csimple
+/CVS$				notdir
+/doc$				notdir
+^\./test$			notdir
+^\./perfdata$			notdir

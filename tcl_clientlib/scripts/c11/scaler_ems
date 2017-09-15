@@ -1,0 +1,26 @@
+#####################################################################################
+# camac scaler
+puts "open q02"
+rename [ems_open ikpq02 camac] q02
+
+puts "init q02"
+q02 modullist create $SCAL_ML
+q02 command1 ResetTrigger 2
+
+rename [q02 is create 1 5] is5
+is5 memberlist create $SCAL_IS
+is5 command1 CCCI 0
+is5 command1 nAFwrite 1 0 16 0x40
+is5 readoutlist create 1 1 {nAFwrite {1 0 16 0x1f80}  nAFreadQstop1 {1 0 2 23}}
+rename [q02 is create 2 6] is6
+is6 memberlist create $DREG_IS
+is6 command1 CCCI 0
+is6 readoutlist create 1 1 {nAFread {1 0 0}  nAFread {2 0 0}}
+rename [q02 is create 3 8] is8
+is8 readoutlist create 1 1 {Timestamp {}}
+q02 trigger create GSI_Trig 2 0 50 25
+
+puts "start q02"
+q02 readout start
+
+#####################################################################################

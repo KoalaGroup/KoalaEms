@@ -1,0 +1,113 @@
+prefix := @prefix@
+exec_prefix := @exec_prefix@
+INCLUDE_DIR := $(prefix)/include
+LIB_DIR     := $(exec_prefix)/lib
+COMMONVER   := @COMMONVER@
+SELFVER     := @SELFVER@
+CXXSELFVER  := @CXXSELFVER@
+
+srcdir := @srcdir@
+VPATH := @srcdir@
+@SET_MAKE@
+
+machname := @target@
+
+COMMON_INCLUDE := @EMSCOMMON@
+COMMON_EX_INCLUDE := @EMSEXCOMMON@
+COMMON_LIB := @EMSCOMMONLIB@
+CC  := @CC@
+CXX := @CXX@
+LD   = @LD@
+LDX  = @LDX@
+CFLAGS := @CFLAGS@
+CXXFLAGS := @CXXFLAGS@
+INSTALL := @INSTALL@
+INSTALL_DATA := @INSTALL_DATA@
+RANLIB := @RANLIB@
+SLIBS := @SLIBS@
+LN_S := @LN_S@
+LDOFLAGS := @LDOFLAGS@
+SHLIBSUFFIX := @SHLIBSUFFIX@
+
+CPPFLAGS = -I. -I$(srcdir) -I$(COMMON_INCLUDE) -I$(COMMON_EX_INCLUDE)
+
+SRC   := clientcomm.c clientcommlib.c
+XSRC  := $(SRC:.c=xx.cc)
+OBJS  := $(SRC:.c=.o)
+XOBJS := $(XSRC:.cc=.o)
+lib   := libemscomm.$(SELFVER).a
+libxx := libemscommxx.$(CXXSELFVER).a
+
+libs  := @libs@
+slibs := $(libs:.a=$(SHLIBSUFFIX))
+
+INSTHDR = clientcomm.h ccommcallback.h
+
+.PHONY: all
+all: $(libs) @SLIBS@
+
+libemscomm.$(SELFVER).a: $(OBJS)
+	$(AR) cr $@ $^
+	$(RANLIB) $@
+
+libemscommxx.$(CXXSELFVER).a: $(XOBJS)
+	$(AR) cr $@ $^
+	$(RANLIB) $@
+
+libemscomm.$(SELFVER)$(SHLIBSUFFIX): $(OBJS)
+	$(LD) $(LDOFLAGS) -o $@ $^ @LDONONEFLAG@  \
+	-L$(COMMON_LIB) -lcommon.$(COMMONVER)
+
+# libemscommxx.$(SELFVER)$(SHLIBSUFFIX): $(XOBJS)
+# 	$(CXX) $(CXXFLAGS) $(LDOFLAGS) -o $@ $^ @LDONONEFLAG@  \
+# 	-L$(COMMON_LIB) -lcommon.$(COMMONVER)
+
+libemscommxx.$(CXXSELFVER)$(SHLIBSUFFIX): $(XOBJS)
+	$(LDX) $(LDOFLAGS) -o $@ $^ @LDONONEFLAG@  \
+	-L$(COMMON_LIB) -lcommon.$(COMMONVER)
+
+clientcommxx.cc:
+	$(LN_S) $(srcdir)/clientcomm.c $@
+
+clientcommlibxx.cc:
+	$(LN_S) $(srcdir)/clientcommlib.c $@
+
+depend: sed.in $(CXXSRC)
+	cp Makefile Makefile.bak
+	sed -e '/^# DO NOT DELETE THIS LINE/,$$d' < Makefile.bak > Makefile
+	echo '# DO NOT DELETE THIS LINE' >> Makefile
+	echo ' ' >> Makefile
+	for i in $(SRC); do \
+	  echo checking $$i ; \
+	  $(CC) -M $(CPPFLAGS)  $(srcdir)/$$i|sed -f sed.in>> Makefile ; \
+	done
+	for i in $(XSRC); do \
+	  echo checking $$i ; \
+	  $(CXX) -M $(CPPFLAGS)  $$i|sed -f sed.in>> Makefile ; \
+	done
+
+sed.in:
+	echo 's|/usr/include/[^ ]*||g' >sed.in
+	echo '/.*: $$/d' >>sed.in
+	echo '/^ *\\ *$$/d' >>sed.in
+
+clean:
+	-rm -f *.o *.a *.so @SO_LOCATION@
+
+realclean: clean
+	-rm -f  $(CXXSRC) core sed.in
+
+distclean: realclean
+	rm -f Makefile Makefile.bak config.cache config.log config.status config.h
+
+local: all
+	-mkdir $(machname)
+	$(INSTALL) $(lib) $(libxx) $(machname)
+
+install: all
+	for i in $(INSTHDR)  ; do \
+	$(INSTALL_DATA) $(srcdir)/$$i $(INCLUDE_DIR)/$$i ; \
+	done
+	for i in $(libs) $(slibs) ; do \
+	$(INSTALL_DATA) $$i $(LIB_DIR)/$$i ; \
+	done

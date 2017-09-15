@@ -1,0 +1,30 @@
+# Generated automatically from Makefile.in by configure.
+# procs/general/struct/Makefile.in
+# $ZEL: Makefile.in,v 1.5 2007/09/17 00:35:51 wuestner Exp $
+
+CONF = ../../../conf
+
+srcdir = .
+
+include $(CONF)/rules.make
+include $(CONF)/config.make
+
+cfiles = IfThenElse.c Loop.c VarLoop.c vonundzuvar.c lenvor.c
+ofiles = $(cfiles:.c=.o)
+depfiles = $(cfiles)
+
+lib = ../../libprocs.a
+
+all: $(lib)
+
+$(lib): $(lib)($(ofiles))
+	$(RANLIB) $@
+
+depend: xdepend
+
+.PHONY: depend
+
+#############################################################################
+
+IfThenElse.o: debug.stamp 
+Loop.o: debug.stamp

@@ -1,0 +1,32 @@
+InOutTyp {io_args} Adresstype {addr_args}
+
+InOutTyp:
+ringbuffer, stream, cluster, filebuffer
+
+Adresstype:
+raw, modul, driver_mapped, driver_mixed, driver_syscall,
+socket, localsocket, file, tape, null
+
+io_args: buffsize wieviel opt_io_args
+
+buffsize: Groesse des io-Buffers (ignored (?) in case of cluster)
+wieviel:  how many data to send
+    0: all data
+  n>0: n events
+   -1: all data, but errors are not fatal
+
+opt_io_args:
+ -----
+ associated with filebuffer:
+ [0]  -1: master-dataout for this buffer
+    n>=0: slave belonging to dataout n
+ [1...] : (string) directoryname for filebuffer
+
+addr_args:
+  depending on Addresstype
+
+opt_addr_args: (only for cluster with tape)
+ [0]   n: tape density code (0 is default)
+ the following flag is hardly used; it should be removed in the near future
+ [1]   1: write filemarks even if forbidden on command line
+       0: respect command line (default)

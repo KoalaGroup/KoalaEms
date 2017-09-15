@@ -1,0 +1,107 @@
+prefix = @prefix@
+exec_prefix := @exec_prefix@
+INCLUDE_DIR := $(prefix)/include
+LIB_DIR     := $(exec_prefix)/lib
+SELFVER      := @SELFVER@
+
+srcdir := @srcdir@
+VPATH  := @srcdir@
+@SET_MAKE@
+
+machname := @target@
+
+CC           := @CC@
+CFLAGS       := @CFLAGS@
+INSTALL      := @INSTALL@
+INSTALL_DATA := @INSTALL_DATA@
+AR           := @AR@
+RANLIB       := @RANLIB@
+LN_S         := @LN_S@
+
+GETCAPSRC = getcap.c
+SRC = swap.c xdrstring.c conststrings.c modulnames.c objectstrings.c \
+	rcs_ids.c get_mount_dev.c human_size.c xprintf.c @GETCAPSRC@
+# SRC += xdrfloat.c
+
+GENHDR = ems_err.h ems_err.f  errorcodes.h errorcodes.f \
+	requesttypes.h unsoltypes.h unsoltypes.f intmsgtypes.h modultypes.h  \
+        modultypes.tcl modultypes_arr.tcl requestarr.tcl errorarrs.tcl
+GENSRC = ems_errstr.c errorstring.c reqstrings.c modultypeinfo.c
+
+SOURCES = $(GENSRC) $(SRC)
+OFILES = $(SOURCES:.c=.o) @LIBOBJS@
+
+M4SRC = ems_err.h.m4 ems_err.f.m4 errorcodes.h.m4 errorcodes.f.m4 \
+	requesttypes.h.m4 unsoltypes.h.m4 unsoltypes.f.m4 intmsgtypes.h.m4 \
+	modultypes.h.m4 ems_errstr.c.m4 errorstring.c.m4 reqstrings.c.m4  \
+        modultypes.tcl.m4 modultypeinfo.c.m4 modultypes_arr.tcl.m4  \
+        requestarr.tcl.m4 errorarrs.tcl.m4
+
+INSTHDR = cdefs.h debug.h objecttypes.h msg.h swap.h \
+	xdrstring.h xdrfloat.h eventformat.h conststrings.h
+
+CPPFLAGS = -I$(srcdir) -I.  @DEFS@
+M4FLAGS = -DEMSDEFS=$(srcdir)
+SHLIBSUFFIX := @SHLIBSUFFIX@
+LDOFLAGS := @LDOFLAGS@
+
+libs = libcommon.$(SELFVER).a libcommon.a
+slibs= libcommon.$(SELFVER)$(SHLIBSUFFIX)
+
+.PHONY: all
+all:	 $(GENHDR) $(GENSRC) $(libs) @SLIBS@
+
+libcommon.a: libcommon.$(SELFVER).a
+	-$(LN_S) libcommon.$(SELFVER).a libcommon.a
+
+libcommon.$(SELFVER).a:	$(OFILES)
+	$(AR) cr $@ $(OFILES)
+	$(RANLIB) $@
+
+libcommon.$(SELFVER)$(SHLIBSUFFIX): $(OFILES)
+	$(LD) $(LDOFLAGS) -o $@ $^ @LDONONEFLAG@ -lc
+
+# $(slibs): $(libs)
+# 	$(LD) $(LDOFLAGS) -o $@ $^ @LDONONEFLAG@  -lc
+
+$(GENHDR) $(GENSRC): $(M4SRC)
+	m4 $(M4FLAGS) <$(srcdir)/$@.m4 >$@
+
+depend: $(GENHDR) $(GENSRC)
+	cp Makefile Makefile.bak
+	sed -e '/^# DO NOT DELETE THIS LINE/,$$d' < Makefile.bak > Makefile
+	echo '# DO NOT DELETE THIS LINE' >> Makefile
+	echo ' ' >> Makefile
+	for i in $(SRC); do \
+	  echo checking $$i ; \
+	  $(CC) -M $(CPPFLAGS)  $(srcdir)/$$i>> Makefile ; \
+	done
+	for i in $(GENSRC); do \
+	  echo checking $$i ; \
+	  $(CC) -M $(CPPFLAGS)  $$i>> Makefile ; \
+	done
+
+clean:
+	rm -f *.o *.a @SLIBS@ @SO_LOCATION@
+	rm -f  $(GENSRC)
+
+realclean: clean
+	rm -f  $(GENHDR)
+
+distclean: realclean
+	rm -f Makefile Makefile.bak config.cache config.log config.status
+
+local: all
+	-mkdir $(machname)
+	$(INSTALL) libcommon.a $(machname)
+
+install: all
+	for i in $(GENHDR) ; do \
+	$(INSTALL_DATA) $$i $(INCLUDE_DIR)/$$i ; \
+	done
+	for i in $(INSTHDR)  ; do \
+	$(INSTALL_DATA) $(srcdir)/$$i $(INCLUDE_DIR)/$$i ; \
+	done
+	for i in libcommon.a @SLIBS@ ; do \
+	$(INSTALL_DATA) $$i $(LIB_DIR)/$$i ; \
+	done

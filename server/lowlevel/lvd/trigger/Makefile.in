@@ -1,0 +1,30 @@
+# lowlevel/lvd/trigger/Makefile.in
+# $ZEL: Makefile.in,v 1.2 2010/04/20 10:08:21 wuestner Exp $
+
+CONF = ../../../conf
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+include $(CONF)/rules.make
+include $(CONF)/config.make
+
+cfiles = lvd_trigger.c trigger.c trig_i2c.c
+ofiles = $(cfiles:.c=.o)
+depfiles = $(cfiles)
+
+LVDTYPES = $(shell echo $(lvd)|tr '[:lower:]' '[:upper:]')
+LVDFLAGS=$(foreach typ,$(LVDTYPES),-DLVD_$(typ) )
+CFLAGS += $(LVDFLAGS)
+export LVDFLAGS
+
+lib = ../../libll.a
+
+all: $(lib)
+
+$(lib): $(lib)($(ofiles))
+	$(RANLIB) $@
+
+depend: xdepend
+
+.PHONY: depend

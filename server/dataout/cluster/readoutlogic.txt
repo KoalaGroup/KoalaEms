@@ -1,0 +1,91 @@
+readout.c::startreadout
+  init_trigger()
+  start_dataout()
+    #ifdef READOUT_CC
+      if (dataout_started) return OK
+      clusters_restart()
+      foreach configured_dataout {dataout_clX(do_idx).procs.start}
+      create startcluster
+      deposit startcluster /*clusters_deposit(is_cluster)*/
+    #else
+      if (dataout_started) return OK
+      foreach configured_dataout {dataout_clX(do_idx).procs.start}
+    #endif
+  insert_trigger_task()
+  schau_nach_speicher()
+  readout_active=Invoc_active
+  notifystatus(status_action_start, Object_pi, 2, {Invocation_readout, 0})
+
+readout.c::resetreadout
+  remove_trigger_task()
+  res=done_trigger()
+  res=stop_dataout()
+  readout_active=Invoc_notactive
+  notifystatus(status_action_reset, Object_pi, 2, {Invocation_readout, 0})
+
+readout.c::fatal_readout_error
+  if (readout_active!=Invoc_active): nix
+  sonst:
+    remove_trigger_task()
+    readout_active=Invoc_error
+    notifystatus(status_action_change, Object_pi, 2, {Invocation_readout, 0})
+
+readout.c::read_out
+  if (next_databuf==0) fatal_readout_error()
+  if(scan_proclist()) fatal_readout_error()
+  reset_trigger()
+  flush_databuf(outptr)
+
+readout.c::doreadout
+  if (!buffer_free) panic() (#ifdef DEBUG)
+  read_out()
+  if (!buffer_free) suspend_trigger_task()
+
+readout.c::outputbuffer_freed
+  if (!suspended) return
+  schau_nach_speicher()
+  if (buffer_free) reactivate_trigger_task()
+
+trigprocs.c.m4::remove_trigger_task
+  /* Immer: tproc_poll, zel: tproc_select */
+  switch (trigprocinf.proctype)
+    tproc_other : trigprocinf.i.tp_other.remove_triggertask()
+    tproc_select: if (st) sched_delete_select_task(st)
+    tproc_poll
+    tproc_timer : if (t) sched_remove_task(t)
+    
+trigprocs.c.m4::insert_trigger_task
+trigprocs.c.m4::suspend_trigger_task
+trigprocs.c.m4::reactivate_trigger_task
+  switch (trigprocinf.proctype)
+    tproc_other : trigprocinf.i.tp_other.reactivate_triggertask()
+    tproc_select: sched_select_task_reactivate(st)
+    tproc_poll  : sched_adjust_prio_t(t, READOUT_PRIOR, 0)
+    tproc_timer : sched_exec_periodic(trigger_task...)
+  
+cl_interface::schau_nach_speicher
+  clusters_create(cluster_max+EVENT_MAX)
+
+cl_interface::flush_databuf
+  clusters_deposit(currentcluster)
+
+cluster.c::clusters_deposit
+  foreach i
+    dataout_cl[i].procs.advertise(i, cluster)
+  if (cluster->numcostumers==0)
+    clusters_recycle(cluster);
+  else
+    clusters_link(cluster);
+
+cluster.c::clusters_link
+  unbedeutend
+
+do_cluster_tape.c::do_cluster_tape_advertise
+  if (dataout_cl[do_idx].doswitch==Do_disabled) return;
+  if (dataout_cl[do_idx].d.c_data.active_cluster==0)
+    {
+    do_special_tape* special=&dataout_clX(do_idx).s.tape_data;
+    dataout_cl[do_idx].d.c_data.active_cluster=cl;
+    do_tape_write(dataout_cl[do_idx].s.tape_data.sockets[0], cl, special,
+        do_idx);
+    }

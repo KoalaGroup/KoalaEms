@@ -1,0 +1,13 @@
+CONF = ../../../CONF
+COMMON = ../../../../COMMON
+
+include $(CONF)/rules.make
+
+cfiles = piops.r datains.r readevents.r gibweiter.r
+lib = sublib.l
+
+
+all: $(lib)
+
+$(lib): $(cfiles)
+	merge $^ >-$@

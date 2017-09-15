@@ -1,0 +1,86 @@
+#! /bin/sh
+#\
+exec emswish $0 $*
+
+# Vorbereitung fuer 'autoload' von Prozeduren
+if [info exists env(EMSTCL_HOME)] {
+  set unsol_library $env(EMSTCL_HOME)/unsol
+  set common_library $env(EMSTCL_HOME)/common
+} else {
+  set unsol_library /usr/local/ems/lib/unsol
+  set common_library /usr/local/ems/lib/common
+}
+lappend auto_path $unsol_library $common_library
+
+# Kommandozeilenargumente verarbeiten
+process_args
+set global_verbose [info exists namedarg(verbose)]
+if {$global_verbose} printargs
+
+if [info exists namedarg(help)] {
+  printhelp
+  exit
+}
+
+bind Entry <Delete> {
+       tkEntryBackspace %W
+}
+
+#wm withdraw .
+set_options
+set maintitle "EMS Unsol. Monitor"
+if [regexp #.* [winfo name .] number] {
+  append maintitle $number
+}
+wm title . $maintitle
+wm maxsize . 10000 10000
+tk_focusFollowsMouse
+
+set tcl_precision 17
+
+set global_display [display_name]
+set global_setupfile(default) [setupfile_name $global_display]
+
+if [info exists namedarg(setup)] {
+  set num_setup_files [llength [glob -nocomplain -- $namedarg(setup)]]
+  if {$num_setup_files!=1} {
+    if {$num_setup_files==0} {
+      puts "no file $namedarg(setup)"
+    } else {
+      puts "filename $namedarg(setup) ambigous"
+    }
+  exit
+  }
+  set global_setupfile(restored) $namedarg(setup)
+  set global_setupfile(save) $namedarg(setup)
+  set global_setupfile(use_default) 0
+} else {
+  set global_setupfile(restored) [find_setupfile $global_setupfile(default) $global_display ~/ems_unsolrc]
+  set global_setupfile(save) $global_setupfile(default)
+  set global_setupfile(use_default) 1
+}
+if {$global_setupfile(restored)!=""} {
+  restore_setup $global_setupfile(restored)
+}
+
+# und, wenn noetig, Setup vervollstaendigen
+correct_setup
+use_args
+
+set dialog_nr 0
+set global_main_loop(running) 0
+set global_lasttime 0
+start_gui
+
+# proc dummytool is called in order to load bgerror and unsol_ende
+dummytool
+
+if {[llength $global_setup(veds)]>0} {
+  output "vedlist from setup:"
+  output_append "$global_setup(veds)"
+}
+
+#ems_confmode asynchron
+setup_unsolcommands
+
+if {$global_setup(auto_start)} {main_loop_}

@@ -1,0 +1,19 @@
+CONF = ../../../CONF
+COMMON = ../../../../COMMON
+
+include $(COMMON)/rules.make
+
+cfiles =  detector.r detector_basics.r 
+
+all: lib.l
+
+lib.l: $(cfiles)
+	merge $^ >-lib.l
+
+#############################################################################
+
+detector.r: errorcodes.h modultypes.h ../../../LOWLEVEL/VME/vme.h \
+            $(CONF)/sconf.h $(COMMON)/debug.h detector.h 
+
+detector_basics.r: errorcodes.h modultypes.h ../../../LOWLEVEL/VME/vme.h \
+                   $(CONF)/sconf.h $(COMMON)/debug.h detector.h 

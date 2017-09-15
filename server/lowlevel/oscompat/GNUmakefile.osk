@@ -1,0 +1,14 @@
+CONF = ../../CONF
+COMMON = ../../../COMMON
+
+include $(CONF)/rules.make
+
+cfiles = datamodule.r
+lib = lib.l
+
+all: $(lib)
+
+$(lib): $(cfiles)
+	merge $^ >-$@
+
+######################################################

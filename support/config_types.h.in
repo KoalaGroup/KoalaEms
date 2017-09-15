@@ -1,0 +1,9 @@
+/* config_types.h.in */
+
+#ifndef _config_types_h_
+#define _config_types_h_
+
+/* define type of 3rd arg of "accept" */
+#define SOCKLEN_TYPE @SOCKLEN_TYPE@
+
+#endif /* _config_types_h_ */

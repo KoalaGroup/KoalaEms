@@ -1,0 +1,70 @@
+This file contains any messages produced by compilers while
+running configure, to aid debugging if configure makes a mistake.
+
+configure:624: checking host system type
+configure:645: checking target system type
+configure:663: checking build system type
+configure:718: checking for gcc
+configure:831: checking whether the C compiler (gcc  ) works
+configure:847: gcc -o conftest    conftest.c  1>&5
+configure:873: checking whether the C compiler (gcc  ) is a cross-compiler
+configure:878: checking whether we are using GNU C
+configure:906: checking whether gcc accepts -g
+configure:938: checking how to run the C preprocessor
+configure:1018: checking whether make sets ${MAKE}
+configure:1056: checking for a BSD compatible install
+configure:1128: checking ems-common
+configure:1147: checking for objecttypes.h in ../common
+configure:1205: checking ems-excommon
+configure:1224: checking for requesttypes.h in /home/huagen/ems/common
+configure:1333: checking ems-commonlib
+configure:1352: checking for libcommon.a in /home/huagen/ems/common
+configure:1352: checking for libcommon.a in /home/huagen/ems/common/x86_64-unknown-linux-gnu
+configure:1352: checking for libcommon.a in /home/huagen/ems/common/x86_64-linux-gnu
+configure:1352: checking for libcommon.a in /home/huagen/ems/common/x86_64
+configure:1352: checking for libcommon.a in /home/huagen/ems/common/linux-gnu
+configure:1352: checking for libcommon.a in /home/huagen/ems/common/lib
+configure:1352: checking for libcommon.a in /home/huagen/ems/common/x86_64-unknown-linux-gnu/lib
+configure:1352: checking for libcommon.a in /home/huagen/ems/common/x86_64-linux-gnu/lib
+configure:1352: checking for libcommon.a in /home/huagen/ems/common/x86_64/lib
+configure:1352: checking for libcommon.a in /home/huagen/ems/common/linux-gnu/lib
+configure:1352: checking for libcommon.a in ../common
+configure:1352: checking for libcommon.a in ../common/x86_64-unknown-linux-gnu
+configure:1352: checking for libcommon.a in ../common/x86_64-linux-gnu
+configure:1352: checking for libcommon.a in ../common/x86_64
+configure:1352: checking for libcommon.a in ../common/linux-gnu
+configure:1352: checking for libcommon.a in ../common/lib
+configure:1352: checking for libcommon.a in ../common/x86_64-unknown-linux-gnu/lib
+configure:1352: checking for libcommon.a in ../common/x86_64-linux-gnu/lib
+configure:1352: checking for libcommon.a in ../common/x86_64/lib
+configure:1352: checking for libcommon.a in ../common/linux-gnu/lib
+configure:1352: checking for libcommon.a in ../../common
+configure:1352: checking for libcommon.a in ../../common/x86_64-unknown-linux-gnu
+configure:1352: checking for libcommon.a in ../../common/x86_64-linux-gnu
+configure:1352: checking for libcommon.a in ../../common/x86_64
+configure:1352: checking for libcommon.a in ../../common/linux-gnu
+configure:1352: checking for libcommon.a in ../../common/lib
+configure:1352: checking for libcommon.a in ../../common/x86_64-unknown-linux-gnu/lib
+configure:1352: checking for libcommon.a in ../../common/x86_64-linux-gnu/lib
+configure:1352: checking for libcommon.a in ../../common/x86_64/lib
+configure:1352: checking for libcommon.a in ../../common/linux-gnu/lib
+configure:1352: checking for libcommon.a in /usr/local/ems
+configure:1352: checking for libcommon.a in /usr/local/ems/x86_64-unknown-linux-gnu
+configure:1352: checking for libcommon.a in /usr/local/ems/x86_64-linux-gnu
+configure:1352: checking for libcommon.a in /usr/local/ems/x86_64
+configure:1352: checking for libcommon.a in /usr/local/ems/linux-gnu
+configure:1352: checking for libcommon.a in /usr/local/ems/lib
+configure:1352: checking for libcommon.a in /usr/local/ems/x86_64-unknown-linux-gnu/lib
+configure:1352: checking for libcommon.a in /usr/local/ems/x86_64-linux-gnu/lib
+configure:1352: checking for libcommon.a in /usr/local/ems/x86_64/lib
+configure:1352: checking for libcommon.a in /usr/local/ems/linux-gnu/lib
+configure:1352: checking for libcommon.a in /usr/local/ems/lib
+configure:1352: checking for libcommon.a in /usr/local/ems/lib/x86_64-unknown-linux-gnu
+configure:1352: checking for libcommon.a in /usr/local/ems/lib/x86_64-linux-gnu
+configure:1352: checking for libcommon.a in /usr/local/ems/lib/x86_64
+configure:1352: checking for libcommon.a in /usr/local/ems/lib/linux-gnu
+configure:1352: checking for libcommon.a in /usr/local/ems/lib/lib
+configure:1352: checking for libcommon.a in /usr/local/ems/lib/x86_64-unknown-linux-gnu/lib
+configure:1352: checking for libcommon.a in /usr/local/ems/lib/x86_64-linux-gnu/lib
+configure:1352: checking for libcommon.a in /usr/local/ems/lib/x86_64/lib
+configure:1352: checking for libcommon.a in /usr/local/ems/lib/linux-gnu/lib

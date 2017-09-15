@@ -1,0 +1,25 @@
+#! /bin/sh
+#\
+exec emssh $0 $*
+
+if [info exists env(EMSTCL_HOME)] {
+  set xh_library $env(EMSTCL_HOME)/xh
+  set common_library $env(EMSTCL_HOME)/common
+} else {
+  set xh_library /usr/local/ems/lib/xh
+  set common_library /usr/local/ems/lib/common
+}
+lappend auto_path /usr/users/wuestner/ems/scripts/exp_status
+
+init_globals
+init_setup
+
+start_beam_loop
+
+start_exp_loop
+
+start_output_loop
+
+set xcv 0
+
+vwait xcv

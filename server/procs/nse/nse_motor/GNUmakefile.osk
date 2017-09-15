@@ -1,0 +1,21 @@
+CONF = ../../../CONF
+COMMON = ../../../../COMMON
+
+include $(COMMON)/rules.make
+
+cfiles  = M_E362.r encoder.r M_function.r \
+         M_E362.r DIO_E217.r
+
+all: lib.l
+
+lib.l: $(cfiles)
+	merge $^ >-lib.l
+
+#############################################################################
+
+$(cfiles): errorcodes.h modultypes.h ../../../LOWLEVEL/VME/vme.h \
+           ../../../OBJECTS/VAR/variables.h $(CONF)/sconf.h \
+           $(COMMON)/debug.h M_E362.h
+
+
+

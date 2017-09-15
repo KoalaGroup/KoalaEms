@@ -1,0 +1,15 @@
+D/bsd////
+D/linux////
+D/osf////
+/DLT.doc/1.1/Tue May  3 09:11:34 2011//
+/Makefile.in/1.5/Tue May  3 09:11:34 2011//
+/ULTRIUM.doc/1.1/Tue May  3 09:11:34 2011//
+/scsi_decode.c/1.4/Tue May  3 09:11:34 2011//
+/scsi_interpret_error.c/1.10/Tue May  3 09:11:34 2011//
+/scsi_status_DLT.c/1.5/Tue May  3 09:11:34 2011//
+/scsi_status_EXABYTE.c/1.4/Tue May  3 09:11:34 2011//
+/scsi_status_ULTRIUM.c/1.5/Tue May  3 09:11:34 2011//
+/scsi_status_UNKNOWN.c/1.5/Tue May  3 09:11:34 2011//
+/scsicompat.c/1.13/Tue May  3 09:11:34 2011//
+/scsicompat.h/1.4/Tue May  3 09:11:34 2011//
+/timeouts/1.2/Tue May  3 09:11:35 2011//

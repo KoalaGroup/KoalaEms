@@ -1,0 +1,85 @@
+/* config.h.in.  Generated automatically from configure.in by autoheader.  */
+
+#ifndef _config_h_
+#define _config_h_
+
+#undef HAVE_CONFIG_H
+
+/* Define as the return type of signal handlers (int or void).  */
+#undef RETSIGTYPE
+
+/* Define if you have the ANSI C header files.  */
+#undef STDC_HEADERS
+
+/* Define if you can safely include both <sys/time.h> and <time.h>.  */
+#undef TIME_WITH_SYS_TIME
+
+/* Gibt es <sys/cdefs.h>? */
+#undef HAVE_SYS_CDEFS_H
+
+/* Gibt es <sys/select.h>? */
+#undef HAVE_SYS_SELECT_H
+
+/* Define if you have the gettimeofday function.  */
+#undef HAVE_GETTIMEOFDAY
+
+/* Define if you have the select function.  */
+#undef HAVE_SELECT
+
+/* Define if you have the socket function.  */
+#undef HAVE_SOCKET
+
+/* Define if you have the strerror function.  */
+#undef HAVE_STRERROR
+
+/* Define if you have the <sys/time.h> header file.  */
+#undef HAVE_SYS_TIME_H
+
+/* Define if you have the <unistd.h> header file.  */
+#undef HAVE_UNISTD_H
+
+/* Define if you have the bzero function. */
+#undef HAVE_BZERO
+
+/* Define if you have the memset function. */
+#undef HAVE_MEMSET
+
+#if !defined(__cplusplus) && !defined(c_plusplus)
+/* Define to empty if the keyword does not work.  */
+#undef const
+#endif /* cplusplus */
+
+/* Define if you dont have a valid declaration for gettimeofday() */
+#undef NEED_GETTIMEOFDAYDEF
+
+/* Define if you dont have a valid declaration for gethostbyname() */
+#undef NEED_GETHOSTBYNAMEDEF
+
+/* Define if you dont have a valid declaration for gethostname() */
+#undef NEED_GETHOSTNAMEDEF
+
+/* Define if you dont have a valid declaration for ntohl() and htons() */
+#undef NEED_NTOHLDEF
+
+/* Define if you dont have a valid declaration for bzero() */
+#undef NEED_BZERODEF
+
+/* Define if you dont have a valid declaration for memset() */
+#undef NEED_MEMSETDEF
+
+/* Define if you dont have a valid declaration for select() */
+#undef NEED_SELECTDEF
+
+/* Define if you dont have a valid declaration for setsockopt() */
+#undef NEED_SETSOCKOPTDEF
+
+/* Define if you dont have a valid declaration for in_addr_t */
+#undef NEED_IN_ADDR_TDEF
+
+/* Define if you dont have a valid declaration for inet_addr() */
+#undef NEED_INET_ADDRDEF
+
+/* sys_errlist not defined in stdio.h? */
+#undef NEED_SYS_ERRLIST
+
+#endif /* _config_h_ */

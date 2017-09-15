@@ -1,0 +1,6 @@
+set host ikpp02-zdf
+set port 4096
+
+set targets {p34 p23 p19 p20 p16 p27 p18 p28 p33 p36 p21b}
+
+set trigger {1}

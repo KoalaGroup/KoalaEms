@@ -1,0 +1,112 @@
+*******************************************************************************
+*                                                                             *
+* fbsingle_a.a                                                                *
+*                                                                             *
+* OS9                                                                         *
+*                                                                             *
+* created: 12.10.94                                                           *
+* last changed: 25.10.94                                                      *
+*                                                                             *
+* PW                                                                          *
+*                                                                             *
+*******************************************************************************
+
+  use "chi_map.d"
+  psect fbsingle_a,0,0,0,0,0
+
+*******************************************************************************
+
+* int FRC(int pa, int sa)
+FRC:
+  move.l  (P_BASE_A,a6),a0
+  move.l  d0,CGEO(a0)
+FRC_p:
+  move.l  d1,SECAD(a0)
+  move.l  RNDM(a0),d0
+  tst.b   DISCON(a0)
+  rts
+
+*******************************************************************************
+
+* int FRD(int pa, int sa)
+FRD:
+  move.l  (P_BASE_A,a6),a0
+  move.l  d0,DGEO(a0)
+FRD_p:
+  move.l  d1,SECAD(a0)
+  move.l  RNDM(a0),d0
+  tst.b   DISCON(a0)
+  rts
+
+*******************************************************************************
+
+* void FWC(int pa, int sa, int data)
+FWC:
+  move.l  (P_BASE_A,a6),a0
+  move.l  d0,CGEO(a0)
+FWC_p:
+  move.l  d1,SECAD(a0)
+  move.l  4(a7),RNDM(a0)
+  tst.b   DISCON(a0)
+  rts
+
+*******************************************************************************
+
+* void FWD(int pa, int sa, int data)
+FWD:
+  move.l  (P_BASE_A,a6),a0
+  move.l  d0,DGEO(a0)
+FWD_p:
+  move.l  d1,SECAD(a0)
+  move.l  4(a7),RNDM(a0)
+  tst.b   DISCON(a0)
+  rts
+
+*******************************************************************************
+
+* int FRCM(int ba)
+FRCM:
+  move.l  (P_BASE_A,a6),a0
+  move.l  d0,CBREG(a0)
+FRCM_p:
+  move.l  RNDM(a0),d0
+  tst.b   DISCON(a0)
+  rts
+
+*******************************************************************************
+
+* int FRDM(int ba)
+FRDM:
+  move.l  (P_BASE_A,a6),a0
+  move.l  d0,DBREG(a0)
+FRDM_p:
+  move.l  RNDM(a0),d0
+  tst.b   DISCON(a0)
+  rts
+
+*******************************************************************************
+
+* void FWCM(int ba, int data)
+FWCM:
+  move.l  (P_BASE_A,a6),a0
+  move.l  d0,CBREG(a0)
+FWCM_p:
+  move.l  d1,RNDM(a0)
+  tst.b   DISCON(a0)
+  rts
+
+*******************************************************************************
+
+* void FWDM(int ba, int data)
+FWDM:
+  move.l  (P_BASE_A,a6),a0
+  move.l  d0,DBREG(a0)
+FWDM_p:
+  move.l  d1,RNDM(a0)
+  tst.b   DISCON(a0)
+  rts
+
+  ends
+
+*******************************************************************************
+*******************************************************************************

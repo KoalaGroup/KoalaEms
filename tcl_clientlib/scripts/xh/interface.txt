@@ -1,0 +1,20 @@
+receive list: key name
+switch $key {
+  "name" {
+    arrayname=$name
+    next lines: time val
+  }
+  "master" {
+    fileevent $channel readable "masterdata $channel"
+    next lines: list of lists
+      {key ...} {key ...} ...
+    switch $key {
+      "name" {
+        list is: {"name" array name}
+      }
+      "value" {
+        list is: {"value" array time value}
+      }
+    }
+  }
+}

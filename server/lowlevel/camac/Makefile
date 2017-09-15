@@ -1,0 +1,42 @@
+# Generated automatically from Makefile.in by configure.
+# lowlevel/camac/Makefile.in
+# $ZEL: Makefile.in,v 1.2 2002/11/06 15:36:35 wuestner Exp $
+
+CONF = ../../conf
+
+srcdir = .
+
+include $(CONF)/rules.make
+include $(CONF)/config.make
+
+cfiles = camac.c
+ofiles = $(cfiles:.c=.o)
+depfiles = $(cfiles)
+
+subdirs := $(camac)
+
+CAMACTYPES = $(shell echo $(camac)|tr '[:lower:]' '[:upper:]')
+CAMACFLAGS=$(foreach typ,$(CAMACTYPES),-DCAMAC_$(typ) )
+CFLAGS += $(CAMACFLAGS)
+export CAMACFLAGS
+
+lib = ../libll.a
+
+all: $(lib)
+
+$(lib): $(lib)($(ofiles)) $(subdirs)
+	$(RANLIB) $@
+
+$(subdirs): FORCE
+	$(MAKE) -C $@ all
+
+define MAKEIT
+	$(MAKE) -C $(dir) depend
+
+endef
+MAKEDEP = $(foreach dir,$(camac),$(MAKEIT))
+
+depend: xdepend
+	$(MAKEDEP)
+
+.PHONY: FORCE depend

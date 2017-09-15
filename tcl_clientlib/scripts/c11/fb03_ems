@@ -1,0 +1,34 @@
+#####################################################################################
+# fastbus ikpf03
+puts "open f03"
+rename [ems_open ikpf03 fastbus] f03
+
+puts "init f03"
+f03 modullist create $FB03_ML
+rename [f03 is create 1 2] is2
+is2 memberlist create "$FB03_IS"
+f03 var create  2  1
+f03 var create  4  1
+f03 var create 12 26
+f03 var create 14 26
+is2 command1 fb_lc_create_pat  $LC_TDC_1875A 2
+is2 command1 fb_lc_create_pat  $LC_TDC_1879  4
+is2 command1 fb_lc_create_list $LC_TDC_1875A 12
+is2 command1 fb_lc_create_list $LC_TDC_1879  14
+format {%08x} [f03 var read 2]
+format {%08x} [f03 var read 4]
+eval "is2 command1 fb_lc1875a_setup $setup_1875A"
+eval "is2 command1 fb_lc1879_setup $setup_1879"
+
+f03 command1 ResetTrigger 3
+
+#is2 readoutlist create 1 1 {fb_lc1875a_readout.2 {2 12} fb_lc1879_readout.2 {4 14 1}}
+#is2 readoutlist create 1 1 {fb_lc1879_readout.2 {4 14 1}}
+is2 readoutlist create 1 1 {Timestamp {}}
+
+f03 trigger create GSI_Trig 3 0 50 25
+
+puts "start f03"
+f03 readout start
+
+#####################################################################################

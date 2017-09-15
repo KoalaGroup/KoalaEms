@@ -1,0 +1,17 @@
+CONF = ../../CONF
+COMMON = ../../../COMMON
+
+include $(CONF)/rules.make
+
+cfiles = VMEpoll.r
+lib = lib.l
+
+all: $(lib)
+
+$(lib): $(cfiles)
+	merge $^ >-$@
+
+#############################################
+
+$(cfiles): errorcodes.h
+VMEpoll.r: trigger.stamp

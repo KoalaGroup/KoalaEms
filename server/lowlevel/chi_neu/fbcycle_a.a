@@ -1,0 +1,159 @@
+*******************************************************************************
+*                                                                             *
+* fbcycle_a.a                                                                 *
+*                                                                             *
+* OS9                                                                         *
+*                                                                             *
+* created: 21.10.94                                                           *
+* last changed: 24.10.94                                                      *
+* 18. 1.95  FCPWSAss (MaWo)                                                   *
+*                                                                             *
+* PW                                                                          *
+*                                                                             *
+*******************************************************************************
+
+  use "chi_map.d"
+  psect fbcycle_a,0,0,0,0,0
+
+*******************************************************************************
+* void FCPD(int pa)           primary address cycle; data
+FCPD:
+  move.l  (P_BASE_A,a6),a0
+  move.l  d0,DGEO(a0)
+FCPD_p:
+  rts
+
+*******************************************************************************
+* void FCPC(int pa)           primary address cycle; data
+FCPC:
+  move.l  (P_BASE_A,a6),a0
+  move.l  d0,CGEO(a0)
+FCPC_p:
+  rts
+
+*******************************************************************************
+* int FCRWss()                read word; res= ss; word geht verloren
+FCRWss:
+  move.l  (P_BASE_A,a6),a0
+  tst.l   RNDM(a0)
+  move.l  #F_BASE,a0
+  clr.l   d0
+  move.b  SSREG(a0),d0
+  rts
+
+*******************************************************************************
+* int FCRWS(int sa)           read word on sec. address;
+FCRWS:
+  move.l  (P_BASE_A,a6),a0
+  move.l  d0,SECAD(a0)
+  move.l  RNDM(a0),d0
+  rts
+
+*******************************************************************************
+* int FCWWss(int dat)         write word; res= ss
+FCWWss:
+  move.l  (P_BASE_A,a6),a0
+  move.l  d0,RNDM(a0)
+  move.l  #F_BASE,a0
+  clr.l   d0
+  move.b  SSREG(a0),d0
+  rts
+
+*******************************************************************************
+* int FCWWS(int sa, int dat)  write word on sec. address; res= ss
+FCWWS:
+  move.l  (P_BASE_A,a6),a0
+  move.l  d0,SECAD(a0)
+  move.l  d1,RNDM(a0)
+  move.l  #F_BASE,a0
+  clr.l   d0
+  move.b  SSREG(a0),d0
+  rts
+
+*******************************************************************************
+* int FCWSAss(int sa)         write secondary address; res= ss
+FCWSAss:
+  move.l  (P_BASE_A,a6),a0
+  move.l  d0,SECAD(a0)
+  move.l  #F_BASE,a0
+  clr.l   d0
+  move.b  SSREG(a0),d0
+  rts
+
+*******************************************************************************
+* int FCPWSAss(int pa, int sa)  primary addr. cycle & write secondary addr.; res= ss
+FCPWSAss:
+  movem.l a1,-(a7)
+  move.l  (P_BASE_A,a6),a0
+  move.l  #F_BASE,a1
+  move.l  d0,CGEO(a0)
+  move.l  d1,SECAD(a0)
+  clr.l   d0
+  move.b  SSREG(a1),d0
+  tst.b   DISCON(a0)
+  movem.l (a7)+,a1
+  rts
+
+*******************************************************************************
+*******************************************************************************
+
+* int FCRB(int* dest, int count)   read block; res= count
+FCRB:
+
+  movem.l d2/a1-a2,-(a7)
+
+  move.l  #F_BASE,a1
+  move.l  #REG_BASE,a2
+  move.l  (P_BASE_A,a6),a0
+
+  move.l  d1,LDWC(a1)             count
+  sub.l   #M_BASE,d0              buffer
+  lsr.l   #2,d0
+  move.l  d0,LDAC(a1)
+  move.w  #$ff,SSENABLE(a1)
+  tst.b   BHR(a0)
+FCRB_poll
+  btst.b  #3,POLLREG0(a2)
+  beq.s   FCRB_ok
+  bra.s   FCRB_poll
+FCRB_ok
+  clr.w   SSENABLE(a1)
+  move.l  RDWC(a1),d0
+  andi.l  #$ffffff,d0
+
+  movem.l (a7)+,d2/a1-a2
+  rts
+
+*******************************************************************************
+
+* int FCWB(int* source, int count) write block; res=count
+FCWB:
+
+  movem.l d2/a1-a2,-(a7)
+  move.l  (P_BASE_A,a6),a0
+  move.l  #F_BASE,a1
+  move.l  #REG_BASE,a2
+
+  addq.l  #1,d1                   count, +1 for write
+  move.l  d1,LDWC(a1)
+  sub.l   #M_BASE,d0              buffer
+  lsr.l   #2,d0
+  move.l  d0,LDAC(a1)
+  move.w  #$ff,SSENABLE(a1)
+  tst.b   BHW(a0)
+FCWB_poll
+  btst.b  #3,POLLREG0(a2)
+  beq.s   FCWB_ok
+  bra.s   FCWB_poll
+FCWB_ok
+  clr.w   SSENABLE(a1)
+  move.l  RDWC(a1),d0
+  andi.l  #$ffffff,d0
+  subi.l  #1,d0
+  movem.l (a7)+,d2/a1-a2
+  rts
+
+  ends
+
+*******************************************************************************
+*******************************************************************************

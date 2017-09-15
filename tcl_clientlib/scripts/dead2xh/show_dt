@@ -1,0 +1,143 @@
+#! /bin/sh
+#\
+exec emssh $0 $*
+
+# $Id: show_dt,v 1.1 2004/06/16 18:04:05 wuestner Exp $
+# copyright 2001
+#   Peter Wuestner; Zentrallabor fuer Elektronik; Forschungszentrum Juelich
+#
+
+# Vorbereitung fuer 'autoload' von Prozeduren
+set EMSTCL_HOME /usr/local/ems/lib
+if [info exists env(EMSTCL_HOME)] {
+  set EMSTCL_HOME $env(EMSTCL_HOME)
+}
+set dead_library $env(EMSTCL_HOME)/dead2xh
+set common_library $env(EMSTCL_HOME)/common
+lappend auto_path $dead_library ;# $common_library
+set saved_auto_path $auto_path
+
+proc init {} {
+  global host port vedname
+  global master_name slave_names
+  global master slaves
+  global last_event
+
+  ems_connect $host $port
+
+  set master [ems_open $master_name]
+  set last_event($master) -1
+  puts -nonewline [format {%8s} $master_name]
+  set slaves {}
+  foreach slave $slave_names {
+    set ved [ems_open $slave]
+    lappend slaves $ved
+    set last_event($ved) -1
+    puts -nonewline [format {%10s} $slave]
+  }
+  puts {}
+}
+
+proc send_names_to_xh {} {
+    global xh_path
+    global master_name slave_names
+
+    set message {}
+    lappend message "name $master_name \{$master_name\}"
+    
+    foreach i $slave_names {
+        lappend message "name $i \{$i\}"
+    }
+
+    if [catch {
+        puts $message
+        puts $xh_path $message
+        flush $xh_path
+    } mist] {
+        puts $mist
+    }
+    return 0
+}
+
+proc send_to_net {name jetzt val} {
+  global xh_path
+
+  set message "\{value $name $jetzt $val\}"
+  if [catch {
+        puts $xh_path $message
+        flush $xh_path
+      } mist] {
+    puts $mist
+  }
+}
+
+proc init_xh {} {
+    global xh_port xh_host
+    global master_name slave_names
+    global xh_path
+
+    puts "connect to xh: $xh_host $xh_port ..."
+    if [catch {socket $xh_host $xh_port} mist] {
+        puts $mist
+        return -1
+    }
+    set xh_path $mist
+    if [catch {
+        puts $xh_path "master deadtime"
+        flush $xh_path
+        puts "ok."
+    } mist ] {
+        puts $mist
+        return -1
+    }
+    if {[send_names_to_xh]} {return -1}
+    return 0
+}
+
+proc loop {} {
+  global delay
+  global master slaves
+  set jetzt [clock seconds]
+  set dt [get_dt $master 1]
+  send_to_net [$master name] $jetzt $dt
+  foreach slave $slaves {
+    set dt [get_dt $slave 0]
+    send_to_net [$slave name] $jetzt $dt
+  }
+  after $delay loop
+}
+
+proc bgerror {args} {
+  puts "bgerror: $args"
+}
+
+# set master_name [lindex $argv 0]
+# set slave_names {}
+# for {set i 1} {$i<$argc} {incr i} {
+#   lappend slave_names [lindex $argv $i]
+# }
+# set master_name e06
+# set slave_names {e02 e03 e04 e07}
+# 
+# set delay 10000
+# set host ikpe1103
+
+#set master_name p21b
+#set slave_names {p16 p19 p20 p23 p27 p33 p34 p36}
+
+set master_name t01
+set slave_names {t02 t03 t04 t05 t06}
+
+set delay 10000
+set host ikptof07
+set port 4096
+set xh_port 1234
+set xh_host localhost
+
+#source get_dt.tcl
+
+init
+if {[init_xh]<0} exit
+loop
+set xcv 0
+vwait xcv

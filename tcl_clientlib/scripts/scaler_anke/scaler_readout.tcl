@@ -1,0 +1,266 @@
+proc init_readscaler_loop {} {
+  global ev_valid evcounter evtime evrate readout_repeat
+  global scaler_valid scaler_valid_2 scalerwords scalertime scalertdiff
+  global ro_status
+
+  set ev_valid 0
+  set scaler_valid 0
+  set scaler_valid_2 0
+  set ro_status(status) unknown
+}
+
+proc got_evrate {args} {
+  global ev_valid evcounter evtime evrate global_xh_path global_setup
+  global ro_status evrate_round global_running
+
+  set status [lindex $args 0]
+  if {"$status"!="$ro_status(status)"} {
+    if {"$ro_status(status)"=="running"} auto_print_scaler
+    set ro_status(status) $status
+  }
+  set ro_status(count) [lindex $args 1]
+  set time [lindex $args 2]
+  if {$ev_valid} {
+    set evdiff [expr $ro_status(count)-$evcounter]
+    if {$evdiff>=0} {
+      set tdiff [expr $time-$evtime]
+      set evrate [expr $evdiff/$tdiff]
+      set evrate_round [format %6.1f $evrate]
+      #puts "\nTime: [clock seconds]"
+      #puts "readout: $status; $evrate/s"
+      if {$global_running(graphical_display)} {
+        lappend message "value evrate [doubletime] $evrate"
+        if [catch {
+              puts $global_xh_path $message
+              flush $global_xh_path
+            } mist ] {
+          output "T1 $mist"
+          set global_running(graphical_display) 0
+        }
+      }
+    }
+  } else {
+#    puts "first loop for eventrate"
+    if {$global_running(graphical_display)} {
+      if [catch {
+            puts $global_xh_path "\{name evrate Eventrate\}"
+            flush $global_xh_path
+          } mist ] {
+        output "T2 $mist"
+        set global_running(graphical_display) 0
+      }
+    }
+    set ev_valid 1
+  }
+  set evcounter $ro_status(count)
+  set evtime $time
+}
+
+proc err_evrate {conf} {
+  puts [$conf print]
+  $conf delete
+}
+
+proc err_scalerate {conf} {
+  puts [$conf print]
+  $conf delete
+}
+
+proc do_timestamp {liste} {
+  upvar $liste list
+  global scaler_valid scalertime scalertdiff
+  set day [lindex $list 0]
+  set sec [lindex $list 1]
+  set hund [lindex $list 2]
+  set t1 [expr $sec+$hund/100.0]
+  if {$scaler_valid} {
+    set scalertdiff [expr $t1-$scalertime]
+  }
+  set scalertime $t1
+  set list [lrange $list 3 end]
+}
+
+proc do_timestamp_2 {liste} {
+  upvar $liste list
+  global scaler_valid_2 scalertime_2 scalertdiff_2
+  set day [lindex $list 0]
+  set sec [lindex $list 1]
+  set hund [lindex $list 2]
+  set t1 [expr $sec+$hund/100.0]
+  if {$scaler_valid_2} {
+    set scalertdiff_2 [expr $t1-$scalertime_2]
+  }
+  set scalertime_2 $t1
+  set list [lrange $list 3 end]
+}
+
+proc do_scaler_2551 {args} {
+  upvar $args list
+  global scaler_num scaler_words
+
+  set num [expr 2*[lindex $list 0]]
+  set list [lrange $list 1 end]
+  for {set i 0} {$i<$num} {incr i 2} {
+    set scaler_words($scaler_num) [expr [lindex $list $i]*4294967296.0\
+        +[lindex $list [expr $i+1]]]
+    incr scaler_num
+  }
+  set list [lrange $list [expr $num] end]
+}
+
+proc do_scaler_4434 {args} {
+  upvar $args list
+  global scaler_num scaler_words
+
+  set num [expr 2*[lindex $list 0]]
+  set list [lrange $list 1 end]
+  for {set i 0} {$i<$num} {incr i 2} {
+    set scaler_words($scaler_num) [expr [lindex $list $i]*4294967296.0\
+        +[lindex $list [expr $i+1]]]
+    incr scaler_num
+  }
+  set list [lrange $list [expr $num] end]
+}
+
+proc do_scaler_4434_c11 {args} {
+  upvar $args list
+  global scaler_num scaler_cont scaler_rate_round scaler_max
+  global scaler_words
+  set num [lindex $list 0]
+  set list [lrange $list 1 end]
+  for {set i 0} {$i<$num} {incr i} {
+#    set scaler_cont($scaler_num) [expr [lindex $list $i] & 0xffffff]
+    set scaler_words($scaler_num) [expr [lindex $list $i] & 0xffffff]
+#    set scaler_rate_round($scaler_num) 0
+#    set scaler_max($scaler_num) 0
+    incr scaler_num
+  }
+  #set list [lrange $list [expr $num] end]
+}
+
+proc got_scalerate {args} {
+  global global_setup global_running scalertime very_old_scalertime
+  global scaler_num scaler_words old_scaler_words very_old_scaler_words
+  global scaler_valid scalertdiff global_xh_path global_setup_names
+  global scaler_cont scaler_rate scaler_rate_round scaler_max
+  global deadtime_round deadtime_ms_round is_display_time
+
+  do_timestamp args
+  set scaler_num 0
+  do_scaler_4434 args
+
+  if {$scaler_valid} {
+    set jetzt [doubletime]
+    for {set i 0} {$i<$scaler_num} {incr i} {
+      set scaler_rate($i) [expr ($scaler_words($i)-$old_scaler_words($i))\
+        /$scalertdiff]
+    }
+    if {$global_setup(view_deadtime)} {
+      set rate_triggered $scaler_rate($global_setup(triggered_channel))
+      set rate_measured $scaler_rate($global_setup(measured_channel))
+      if {($rate_measured>0) &&($rate_triggered>=$rate_measured)} {
+        set deadtime [expr {1.0-$rate_measured/$rate_triggered}]
+      } else {
+        set deadtime 0
+      }
+    }
+    if {$global_running(graphical_display)} {
+      for {set i 0} {$i<$scaler_num} {incr i} {
+        if {$scaler_rate($i)>=0} {
+          lappend message "value scaler_$i $jetzt $scaler_rate($i)"
+        }
+      }
+      if {$global_setup(view_deadtime)} {
+        lappend message "value deadtime $jetzt $deadtime"
+      }
+      if [catch {
+            puts $global_xh_path $message
+            flush $global_xh_path
+          } mist] {
+        output "T5 $mist"
+        set global_running(graphical_display) 0
+      }
+    }
+    if {$global_running(numerical_display) && $is_display_time} {
+      for {set i 0} {$i<$scaler_num} {incr i} {
+        set scaler_cont($i) [lindex [split $scaler_words($i) .] 0]
+      }
+      set tdiff [expr $scalertime-$very_old_scalertime]
+      for {set i 0} {$i<$scaler_num} {incr i} {
+        set rate($i) [expr ($scaler_words($i)-$very_old_scaler_words($i))/$tdiff]
+        if {$rate($i)>=0} {
+          set scaler_rate_round($i) [format %7.1f $rate($i)]
+          if {$scaler_rate_round($i)>$scaler_max($i)} {
+            set scaler_max($i) $scaler_rate_round($i)
+          }
+        }
+      }
+      if {$global_setup(view_deadtime)} {
+        set diff_triggered [expr\
+            {$scaler_words($global_setup(triggered_channel))\
+            -$very_old_scaler_words($global_setup(triggered_channel))}]
+        set diff_measured [expr\
+            {$scaler_words($global_setup(measured_channel))\
+            -$very_old_scaler_words($global_setup(measured_channel))}]
+        if {($diff_measured>0) && ($diff_triggered>=$diff_measured)} {
+          set deadtime [expr {(1.0-$diff_measured/$diff_triggered)*100.0}]
+          set deadtime_ms [expr {(1/$rate($global_setup(measured_channel))-\
+              1/$rate($global_setup(triggered_channel)))*1000.0}]
+          set deadtime_round [format %2.0f $deadtime]
+          set deadtime_ms_round [format %5.3f $deadtime_ms]
+        } else {
+          set deadtime_round {?}
+          set deadtime_ms_round {?}
+        }
+      }
+      for {set i 0} {$i<$scaler_num} {incr i} {
+        set very_old_scaler_words($i) $scaler_words($i)
+      }
+      set very_old_scalertime $scalertime
+      set is_display_time 0
+      after [expr {$global_setup(display_repeat)*1000}] {set is_display_time 1}
+    }
+  } else {
+#    puts "first loop for scalerate"
+    if {$global_running(graphical_display)} {
+      for {set i 0} {$i<$scaler_num} {incr i} {
+        set scaler_max($i) 0
+        if [info exists global_setup_names($i)] {
+          lappend message "name scaler_$i \{$global_setup_names($i)\}"
+        } else {
+          lappend message "name scaler_$i \{scaler_$i\}"
+        }
+      }
+      if {$global_setup(view_deadtime)} {
+        lappend message "name deadtime deadtime"
+      }
+      if [catch {
+            puts $global_xh_path $message
+            flush $global_xh_path
+          } mist] {
+        output "T6 $mist"
+        set global_running(graphical_display) 0
+      }
+    }
+    for {set i 0} {$i<$scaler_num} {incr i} {
+      set very_old_scaler_words($i) $scaler_words($i)
+    }
+    set very_old_scalertime $scalertime
+    set scaler_valid 1
+  }
+  for {set i 0} {$i<$scaler_num} {incr i} {
+    set old_scaler_words($i) $scaler_words($i)
+  }
+}
+
+proc readscaler_loop {} {
+  global global_setup global_iss global_openveds readout_repeat
+  global evrate_proc scaler_proc scaler_proc2 global_after
+
+  eval $evrate_proc
+  foreach is $global_setup(iss) {
+    eval $scaler_proc($is)
+#    eval $scaler_proc2($is)
+  }
+  set global_after(id) [after $global_setup(readout_repeat) readscaler_loop]
+}

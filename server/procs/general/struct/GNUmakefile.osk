@@ -1,0 +1,18 @@
+CONF = ../../../CONF
+COMMON = ../../../../COMMON
+
+include $(CONF)/rules.make
+
+cfiles = IfThenElse.r Loop.r VarLoop.r vonundzuvar.r lenvor.r
+lib = lib.l
+
+all: $(lib)
+
+$(lib): $(cfiles)
+	merge $^ >-lib.l
+
+#############################################################################
+
+IfThenElse.r: sconf.h debug.h ../../../OBJECTS/VAR/variables.h errorcodes.h
+Loop.r: sconf.h debug.h errorcodes.h
+VarLoop.r: sconf.h debug.h ../../../OBJECTS/VAR/variables.h errorcodes.h

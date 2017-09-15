@@ -1,0 +1,71 @@
+#####################################################################################
+source aux_ems
+source ped_ems
+source ok_ems
+
+#####################################################################################
+source drams_ems
+#source scaler_ems
+#source fb03_ems
+#source fb04_ems
+
+#####################################################################################
+# ser1 (fastbus)
+
+puts "open v05"
+rename [ems_open ikpv05] v05
+
+puts "init v05"
+#v05 datain  create 1 ringbuffer driver_mapped /vic/2 1 0 1
+v05 datain  create 2 ringbuffer driver_mapped /vic/3 1 0 1
+v05 dataout create 1 ringbuffer 0x80000 0 modul mist
+set ans_v05 [v05 dataout upload 1]
+set ad_v05 [lindex $ans_v05 5]
+
+puts "start v05"
+v05 readout start
+
+#####################################################################################
+# ser2 (camac)
+
+#puts "open v06"
+#rename [ems_open ikpv06] v06
+
+#puts "init v06"
+#v06 datain  create 1 ringbuffer driver_mapped /vic/2 1 0 1
+#v06 datain  create 2 ringbuffer driver_mapped /vic/4 1 0 1
+#v06 dataout create 1 ringbuffer 0x80000 0 modul mist
+#set ans_v06 [v06 dataout upload 1]
+#set ad_v06 [lindex $ans_v06 5]
+
+#puts "start v06"
+#v06 readout start
+
+#####################################################################################
+# eventbuilder
+
+puts "open v15"
+rename [ems_open ikpv15] v15
+
+puts "init v15"
+v15 datain  create 1 ringbuffer driver_mapped /vme/0 0 $ad_v05 0
+#v15 datain  create 2 ringbuffer driver_mapped /vme/8 0 $ad_v06 0
+v15 dataout create 1 ringbuffer 0x80000 0 null
+#v15 dataout create 2 ringbuffer 0x80000 -1 socket zelof1 8192
+#v15 dataout create 1 ringbuffer 0x80000 0 tape /xa0
+
+puts "start v15"
+v15 readout start
+
+#####################################################################################
+# pc
+
+#puts "open z27"
+#rename [ems_open z27] z27
+
+#puts "init z27"
+#z27 command1 MaxevCount 100000000
+#z27 trigger create zel '/tmp/sync0' 1 100 0 10 20
+
+#puts "start z27"
+#z27 readout start

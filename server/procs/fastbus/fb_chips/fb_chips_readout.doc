@@ -1,0 +1,375 @@
+/******************************************************************************
+*                                                                             *
+*  fb_chips_readout.doc                                                       *
+*                                                                             *
+*  Version:  MultiBlock ReadOut   (Do Commands / Programminvocation)          *
+*                                                                             *
+*            variable Trigger     (CHI Pulse / extern / GSI Triggermodule)    *
+*                                                                             *
+*            without SuperHeader  (Hardware Datareduction --> Jumper)         *
+*                                                                             *
+*  OS9                                                                        *
+*                                                                             *
+*  95/01/17         Leege  /  FZR                                             *
+*                                                                             *
+******************************************************************************/
+ 
+  Simple Test ReadOut  
+  =================== 
+ 
+Aufruf:
+-------
+
+ FPSTRO (pa, sa, cycles, polling, csr0, start_sel)
+
+
+Parameter:
+----------
+
+p[0] : No. of parameters (== 6)
+p[1] : primary address
+p[2] : secondary address  (DSR#1)
+p[3] : No. of measuring cycles
+p[4] : bitcombination  for polling:  (CSR0 && polling) != 0 
+p[5] : value of CSR#0 to start measuring cycles
+p[6] : value of CSR#0 for cycling activate measure
+       == 0: only one output of CSR#0
+       != 0: output this CSR#0 for every measuring cycle
+
+outptr[0] : Error-Code / SS-code
+outptr[1] : total count of reading values (n * LIFO's)
+outptr[2] : value
+...
+ 
+
+
+/*****************************************************************************/
+
+/* MultiBlock Test Initialisation  ( --> act. PS-IS )
+   ==================================================
+
+ FPSTINI (pa_ml, gate, no_mod)
+
+p[0] : No. of parameters (== 3)
+p[1] : primary address MasterLink
+p[2] : gate generator/trigger: LW = 0     - CHIpulse / external generator --> CHIext
+                                  = 1,2,3 - GSI-Triggermodul (addr. base) --> software trigger 
+                               HW = 0     - no trigger numbers
+                                  > 0     - trigger numbers (GSI trigger)
+p[3] : No. of modules
+
+outptr[0] : error-code / SS-code
+
+  
+
+
+/*****************************************************************************/
+
+  MultiBlock Test Readout  
+  =======================
+
+Aufruf:
+-------
+ 
+ FPSMBRO (pa_ml, gate ,no_mod, no_subev)
+
+p[0] : No. of parameters (== 4)
+p[1] : primary address MasterLink
+p[2] : gate generator/trigger: LW = 0     - CHIpulse / external generator --> CHIext
+                                  = 1,2,3 - GSI-Triggermodul (addr. base) --> software trigger 
+                               HW = 0     - no trigger number
+                                  > 0     - trigger numbers (GSI trigger)
+p[3] : No. of modules
+p[4] : No. of subevents
+
+outptr[0] : Error-Code / SS code 
+outptr[1] : total count of reading values 
+outptr[2] : begin subeventblock 1
+...
+outptr[n] : end of subeventblocks
+ 
+
+Aufbau Subeventblocks:
+----------------------
+
+         31                         16 15                         0
+         -----------------------------------------------------------  Subevent
+word 0   |     Subevent Length  NSEWL =  N                         |  Header
+         -----------------------------------------------------------
+         |31     -    24|23-21|20 - 16|15  -  11|10      -        0|  Super
+         ...........................................................  Header
+word 1   |   User ID    |  0  |  GA   |    0    |        WC        |  
+         -----------------------------------------------------------
+         |31     -    24|23-21|20 - 16|15  -    10|9     -        0|  Modul
+         ...........................................................  Header
+word 2   |   User ID    |  0  |  GA   |  Ch-Co    |      E-No      |  
+         -----------------------------------------------------------
+         |31|30 - 26|25     -       16|15 |14 - 10|9      -       0|
+         ...........................................................
+word 3   | 0| Ch-No |     Data        |0/1|(Ch-No)|     Data       |  Data
+         ...........................................................  Block 
+word 4   | 0| Ch-No |     Data        | 0 | Ch-No |     Data       |
+         ...........................................................
+ ...
+
+word i   | 0| Ch-No |     Data        | 0 | Ch-No |     (Data)     |
+         -----------------------------------------------------------
+         |31     -    24|23-21|20 - 16|15  -  11|10      -        0|  Super
+         ...........................................................  Header
+word i+1 |   User ID    |  0  |  GA   |    0    |        WC        |  
+         -----------------------------------------------------------
+         |31     -    24|23-21|20 - 16|15  -    10|9      -       0|  Modul
+         ...........................................................  Header
+word i+2 |   User ID    |  0  |  GA   |   Ch-Co   |       E-No     |  
+         -----------------------------------------------------------
+         |31|30 - 26|25     -       16|15 |14 - 10|9      -       0|
+         ...........................................................
+word i+3 | 0| Ch-No |     Data        |0/1|(Ch-No)|      Data      |  Data
+         ...........................................................  Block
+word i+4 | 0| Ch-No |     Data        | 0 | Ch-No |      Data      |
+ 
+  ...
+         |                                                         |
+word N   | 0| Ch-No |     Data        | 0 | Ch-No |      (Data)    |
+         -----------------------------------------------------------
+
+
+
+NSEWL    Subevent Word Lenght
+GA       Geographical modul Address
+WC       Word Counter (without SuperHeader)
+User ID  User programmable 8 bits (1 byte)
+E-No     Event-No in this modul
+Ch-Co    No of valid channels in this modul
+Ch-No    Channel Number in this modul
+ 
+
+
+
+Modul Setup fuer MultiBlock ReadOut:
+------------------------------------
+
+                        Pedestal / Lower Threshold / Upper Threshold 
+
+                               enable           disable
+
+MasterLink  -->  CSR#0:        0x2b44            0x844
+
+SimpleLink  -->  CSR#0:        0x3b44           0x1844 
+
+EndLink     -->  CSR#0:        0x3344           0x1044
+  
+
+/*****************************************************************************/
+
+  MultiBlock  Readout  
+  =================== 
+
+Aufruf:
+-------
+ 
+ FBMB_Readout (pa_ml, no_mod)
+
+
+Parameter:
+----------
+
+p[0] : No. of parameters (== 2)
+p[1] : primary address MasterLink  
+p[2] : No. of modules   
+
+
+outptr[0] : begin subeventblock
+...
+outptr[n] : end of subeventblock
+ 
+
+Aufbau Subeventblock (SubeventBody):
+------------------------------------
+
+
+         -----------------------------------------------------------
+         |31     -    24|23-21|20 - 16|15  -  11|10      -        0|  Super
+         ...........................................................  Header
+word 1   |   User ID    |  0  |  GA   |    0    |        WC        |  
+         -----------------------------------------------------------
+         |31     -    24|23-21|20 - 16|15  -    10|9     -        0|  Modul
+         ...........................................................  Header
+word 2   |   User ID    |  0  |  GA   |  Ch-Co    |      E-No      |  
+         -----------------------------------------------------------
+         |31|30 - 26|25     -       16|15 |14 - 10|9      -       0|
+         ...........................................................
+word 3   | 0| Ch-No |     Data        |0/1|(Ch-No)|     Data       |  Data
+         ...........................................................  Block 
+word 4   | 0| Ch-No |     Data        | 0 | Ch-No |     Data       |
+         ...........................................................
+ ...
+
+word i   | 0| Ch-No |     Data        | 0 | Ch-No |     (Data)     |
+         -----------------------------------------------------------
+         |31     -    24|23-21|20 - 16|15  -  11|10      -        0|  Super
+         ...........................................................  Header
+word i+1 |   User ID    |  0  |  GA   |    0    |        WC        |  
+         -----------------------------------------------------------
+         |31     -    24|23-21|20 - 16|15  -    10|9      -       0|  Modul
+         ...........................................................  Header
+word i+2 |   User ID    |  0  |  GA   |   Ch-Co   |       E-No     |  
+         -----------------------------------------------------------
+         |31|30 - 26|25     -       16|15 |14 - 10|9      -       0|
+         ...........................................................
+word i+3 | 0| Ch-No |     Data        |0/1|(Ch-No)|      Data      |  Data
+         ...........................................................  Block
+word i+4 | 0| Ch-No |     Data        | 0 | Ch-No |      Data      |
+ 
+  ...
+         |                                                         |
+word N   | 0| Ch-No |     Data        | 0 | Ch-No |      (Data)    |
+         -----------------------------------------------------------
+
+ 
+GA       Geographical modul Address
+WC       Word Counter (without SuperHeader)
+User ID  User programmable 8 bits (1 byte)
+E-No     Event-No in this modul  (= 1 / Single Event !)
+Ch-Co    No of valid channels in this modul
+Ch-No    Channel Number in this modul
+ 
+/*=============================================================================*/
+
+
+ Aufbau Eventdaten (auf Tape / ueber Socket):
+ ============================================
+
+EventHeader: word 1   Gesamtlaenge Event (in Worten)
+ 
+             word 2   Event.Nr. (1 ... n)
+
+             word 3   Trigger-Nr. (1 ... 15)
+
+             word 4   Anzahl der Instrumentierungssysteme
+ 
+Eventbody:   word 5
+               .
+               .      Subevents  (SubeventHeader + Subeventdaten)
+               .
+             word n
+
+
+Subevent:
+---------
+
+SubeventHeader:  word 1   IS - ID
+
+                 word 2   Anzahl der (Daten)worte des Subevents
+         
+SubeventBody:    word 3   
+                   .
+                   .      Subeventdaten  (hardwareabhaengige Darstellung der Subevents)
+                   .
+                 word m
+
+
+Readoutdaten:
+-------------
+
+[ ReadoutHeader:   word 0   Datentyp (Bit 31 ... 16) + Anzahl der Datenworte 
+                            (Bit 15 ... 0) des akt.Readouts (ohne Header)     ]
+
+  ReadoutBody:     word 1
+                     .
+                     .      Readoutdatenworte
+                     .
+                   word i
+
+
+
+/*****************************************************************************/
+
+ Build Pedestal
+ ==============
+
+Aufruf:
+-------
+
+ FBMB_BuildPed (pa, base, evt_max, fact)
+
+Parameter:
+----------
+
+p[0] : No. of parameters (== 4)
+p[1] : primary address
+p[2] : gate generator/trigger: 0     - CHIpulse / external generator --> CHIext
+                               1,2,3 - GSI-Triggermodul (addr. base) --> software trigger 
+p[3] : number of events for evaluation of pedestals 
+p[4] : multiplicity factor:    ped = - (mean + p[4] * sigma)
+
+outptr[0] :  error-code / SS-code (integer)
+outptr[1] :  Mean value channel 1 (integer * 1000)
+outptr[2] :  Variance channel 1   (integer * 1000)
+outptr[3] :  Pedestal channel 1   (integer)
+  ...
+outptr[94] : Mean value channel 32 (integer * 1000)
+outptr[95] : Variance channel 32   (integer * 1000)
+outptr[96] : Pedestal channel 32   (integer)
+
+ 
+/*****************************************************************************/
+
+ Read Setup
+ ==========
+
+Aufruf:
+-------
+
+ FBMB_ReadSetup (pa)
+
+Parameter:
+----------
+
+p[0] :  No. of parameters (== 1)
+p[1] :  primary address 
+
+outptr[0] :  Error-Code / SS-code
+outptr[1] :  ID (Module/User Identifier)
+outptr[2] :  value of CSR#0
+outptr[3] :  Pedestal channel 1
+outptr[4] :  Lower Threshold channel 1
+outptr[5] :  Upper Threshold channel 1
+  ...
+outptr[96] : Pedestal channel 32 ...
+outptr[97] : Lower Threshold channel 32
+outptr[98] : Upper Threshold channel 32
+
+
+/*****************************************************************************/
+
+ Load Setup
+ ==========
+
+Aufruf:
+-------
+  
+ FBMB_LoadSetup (pa, id, csr0, pd1 ... pd32, lthr1 ... lthr32, uthr1 ... uthr32)
+
+Parameter:
+----------
+
+p[0] :  No. of parameters (== 99)
+p[1] :  primary address
+p[2] :  ID (Module/User Identifier)
+p[3] :  value of CSR#0
+p[4] :  Pedestal channel 1
+p[5] :  Lower Threshold channel 1
+p[7] :  Upper Threshold channel 1
+ ...
+p[97] : Pedestal channel 32 
+p[98] : Lower Threshold channel 32
+p[99] : Upper Threshold channel 32
+
+outptr[0] : Error-Code / SS-code
+
+
+
+/*****************************************************************************/
+/*****************************************************************************/
+

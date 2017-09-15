@@ -1,0 +1,50 @@
+CONF = .
+COMMON = ../../COMMON
+
+include rules.make
+
+makevars = objects domains invocations procs dataout lowlevel \
+	commu trigger dummyprocs profilelib
+
+all: config.make sconf.c sconf.h
+
+config.make: thisconfig.kein.c
+	cpp -a $< ! grep ".*=.*" >-$@
+	$(MAKE) stamps1
+
+sconf.c: thisconfig.kein.c
+	cpp -a $< ! sed -f config.sed >-$@
+
+sconf.h: thisconfig.kein.c
+	cpp -a $< ! grep "~%" ! tr "%" "#" >-config.defines
+	echo -r $(z) >-buildname
+	date -m ! tr -d "\n" >-builddate
+	m4 $@.m4 >-$@
+	$(MAKE) stamps2
+
+thisconfig.kein.c: $(z).config
+	copy $< $@
+
+stamps1: $(makevars)
+	echo "mache stamps1"
+	copy config.make config.make.alt
+
+$(makevars): config.make.alt
+	echo "mache $@"
+	$(MAKE) -f GNUmakefile.stamps all var=$@
+
+stamps2: sconf.h.alt
+	cpp -a definealt.kein.c ! tr "%" "#" >-altdefines
+	cpp -a cmpdefines.kein.c >-configstamps
+	shell configstamps
+	copy sconf.h sconf.h.alt
+
+config.make.alt sconf.h.alt:
+	touch $@
+
+.PHONY: stamps1 $(makevars) stamps2
+
+clean:
+	-$(RM) sconf.h sconf.c
+	-$(RM) *.alt *.stamp
+	-$(RM) config.defines altdefines configstamps buildname builddate thisconfig.kein.c

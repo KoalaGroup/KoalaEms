@@ -1,0 +1,25 @@
+##############################################################################
+#                                                                            #
+# makefile for SERVER/PROCS/CAMAC/DRAMS                                      #
+#                                                                            #
+# OS9                                                                        #
+#                                                                            #
+# 11.02.94                                                                   #
+#                                                                            #
+##############################################################################
+
+CONF = ../../../CONF
+COMMON = ../../../../COMMON
+
+include $(COMMON)/rules.make
+
+cfiles = drams.r c219_help.r
+
+all: lib.l
+
+lib.l: $(cfiles)
+	merge $^ >-lib.l
+
+drams.r: config.h modultypes.h
+
+c219_help.r: config.h modultypes.h

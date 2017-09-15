@@ -1,0 +1,28 @@
+# Generated automatically from Makefile.in by configure.
+# procs/general/Makefile.in
+# $ZEL: Makefile.in,v 1.12 2009/08/09 21:44:35 wuestner Exp $
+
+CONF = ../../conf
+
+srcdir = .
+
+include $(CONF)/rules.make
+include $(CONF)/config.make
+
+cfiles = Echo.c timestamp.c errno.c uname.c runnr.c request.c
+ofiles = $(cfiles:.c=.o)
+depfiles = $(cfiles)
+
+lib = ../libprocs.a
+
+all: $(lib)
+
+$(lib): $(lib)($(ofiles))
+	$(RANLIB) $@
+
+depend: xdepend
+
+.PHONY: depend
+
+###################################################
+

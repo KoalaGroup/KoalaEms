@@ -1,0 +1,8 @@
+#define WORDS_BIGENDIAN
+#undef HAVE_SYS_CDEFS_H
+#define NEED_STRDUP
+
+/*
+#define volatile
+#define const
+*/

@@ -1,0 +1,29 @@
+\section{\path{general}}
+
+\begin{procdesc}{Echo}{gibt alle Argumente aus}
+\args{beliebig}
+\descr{
+	Alle Argumente werden unverändert in den Ausgabestrom geschrieben. Dabei wird keinerlei
+	Hardware angesprochen, diese Funktion ist also z.B. zur Erzeugung von Testdaten brauchbar.
+}
+\data{alle Argumente}
+\end{procdesc}
+
+\begin{procdesc}{IdentIS}{gibt Informationen über das aktuelle Instrumentierungssystem aus}
+\data{
+	zuerst Anzahl der im Instrumentierungssystem definierten Module (siehe DownloadISModulList),
+	dann paarweise jeweils Moduladresse und -typ
+}
+\rem{
+	funktioniert auch, wenn keine Instrumentierungssysteme konfiguriert oder definiert sind (erzeugt
+	dann die Ausgabe `0')
+}
+\end{procdesc}
+
+\begin{procdesc}{Timestamp}{gibt Zeitmarke aus}
+\data{3 Worte: Tage, Sekunden, Hundertstelsekunden}
+\rem{
+	Das Resultat ist im allgemeinen nicht absolut zu interpretieren, sondern nur zur Bildung von
+	Differenzen brauchbar.
+}
+\end{procdesc}

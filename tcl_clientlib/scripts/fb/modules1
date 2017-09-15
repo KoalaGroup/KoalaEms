@@ -1,0 +1,18 @@
+source modultypes.tcl
+
+proc modules {ved} {
+  global fastbus_modules
+  set list [$ved command1 FModulList 0]
+  set num [lindex $list 0]
+  puts "$num Modules:"
+  for {set i 0} {$i<$num} {incr i} {
+    set slot [lindex $list [expr $i*2+1]]
+    set type [format {0x%4X} [lindex $list [expr $i*2+2]]]
+    if [info exists fastbus_modules($type)] {
+      set name $fastbus_modules($type)
+    } else {
+      set name $type
+    }
+    puts [format {%2d %s} $slot $name]
+  }
+}

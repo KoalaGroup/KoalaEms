@@ -1,0 +1,389 @@
+dnl $Id: configure.in,v 1.30 2010/09/10 21:50:27 wuestner Exp $
+dnl Process this file with autoconf to produce a configure script.
+dnl $ems/tcl_clientlib
+AC_INIT(emstcl.cc)
+AC_CONFIG_AUX_DIR(../confsupp)
+
+lems=/usr/local/ems
+AC_PREFIX_DEFAULT(/usr/local/ems)
+
+dnl Checks for programs.
+AC_PROG_CC
+AC_PROG_CPP
+AC_PROG_CXX
+AC_PROG_CXXCPP
+AC_PROG_RANLIB
+AC_PROG_MAKE_SET
+AC_PROG_INSTALL
+AC_CANONICAL_SYSTEM
+
+. $srcdir/patchlevel
+
+AC_ARG_ENABLE(debug, [  --enable-debug ])
+dnl Set compilation flags
+CXX_ANSI=0
+if test "$GXX" = yes ; then
+    CXXFLAGS="-D__STD_STRICT_ANSI -ansi"
+    CXXFLAGS="$CXXFLAGS -Wall -Woverloaded-virtual"
+    if test "$enable_debug" = yes ; then
+        CXXFLAGS="$CXXFLAGS -g"
+    else
+        CXXFLAGS="$CXXFLAGS -O2"
+    fi
+    WERROR="-Werror"
+    case $build_os in
+        linux*)
+        CPPFLAGS="-D_BSD_SOURCE"
+    ;;
+    esac
+else
+  WERROR=""
+  case $build_os in
+    ultrix*)
+      if test "$enable_debug" = yes ; then
+        CXXFLAGS="-g"
+      else
+        CXXFLAGS="-O2"
+      fi
+    ;;
+    osf*)
+      CXXFLAGS=""
+      AC_MSG_CHECKING(for cxx version)
+      AC_LANG_CPLUSPLUS
+      AC_TRY_RUN([
+        main()
+          {
+          int x;
+          #ifdef __DECCXX_VER
+            if (__DECCXX_VER>=60000000)
+              x=0;
+            else
+              x=1;
+          #else
+          x=2;
+          #endif
+          exit(x);
+          }
+        ],
+        cxxver=new,
+        cxxver=old,
+        cxxver=none
+      )
+      case $cxxver in
+        new)
+          AC_MSG_RESULT(6 or newer)
+          CXXFLAGS="$CXXFLAGS -use_ld_input -std strict_ansi -ptr ../cxx_repository -tall -nopure_cname"
+          CXX_ANSI=1
+          for i in CLIENTLIBVER SUPPORTVER PROCLIBVER SELFVER ; do
+            eval $i=`echo \`eval echo \\\\$\$i\`|sed 's/\./a\./'`
+          done
+        ;;
+        old)
+          AC_MSG_RESULT(5 or older)
+          CXXFLAGS="$CXXFLAGS -ptr ../cxx_repository"
+        ;;
+        none)
+          AC_MSG_RESULT(unknown)
+        ;;
+      esac
+      if test "$enable_debug" = yes ; then
+        CXXFLAGS="$CXXFLAGS -g"
+      else
+        CXXFLAGS="$CXXFLAGS -O2"
+      fi
+    ;;
+  esac
+fi
+AC_SUBST(CXXFLAGS)
+
+dnl Check for shared objects
+AC_MSG_CHECKING(whether we should create shared objects)
+AC_ARG_ENABLE(dynamic, [  --disable-dynamic  don't use shared objects],
+  [], enable_dynamic=yes)
+echo enable_dynamic: "$enable_dynamic"
+makeshared=false
+if test "$enable_dynamic" = yes ; then
+  case $target_os in
+    _linux*)
+      LDOFLAGS='-shared --whole-archive -rpath $(LIB_DIR)'
+      SHLIBSUFFIX=.so
+      makeshared=true
+    ;;
+    _osf*)
+      LDOFLAGS='-shared -rpath $(LIB_DIR) -exact_version'
+      LDOFLAGS=$LDOFLAGS' -set_version $(SELFVER)'
+      LDOFLAGS=$LDOFLAGS' -error_unresolved'
+      if test "$enable_debug" = yes ; then
+        LDOFLAGS="$LDOFLAGS -g"
+      fi
+      LDONONEFLAG="-none"
+      SHLIBSUFFIX=.so
+      makeshared=true
+    ;;
+  esac
+else
+  case $target_os in
+    linux*)
+      LDFLAGS="$LDFLAGS" -static
+    ;;
+    osf*)
+      LDFLAGS="$LDFLAGS" -non_shared
+    ;;
+  esac
+  
+fi
+if test $makeshared = true ; then
+  AC_MSG_RESULT(yes)
+  SLIBS='$(slibs)'
+  LIBSUFFIX=$SHLIBSUFFIX
+else
+  AC_MSG_RESULT(no)
+  LIBSUFFIX=.a
+fi
+AC_SUBST(SHLIBSUFFIX)
+AC_SUBST(LIBSUFFIX)
+AC_SUBST(LDFLAGS)
+AC_SUBST(LDOFLAGS)
+AC_SUBST(LDONONEFLAG)
+AC_SUBST(COMMONVER)
+AC_SUBST(CLIENTLIBVER)
+AC_SUBST(SUPPORTVER)
+AC_SUBST(PROCLIBVER)
+AC_SUBST(SELFVER)
+
+dnl EMS_SEARCH([Xlib], [X11 library],
+dnl   [libX11.so], [X11LIB],
+dnl   [. lib],
+dnl   [/usr/lib /usr/shlib /usr/lib/X11 /usr/X11/lib /usr/X11R6/lib])
+dnl if test -z "$X11LIB" ; then
+dnl   EMS_SEARCH([Xlib], [X11 library],
+dnl     [libX11.a], [X11LIB],
+dnl     [. lib],
+dnl     [/usr/lib /usr/shlib /usr/lib/X11 /usr/X11/lib /usr/X11R6/lib],
+dnl     [fatal])
+dnl fi
+dnl AC_SUBST(X11LIB)
+
+AC_PATH_X
+if test "$no_x" = yes ; then
+  AC_MSG_ERROR(X11 not found; use --x-includes and --x-libraries)
+fi
+AC_SUBST(x_includes)
+AC_SUBST(x_libraries)
+
+EXTRALIBS=""
+AC_MSG_CHECKING(for DECNet library)
+if test -f /usr/lib/libdnet_stub${LIBSUFFIX} ; then
+  AC_MSG_RESULT(/usr/lib/libdnet_stub${LIBSUFFIX})
+  EXTRALIBS="$EXTRALIBS -ldnet_stub"
+else
+  if test -f /usr/shlib/libdnet_stub${LIBSUFFIX} ; then
+    AC_MSG_RESULT(/usr/shlib/libdnet_stub${LIBSUFFIX})
+    EXTRALIBS="$EXTRALIBS -ldnet_stub"
+  else
+    AC_MSG_RESULT(no)
+  fi
+fi
+
+AC_CHECK_LIB([dl], [main],
+  [EXTRALIBS="$EXTRALIBS -ldl"],
+  [])
+AC_SUBST(EXTRALIBS)
+
+dnl required packages:
+dnl ems_common
+dnl ems-support
+dnl ems-clientlib
+dnl proclib
+dnl
+
+AC_ARG_WITH(ems-libs, [  --with-ems-libs search first in this directory for ems libraries],
+	emslibs=$withval, emslibs="")
+
+EMS_SEARCH_COMMON
+EMS_SEARCH_COMMONLIB(.$COMMONVER$LIBSUFFIX)
+AC_SUBST(EMSCOMMON)
+AC_SUBST(EMSEXCOMMON)
+AC_SUBST(EMSCOMMONLIB)
+
+EMS_SEARCH_SUPPORT
+EMS_SEARCH_SUPPORTLIB(.$SUPPORTVER$LIBSUFFIX)
+AC_SUBST(EMSSUPPORT)
+AC_SUBST(EMSSUPPORTLIB)
+
+EMS_SEARCH_CLIENT
+EMS_SEARCH_CLIENTLIB(xx.$CLIENTLIBVER$LIBSUFFIX)
+AC_SUBST(EMSCLIENT)
+AC_SUBST(EMSCLIENTLIB)
+
+EMS_SEARCH_PROC
+EMS_SEARCH_PROCLIB(.$PROCLIBVER$LIBSUFFIX)
+AC_SUBST(EMSPROC)
+AC_SUBST(EMSPROCLIB)
+
+if test "$enable_dynamic" = yes ; then
+  suffix=""
+else
+  suffix=.a
+fi
+echo suffix=\"$suffix\"
+
+AC_MSG_CHECKING(for TCL Version)
+TCL_VER=`echo 'wm withdraw . ; puts $tcl_version ; exit' | wish`
+AC_MSG_RESULT($TCL_VER)
+AC_SUBST(TCL_VER)
+
+AC_MSG_CHECKING(for TK Version)
+TK_VER=`echo 'wm withdraw . ; puts $tk_version ; exit' | wish`
+AC_MSG_RESULT($TK_VER)
+AC_SUBST(TK_VER)
+
+tcl_default_inc=/usr/include/tcl$TCL_VER
+
+ltcl=/usr/local/tcl
+EMS_SEARCH([tcl], [tcl includes],
+	[tcl.h], [TCL],
+	[. include include/generic],
+	[$tcl_default_inc $ltcl $ltcl/include $ltcl/include/generic])
+AC_SUBST(TCL)
+
+ltk=/usr/local/tcl
+EMS_SEARCH([tk], [tk includes],
+	[tk.h], [TK],
+	[. include include/generic],
+	[$tcl_default_inc $ltk $ltk/include $ltk/include/generic])
+AC_SUBST(TK)
+
+dnl if test "$enable_dynamic" = yes ; then
+dnl   EMS_SEARCH([tcllib_shared], [tcl library shared],
+dnl 	  [libtcl${TCL_VER}*.so], [TCLLIBDIR],
+dnl 	  [. unix lib $target $target_cpu $target_os $target/lib $target_cpu/lib \
+dnl 	  $target_os/lib],
+dnl 	  [$ltcl $ltcl/unix $ltcl/lib $ltcl/$target $ltcl/$target_cpu \
+dnl 	  $ltcl/$target_os $ltcl/$target/lib $ltcl/$target_cpu/lib \
+dnl 	  $ltcl/$target_os/lib])
+dnl fi
+if test -z "$TCLLIBDIR" ; then
+  EMS_SEARCH([tcllib], [tcl library],
+	  [libtcl${TCL_VER}.so], [TCLLIBDIR],
+	  [. unix lib $target $target_cpu $target_os $target/lib $target_cpu/lib \
+	  $target_os/lib],
+	  [/usr/lib /usr/lib64 $ltcl $ltcl/unix $ltcl/lib $ltcl/$target $ltcl/$target_cpu \
+	  $ltcl/$target_os $ltcl/$target/lib $ltcl/$target_cpu/lib \
+	  $ltcl/$target_os/lib],
+          [fatal])
+fi
+TCLLIB=`ls $TCLLIBDIR/libtcl${TCL_VER}*|sort -r|head -1`
+echo TCLLIB=$TCLLIB
+AC_SUBST(TCLLIB)
+
+dnl if test "$enable_dynamic" = yes ; then
+dnl   EMS_SEARCH([tklib_shared], [tk library shared],
+dnl 	  [libtk${TK_VER}*.so], [TKLIBDIR],
+dnl 	  [. unix lib $target $target_cpu $target_os $target/lib $target_cpu/lib \
+dnl 	  $target_os/lib],
+dnl 	  [$ltk $ltk/unix $ltk/lib $ltk/$target $ltk/$target_cpu \
+dnl 	  $ltk/$target_os $ltk/$target/lib $ltk/$target_cpu/lib \
+dnl 	  $ltk/$target_os/lib])
+dnl fi
+if test -z "$TKLIBDIR" ; then
+  EMS_SEARCH([tklib], [tk library],
+	  [libtk${TK_VER}.so], [TKLIBDIR],
+	  [. unix lib $target $target_cpu $target_os $target/lib $target_cpu/lib \
+	  $target_os/lib],
+	  [/usr/lib /usr/lib64 $ltk $ltk/unix $ltk/lib $ltk/$target $ltk/$target_cpu \
+	  $ltk/$target_os $ltk/$target/lib $ltk/$target_cpu/lib \
+	  $ltk/$target_os/lib],
+          [fatal])
+fi
+TKLIB=`ls $TKLIBDIR/libtk${TK_VER}*|sort -r|head -1`
+AC_SUBST(TKLIB)
+
+AC_LANG_CPLUSPLUS
+
+AC_CHECK_HEADERS(sys/cdefs.h)
+
+AC_CHECK_HEADERS(String.h)
+AC_CHECK_HEADERS(string)
+
+AC_MSG_CHECKING(whether we have to use namespaces)
+SAVED_CXXFLAGS=$CXXFLAGS
+CXXFLAGS="$CXXFLAGS $WERROR"
+AC_CACHE_VAL(ems_cv_namespaces,
+AC_TRY_COMPILE([
+#if defined (__STD_STRICT_ANSI) || defined (__STRICT_ANSI__)
+#include <iostream>
+#else
+#include <iostream.h>
+#endif
+namespace xxx {
+int i;
+}
+using namespace std;
+], [
+xxx::i=13;
+],
+ems_cv_namespaces=yes,
+ems_cv_namespaces=no))
+AC_MSG_RESULT($ems_cv_namespaces)
+if test $ems_cv_namespaces = yes ; then
+    AC_DEFINE(HAVE_NAMESPACES)
+fi
+CXXFLAGS=$SAVED_CXXFLAGS
+
+AC_MSG_CHECKING([whether bool is defined])
+AC_CACHE_VAL(ems_cv_header_bool_def,
+AC_TRY_COMPILE([], [
+bool b;
+b=true;
+], ems_cv_header_bool_def=yes, ems_cv_header_bool_def=no))
+AC_MSG_RESULT($ems_cv_header_bool_def)
+if test $ems_cv_header_bool_def = no ; then
+	AC_DEFINE(NEED_BOOL)
+fi
+
+AC_MSG_CHECKING([whether ftruncate() is defined])
+AC_CACHE_VAL(ems_cv_header_ftruncate_def,
+AC_TRY_COMPILE([#include <unistd.h>], [
+int r;
+r=ftruncate(1, 0);
+], ems_cv_header_ftruncate_def=yes, ems_cv_header_ftruncate_def=no))
+AC_MSG_RESULT($ems_cv_header_ftruncate_def)
+if test $ems_cv_header_ftruncate_def = no ; then
+	AC_DEFINE(NEED_FTRUNCATEDEF)
+fi
+
+AC_MSG_CHECKING([whether lockf() is defined])
+AC_CACHE_VAL(ems_cv_header_lockf_def,
+AC_TRY_COMPILE([#include <unistd.h>], [
+int r;
+r=lockf(1, F_LOCK, 0);
+], ems_cv_header_lockf_def=yes, ems_cv_header_lockf_def=no))
+AC_MSG_RESULT($ems_cv_header_lockf_def)
+if test $ems_cv_header_lockf_def = no ; then
+	AC_DEFINE(NEED_LOCKFDEF)
+fi
+
+AC_MSG_CHECKING([whether gettimeofday() is defined])
+AC_CACHE_VAL(ems_cv_header_gettimeofday_def,
+	AC_EGREP_CPP(gettimeofday, [#include <sys/time.h>],
+	ems_cv_header_gettimeofday_def=yes, 
+	ems_cv_header_gettimeofday_def=no))
+AC_MSG_RESULT($ems_cv_header_gettimeofday_def)
+if test $ems_cv_header_gettimeofday_def = no ; then
+	AC_DEFINE(NEED_GETTIMEOFDAYDEF)
+fi
+
+AC_MSG_CHECKING([whether rint() is defined])
+AC_CACHE_VAL(ems_cv_header_rint_def,
+AC_EGREP_CPP(rint, [#include <math.h>],
+ems_cv_header_rint_def=yes,
+ems_cv_header_rint_def=no))
+AC_MSG_RESULT($ems_cv_header_rint_def)
+if test $ems_cv_header_rint_def = no ; then
+	AC_DEFINE(NEED_RINTDEF)
+fi
+
+AC_DEFINE(HAVE_CONFIG_H)
+AC_CONFIG_HEADER(config.h)
+AC_OUTPUT(Makefile)

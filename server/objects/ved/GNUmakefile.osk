@@ -1,0 +1,19 @@
+CONF = ../../CONF
+COMMON = ../../../COMMON
+
+include $(CONF)/rules.make
+
+cfiles = ved.r sconf.r
+lib = lib.l
+
+all: $(lib)
+
+$(lib): $(cfiles)
+	merge $^ >-$@
+
+sconf.r: $(CONF)/sconf.c
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $<
+
+##########################################################
+
+ved.r: sconf.h debug.h requesttypes.h errorcodes.h objecttypes.h xdrstring.h

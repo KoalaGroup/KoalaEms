@@ -1,0 +1,44 @@
+CONF = ../CONF
+COMMON = ../../COMMON
+EMSEXCOMMON = $(COMMON)
+
+extralibs = $(NETLIB) $(SSMLIB) $(IOLIB) $(GETOPT)
+
+M4FLAGS = -DEMSEXCOMMON=$(EMSEXCOMMON)
+
+include $(CONF)/rules.make
+
+include $(CONF)/config.make
+
+cfiles = scheduler.r requests.r server.r signals_osk.r timers_osk.r fileconfig.r
+
+libs1 = ../COMMU/libcommu.l ../OBJECTS/libobj.l
+ifdef procs
+libs2 = ../PROCS/libprocs.l
+endif
+libs3 = ../DUMMYPROCS/libdummy.l
+ifdef trigger
+libs4 = ../TRIGGER/libtrig.l
+endif
+ifdef dataout
+libs5 = ../DATAOUT/libdo.l
+endif
+ifdef lowlevel
+libs6 = ../LOWLEVEL/libll.l
+endif
+
+libs = $(libs1) $(libs2) $(libs3) $(libs4) $(libs5) $(libs6)
+
+all: ../server.$(z)
+
+../server.$(z): $(cfiles) $(libs) $(COMMON)/common.l
+	$(CC) $(extralflags) $(cfiles) $(addprefix -l,$(libs)) -l$(COMMON)/common.l $(extralibs) -L$(GNULIB) -o $@
+
+clean:
+	-$(RM) requests.c
+
+#########################################################
+
+requests.r: $(COMMON)/requesttypes.inc requests.h $(COMMON)/requesttypes.h $(COMMON)/errorcodes.h
+server.r: $(CONF)/sconf.h $(COMMON)/debug.h $(COMMON)/errorcodes.h
+signals_osk.r: $(COMMON)/errorcodes.h signals.h

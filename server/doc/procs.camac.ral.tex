@@ -1,0 +1,147 @@
+\subsection{\path{camac/ral}}
+
+Das Argument "`Slotnummer des Kontrollmodules"' in den folgenden Funktionen ist die
+CAMAC-Slotadresse des RAL-Readout-Moduls. In einer sp"ateren Version wird
+dies ein Index in die Adre"stabelle des Instrumentierungssystems sein.
+
+Die Z"ahlung der "`RAL-Spalte"' beginnt mit Null.
+
+\begin{procdesc}{RALconfig}{Ermittlung der Konfiguration des RAL-Auslesebaumes}
+\args{Slotnummer des Kontrollmodules}
+\descr{
+	Die Routine ermittelt die Anzahl der RAL111-Chips in jeder Spalte des
+	Auslesebaumes, indem feste Muster durch die aus den DAC- oder Test-Registern
+	gebildeten FIFOs geschoben werden.
+}
+\data{Ein Datenwort pro Spalte, enth"alt die Anzahl der RAL111-Chips darin}
+\rand{Die Hardware wird vollst"andig zur"uckgesetzt --- neue Initialisierung notwendig.}
+\errors{Hardwarefehler}
+\end{procdesc}
+
+\begin{procdesc}{RALdatapathtest}{Test des 4-bit-Datenweges zum Frontend}
+\args{Slotnummer des Kontrollmodules, RAL-Spalte, Anzahl der Testworte}
+\descr{
+	Ein aus einer aufsteigenden Rampe bestehendes Testmuster der gegebenen
+	L"ange wird durch das aus den DAC- oder Test-Registern bestehende FIFO
+	der gegebenen Spalte geschoben und das Resultat auf Konsistenz gepr"uft.
+}
+\rand{Die Hardware wird vollst"andig zur"uckgesetzt --- neue Initialisierung notwendig.}
+\errors{Hardwarefehler}
+\end{procdesc}
+
+\begin{procdesc}{RALloadtestregs}{Laden der Test-Register in den RAL111-Chips}
+\args{Slotnummer des Kontrollmodules, RAL-Spalte, Modus, [Daten]}
+\descr{
+	Die Test-Register (siehe "`RALtestreadout"') werden auf die gegebenen Werte
+	gesetzt. Das "`Modus"'-Argument definiert die Art der Spezifikation:
+	\begin{list}{}{}
+		\item 0: Die durch folgende
+			Datenargumente gegebenen Bitpositionen werden auf {\dq}1{\dq}
+			gesetzt, alle anderen auf {\dq}0{\dq}.
+		\item 1: Die durch folgende
+			Datenargumente gegebenen Bitpositionen werden auf {\dq}0{\dq}
+			gesetzt, alle anderen auf {\dq}1{\dq}.
+		\item 2: Die folgenden Argumente werden als XDR-String interpretiert, der
+			das komplette Bitmuster enth"alt. Die L"ange des Strings mu"s
+			$N * 2$ sein, mit N als Anzahl der RAL111-Chips in der
+			Spalte. (1 Chip enth"alt 16 bit)
+	\end{list}
+}
+\rand{Das CAMAC-Readoutmodul wird zur"uckgesetzt.}
+\errors{Argumentfehler, Hardwarefehler}
+\end{procdesc}
+
+\begin{procdesc}{RALloaddac}{Laden der DAC-Register in den RAL111-Chips}
+\args{Slotnummer des Kontrollmodules, RAL-Spalte, Modus, [Daten]}
+\descr{
+	Die Threshold-DAC-Register werden auf die gegebenen Werte
+	gesetzt. Das "`Modus"'-Argument definiert die Art der Spezifikation:
+	\begin{list}{}{}
+		\item 0: Es folgt 1 Datenwort; alle DAC-Register in der Spalte werden
+			auf diesen Wert gesetzt.
+		\item 1: Die folgenden Argumente werden als XDR-String interpretiert, der
+			pro RAL111-Chip ein Byte enth"alt. Die L"ange des Strings mu"s
+			der Anzahl der RAL111-Chips in der
+			Spalte entsprechen. (Davon sind nur die niederwertigen 4 Bit
+			signifikant.)
+	\end{list}
+}
+\rand{Das CAMAC-Readoutmodul wird zur"uckgesetzt.}
+\errors{Argumentfehler, Hardwarefehler}
+\end{procdesc}
+
+\begin{procdesc}{RALfilterramload}{Laden der Filter-Lookup-Table im CAMAC-Readoutmodul}
+\args{Slotnummer des Kontrollmodules, Modus, [Daten]}
+\descr{
+	Der Filter-RAM wird mit den gegebenen Werten geladen.
+	Das "`Modus"'-Argument definiert die Art der Spezifikation:
+	\begin{list}{}{}
+		\item 0: Die durch folgende
+			Datenargumente gegebenen Bitpositionen werden auf {\dq}1{\dq}
+			gesetzt, alle anderen auf {\dq}0{\dq}.
+		\item 1: Die durch folgende
+			Datenargumente gegebenen Bitpositionen werden auf {\dq}0{\dq}
+			gesetzt, alle anderen auf {\dq}1{\dq}.
+		\item 2: Die folgenden Argumente werden als XDR-String interpretiert, der
+			das komplette Bitmuster enth"alt. Die L"ange des Strings mu"s
+			16 kByte sein.
+	\end{list}
+}
+\errors{Argumentfehler}
+\end{procdesc}
+
+\begin{procdesc}{RALfilterramread}{Auslesen der Filter-Lookup-Table im CAMAC-Readoutmodul}
+\args{Slotnummer des Kontrollmodules}
+\descr{
+	Der Filter-RAM wird ausgelesen.
+}
+\data{Ein XDR-String der L"ange 16k wird erzeugt.}
+\errors{Argumentfehler}
+\end{procdesc}
+
+\begin{procdesc}{RALfilterramtest}{Testen des Filter-RAMs im CAMAC-Readoutmodul}
+\args{Slotnummer des Kontrollmodules}
+\descr{
+	Das Filter-RAM wird mit einem Testmuster beschrieben, zur"uckgelesen
+	und verglichen.
+}
+\rand{Der Inhalt des Filter-RAMs wird "uberschrieben.}
+\errors{Argumentfehler, Hardwarefehler}
+\end{procdesc}
+
+\begin{procdesc}{RALtestreadout}{Readout des RAL-Systems im Testmodus}
+\args{Slotnummer des Kontrollmodules, Testmodus, STA1}
+\descr{
+	Das RAL-System wird in einem Testmodus ausgelesen. Das "`Modus"'-
+	Argument kann folgende Werte annehmen:	
+	\begin{list}{}{}
+		\item 0: Die "`all-zero"'-Register in den RAL111-Chips werden
+			ausgelesen. (Achtung --- die Chips k"onnen trotzdem Daten liefern,
+			siehe Bemerkungen im Manual.)
+		\item 1: Die "`all-one"'-Register in den RAL111-Chips werden
+			ausgelesen.
+		\item 2: Die Test-Register in den RAL111-Chips werden
+			ausgelesen. (siehe "`RALloadtestregs"')
+	\end{list}
+	Das "`STA1"'-Argument bestimmt den Wert des STA1-Kontrollregisters
+	in CAMAC-Readoutmodul (und damit "uber Zero-Suppression und Total-Readout ---
+	siehe Manual).
+}
+\data{Der ausgelesenen Daten werden zur"uckgeliefert.}
+\rand{Das CAMAC-Readoutmodul wird zur"uckgesetzt.}
+\errors{Hardwarefehler}
+\end{procdesc}
+
+\begin{procdesc}{RALreadout}{Readout des RAL-Systems}
+\args{Slotnummer des Kontrollmodules}
+\descr{
+	Das RAL-System wird ausgelesen und neu gestartet.
+	Vorher m"ussen die Kontrollregister (durch einfache CAMAC-
+	Kommandos) auf die gew"unschten Werte gesetzt worden sein
+	und der Readout erstmalig gestartet werden.
+}
+\data{Der ausgelesenen Daten werden zur"uckgeliefert.}
+\errors{Hardwarefehler (insbesondere, falls keine Daten ausgelesen
+	werden konnten --- dann sollte die Zero-Suppression ausgeschaltet
+	werden)}
+\end{procdesc}

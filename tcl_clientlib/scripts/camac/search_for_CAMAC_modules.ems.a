@@ -1,0 +1,74 @@
+#!/usr/local/bin/emssh
+
+# syntax: search_for_CAMAC_modules.ems commu_host server_name
+
+################################################################################
+
+set maybe(0,28) {Timer SEN RTC 2014}
+set maybe(5,1) {Scaler LeCroy 4434}
+set maybe(6,5) {Logic LeCroy 4516}
+set maybe(7,1) {Discriminator LeCroy 4413}
+set maybe(7,2) {Discriminator LeCroy 4413}
+set maybe(8,2) {MLU LeCroy 2373}
+set maybe(9,9) {PLU CAEN C85}
+set maybe(12,12) {Discriminator LeCroy 3412}
+set maybe(16,16) {Delay LeCroy 4518}
+set maybe(19,14) {Status CERN 155}
+set maybe(19,19) {PreScaler SIS 5802}
+set maybe(32,0) {Clock Schlumberger JQH10}
+set maybe(39,39) {CF-Discriminator LeCroy 3420}
+set maybe(54,36) {FERA LeCroy 4300B}
+set maybe(64,0) {TDC LeCroy 2228A}
+set maybe(84,24) {Scaler LeCroy 2551}
+set maybe(96,96) {Gate&DelayGenerator CAEN C469}
+set maybe(112,48) {Dataway Display Borer 1801 (online)}
+set maybe(160,89) {CAEN C219}
+set maybe(192,176) {Dataway Display Borer 1802}
+set maybe(512,5) {Dataway Display LeCroy 2050}
+
+################################################################################
+
+if {$argc < 2} {
+	puts "syntax: $argv0 commu_host server_name"
+	exit -1
+}
+set commu_host [lindex $argv 0]
+set server_name [lindex $argv 1]
+
+ems_connect $commu_host 4096
+set ved [ems_open $server_name]
+
+$ved command1 CCCZ
+for {set n 1} {$n<24} {incr n} {
+	set is_there 0
+	set is_active 0
+	for {set f 0} {$f<32} {incr f} {
+		for {set a 0} {$a<16} {incr a} {
+			if {$f>=0 && $f<=7} {
+				$ved command1 nAFread $n $a $f
+			} elseif {$f>=16 && $f<=23} {
+				$ved command1 nAFwrite $n $a $f 1
+			} else {
+				$ved command1 nAFcntl $n $a $f
+			}
+		set qx [$ved command1 QX]
+		set q [expr 0x80000000 & $qx]
+		set x [expr 0x40000000 & $qx]
+		if {$q} {incr is_active}
+		if {$x} {incr is_there}
+#		after 1
+		}
+	}
+	if {($is_there || $is_active)} {
+		puts -nonewline {slot: }
+		puts -nonewline "[format %2d $n]"
+		puts -nonewline {   X: }
+		puts -nonewline "[format %3d $is_there]"
+		puts -nonewline {   Q: }
+		puts -nonewline "[format %3d $is_active]"
+		if {[info exists maybe($is_there,$is_active)]} {
+			puts -nonewline "   maybe: $maybe($is_there,$is_active)"
+		}
+		puts {}
+	}
+}

@@ -1,0 +1,62 @@
+Object:
+  0 Object_null
+  1 Object_ved
+  2 Object_domain
+  3 Object_is
+  4 Object_var
+  5 Object_pi
+  6 Object_do
+
+Domain:
+  0 Dom_null
+  1 Dom_Modullist
+  2 Dom_LAMproclist
+  3 Dom_Trigger
+  4 Dom_Event
+  5 Dom_Datain
+  6 Dom_Dataout
+
+Invocation:
+  0 Invocation_null
+  1 Invocation_readout
+  2 Invocation_LAM
+
+InvocStatus:
+  -3 Invoc_error
+  -2 Invoc_alldone
+  -1 Invoc_stopped
+   0 Invoc_notactive
+   1 Invoc_active
+
+Capabtyp:
+  0 Capab_listproc
+  1 Capab_trigproc
+
+InOutTyp:
+  0 InOut_Ringbuffer
+  1 InOut_Stream
+  2 InOut_Cluster
+
+IOAddr:
+  0 Addr_Raw
+  1 Addr_Modul
+  2 Addr_Driver_mapped
+  3 Addr_Driver_mixed
+  4 Addr_Driver_syscall
+  5 Addr_Socket
+  6 Addr_LocalSocket
+  7 Addr_File
+  8 Addr_Tape
+  9 Addr_Null
+
+DoRunStatus:
+  0 Do_running
+  1 Do_neverstarted
+  2 Do_done
+  3 Do_error
+  4 Do_flushing
+
+DoSwitch:
+  -1 Do_noswitch
+   0 Do_enabled
+   1 Do_disabled

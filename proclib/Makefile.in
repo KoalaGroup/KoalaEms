@@ -1,0 +1,102 @@
+prefix       := @prefix@
+exec_prefix  := @exec_prefix@
+INCLUDE_DIR  := $(prefix)/include
+LIB_DIR      := $(exec_prefix)/lib
+COMMONVER    := @COMMONVER@
+CLIENTLIBVER := @CLIENTLIBVER@
+SUPPORTVER   := @SUPPORTVER@
+SELFVER      := @SELFVER@
+
+srcdir := @srcdir@
+VPATH  := @srcdir@
+@SET_MAKE@
+
+machname := @target@
+
+COMMON_INCLUDE    := @EMSCOMMON@
+COMMON_EX_INCLUDE := @EMSEXCOMMON@
+COMMON_LIB        := @EMSCOMMONLIB@
+SUPPORT_INCLUDE   := @EMSSUPPORT@
+SUPPORT_LIB       := @EMSSUPPORTLIB@
+CLIENTLIB_INCLUDE := @EMSCLIENT@
+CLIENTLIB_LIB     := @EMSCLIENTLIB@
+CXX               := @CXX@
+CXXFLAGS          := @CXXFLAGS@
+INSTALL           := @INSTALL@
+INSTALL_DATA      := @INSTALL_DATA@
+RANLIB            := @RANLIB@
+LDOFLAGS          := @LDOFLAGS@
+SHLIBSUFFIX       := @SHLIBSUFFIX@
+
+CPPFLAGS := -I. -I$(srcdir) -I$(COMMON_INCLUDE) -I$(COMMON_EX_INCLUDE)  \
+	-I$(SUPPORT_INCLUDE) -I$(CLIENTLIB_INCLUDE) -DHAVE_CONFIG_H
+
+SRC := proc_ved.cc proc_is.cc  \
+	caplib.cc ved_errors.cc proc_plist.cc proc_conf.cc  \
+	proc_memberlist.cc proc_isstatus.cc proc_namelist.cc  \
+	proc_iotype.cc proc_modullist.cc proc_ioaddr.cc proc_dataio.cc  \
+	proc_communicator.cc proc_veds.cc proc_readoutstatus.cc  \
+	proc_addrtrans.cc proc_dataoutstatus.cc smartptr.cc smartptr_t.cc
+
+OBJS := $(SRC:.cc=.o)
+
+libs  := libproc.$(SELFVER).a
+slibs := $(libs:.a=$(SHLIBSUFFIX))
+
+NOLIBS = -L$(SUPPORT_LIB) -lsupp.$(SUPPORTVER) -L$(CLIENTLIB_LIB)  \
+  -lemscommxx.$(CLIENTLIBVER) -L$(COMMON_LIB) -lcommon.$(COMMONVER)
+
+INSTHDR = caplib.hxx  \
+	proc_conf.hxx proc_defs.hxx  \
+	proc_is.hxx  \
+	proc_plist.hxx proc_ved.hxx ved_errors.hxx
+
+.PHONY: all
+all: $(libs) @SLIBS@
+
+libproc.$(SELFVER).a: $(OBJS)
+	$(AR) cr $@ $^
+	$(RANLIB) $@
+
+libproc.$(SELFVER)$(SHLIBSUFFIX): $(OBJS)
+	$(CXX) $(CXXFLAGS) $(LDOFLAGS) -o $@ $^ @LDONONEFLAG@  \
+	$(NOLIBS)
+
+depend: sed.in
+	cp Makefile Makefile.bak
+	sed -e '/^# DO NOT DELETE THIS LINE/,$$d' < Makefile.bak > Makefile
+	echo '# DO NOT DELETE THIS LINE' >> Makefile
+	echo ' ' >> Makefile
+	for i in $(SRC); do \
+	  echo checking $$i ; \
+	  $(CXX) -M $(CPPFLAGS) $(CXXFLAGS) $(srcdir)/$$i|sed -f sed.in>> Makefile ; \
+	done
+
+sed.in:
+	echo 's|/usr/include/[^ ]*||g' >sed.in
+	echo '/.*: $$/d' >>sed.in
+	echo '/^ *\\ *$$/d' >>sed.in
+
+clean:
+	rm -f *.o *.a *.so core sed.in
+
+realclean: clean
+
+distclean: realclean
+	rm -f Makefile Makefile.bak config.cache config.log config.status config.h
+
+local: all
+	-mkdir $(machname)
+	$(INSTALL) $(lib) $(libxx) $(machname)
+
+install: install_header install_binaries
+
+install_header:
+	for i in $(INSTHDR)  ; do \
+	$(INSTALL_DATA) $(srcdir)/$$i $(INCLUDE_DIR)/$$i ; \
+	done
+	
+install_binaries: all
+	for i in $(libs) @SLIBS@ ; do \
+	$(INSTALL_DATA) $$i $(LIB_DIR)/$$i ; \
+	done

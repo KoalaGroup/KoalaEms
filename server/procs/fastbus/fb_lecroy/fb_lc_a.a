@@ -1,0 +1,70 @@
+********************************************************************************
+*                                                                              *
+* fb_lc_a.a                                                                    *
+*                                                                              *
+* OS9                                                                          *
+*                                                                              *
+* MaWo                                                                         *
+*                                                                              *
+* 30.12.94                                                                     *
+*                                                                              *
+********************************************************************************
+
+  psect fb_lc_a,0,0,0,0,0
+
+*******************************************************************************
+
+* int PATBIT(int *word)
+PATBIT:
+  movem.l d2/a0,-(a7)
+  movea.l d0,a0
+  move.l  (a0),d1
+  beq.s   NULL
+  move.l  #$1f,d0
+  bfffo   d1{0:0},d2
+  sub.b   d2,d0
+  bclr.l  d0,d1
+  move.l  d1,(a0)
+  bra.s   END_P
+NULL
+  moveq.l #$ffffffff,d0
+END_P
+  movem.l (a7)+,d2/a0
+  rts
+
+*******************************************************************************
+
+* int PATtest(int *word)
+PATtest:
+  movem.l d2/a0,-(a7)
+  movea.l d0,a0
+  move.l  (a0),d1
+  bfffo   d1{0:0},d0
+  bfclr   d1{d0:1}
+  move.l  d1,(a0)
+  movem.l (a7)+,d2/a0
+  rts
+
+*******************************************************************************
+
+* int MODMEM(int word, int *ptr)
+MODMEM:
+  movem.l d2-d4/a0,-(a7)
+  move.l  d0,d2
+  clr.l   d0
+  movea.l d1,a0
+LOOP
+  tst.l   d2
+  beq.s   END_M
+  addq.b  #1,d0
+  move.l  #$1f,d4
+  bfffo   d2{0:0},d3
+  sub.b   d3,d4
+  bclr.l  d4,d2
+  move.l  d4,(a0)+
+  bra.s   LOOP
+END_M
+  movem.l (a7)+,d2-d4/a0
+  rts
+
+*******************************************************************************

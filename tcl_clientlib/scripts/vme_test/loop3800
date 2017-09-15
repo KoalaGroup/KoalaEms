@@ -1,0 +1,27 @@
+proc loop3800 {} {
+  $ved command1 sis3800init 5 6 7
+  foreach i {5 6 7} {
+    $ved command1 VMEwrite4 $i 0 0x30
+    $ved command1 VMEwrite4 $i 0x50 0
+  }
+  while {1} {
+    $ved command1 sis3800clock 5 6 7
+    set v [$ved command1 sis3800read 5 6 7]
+    puts [lindex $v 0]
+    after 1000
+  }
+}
+
+proc loop3800s {ved} {
+  $ved command1 sis3800ShadowInit 1 5 6 7
+  foreach i {5 6 7} {
+    $ved command1 VMEwrite4 $i 0 0x30
+    $ved command1 VMEwrite4 $i 0x50 0
+  }
+  while {1} {
+    $ved command1 sis3800clock 5 6 7
+    set v [$ved command1 sis3800ShadowUpdate 1 3 5 6 7 0xffffffff 0xffffffff 0xffffffff]
+    puts "[lrange $v 2 3] [lrange $v 67 68] [lrange $v 132 133]"
+    after 1000
+  }
+}

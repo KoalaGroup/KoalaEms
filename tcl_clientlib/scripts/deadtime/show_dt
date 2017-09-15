@@ -1,0 +1,155 @@
+#! /bin/sh
+#\
+exec emssh $0 $*
+
+# $Id: show_dt,v 1.9 2009/02/05 19:39:55 wuestner Exp $
+# copyright 2001
+#   Peter Wuestner; Zentrallabor fuer Elektronik; Forschungszentrum Juelich
+#
+
+# Vorbereitung fuer 'autoload' von Prozeduren
+if [info exists env(EMSTCL_HOME)] {
+    set dead_library $env(EMSTCL_HOME)/deadtime
+    #set common_library $env(EMSTCL_HOME)/common
+    set EMSTCL_HOME $env(EMSTCL_HOME)
+} else {
+    set dead_library /usr/local/ems/lib/deadtime
+    #set common_library /usr/local/ems/lib/common
+    set EMSTCL_HOME /usr/local/ems/lib
+}
+lappend auto_path $dead_library ;# $common_library
+set saved_auto_path $auto_path
+
+proc scale_from_range {range bins} {
+  # range in us;
+  set res [expr round($range*10./double($bins))]
+  #puts "range=$range us; bins=$bins; scale=$res"
+  return $res
+}
+
+proc init {facility} {
+    global slavenames mastername
+    global host port delay
+
+    set suffix init
+    if [string equal $facility {}] {
+        set facilities [glob -types f *.${suffix}]
+        set l [string length ${suffix}]
+        incr l -1
+        puts -nonewline {valid facilities are:}
+        foreach f $facilities {
+            set f [string range $f 0 [expr [string last ${suffix} $f]-2]]
+            puts -nonewline "  $f"
+        }
+        puts {}
+        return -1
+    }
+
+    if [catch {source $facility.${suffix}}] {
+        global errorInfo
+        puts "cannot init $facility"
+        set error [lindex [split $errorInfo \n] 0]
+        puts $error
+        return -1
+    }
+
+    set slavenames [array names ranges]
+    set idx [lsearch -exact $slavenames $master]
+    set slavenames [lreplace $slavenames $idx $idx]
+    set mastername $master
+
+    return 0
+}
+
+proc init_veds {} {
+    global slavenames mastername
+    global host port
+    global master slaves
+    global last_event
+
+    ems_connect $host $port
+    set master [ems_open $mastername]
+    set last_event($master) -1
+    set slaves {}
+    foreach ved $slavenames {
+        set slave [ems_open $ved]
+        lappend slaves $slave
+        set last_event($slave) -1
+    }
+}
+
+proc headline {} {
+    global master slaves
+    puts -nonewline [format {%8s} [$master name]]
+    foreach slave $slaves {
+        puts -nonewline [format {%10s} [$slave name]]
+    }
+    puts ""
+}
+
+proc loop {} {
+    global delay
+    global master slaves
+    global linecount
+
+    if {$linecount%20==0} headline
+
+    set dt [get_dt $master 1]
+    if {$dt>0} {
+        puts -nonewline [format {%3f} $dt]
+    } else {
+        puts -nonewline "     ---"
+    }
+    foreach slave $slaves {
+        set dt [get_dt $slave 0]
+        if {$dt>0} {
+            puts -nonewline [format {  %3f} $dt]
+        } else {
+            puts -nonewline "       ---"
+        }
+    }
+    puts ""
+    incr linecount
+    after $delay loop
+}
+
+proc bgerror {args} {
+    puts "bgerror: $args"
+}
+
+proc main {} {
+    global argc argv0 argv
+    global linecount delay
+
+    if {$argc<1} {
+        puts "usage: $argv0 facility"
+        set facility {}
+    } else {
+        set facility [lindex $argv 0]
+    }
+
+    set res [init $facility]
+    if {$res<0} return
+
+#     {
+#     # some code to override init:
+#     
+#     set mastername [lindex $argv 0]
+#     set slavenames {}
+#     for {set i 1} {$i<$argc} {incr i} {
+#       lappend slavenames [lindex $argv $i]
+#     }
+#     #set mastername e06
+#     #set slavenames {e02 e03 e04 e07}
+#     }
+
+    set delay 10000
+
+    init_veds
+    set linecount 0
+    loop
+    set xcv 0
+    vwait xcv
+}
+
+main

@@ -1,0 +1,72 @@
+FBPULSE()
+FBPULSE_reset()
+FCARB()
+  become busmaster
+
+FCDISC()
+  disconnect from module
+
+FCPC(pa)
+  primary address cycle; control space
+
+FCPD(pa)
+  primary address cycle; data space
+
+FCREL()
+  release busmastership
+
+FCRW()
+  read word
+
+FCRWS(sa)
+  write sec. address; read word
+
+FCWSAss(sa)
+  write secondary address; return slave status
+
+FCWW(dat)
+  write word
+
+FCWWS(sa, dat)
+  write secondary address; write word; return slave status
+
+FCWWss(dat)
+  write word; return slave status
+
+FRC(pa, sa)
+  connect to pa (control space); write sec. address; read word; disconnect
+
+FRCB(pa, sa, dest, count)
+FRCM(ba)
+FRCa(pa, sa)
+  connect to pa (control space); write sec. address; read word
+
+FRD(pa, sa)
+  connect to pa (data space); write sec. address; read word; disconnect
+
+FRDB(pa, sa, dest, count)
+FRDB_S(pa, dest, count)
+FRDM(ba)
+FRDa(pa, sa)
+  connect to pa (data space); write sec. address; read word
+
+FWC(pa, sa, data)
+  connect to pa (control space); write sec. address; write word; disconnect
+
+FWCB(pa, sa, source, count)
+FWCM(ba, data)
+FWCa(pa, sa, data)
+  connect to pa (control space); write sec. address; write word
+
+FWD(pa, sa, data)
+  connect to pa (data space); write sec. address; write word; disconnect
+
+FWDB(pa, sa, source, count)
+FWDM(ba, data)
+FWDa(pa, sa, data)
+  connect to pa (data space); write sec. address; write word
+
+fb_modul_id(int pa);
+keep_mastership(int keep);
+setarbitrationlevel(int arblevel);
+sscode()

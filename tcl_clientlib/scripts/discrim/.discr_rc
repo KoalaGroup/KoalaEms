@@ -1,0 +1,20 @@
+set global_setup(moduls) {{1 4413} {2 4413} {11 4413} {12 4413} {22 4413}
+  {23 4413} {13 C193}}
+set global_setup(commu_transport) {tcp}
+set global_setup(commu_host) {ikpe1102}
+#set global_setup(commu_host) {ikpe1103}
+set global_setup(commu_port) {4096}
+set global_setup(commu_socket) {}
+#set global_setup(ved) {e05}
+set global_setup(ved) {ikpc07}
+set global_setup(dumpfile) /usr/users/wuestner/discrim_dump
+
+# set global_setup(moduls) {{2 4413} {3 C193} {1 4413}}
+# set global_setup(commu_transport) {tcp}
+# set global_setup(commu_host) {zelas3}
+# set global_setup(commu_port) {4096}
+# set global_setup(commu_socket) {}
+# set global_setup(ved) {385}
+#
+#
+#

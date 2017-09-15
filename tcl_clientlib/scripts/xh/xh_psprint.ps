@@ -1,0 +1,519 @@
+%!  PostScript Source Code
+%
+%% Description: PostScript prolog for a2ps program.
+%% Copyright (c) 1990, Miguel Santana, miguel@imag.imag.fr
+%% a2ps 4.0
+%%EndComments
+
+/$a2psdict 100 dict def
+$a2psdict begin
+
+% General macros.
+/xdef {exch def} bind def
+/getfont {exch findfont exch scalefont} bind def
+
+% Create Courier backspace font
+/backspacefont {
+    /Courier findfont dup length dict begin
+	{ %forall
+	    1 index /FID eq { pop pop } { def } ifelse
+	} forall
+	currentdict /UniqueID known { %if
+	    /UniqueID UniqueID 16#800000 xor def
+	} if
+	CharStrings length 1 add dict begin
+	    CharStrings { def } forall
+	    /backspace { -600 0 0 0 0 0 setcachedevice } bind def
+	    currentdict
+	end
+	/CharStrings exch def
+	/Encoding Encoding 256 array copy def
+	Encoding 8 /backspace put
+	currentdict
+    end
+    definefont pop
+} bind def
+
+% FUNCTIONS
+
+% Function newfile: Initialize file printing.
+/newfile
+{ /filenm xdef
+  /filenmwidth filenm stringwidth pop def
+  /filenmfont
+       filenmwidth filenmroom gt
+       {
+	       filenmfontname
+	       filenmfontsize filenmroom mul filenmwidth div
+	     getfont
+       }
+       { stdfilenmfont }
+     ifelse
+  def
+} bind def
+
+% Function header: prints page header. no page and
+% sheetside are passed as arguments.
+/header
+  { upperx 1 index get  uppery headersize sub 1 add  moveto
+    datefont setfont
+    gsave
+      upperx 1 index get uppery moveto pop
+      0 headersize 2 div neg rmoveto 
+      headersize setlinewidth
+      0.85 setgray
+      pagewidth 0 rlineto stroke
+    grestore
+    gsave
+      datefontsize headermargin rmoveto
+      date show				% date/hour
+    grestore
+    gsave
+      pnum cvs pop				% page pop up
+        pagewidth (Page 999) stringwidth pop sub
+        headermargin
+	  rmoveto
+      (Page ) show pnum show		% page number
+    grestore
+    empty pnum copy pop
+    gsave
+      filenmfont setfont
+         filenmroom filenm stringwidth pop sub 2 div datewidth add
+          bodymargin 2 mul 
+        add 
+        headermargin
+      rmoveto
+        filenm show			% file name
+      grestore
+    } bind def
+
+% Function border: prints border page. Use sheetside as arg
+/border 
+{ upperx 1 index get uppery moveto pop
+  gsave				% print four sides
+    0.7 setlinewidth		% of the square
+    pagewidth 0 rlineto
+    0 pageheight neg rlineto
+    pagewidth neg 0 rlineto
+    closepath stroke
+  grestore
+} bind def
+
+% Function hborder: completes border of the header.
+/hborder 
+{ gsave
+	0.7 setlinewidth
+	0 headersize neg rmoveto
+	pagewidth 0 rlineto
+	stroke
+  grestore
+} bind def
+
+% Function sheetnumber: prints the sheet number.
+/sheetnumber
+    { sheetnumberx sheetnumbery moveto
+      datefont setfont
+      pnum cvs
+	  dup stringwidth pop (0) stringwidth pop sub neg 0 rmoveto show
+      empty pnum copy pop
+    } bind def
+
+% Function currentdate: prints the current date.
+/currentdate
+    { datex datey moveto
+      bodyfont setfont
+      (Date: ) show
+      currdate show
+    } bind def
+
+% Function s: print a source line
+/s  { show
+      /y0 y0 bodyfontsize sub def
+      x0 y0 moveto
+    } bind def
+
+% Functions b and st: change to bold or standard font
+/b  { show
+      boldfont setfont
+    } bind def
+/st { show
+      bodyfont setfont
+    } bind def
+
+% Strings used to make easy printing numbers
+/pnum 12 string def
+/empty 12 string def
+
+% Global initializations
+
+/CourierBack backspacefont
+/filenmfontname /Helvetica-Bold def
+/inch {72 mul} bind def
+
+% Initialize page description variables.
+/x0 0 def
+/y0 0 def
+/sheetheight 11.64 inch def
+/sheetwidth 8.27 inch def
+/margin 1.2 inch def
+/rightmargin margin 3 div def
+/leftmargin margin 2 mul 3 div def
+/twinfiles false def
+/date () def
+/currdate (May 24 1996 13:48:24) def
+%%EndProlog
+
+/docsave save def
+/landscape true def
+/twinpage true def
+% Character size for fonts.
+/filenmfontsize 11 def
+/datefontsize filenmfontsize 0.8 mul def
+/datefont /Helvetica datefontsize getfont def
+/datewidth datefont setfont currdate stringwidth pop def
+/stdfilenmfont filenmfontname filenmfontsize getfont def
+/headermargin filenmfontsize 0.25 mul def
+/headersize 0.22 inch def
+/bodyfontsize 6.8 def
+/bodyfont /CourierBack bodyfontsize getfont def
+/boldfont /Courier-Bold bodyfontsize getfont def
+/bodymargin bodyfontsize 0.7 mul def
+/lines 71 def
+/columns 91 def
+
+% Logical page attributs (a half of a sheet).
+/pagewidth
+   bodyfont setfont (0) stringwidth pop columns mul bodymargin dup add add
+   def
+/pageheight
+   bodyfontsize lines mul bodymargin dup add add headersize add
+   def
+/filenmroom
+      pagewidth
+      filenmfontsize 4 mul datewidth add (Page 999) stringwidth pop add
+    sub
+  def
+
+% Coordinates for upper corner of a logical page and for
+% sheet number. Coordinates depend on format mode used.
+% In twinpage mode, coordinate x of upper corner is not
+% the same for left and right pages: upperx is an array of
+% two elements, indexed by the side of the sheet.
+/topmargin margin twinpage {3} {2} ifelse div def
+% Landscape format
+/uppery rightmargin pageheight add bodymargin add def
+/sheetnumbery datefontsize datefontsize add def
+/datey sheetnumbery def
+
+% Two logical pages
+/upperx [ topmargin			% left page
+          dup 2 mul pagewidth add	% right page
+        ] def
+/sheetnumberx sheetheight topmargin sub def
+/datex topmargin def
+/date (May 15 1996 22:39:49) def
+(xh_psprint.tcl) newfile
+sheetwidth 0 inch translate	% new origin
+90 rotate			% landscape format
+1 0 header
+0 border
+hborder
+/x0 upperx 0 get bodymargin add def
+/y0 uppery bodymargin bodyfontsize add headersize add sub def
+x0 y0 moveto
+bodyfont setfont
+( proc dataprint_psprint {} {) s
+(   global static_dataprint static_dataprint_list) s
+( ) s
+(   if [) s
+(     catch {) s
+(       if {$static_dataprint\(pf\)=="print"} {) s
+(         set file [open "|$static_dataprint\(lpr\)" "WRONLY"]) s
+(       } else {) s
+(         set file [open $static_dataprint\(fname\) "CREAT WRONLY TRUNC"]) s
+(       }) s
+(     } mist) s
+(   ] {) s
+(     bgerror $mist) s
+(     return) s
+(   }) s
+(   ) s
+( # header) s
+(   puts $file {%!}) s
+(   puts $file {%}) s
+(   puts $file {%% Description: Output from XHisto}) s
+(   puts $file {%% Copyright 1996 Peter Wuestner, Forschungszentrum Juelich, ZEL}) s
+(   puts $file {%% xh 1.2}) s
+(   puts $file {%% EndComments}) s
+(   puts $file {}) s
+(   ) s
+(   puts $file {% show left centered}) s
+(   puts $file "/show_lc \\{") s
+(   puts $file {  gsave}) s
+(   puts $file {  2 index}) s
+(   puts $file {  0 0 moveto}) s
+(   puts $file {  false charpath flattenpath pathbbox}) s
+(   puts $file {  3 2 roll}) s
+(   puts $file {  add 2 div}) s
+(   puts $file {  3 1 roll}) s
+(   puts $file {  pop}) s
+(   puts $file {  3 1 roll}) s
+(   puts $file {  sub}) s
+(   puts $file {  3 1 roll}) s
+(   puts $file {  sub}) s
+(   puts $file {  exch}) s
+(   puts $file {  grestore}) s
+(   puts $file {  moveto show}) s
+(   puts $file "\\} def") s
+(   puts $file {}) s
+( ) s
+(   puts $file {% show centered top}) s
+(   puts $file "/show_ct \\{") s
+(   puts $file {  gsave}) s
+(   puts $file {  2 index}) s
+(   puts $file {  0 0 moveto}) s
+(   puts $file {  false charpath flattenpath pathbbox}) s
+(   puts $file {  3 2 roll}) s
+(   puts $file {  pop}) s
+(   puts $file {  3 1 roll}) s
+(   puts $file {  add 2 div}) s
+(   puts $file {  3 1 roll}) s
+(   puts $file {  sub}) s
+(   puts $file {  3 1 roll}) s
+(   puts $file {  sub}) s
+(   puts $file {  exch}) s
+(   puts $file {  grestore}) s
+(   puts $file {  moveto show}) s
+(   puts $file "\\} def") s
+(   puts $file {}) s
+( ) s
+(   puts $file {% show centered centered}) s
+(   puts $file {% z.B. \(mist\) 0 0 show_cc}) s
+(   puts $file "/show_cc \\{") s
+(   puts $file {  gsave}) s
+(   puts $file {  2 index}) s
+(   puts $file {  0 0 moveto}) s
+%%Page: 1 1
+2 1 header
+1 border
+hborder
+/x0 upperx 1 get bodymargin add def
+/y0 uppery bodymargin bodyfontsize add headersize add sub def
+x0 y0 moveto
+bodyfont setfont
+(   puts $file {  false charpath flattenpath pathbbox}) s
+(   puts $file {  3 2 roll}) s
+(   puts $file {  add 2 div}) s
+(   puts $file {  3 1 roll}) s
+(   puts $file {  add 2 div}) s
+(   puts $file {  3 1 roll}) s
+(   puts $file {  sub}) s
+(   puts $file {  3 1 roll}) s
+(   puts $file {  sub}) s
+(   puts $file {  exch}) s
+(   puts $file {  grestore}) s
+(   puts $file {  moveto show}) s
+(   puts $file "\\} def") s
+(   puts $file {}) s
+( ) s
+(   puts $file "/xtrans \\{") s
+(   puts $file {  xmin sub}) s
+(   puts $file {  xdiff div w mul}) s
+(   puts $file "\\} def") s
+(   puts $file {}) s
+( ) s
+(   puts $file "/ytrans \\{") s
+(   puts $file {  ymax div h mul}) s
+(   puts $file "\\} def") s
+(   puts $file {}) s
+( ) s
+(   puts $file "/xtic \\{") s
+(   puts $file {% x length xtic}) s
+(   puts $file {  exch}) s
+(   puts $file {  xtrans}) s
+(   puts $file {  2 copy}) s
+(   puts $file {  0 moveto}) s
+(   puts $file {  0 exch neg rlineto}) s
+(   puts $file {  stroke}) s
+(   puts $file {  h moveto}) s
+(   puts $file {  0 exch rlineto}) s
+(   puts $file {  stroke}) s
+(   puts $file "\\} def") s
+(   puts $file {}) s
+( ) s
+(   puts $file "/xlab \\{") s
+(   puts $file {% label x xlab}) s
+(   puts $file {  xtrans}) s
+(   puts $file {  ltic 3 add neg}) s
+(   puts $file {  show_ct}) s
+(   puts $file "\\} def") s
+(   puts $file {}) s
+( ) s
+(   puts $file "/ytic \\{") s
+(   puts $file {% y length ytic}) s
+(   puts $file {  exch}) s
+(   puts $file {  ytrans}) s
+(   puts $file {  2 copy}) s
+(   puts $file {  0 exch moveto}) s
+(   puts $file {  neg 0 rlineto}) s
+(   puts $file {  stroke}) s
+(   puts $file {  w exch moveto}) s
+(   puts $file {  0 rlineto}) s
+(   puts $file {  stroke}) s
+(   puts $file "\\} def") s
+(   puts $file {}) s
+( ) s
+(   puts $file "/ylab \\{") s
+(   puts $file {% label y ylab}) s
+(   puts $file {  ytrans}) s
+(   puts $file {  w ltic 3 add add}) s
+(   puts $file {  exch}) s
+(   puts $file {  show_lc}) s
+(   puts $file "\\} def") s
+(   puts $file {}) s
+( ) s
+1 sheetnumber
+showpage
+sheetwidth 0 inch translate	% new origin
+90 rotate			% landscape format
+3 0 header
+0 border
+hborder
+/x0 upperx 0 get bodymargin add def
+/y0 uppery bodymargin bodyfontsize add headersize add sub def
+x0 y0 moveto
+bodyfont setfont
+( # definitionen) s
+(   puts $file {/Courier findfont}) s
+(   puts $file {8 scalefont setfont}) s
+(   puts $file {}) s
+(   puts $file "/pagewidth $static_dataprint\(width\) def") s
+(   puts $file "/pageheight $static_dataprint\(height\) def") s
+(   puts $file {}) s
+(   puts $file {/xoffs 36 def}) s
+(   puts $file {/yoffs 36 def}) s
+(   puts $file {}) s
+(   puts $file {/width pagewidth xoffs 2 mul sub def}) s
+(   puts $file {/height pageheight yoffs 2 mul sub def}) s
+(   puts $file {}) s
+(   puts $file {/xrand 50 def}) s
+(   puts $file {/yrand 20 def}) s
+(   puts $file {}) s
+(   puts $file "/xmin $static_dataprint\(t0_i\) def") s
+(   puts $file "/xmax $static_dataprint\(t1_i\) def") s
+(   puts $file {/xdiff xmax xmin sub def}) s
+(   puts $file "/ymax $static_dataprint\(y1\) def") s
+(   puts $file {}) s
+(   puts $file {/ltic 8 def}) s
+(   puts $file {/stic 5 def}) s
+(   puts $file {}) s
+( ) s
+( # auesserer Rahmen) s
+(   switch -exact $static_dataprint\(rotation\) {) s
+(     0 {}) s
+(     90 {) s
+(       puts $file {90 rotate}) s
+(       puts $file {0 pageheight neg translate}) s
+(       puts $file {}) s
+(     }) s
+(     180 {}) s
+(     270 {}) s
+(   }) s
+( ) s
+(   puts $file {xoffs yoffs translate}) s
+(   puts $file {0 setgray}) s
+(   puts $file {0.1 setlinewidth}) s
+(   puts $file {0 0 moveto}) s
+(   puts $file {0 height lineto}) s
+(   puts $file {width height lineto}) s
+(   puts $file {width 0 lineto}) s
+(   puts $file {closepath stroke}) s
+(   puts $file {}) s
+( ) s
+( # innerer Rahmen) s
+(   puts $file {xrand yrand translate}) s
+(   puts $file {/w width xrand 2 mul sub def}) s
+(   puts $file {/h height yrand 2 mul sub def}) s
+(   puts $file {0 0 moveto}) s
+(   puts $file {0 h lineto}) s
+(   puts $file {w h lineto}) s
+(   puts $file {w 0 lineto}) s
+(   puts $file {closepath stroke}) s
+(   puts $file {}) s
+( ) s
+( # xtics) s
+(   switch -exact $static_dataprint\(xticunit\) {) s
+(     seconds {set ut 1}) s
+(     minutes {set ut 60}) s
+(     hours {set ut 3600}) s
+(     days {set ut 86400}) s
+(   }) s
+(   switch -exact $static_dataprint\(xlabunit\) {) s
+(     seconds {set ul 1}) s
+(     minutes {set ul 60}) s
+(     hours {set ul 3600}) s
+(     days {set ul 86400}) s
+(   }) s
+%%Page: 2 2
+4 1 header
+1 border
+hborder
+/x0 upperx 1 get bodymargin add def
+/y0 uppery bodymargin bodyfontsize add headersize add sub def
+x0 y0 moveto
+bodyfont setfont
+(   set x0 $static_dataprint\(t0_i\)  ) s
+(   set xt [expr $static_dataprint\(xtics\)*$ut]) s
+(   set xl [expr $static_dataprint\(xlabs\)*$ul]) s
+(   for {set x [expr $x0-$x0%$xt+$xt]} {$x<=$static_dataprint\(t1_i\)} {incr x $xt} {) s
+(     puts $file "$x stic xtic") s
+(   }) s
+(   puts $file {}) s
+( ) s
+( # xlabels) s
+(   for {set x [expr $x0-$x0%$xl+$xl]} {$x<=$static_dataprint\(t1_i\)} {incr x $xl} {) s
+(     puts $file "$x ltic xtic") s
+(     puts $file "\([clock format $x -format $static_dataprint\(xform\)]\) $x xlab") s
+(   }) s
+(   puts $file {}) s
+( ) s
+( # ytics) s
+(   for {set y 0} {$y<=$static_dataprint\(y1\)} {incr y $static_dataprint\(ytics\)} {) s
+(     puts $file "$y stic ytic") s
+(   }) s
+(   puts $file {}) s
+( ) s
+( # ylabels) s
+(   for {set y 0} {$y<=$static_dataprint\(y1\)} {incr y $static_dataprint\(ylabs\)} {) s
+(     puts $file "$y ltic ytic") s
+(     puts $file "\($y\) $y ylab") s
+(   }) s
+(   puts $file {}) s
+( ) s
+( # daten) s
+(   foreach arr $static_dataprint\(arrlist\) {) s
+(     if {$static_dataprint_list\($arr\)} {) s
+(       set i0 [$arr rightindex $static_dataprint\(t0_i\)]) s
+(       set i1 [$arr leftidx $static_dataprint\(t1_i\)]) s
+(       set i $i0) s
+(       puts $file "[$arr gettime $i %d] xtrans [$arr getval $i] ytrans moveto") s
+(       for {incr i} {$i<=$i1} {incr i} {) s
+(         puts $file "[$arr gettime $i %d] xtrans [$arr getval $i] ytrans lineto") s
+(       }) s
+(       puts $file {stroke}) s
+(       puts $file {}) s
+(     }) s
+(   }) s
+( ) s
+( # ende) s
+(   if {$static_dataprint\(eps\)=="ps"} {) s
+(     puts $file "showpage") s
+(   }) s
+( ) s
+(   close $file) s
+( }) s
+2 sheetnumber
+showpage
+
+%%Trailer
+docsave restore end

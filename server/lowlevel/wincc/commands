@@ -1,0 +1,7 @@
+ems_open 064
+ved_064 command1 WCC_open 'zelz35' 4001
+for {set i 0} {$i<100} {incr i} {catch {ved_064 command1 WCC_R 0 'chan1_state' 'char'}; sleep 1}
+
+7:       401c0000 00000000 (1075576832 0)
+7.3:     401d3333 33333333 (1075655475 858993459)
+123.456:        7 825373484

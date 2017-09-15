@@ -1,0 +1,19 @@
+scsi_rewind            timeout=600000    10 m
+scsi_request_sense
+scsi_read_block_limits
+scsi_write             timeout=180000     3 m
+scsi_write_filemark    timeout=180000     3 m
+scsi_space             timeout=20000000   5 h
+scsi_inquiry
+scsi_mode_select
+scsi_reserve_unit
+scsi_release_unit
+scsi_erase             timeout=20000000   5 h
+scsi_load_unload       timeout=600000    10 m
+scsi_prevent_allow
+scsi_locate            timeout=20000000   5 h
+scsi_read_position
+scsi_log_select
+
+
+scsi_erase timeout=20000000

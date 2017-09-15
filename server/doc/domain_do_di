@@ -1,0 +1,71 @@
+domain dataout:
+
+<Index> <InOutTyp> <Buffersize> <Priority> <IOAddr> <Address>
+
+oder
+<Index> <InOutTyp> -1 <InOutArgs> <IOAddr> <AddressArgs>
+
+InOutArgs: Num {arg}
+  arg1: Buffersize (muss sein)
+  arg2: Priority   (muss sein)
+  arg3... optional
+
+AdressArgs: Num <weiter wie Address>
+
+Address:
+  Raw:
+    addr
+  Modul:
+    name
+  Driver_mapped:
+    name addr_space offset option
+  Driver_mixed:
+    name addr_space offset option
+  Driver_syscall:
+    name addr_space offset option
+  Socket:
+    host port       (fuer connect)
+    INADDR_ANY port (fuer listen)
+  LocalSocket:
+    name
+  File:
+    name
+  Tape:
+    name
+  Null:
+    nix
+
+aus objects.h extrahiert:
+InOutTyp:
+  0 InOut_Ringbuffer
+  1 InOut_Stream
+  2 InOut_Cluster
+
+IOAddr:
+  0 Addr_Raw
+  1 Addr_Modul
+  2 Addr_Driver_mapped
+  3 Addr_Driver_mixed
+  4 Addr_Driver_syscall
+  5 Addr_Socket
+  6 Addr_LocalSocket
+  7 Addr_File
+  8 Addr_Tape
+  9 Addr_Null
+domain datain:
+
+p[0] : Domain-ID (index)
+p[1] : Buffer-Type
+p[2] : Address-Type
+p[3] : raw-address | modulname | driverpath
+[p[...] : space,offset,option]
+
+oder
+p[0] : Domain-ID (index)
+p[1] : Buffer-Type
+p[2] : -1
+p[3] : argnum
+p[4...] : Buffer args
+p[4+argnum] : Address-Type
+p[5+argnum] : argnum
+p[6+argnum ...] : Address args

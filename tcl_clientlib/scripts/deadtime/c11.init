@@ -1,0 +1,14 @@
+set host ikpe1103
+set port 4096
+
+set master e06
+array set ranges {
+    e02 50000
+    e03 50000
+    e04 50000
+    e06 50000
+    e07 50000
+}
+#set gapscale [scale_from_range 20000 $numbins]
+set gapscale 500
+set tdtscale [scale_from_range 50000 $numbins]

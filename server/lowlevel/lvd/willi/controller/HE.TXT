@@ -1,0 +1,106 @@
+gilt nur fuer SIS1100 Systemcontroller
+mwconf.mrout_start/mwconf.mrout_chan	Anfang und Anzahl Kanaele
+
+d		Schwelle aller beteiligten Input Karten neu setzen
+		^A alle weitere Schwellen auf diesen Wert setzen
+
+LEFT	Anzahl Kanaele um 16 verringern, bis auf mindestens 16
+
+RIGHT	Anzahl Kanaele um 16 erhoehen, bis auf maximal 96 (0x60)
+
+	row=(mwconf.mrout_start >>4)  &0x3F;
+	col=(mwconf.mrout_start >>12) &0x0F;
+	if (key == UP) {
+		if (!row && col) row=mwconf.column[--col].rows;
+
+		if (row) row--;
+
+		mwconf.mrout_start=(col <<12) |(row <<4);
+		break;
+	}
+
+	if (key == CTLUP) {
+		if (!row && col) row=mwconf.column[--col].rows;
+
+		if (row) {
+			if (row < 4) row=4;
+			row -=4;
+		}
+
+		mwconf.mrout_start=(col <<12) |(row <<4);
+		break;
+	}
+
+	if (key == DOWN) {
+		row++;
+		if (row >= mwconf.column[col].rows) {
+			if (col+1 < mwconf.columns) { row=0; col++; }
+			else row--;
+		}
+
+		mwconf.mrout_start=(col <<12) |(row <<4);
+		break;
+	}
+
+	if (key == CTLDOWN) {
+		if (row &0x3) row =(row |0x3)+1; else row +=4;
+
+		if (row >= mwconf.column[col].rows) {
+			if (col+1 < mwconf.columns) { row=0; col++; }
+			else row -=4;
+		}
+
+		mwconf.mrout_start=(col <<12) |(row <<4);
+		break;
+	}
+
+	if (key == PGUP) {
+		if (!col) continue;
+
+		col--;
+		mwconf.mrout_start=col <<12;
+		break;
+	}
+
+	if (key == PGDN) {
+		if (col+1 >= mwconf.columns) continue;
+
+		mwconf.mrout_start=++col <<12;
+		break;
+	}
+
+	if (key == CTLLEFT) {
+		errno=0; use_default=0; last_key=0;
+		i=mwconf.mrout_start >>6;
+		do {
+			if ((ret=inp_setdac(config.sc_db,
+									  config.sc_db[0].inp_db+i,
+									  -2, -1)) != 0) return ret;
+
+			i++;
+		} while (i <= ((mwconf.mrout_start+mwconf.mrout_chan-1) >>6));
+
+		printf("\r%8u  thr=%5.2fV", cnt, THRH_MIN+THRH_SLOPE*last_thr_dac);
+		continue;
+	}
+
+	if (key == CTLRIGHT) {
+		errno=0; use_default=0; last_key=0;
+		i=mwconf.mrout_start >>6;
+		do {
+			if ((ret=inp_setdac(config.sc_db,
+									  config.sc_db[0].inp_db+i,
+									  -2, 1)) != 0) return ret;
+
+			i++;
+		} while (i <= ((mwconf.mrout_start+mwconf.mrout_chan-1) >>6));
+
+		printf("\r%8u  thr=%5.2fV", cnt, THRH_MIN+THRH_SLOPE*last_thr_dac);
+		continue;
+	}
+
+	return ret;
+}
+
+for (lptr=rdbuf[0][0]; lptr < rdbuf[REGS][0]; *lptr++ =0);
+

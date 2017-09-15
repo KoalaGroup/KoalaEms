@@ -1,0 +1,35 @@
+# Generated automatically from Makefile.in by configure.
+# procs/lvd/Makefile.in
+# $ZEL: Makefile.in,v 1.8 2009/12/02 23:57:17 wuestner Exp $
+
+CONF = ../../conf
+
+srcdir = .
+
+include $(CONF)/rules.make
+include $(CONF)/config.make
+
+cfiles = lvd_init.c lvd_cratescan.c lvd_verify.c \
+    lvd_read_single.c lvd_read_async.c lvd_i2c.c
+ofiles = $(cfiles:.c=.o)
+depfiles = $(cfiles)
+
+LVDTYPES = $(shell echo $(lvd)|tr '[:lower:]' '[:upper:]')
+LVDFLAGS=$(foreach typ,$(LVDTYPES),-DLVD_$(typ) )
+CFLAGS += $(LVDFLAGS)
+
+lib = ../libprocs.a
+
+all: $(lib)
+
+$(lib): $(lib)($(ofiles))
+	$(RANLIB) $@
+
+clean:
+	-$(RM) *.o
+
+depend: xdepend
+
+.PHONY: depend
+
+#############################################

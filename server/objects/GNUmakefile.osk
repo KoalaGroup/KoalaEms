@@ -1,0 +1,20 @@
+CONF = ../CONF
+COMMON = ../../COMMON
+
+include $(CONF)/rules.make
+
+include $(CONF)/config.make
+
+lib = libobj.l
+
+subdirs = VED $(objects)
+
+all: $(lib)
+
+$(lib): $(subdirs) objects.stamp
+	merge $(addsuffix /lib.l,$(subdirs)) >-$@
+
+$(subdirs): FORCE
+	$(MAKE) -C $@ all
+
+.PHONY: FORCE

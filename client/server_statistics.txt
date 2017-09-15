@@ -1,0 +1,59 @@
+alle replies mit timestamp (unix-format)
+
+datain
+  suspended
+  suspensions
+  status
+  error
+  eventcnt
+  cluster
+  words
+
+
+dataout
+  error (errcode?)
+  fertig (Do_running, Do_neverstarted, Do_done, Do_error)
+  disabled (Do_noswitch, Do_enabled, Do_disabled)
+  Anzahl der folgenden Worte
+  transferred clusters
+  transferred words
+  number of dataout_suspensions
+  if (READOUT_CC) expected eventsize
+
+readout
+    bisher:
+  readout_active      InvocStatus
+  eventcnt            int          (groesste ev-nummer)
+    neu:
+  foreach datain ...
+  suspended           -bool
+  buffer_free         /
+  suspensions         int
+
+Request getreadoutattr:
+  id
+  format fuer timestamp (1: unix; 2: OSK)
+  version additional data (==1 od. 2)
+Reply getreadoutattr:
+  readout_active
+  eventcnt
+  ---
+  timestamp format
+  timestamp
+  ---
+  add. format (1: cc, 2: em)
+--- if cc (1)
+  suspensions
+  suspended
+--- if em (2)
+  num_di
+    num_values
+    di_idx
+    status
+    error
+    suspended
+    suspensions
+    cluster
+    eventcnt
+    words
+---

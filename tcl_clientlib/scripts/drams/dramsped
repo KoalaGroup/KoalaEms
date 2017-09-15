@@ -1,0 +1,18 @@
+#!/usr/local/bin/klient
+open drams
+reset ro
+setunsol 1
+resetved
+downloaddomain ml 0 7 $DRAMS_CONTROL 8 $DRAMS_RECEIVER 9 $DRAMS_EVENT 4 $T_TRIG 17 $CAEN_IO
+
+createis 1 11
+#downloadismodullist 4 7 8 9
+downloadismodullist 7 8 9 17
+DRAMS_mess_ped(1, 1000,20)
+flush
+echo readvariable 1
+readvariable 1 >/usr/users/diart/data/pedestals
+flush
+echo resetved
+resetved
+

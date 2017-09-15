@@ -1,0 +1,6 @@
+proc status_CAEN_V551B {ved addr} {
+}
+
+proc status_CAEN_V550 {ved addr} {
+}
+

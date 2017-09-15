@@ -1,0 +1,89 @@
+DRAMS-Procedures:
+
+==============================================================================
+
+DRAMS_prepare
+
+schaltet DRAMS in Mess-Modus
+Args: none
+
+==============================================================================
+
+DRAMS_Readout
+
+Readout der DRAMS-Module
+Args: none
+
+==============================================================================
+
+DRAMS_Pedestal
+
+Misst Pedestals und gibt sie als Funktionswert zurueck
+Args: int loops, int delay[, int kanal]
+
+wie DRAMS_mess_ped, aber ohne Variable
+
+==============================================================================
+
+DRAMS_mess_ped
+
+Misst Pedestals und schreibt sie in die Variable var
+Args: var, int loops, int delay[, int kanal]
+
+delay<=100; in 1/100 s
+kanal: Output-Kanal fuer CAEN C219
+
+sizeof(var) wird auf num_receiver*1024*2 gesetzt
+var enthaelt danach abwechselnd pedestal*1000 und sigma*1000
+  (fuer DRAMS_set_ped brauchbar)
+
+==============================================================================
+
+DRAMS_set_ped
+
+Entnimmt der Variablen var Pedestals und schreibt sie in die
+koehlerschen DRAMS-Module
+Args: var factor
+
+sizeof(var) muss num_receiver*1024*2 sein und abwechselnd pedestal*1000 und
+sigma*1000 enthalten (z.B. von DRAMS_mess_ped erzeugt)
+
+geladen wird round(pedestal) und round(pedestal+(factor/1000.)*sigma)
+
+==============================================================================
+
+DRAMS_Set
+
+Args:
+  [0]: num_receiver*2048+1
+  [1]: num_receiver
+  [2]: pedestal[0]
+  [3]: threshold[0]
+  [4]: pedestal[1]
+  ...
+
+==============================================================================
+
+DRAMS_save_ped
+
+liest Pedestals und Schwellen aus den DRAMS aus und speichert sie in einer 
+EMS-Variablen
+Args: var
+
+sizeof(var) wird auf num_receiver*1024*2 gesetzt
+es werden abwechselnd Pedestals und Schwellen der einzelnen Kanaele gespeichert.
+
+==============================================================================
+
+DRAMS_zero_ped
+
+setzt alle Pedestals in allen Receiver-Modulen des IS auf 0
+Args: none
+
+==============================================================================
+
+DRAMS_zero_thresh
+
+setzt alle Thresholds in allen Receiver-Modulen des IS auf 0
+Args: none
+

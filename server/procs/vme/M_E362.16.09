@@ -1,0 +1,442 @@
+
+/****************************************************************************/
+/*                                                                          */
+/*                                                                          */
+/* Erstellungsdatum : 12.07. '93                                            */
+/*                                                                          */
+/* letzte Aenderung:  18.08. '93                                            */
+/*                                                                          */
+/* Autor : Twardo (verifiziert fuer EMS)                                    */
+/*                                                                          */
+/****************************************************************************/
+
+#include <math.h>
+#include <errorcodes.h>
+#include <modultypes.h>
+#include <debug.h>
+#include <config.h>
+#include <types.h>
+#include "../../LOWLEVEL/VME/vme.h"
+#include "../../OBJECTS/VAR/variables.h"
+#include "m_e362.h"
+#include "./list.h"
+
+#define TIME(look) ( (look<<8) | 0x80000000 )
+
+extern *outptr,*memberlist;
+
+/* Variablen fuer die verkette Liste */
+listpointer *ptr,*head,*c_n;
+stdelement element;
+int fail;
+
+/* statische Variable, die anzeigt, ob eine Liste besteht */
+static int list_exist=0;
+
+/* Es folgen globale Variablen fuer m_e362 */
+u_char CNTR_r[]={0x80,0x81,0x82,0x83,0x84,0x85,0x86,0x87};
+int    R1_[]={  10,  20, 50,100,200, 400,1000};
+int    R2_[]={   0,   0,  0,  0,  0,1000,1000};
+int    R4_[]={   0,   0,  0,  0,  0,2000,4000};
+int    R5_[]={   0,   0,  0,  0,  0,2000,4000};
+int    R6_[]={   0,   0,  0,  0,  0,2200,2000};
+int    R7_[]={2000,1000,500,100,200, 400,1000};
+
+u_char motor_r[8];
+
+/****************************************************************************/
+/* Procedure M_E362_goslowperm(Adresse,CONST,CONST2)                        */
+/*                                                                          */
+/*           Adresse  = Basisadresse (input)                                */
+/*           CONST1   = R1 Startsequenz (input)                             */
+/*           CONST2   = R7 Stoppsequenz (input)                             */
+/*                                                                          */
+/* Confirmation: Encoderwert (im moment nicht)                              */
+/*                                                                          */
+/****************************************************************************/
+
+plerrcode proc_M_E362_goslowperm(p)
+
+int *p;
+{
+int    welcher,adresse;
+
+printf("Motor --- M_E362_goslowperm ---\n");
+welcher=p[1];
+adresse=memberlist[welcher];
+adresse=adresse+4;
+
+motor_r[1] = p[2];
+motor_r[7] = p[3];
+
+*A_Addr(adresse,0)=CNTR_reset;
+*A_Addr(adresse,0)=CNTR_master;
+
+loadr(adresse,1,motor_r[1]);
+loadr(adresse,7,motor_r[7]);
+
+*A_Addr(adresse,0)=CNTR_slowneg;
+*A_Addr(adresse,0)=GO_slow;
+
+return(plOK);
+}
+
+plerrcode test_proc_M_E362_goslowperm(p)
+
+int *p;
+{
+   if ( *p++ !=3 )                 return(plErr_ArgNum);
+   if ( !memberlist )              return(plErr_NoISModulList);
+   if ( get_mod_type(memberlist[*p]) != E362 ){
+      *outptr++=memberlist[*p];
+                                   return(plErr_BadModTyp);
+   }
+
+   return(plOK);
+}
+char name_proc_M_E362_goslowperm[]="M_E362_goslowperm";
+int ver_proc_M_E362_goslowperm=1;
+
+/****************************************************************************/
+/*                                                                          */
+/* Procedure M_E362_goslowpul(Adresse,CONST1,CONST2,CONST3)                 */
+/*                                                                          */
+/*           Adresse  = Basisadresse (input)                                */
+/*           CONST1   = R1 Startsequenz (input)                             */
+/*           CONST2   = R7 Stoppsequenz (input)                             */
+/*           CONST3   = Anzahl der Pulse                                    */
+/*                                                                          */
+/* Confirmation: keine Daten                                                */
+/*                                                                          */
+/****************************************************************************/
+
+plerrcode proc_M_E362_goslowpul(p)
+
+int *p;
+{
+int    welcher,adresse,pulse;
+
+printf("Motor --- M_E362_goslowperm ---\n");
+welcher=p[1];
+adresse=memberlist[welcher];
+adresse=adresse+4;
+
+motor_r[1] = p[2];
+motor_r[7] = p[3];
+pulse      = p[4];
+
+*A_Addr(adresse,0)=CNTR_reset;
+*A_Addr(adresse,0)=CNTR_master;
+
+loadr(adresse,1,motor_r[1]);
+loadr(adresse,7,motor_r[7]);
+
+loadpulse(adresse,pulse);
+
+*A_Addr(adresse,0)=CNTR_step;
+*A_Addr(adresse,0)=GO_slow;
+
+return(plOK);
+}
+
+plerrcode test_proc_M_E362_goslowpul(p)
+
+int *p;
+{
+   if ( *p++ !=4 )                 return(plErr_ArgNum);
+   if ( !memberlist )              return(plErr_NoISModulList);
+   if ( get_mod_type(memberlist[*p]) != E362 ){
+      *outptr++=memberlist[*p];
+                                   return(plErr_BadModTyp);
+   }
+
+   return(plOK);
+}
+char name_proc_M_E362_goslowpul[]="M_E362_goslowpul";
+int ver_proc_M_E362_goslowpul=1;
+
+
+/****************************************************************************/
+/*                                                                          */
+/* Procedure M_E362_stop(stopmode)                                          */
+/*                                                                          */
+/*           Adresse  = Basisadresse (input)                                */
+/*           stopmode = 0     stop immediatelly (input)                     */
+/*                      sonst gently                                        */
+/*                                                                          */
+/* Confirmation: keine Daten                                                */
+/*                                                                          */
+/****************************************************************************/
+
+plerrcode proc_M_E362_stop(p)
+
+int *p;
+{
+int    welcher,adresse;
+
+welcher=p[1];
+adresse=memberlist[welcher];
+adresse=adresse+4;
+
+if (p[2]) *A_Addr(adresse,0)=CNTR_reset;
+else *A_Addr(adresse,0)=CNTR_stop;
+
+return(plOK);
+}
+
+plerrcode test_proc_M_E362_stop(p)
+
+int *p;
+{
+   if ( *p++ !=2 )                 return(plErr_ArgNum);
+   if ( !memberlist )              return(plErr_NoISModulList);
+   if ( get_mod_type(memberlist[*p]) != E362 ){
+      *outptr++=memberlist[*p];
+                                   return(plErr_BadModTyp);
+   }
+   return(plOK);
+}
+char name_proc_M_E362_stop[]="M_E362_stop";
+int ver_proc_M_E362_stop=1;
+
+
+/****************************************************************************/
+/*                                                                          */
+/* Procedure M_E362_status(motoradresse,encoderadresse,variablennummer)     */
+/*                                                                          */
+/*           MotorAdresse  = Basisadresse Nr. aus der Instrumentierungsliste*/
+/*           EncoderAdresse= Basisadresse Nr. aus der Instrumentierungsliste*/
+/*           Variablennr.  = Nummer der Variablen in der Statusinformationen*/
+/*                           von der Interceptroutine abgalegt werden       */
+/*                                                                          */
+/* Confirmation: Pulsregister, Encoderwert, Statusvariable                  */
+/*                                                                          */
+/****************************************************************************/
+
+plerrcode proc_M_E362_status(p)
+
+int *p;
+{
+int m_adresse,e_adresse,var_nr,var_size,*var_ptr;
+
+m_adresse=memberlist[p[1]]+4;
+e_adresse=memberlist[p[2]];
+var_nr   =p[3];
+var_size =var_list[p[3]].len;
+var_ptr  =(int *)var_list[var_nr].var.ptr;
+
+while ( var_size-- ) *outptr++= *var_ptr++;
+*outptr++ = getpulse(m_adresse);
+*outptr++ = encoderwert(e_adresse);
+
+/*
+*outptr++ = *A_Addr(adresse,0); ist das das statusregister??????
+*/
+
+return(plOK);
+}
+
+plerrcode test_proc_M_E362_status(p)
+
+int *p;
+{
+   if ( p[0] !=3 )                 return(plErr_ArgNum);
+   if ( !memberlist )              return(plErr_NoISModulList);
+   if ( get_mod_type(memberlist[p[1]]) != E362 ){
+      *outptr++=memberlist[p[1]];
+                                   return(plErr_BadModTyp);
+   }
+   if ( get_mod_type(memberlist[p[2]]) != ROC717 ){
+      *outptr++=memberlist[p[2]];
+                                   return(plErr_BadModTyp);
+   }
+   if ( p[3]>MAX_VAR ) return(plErr_IllVar);
+   if ( !var_list[p[3]].len ) return(plErr_NoVar);
+   if ( var_list[p[3]].len != 7 ) return(plErr_IllVarSize);
+
+   return(plOK);
+}
+char name_proc_M_E362_status[]="M_E362_status";
+int ver_proc_M_E362_status=1;
+
+
+
+/****************************************************************************/
+/*                                                                          */
+/* Procedure M_E362(Adresse,CONST1,CONST2,CONST3,CONST4,CONST5,Adresse)     */
+/*                                                                          */
+/*           Adresse  = Basisadresse der Motorkarte                         */
+/*           CONST1   = Richtung negativ=0                                  */
+/*           CONST2   = Geschindigkeit 1..8                                 */
+/*           CONST3   = Winkel=0 sonst Pulse                                */
+/*           CONST4   = Grad bzw. Pulse                                     */
+/*           CONST5   = Minuten                                             */
+/*           CONST6   = Sekunden                                            */
+/*           CONST7   = justieren nein=0                                    */
+/*           Adresse  = Basisadresse des Encoders                           */
+/*           Variable = Variablennummer fuer Status                         */
+/*           try      = Anzahl der Versuche zum Positionieren               */
+/*           t_out    = Timeout in Sekunden                                 */
+/*                                                                          */
+/* Confirmation: Encoderwert,Status                                         */
+/*                                                                          */
+/* Bemerkung: Es wird nocht nicht beruecksichtigt, dass der Motor nach      */
+/*            0x1ffff Pulsen eine ganze Umdrehung gemacht hat. Dies wird in */
+/*            dem Programm nicht abgefangen, so dass das Programm in einen  */
+/*            "Endlosloop" geraet.                                          */
+/*            Die hier angebotenen Geschwindigkeiten muessen auch noch      */
+/*            ueberdacht werden. Sie muessen wohl an dem tatsaechlichen     */
+/*            Experiment erstellt werden.                                   */
+/*                                                                          */
+/****************************************************************************/
+
+
+plerrcode proc_M_E362(p)
+
+int *p;
+{
+
+int look=1,out=120; /* als Parameter!!! */
+
+intercept(sighand);
+
+printf("Motor --- M_E362 ---\n");
+
+/* --- Adresse des Motors ---------------------------------------------- */
+element.motoradresse=memberlist[p[1]]+4;
+
+/* --- Typ des Motors -------------------------------------------------- */
+element.motortyp=get_mod_type(memberlist[p[1]]);
+
+/* --- Adresse des Encoders -------------------------------------------- */
+element.encoderadresse=memberlist[p[9]];
+
+/* --- Typ des Encoders ------------------------------------------------ */
+element.encodertyp=get_mod_type(memberlist[p[9]]);
+
+/* --- Nummer der Variablen fuer den Status in die Struktur schreiben -- */
+element.var=p[10];
+
+/* --- Reset- und MasterMode ------------------------------------------- */
+*A_Addr(element.motoradresse,0)=CNTR_reset;
+*A_Addr(element.motoradresse,0)=CNTR_master;
+
+/* --- Encoder auslesen ------------------------------------------------ */
+element.encoderalt=encoderwert(element.encoderadresse);
+
+/* --- Register 1,2,4,5,6,7 mit der gewaehlten Geschwindigkeit laden --- */
+loadr(element.motoradresse,1,R1_[p[3]]);
+loadr(element.motoradresse,2,R2_[p[3]]);
+loadr(element.motoradresse,4,R4_[p[3]]);
+loadr(element.motoradresse,5,R5_[p[3]]);
+loadr(element.motoradresse,6,R6_[p[3]]);
+loadr(element.motoradresse,7,R7_[p[3]]);
+
+/* --- Winkel oder Pulse ----------------------------------------------- */
+if ( p[4] ) element.pulse=p[5];
+else element.pulse=(60*60*p[5]+60*p[6]+p[7])/9;
+
+/* --- die Anzahl der Pulse laden -------------------------------------- */
+loadpulse(element.motoradresse,element.pulse);
+
+/* --- Ziel feststellen ------------------------------------------------ */
+if ( p[2] ) element.ziel=element.encoderalt+p[5];
+else element.ziel=element.encoderalt-p[5];
+
+/* Signale gewinnen mit Drochnerprocedure !!!!!!!!!!!!!!!!!!!!!!!!!!!! */
+if ( (element.signal_look=install_signalhandler(sighand,0))==(-1) ){
+   printf("ERROR can't get Signal.\n");
+   exit(1);
+}
+
+/* --- cyklischen Alarm setzen ----------------------------------------- */
+if ( (element.alm_cycle_id =
+     alm_cycle(element.signal_look,TIME(look)))==(-1) ) {
+   printf("ERROR can't set ALARM\n");
+   *outptr++=-1;
+   exit();
+}
+
+/* Signale gewinnen mit Drochnerprocedure !!!!!!!!!!!!!!!!!!!!!!!!!!!! */
+if ( (element.signal_timeout=install_signalhandler(sighand,0))==(-1) ){
+   printf("ERROR can't get Signal.\n");
+   exit(1);
+}
+
+/* --- Alarm fuer Timeout setzen --------------------------------------- */
+element.t_out= ( (p[12]<<8) | 0x80000000 );
+if ( (element.alm_set_id =
+      alm_set(element.signal_timeout,element.t_out))==(-1) ) {
+   printf("ERROR can't set ALARM\n");
+   *outptr++=-1;
+   exit();
+}
+
+/* --- alle fuer die Interceptroutine benoetigten Parameter in die ----- */
+/* --- Struktur laden -------------------------------------------------- */
+element.encoder        =0;
+element.dif            =0;
+element.justieren      =p[8];
+element.direction      =p[2];
+element.again          =0;
+element.try            =p[11];
+element.rep            =0;
+
+/* --- wenn noch keine Liste besteht, erzeuge eine -------------------- */
+if ( !list_exist ) {
+   createliste();
+   list_exist=1;
+}
+
+/* --- die Struktur in die verkette Liste laden ----------------------- */
+insertafter(element);
+
+/* --- Motor einmal anfahren fahren, Rest mit Interceptroutine ---- */
+if ( p[3]<=4 ) {
+   if ( p[2] ) {
+      *A_Addr(element.motoradresse,0)=CNTR_steppos;
+   }
+   else {
+      *A_Addr(element.motoradresse,0)=CNTR_stepneg;
+   }
+   *A_Addr(element.motoradresse,0)=GO_slow;
+}
+else {
+   if ( p[2] ) {
+      *A_Addr(element.motoradresse,0)=CNTR_stepposAv;
+   }
+   else {
+      *A_Addr(element.motoradresse,0)=CNTR_stepnegAv;
+   }
+   *A_Addr(element.motoradresse,0)=GO_quick;
+}
+
+return(plOK);
+}
+
+plerrcode test_proc_M_E362(p)
+
+int *p;
+{
+   if ( p[0] !=12 )                 return(plErr_ArgNum);
+   if ( !memberlist )               return(plErr_NoISModulList);
+   if ( get_mod_type(memberlist[p[1]]) != E362 ){
+      *outptr++=memberlist[p[1]];
+                                    return(plErr_BadModTyp);
+   }
+   if ( p[8] ) {
+      if ( get_mod_type(memberlist[p[9]]) != ROC717 ){
+           *outptr++=memberlist[p[9]];
+                                    return(plErr_BadModTyp);
+         }
+   }
+   if ( p[10] > MAX_VAR )           return( plErr_IllVar);
+   if ( !var_list[p[10]].len )      return(plErr_NoVar);
+   if (  var_list[p[10]].len != 7 ) return(plErr_IllVarSize);
+
+   return(plOK);
+}
+
+char name_proc_M_E362[]="M_E362";
+int ver_proc_M_E362=1;
+

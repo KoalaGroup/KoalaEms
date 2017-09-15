@@ -1,0 +1,61 @@
+#! /bin/sh
+#\
+exec emssh $0 $*
+
+# Vorbereitung fuer 'autoload' von Prozeduren; die Variable common_library
+# muss an die konkrete Installation angepasst werden.
+set common_library /usr/local/ems/lib/common
+lappend auto_path $common_library
+
+# Kommandozeilenargumente verarbeiten
+# process_args
+# set global_verbose [info exists namedarg(verbose)]
+# if {$global_verbose} printargs
+# 
+# if [info exists namedarg(help)] {
+#   printhelp
+#   exit
+# }
+
+#wm withdraw .
+#set_options
+#set maintitle showveto
+#set tcl_precision 17
+
+if [info exists namedarg(ved)] {
+  set ved $namedarg(ved)
+} else {
+  set ved Crate_3
+}
+if [info exists namedarg(host)] {
+  set host $namedarg(host)
+} else {
+  set host ikpe1102
+}
+if [info exists namedarg(port)] {
+  set host $namedarg(port)
+} else {
+  set port 4097
+}
+
+proc date {} {
+  return [clock format [clock seconds] -format {%H:%M:%S}]
+}
+
+ems_connect $host $port
+rename [ems_open $ved camac] c3
+set val [format {0x%x} [c3 command1 nAFread 17 0 0]]
+set oldveto [expr {($val&2)!=0}]
+puts "[date] veto=$oldveto (start)"
+while 1 {
+  after 500
+  set val [format {0x%x} [c3 command1 nAFread 17 0 0]]
+  set veto [expr {($val&2)!=0}]
+  if {$veto!=$oldveto} {
+    puts "[date] veto=$veto"
+    set oldveto $veto
+  }
+}
+
+###############################################################################
+###############################################################################

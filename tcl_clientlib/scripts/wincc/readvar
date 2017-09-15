@@ -1,0 +1,56 @@
+
+proc open_wcc {hostname} {
+global wincc_info
+
+set vedname 064
+set portnum 4001
+
+set wincc_info(ved) [ems_open $vedname]
+set wincc_info(path) [$wincc_info(ved) command1 WCC_open '$hostname' $portnum]
+}
+
+proc readvar {name typ} {
+global wincc_info
+
+set res [$wincc_info(ved) command1 WCC_R $wincc_info(path) '$name' '$typ']
+puts "res: $res"
+set wccerrcode [lindex $res 1]
+if {$wccerrcode!=0} {
+  puts "WCC_error: $wccerrcode"
+  return 0;
+}
+set varerrcode [lindex $res 2]
+if {$varerrcode!=0} {
+  puts "VAR_error: $varerrcode"
+  return 0;
+}
+set rest [lrange $res 3 end]
+set val 0
+switch $typ {
+  bit   -
+  byte  -
+  word  -
+  dword -
+  sbyte -
+  sword {
+    set val [lindex $rest 0]
+  }
+  char {
+    xdr2string $rest val
+  }
+  double {
+    set val [eval xdr2double $rest]
+  }
+  float {
+    set val [eval xdr2float $rest]
+  }
+  raw {
+    set val "raw not converted"
+  }
+  default {
+    puts "type $typ is not known"
+    return 0
+  }
+}
+return $val
+}

@@ -1,0 +1,29 @@
+# Generated automatically from Makefile.in by configure.
+# trigger/pci/sis1100/Makefile.in
+# $ZEL: Makefile.in,v 1.1 2003/10/10 13:36:18 wuestner Exp $
+# created 30.Sep.2003 PW
+
+CONF = ../../../conf
+
+srcdir = .
+
+include $(CONF)/rules.make
+include $(CONF)/config.make
+
+cfiles = sis1100trigger.c
+ofiles = $(cfiles:.c=.o)
+depfiles = $(cfiles)
+
+lib = ../../libtrig.a
+
+all: $(lib)
+
+$(lib): $(lib)($(ofiles))
+	$(RANLIB) $@
+
+depend: xdepend
+
+.PHONY: depend
+
+#############################################
+

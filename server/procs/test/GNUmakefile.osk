@@ -1,0 +1,19 @@
+CONF = ../../CONF
+COMMON = ../../../COMMON
+
+include $(CONF)/rules.make
+
+cfiles = debuglevel.r delay.r error.r exit.r chstdout.r  \
+	printevent.r random.r unsol.r onreadouterror.r maxevcount.r  \
+	readoutprior.r
+
+all: lib.l
+
+lib.l: $(cfiles)
+	merge $^ >-lib.l
+
+#####################################################
+
+$(cfiles): sconf.h debug.h errorcodes.h
+unsol.r: unsoltypes.h
+random.r: ../../OBJECTS/VAR/variables.h

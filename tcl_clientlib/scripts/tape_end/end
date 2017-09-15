@@ -1,0 +1,172 @@
+#! /bin/sh
+#\
+exec emswish $0 $*
+
+proc xformat {v} {
+  set s {}
+  while {$v>999} {
+    set a [expr $v%1000]
+    set v [expr $v/1000]
+    set s [format {,%03d%s} $a $s]
+  }
+  set s [format {%d%s} $v $s]
+  return $s
+}
+
+proc xfformat {v} {
+  set s {}
+  while {$v>999} {
+    set a [expr int(fmod($v, 1000))]
+    set v [expr ($v-$a)/1000]
+    set s [format {,%03d%s} $a $s]
+  }
+  set s [format {%d%s} [expr int($v)] $s]
+  return $s
+}
+
+proc got_do_status_error {ved do conf} {
+  puts "$ved dataout $do: [$conf print text]"
+  $conf delete
+}
+
+proc calc_end {ft rest jetzt} {
+    global reste  ;# list of the last remaining blocks (size 4096)
+    global zeiten ;# list of the last times when remaining blocks where reported
+    ;# 'null' is 1 if the datarate is lower than half of the average
+    global last_null ;# last 'null' (0/1)
+    global last_gap  ;# incremented at each invocation of calc_end; 
+                     ;# zeroed if null changes from 0 to 1
+    global gaps      ;# list of the last gaps between 'flat tops'
+    global gapsum    ;# distance of 5(?) gaps
+    global gaps_found ;# number of gaps seen so far (only gaps_found!=0 is used)
+    global t0        ;# time of start of measurement (to avoid too large timestamps)
+    global old_ft old_time ;# used to calculate datarate between invocations
+
+    lappend reste [expr double($rest)]
+    lappend zeiten $jetzt ;# jetzt is already double
+
+    set max 120 ;# limit calculations to 10 minutes
+    
+    if {($gaps_found>2) && ($gapsum>10)} {set max $gapsum}
+    while {[llength $reste]>$max} { ;# truncate the lists
+        set reste [lrange $reste 1 end]
+        set zeiten [lrange $zeiten 1 end]
+    }
+    set n [llength $reste]
+
+    if {$old_time} {
+        ;# rate of data transferred to tape (after compression)
+        set trate [expr ($ft-$old_ft)/($jetzt-$old_time)]
+    } else {
+        set trate 0
+    }
+    set t4rate [expr $trate/4096] ;# the same in terms of 4 KBye
+    set old_ft $ft
+    set old_time $jetzt
+
+    if {$n>1} {
+        set xqsum 0; set xsum 0; set ysum 0; set xysum 0
+        for {set i [expr $n-1]} {$i>=0} {incr i -1} {
+            set x [lindex $zeiten $i]
+            set y [lindex $reste $i]
+            set xqsum [expr $xqsum+$x*$x]
+            set xsum [expr $xsum+$x]
+            set ysum [expr $ysum+$y]
+            set xysum [expr $xysum+$x*$y]
+        }
+
+        set q [expr $n*$xqsum-$xsum*$xsum]
+        set b [expr ($n*$xysum-$xsum*$ysum)/$q];
+        set a [expr ($ysum-$b*$xsum)/$n];
+
+        set null [expr $t4rate<$b*-.5]
+        set xrest [expr $a+$b*$jetzt]
+        set xrd [expr $rest/$xrest-1.]
+        set bang [expr -$a/$b]
+        set xbang [expr int($bang+$t0)]
+        set sbang [clock format $xbang -format {%H:%M}]
+
+        puts -nonewline [format {n=%3d r=%d b=%+6.1f bang=%6.0f %+f %s %6.0f %5.1f %d %d} \
+            $n $rest $b $bang $xrd $sbang $trate $t4rate $null $last_gap]
+        if {!$null && $last_null} {
+            if {$gaps_found>1} {
+                lappend gaps $last_gap
+
+                set gapsum 0
+
+                set gapnum [llength $gaps]
+                if {$gapnum>10} {set gaps [lrange $gaps 1 end]}
+                set gapsum 0
+                foreach g $gaps {incr gapsum $g}
+                foreach g $gaps {puts -nonewline " $g"}
+            }
+            set last_gap 0
+            incr gaps_found
+        }
+        puts ""
+        incr last_gap
+        set last_null $null
+    } else {
+        puts [format {n=%3d r=%d} $n $rest]
+    }
+
+}
+
+proc update_tstatus_64 status {
+    global t0
+    # puts "$status"
+    set len [llength $status]
+    if {$len>=20} {
+        set jetzt [expr [doubletime]-$t0]
+
+        set mbtape [lindex $status 15]
+        set btape [lindex $status 16]
+        set ftvar [expr $mbtape*1048576.+$btape]
+
+        if {$len>=21} {
+          # DLT7000 remaining tape
+          set rest [lindex $status 20]
+          calc_end $ftvar $rest $jetzt
+        }
+    } else {
+        puts "len=$len"
+    }
+    if {($len>=15) && ([lindex $status 1]!=0)} {
+        puts "Tapestatus:"
+        puts "  error code           : [lindex $status 0]"
+        puts "  sense key            : [lindex $status 1]"
+        puts "  add. sense code      : [lindex $status 2]"
+        puts "  add. sense code qual.: [lindex $status 3]"
+    }
+}
+
+proc got_do_status {ved idx args} {
+    set global_intsize 64
+    if {$global_intsize<64} {
+      update_tstatus_32 [lrange $args 11 end]
+    } else {
+      update_tstatus_64 [lrange $args 11 end]
+    }
+}
+
+proc status_loop {} {
+    set ved eb
+    set idx 1
+    $ved dataout status $idx 1 : got_do_status $ved $idx ? got_do_status_error $ved $idx
+    after 5000 status_loop
+}
+
+ems_connect ikptof07 4096
+rename [ems_open em] eb
+
+set last_null 0
+set last_gap 0
+set gaps {}
+set gapsum 0
+set gaps_found 0
+set old_ft 0
+set old_time 0
+
+eb confmode asynchron
+set t0 [doubletime]
+status_loop

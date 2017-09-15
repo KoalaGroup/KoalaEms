@@ -1,0 +1,12 @@
+CONF = ../../CONF
+COMMON = ../../../COMMON
+
+include $(COMMON)/rules.make
+
+cfiles =  DIO_E217.r 
+
+
+all: lib.l
+
+lib.l: $(cfiles)
+	merge $^ >-lib.l

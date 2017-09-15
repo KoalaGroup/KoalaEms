@@ -1,0 +1,131 @@
+# IS {triggerlist} {proclist}
+# triggerlist: trigger
+#            : trigger, trigger ...
+#            : trigger_a-trigger_e
+# proclist   : procedure
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<proclists>
+    <is>
+        <id>0</id>
+        <trigger>1-15</trigger>
+        <proclist>
+            <proc>
+                <name>GetIntVar.1</name><args>1</args>
+            </proc>
+        </proclist>
+    </is>
+    <is>
+        <id>1000</id>
+        <trigger>1-15</trigger>
+        <proclist>
+            <proc>
+                <name>GetPCITrigData.1</name><args></args>
+            </proc>
+        </proclist>
+    </is>
+}
+</proclists>
+
+
+# proclist   : procedure procedure ...
+# procedure  : name {args}
+
+# the '{1}' here is the size of the variable, not the index!
+0 {1-15} {
+    GetIntVar.1 {1}
+}
+
+is: 1000
+trigger: 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
+proc: GetPCITrigData.1 {}
+
+
+is: 4
+trigger: 8 9
+proc: Scaler2551_update_read.1 {4 1 4095}
+proc: Scaler2551_update_read.1 {4 2 4095}
+
+
+5 {1 9} {
+    Scaler4434_update_read.1 {5 1 1}
+}
+5 {8} {
+    Scaler4434_update_read.1 {5 1 -1}
+    Scaler4434_update_read.1 {5 2 -1}
+    Scaler4434_update_read.1 {5 3 -1}
+}
+
+10 {1} {
+    C219statist.1 {1 10 11}
+}
+
+35 {1}
+    sis3600wait.1 {9 0 -1}
+    FRDB_multi_read.1 {1 520}
+}
+35 {9} {
+    sis3600wait.1 {9 0 -1}
+    FRDB_multi_read.1 {1 520}
+}
+
+51 {8} {
+    fb_lc1881_check_buf.2 {504 0 60}
+}
+51 {9} {
+    fb_lc1881_check_buf.2 {504 0 60}
+}
+
+20 {1} {
+    fb_lc1881_readout.4 {5 1 5 7}
+}
+20 {9}
+    fb_lc1881_readout.4 {5 1 5 7}
+}
+
+IS 21
+trigger 1
+proc fb_ph10Cx_read.1 {17 0 12}
+trigger 9
+proc fb_ph10Cx_read.1 {17 0 12}
+
+IS 52
+trigger 8
+proc fb_lc1881_check_buf.2 {1048064 0 60}
+trigger 9
+proc fb_lc1881_check_buf.2 {1048064 0 60}
+IS 22
+trigger 1
+proc fb_lc1881_readout.4 {5 1 10 12}
+trigger 9
+proc fb_lc1881_readout.4 {5 1 10 12}
+
+IS 1
+trigger 8
+proc Timestamp.1 {1}
+trigger 9
+proc Timestamp.1 {1}
+
+IS 3:
+trigger 8
+proc sis3800ShadowUpdate.1 {1 6 1 2 3 4 5 6 -1 -1 -1 -1 -1 -1}
+trigger 9
+proc sis3800ShadowUpdate.1 {1 6 1 2 3 4 5 6 -1 -1 -1 -1 -1 -1}
+
+IS 53:
+trigger 8
+proc fb_lc1881_check_buf.2 {15 0 60}
+trigger 9
+proc fb_lc1881_check_buf.2 {15 0 60}
+
+IS 26:
+trigger 1
+proc fb_lc1881_readout.4 {5 1 3 5}
+trigger 9
+proc fb_lc1881_readout.4 {5 1 3 5}
+
+IS 25:
+trigger 1
+proc fb_ph10Cx_read.1 {11 0 8}
+trigger 9
+proc fb_ph10Cx_read.1 {11 0 8}

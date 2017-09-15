@@ -1,0 +1,14 @@
+CONF = ../../../CONF
+COMMON = ../../../../COMMON
+
+include $(COMMON)/rules.make
+
+cfiles = InputIntVarD.r InputNumberD.r InputString.r PrintIntVar.r PrintNumber.r PrintString.r
+
+all: lib.l
+
+lib.l: $(cfiles)
+	merge $^ >-lib.l
+
+#############################################################################
+

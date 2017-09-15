@@ -1,0 +1,11 @@
+CONF = ../../CONF
+COMMON = ../../../COMMON
+
+include $(COMMON)/rules.make
+
+cfiles = DownLoad.r StartNCO.r UpLoad.r dsp_drv.r nco_drv.r
+
+all: lib.l
+
+lib.l: $(cfiles)
+	merge $^ >-lib.l

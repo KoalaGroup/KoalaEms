@@ -1,0 +1,21 @@
+#!/usr/local/bin/klient
+open drams
+is 0
+downloaddomain ml 0 7 $DRAMS_CONTROL 8 $DRAMS_RECEIVER 9 $DRAMS_EVENT 4 $T_TRIG 17 $CAEN_IO
+ResetTrigger(4)
+
+createis 1 11
+#downloadismodullist 4 7 8 9
+downloadismodullist 7 8 9 17
+downloadreadoutlist 20 1 {DRAMS_Readout()}
+createvariable 1 2048
+writevariable 1 <pedestals
+DRAMS_set_ped(1,2500)
+DRAMS_prepare()
+
+createis 2 12
+downloadismodullist
+downloadreadoutlist 10 1 {Timestamp()}
+
+downloaddomain trig 0 GSI_Trig 4 1 30 10
+flush

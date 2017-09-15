@@ -1,0 +1,116 @@
+#! /bin/sh
+#\
+exec emswish $0 $*
+
+# $ZEL: scaler,v 1.6 2006/08/13 17:32:02 wuestner Exp $
+# copyright 1998, 2005
+#   P. Wuestner; Zentralinstitut fuer Elektronik; Forschungszentrum Juelich
+#
+
+# Vorbereitung fuer 'autoload' von Prozeduren; die Variable scaler_library
+# muss an die konkrete Installation angepasst werden.
+if [info exists env(EMSTCL_HOME)] {
+  set scaler_library $env(EMSTCL_HOME)/scaler
+  set common_library $env(EMSTCL_HOME)/common
+} else {
+  set scaler_library /usr/local/ems/lib/scaler
+  set common_library /usr/local/ems/lib/common
+}
+lappend auto_path $scaler_library $common_library
+
+# readonly attribute for "entry"
+if {[info tclversion]>8.3} {
+    set entry_ro {readonly}
+} else {
+    set entry_ro {disabled}
+}
+
+# Kommandozeilenargumente verarbeiten
+process_args
+set global_verbose [info exists namedarg(verbose)]
+if {$global_verbose} printargs
+
+if [info exists namedarg(help)] {
+  printhelp
+  exit
+}
+
+bind Entry <Delete> {
+       tkEntryBackspace %W
+}
+#bind Entry <apLineDel> {
+#       if [%W selection present] {
+#      %W delete sel.first sel.last
+#  } else {
+#      %W delete insert
+#  }
+#}
+wm withdraw .
+set_options
+set maintitle Scaler
+if [regexp #.* [winfo name .] number] {
+  append maintitle $number
+}
+wm title . $maintitle
+wm maxsize . 10000 10000
+
+tk_focusFollowsMouse
+set tcl_precision 17
+
+# proc namespacedummies is called in order to load bgerror and all
+#   procedures in namespaces
+  namespacedummies
+
+set global_display [display_name]
+set global_setupfile(default) [setupfile_name $global_display]
+
+if [info exists namedarg(setup)] {
+  set num_setup_files [llength [glob -nocomplain -- $namedarg(setup)]]
+  if {$num_setup_files!=1} {
+    if {$num_setup_files==0} {
+      puts "no file $namedarg(setup)"
+    } else {
+      puts "filename $namedarg(setup) ambigous"
+    }
+  exit
+  }
+  set global_setupfile(restored) $namedarg(setup)
+  set global_setupfile(save) $namedarg(setup)
+  set global_setupfile(use_default) 0
+} else {
+  set global_setupfile(restored) [find_setupfile $global_setupfile(default) $global_display ~/scalerrc]
+  set global_setupfile(save) $global_setupfile(default)
+  set global_setupfile(use_default) 1
+}
+if {$global_setupfile(restored)!=""} {
+  restore_setup $global_setupfile(restored)
+}
+
+# und, wenn noetig, Setup vervollstaendigen
+correct_setup
+use_args
+
+# User-Interface starten
+init_output Scaler_log
+set global_running(outer_loop) 0
+set global_running(graphical_display) 0
+set global_running(numerical_display) 0
+
+# read in command and procedure lists
+if {[check_commands]!=0} {
+  exit
+}
+for {set i 0} {$i<$global_num_channels} {incr i} {
+  if {[info exists global_setup_names($i)] == 0} {
+    set global_setup_names($i) __$i}
+  if {[info exists global_setup_pane($i)] == 0} {
+    set global_setup_pane($i) 0}
+  if {[info exists global_setup_vis($i)] == 0} {
+    set global_setup_vis($i) 0}
+  if {[info exists global_setup_print($i)] == 0} {
+    set global_setup_print($i) 1}
+}
+start_gui
+
+###############################################################################
+###############################################################################

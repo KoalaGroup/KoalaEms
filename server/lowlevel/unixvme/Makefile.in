@@ -1,0 +1,42 @@
+# lowlevel/unixvme/Makefile.in
+# $ZEL: Makefile.in,v 1.6 2005/11/20 21:54:27 wuestner Exp $
+
+CONF = ../../conf
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+include $(CONF)/rules.make
+include $(CONF)/config.make
+
+cfiles = unixvme.c unixvme_jtag.c
+ofiles = $(cfiles:.c=.o)
+depfiles = $(cfiles)
+
+subdirs := $(unixvme)
+
+VMETYPES = $(shell echo $(unixvme)|tr '[:lower:]' '[:upper:]')
+VMEFLAGS=$(foreach typ,$(VMETYPES),-DUNIXVME_$(typ) )
+CFLAGS += $(VMEFLAGS)
+export VMEFLAGS
+
+lib = ../libll.a
+
+all: $(lib)
+
+$(lib): $(lib)($(ofiles)) $(subdirs)
+	$(RANLIB) $@
+
+$(subdirs): FORCE
+	$(MAKE) -C $@ all
+
+define MAKEIT
+	$(MAKE) -C $(dir) depend
+
+endef
+MAKEDEP = $(foreach dir,$(unixvme),$(MAKEIT))
+
+depend: xdepend
+	$(MAKEDEP)
+
+.PHONY: depend

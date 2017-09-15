@@ -1,0 +1,7 @@
+proc(echo)
+proc(vednames)
+proc(vedaddress)
+proc(vednamebyaddress)
+proc(vedinfo)
+proc(clientinfo)
+proc(strerror)

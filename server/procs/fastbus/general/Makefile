@@ -1,0 +1,40 @@
+# Generated automatically from Makefile.in by configure.
+# procs/fastbus/general/Makefile.in
+# $ZEL: Makefile.in,v 1.8 2005/04/12 18:40:12 wuestner Exp $
+
+CONF = ../../../conf
+
+srcdir = .
+
+include $(CONF)/rules.make
+include $(CONF)/config.make
+
+cfiles = fbsingle_primitiv.c fbsingle.c \
+        fbbroadcast.c fbutil.c \
+        fbblock_primitiv.c \
+        fbblock.c \
+        fbmultisingle_primitiv.c \
+        deadbeef.c \
+        frdb_multi.c \
+        fb_dmalen.c \
+        ../fastbus_verify.c
+
+ofiles = $(cfiles:.c=.o)
+depfiles = $(cfiles)
+
+FASTBUSTYPES = $(shell echo $(fastbus)|tr '[:lower:]' '[:upper:]')
+FASTBUSFLAGS=$(foreach typ,$(FASTBUSTYPES),-DFASTBUS_$(typ) )
+CFLAGS += $(FASTBUSFLAGS)
+
+lib = ../../libprocs.a
+
+all: $(lib)
+
+$(lib): $(lib)($(ofiles))
+	$(RANLIB) $@
+
+depend: xdepend
+
+.PHONY: depend
+
+#######################################

@@ -1,0 +1,29 @@
+# Generated automatically from Makefile.in by configure.
+# lowlevel/jtag/Makefile.in
+# $ZEL: Makefile.in,v 1.4 2008/03/11 20:26:08 wuestner Exp $
+
+CONF = ../../conf
+
+srcdir = .
+
+include $(CONF)/rules.make
+include $(CONF)/config.make
+
+cfiles = jtag.c jtag_proc.c jtag_actions.c jtag_chipdata.c \
+        jtag_read_data.c \
+        jtag_XC18V00.c jtag_XCFS.c jtag_XCFP.c
+ofiles = $(cfiles:.c=.o)
+depfiles = $(cfiles)
+
+CFLAGS += $(LOWLEVELFLAGS)
+
+lib = ../libll.a
+
+all: $(lib)
+
+$(lib): $(lib)($(ofiles))
+	$(RANLIB) $@
+
+depend: xdepend
+
+.PHONY: FORCE depend

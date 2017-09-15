@@ -1,0 +1,34 @@
+vme_primitiv.c
+---------
+vmeread2   crate abs_addr
+vmewrite2  crate abs_addr data
+
+vmeread4   crate abs_addr
+vmewrite4  crate abs_addr data
+
+vmeprobe   crate abs_addr datasize
+
+vmeread    crate abs_addr datasize num
+vmewrite   crate abs_addr datasize num data
+
+
+vme_simple.c
+--------------
+VMEread2   modul offs
+VMEwrite2  modul offs data
+
+VMEread4   modul offs
+VMEwrite4  modul offs data
+
+VMEread    modul offs datasize num
+VMEwrite   modul offs datasize num data
+
+VMEprobe   modul offs datasize
+
+
+sis3800/sis3###.c
+-----------------
+sis3###init  modules...
+sis3###read  modules...
+sis3###clock  modules...
+

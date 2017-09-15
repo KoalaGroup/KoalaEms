@@ -1,0 +1,17 @@
+unsolicited Message fuer Ende der Datenuebertragung:
+
+Unsol_StatusChanged        common/unsoltypes.h
+status_action_finish       common/actiontypes.h
+Object_do                  common/objecttypes.h
+1                    (1 Wort folgt)
+-1                   (Dataout-Index; -1 heisst 'alle')
+
+
+Dataoutstatus:
+
+  Do_running
+  Do_neverstarted
+  Do_done            Alle Daten uebertragen, genug gewartet 
+  Do_error           Fehler, Warten ist zwecklos
+  Do_flushing        Arbeitet noch, warten kann helfen
+                     wenn Eventbuilder keine Daten mehr annimmt, wartet man ewig

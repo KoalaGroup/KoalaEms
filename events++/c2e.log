@@ -1,0 +1,588 @@
+huagen@ikp475:~/ems/build/events++$ ./cluster2event -verbose -asynchron -maxmem 33425 :12345 :3333
+connecting input with port 12345
+connecting output with port 3333
+input from socket INET: 127.0.0.1:12345
+  connected with INET: 127.0.0.1:42222
+output to socket INET: 127.0.0.1:3333
+  connected with INET: 127.0.0.1:40710
+
+
+In do_convert_asynchron(): while(weiter) checkpoint_1;
+In do_convert_asynchron(): reset FDs, point2;
+In do_convert_asynchron(): input_OK, else break point_3;
+The result of select() function is 2, point_4
+In Clusterreader::read_cluster(),  cluster = 0;
+buf->head[ 0 ] is 0x00000008 
+buf->head[ 1 ] is 0x12345678 
+buf->head[ 2 ] is 0x0000000a 
+buf->head[ 3 ] is 0x00000000 
+the d= new int[size] is 27119544, and size is 9 
+cluster[ 0 ] is 0x00000008 
+cluster[ 1 ] is 0x12345678 
+cluster[ 2 ] is 0x00000001 
+cluster[ 3 ] is 0x00000000 
+cluster[ 4 ] is 0x80000001 
+cluster[ 5 ] is 0x00000001 
+cluster[ 6 ] is 0x00000000 
+cluster[ 7 ] is 0x00000001 
+cluster[ 8 ] is 0x00000004 
+cluster[ 9 ] is 0x00000000 
+cluster[ 10 ] is 0x00000000 
+cluster[ 11 ] is 0x00000000 
+cluster[ 12 ] is 0x0001f021 
+cluster[ 13 ] is 0x00000000 
+cluster[ 14 ] is 0x00000000 
+cluster[ 15 ] is 0x00000000 
+cluster[ 16 ] is 0x00000000 
+cluster[ 17 ] is 0x00000000 
+cluster[ 18 ] is 0x00000000 
+cluster[ 19 ] is 0x00000000 
+cluster[ 20 ] is 0x00000000 
+cluster[ 21 ] is 0x00000000 
+cluster[ 22 ] is 0x00000000 
+cluster[ 23 ] is 0x00000000 
+cluster[ 24 ] is 0x00000000 
+cluster[ 25 ] is 0x00000000 
+cluster[ 26 ] is 0x00000000 
+cluster[ 27 ] is 0x00000000 
+cluster[ 28 ] is 0x00000000 
+cluster[ 29 ] is 0x00000000 
+cluster[ 30 ] is 0x00000000 
+cluster[ 31 ] is 0x00000000 
+cluster[ 32 ] is 0x00000000 
+cluster[ 33 ] is 0x00000000 
+In Clusterreader::read_cluster(),  cluster=(this->*reader)();
+In Clusterreader::read_cluster(),  stattist_.print(0)
+ved_info; size=8; optsize=0 vednum=1 isnum=1(4)
+the cluster type is get_ved_info
+if(FD_ISSET(rpath, &readfds)), checkpoint_5;
+if(FD_ISSET(wpath, &writefds)), checkpoint_6;
+else: checkpoint_8;
+In Clusterreader::read_cluster(),  cluster = 0;
+buf->head[ 0 ] is 0x00000034 
+buf->head[ 1 ] is 0x12345678 
+buf->head[ 2 ] is 0x00000001 
+buf->head[ 3 ] is 0x00000000 
+the d= new int[size] is 27119800, and size is 53 
+cluster[ 0 ] is 0x00000034 
+cluster[ 1 ] is 0x12345678 
+cluster[ 2 ] is 0x00000000 
+cluster[ 3 ] is 0x00000003 
+cluster[ 4 ] is 0x00000001 
+cluster[ 5 ] is 0x50f969ab 
+cluster[ 6 ] is 0x000e1512 
+cluster[ 7 ] is 0x00000000 
+cluster[ 8 ] is 0x00000000 
+cluster[ 9 ] is 0x00000000 
+cluster[ 10 ] is 0x00000001 
+cluster[ 11 ] is 0x00000029 
+cluster[ 12 ] is 0x00000001 
+cluster[ 13 ] is 0x00000001 
+cluster[ 14 ] is 0x00000001 
+cluster[ 15 ] is 0x00000004 
+cluster[ 16 ] is 0x00000024 
+cluster[ 17 ] is 0x00000001 
+cluster[ 18 ] is 0x00000022 
+cluster[ 19 ] is 0x40034021 
+cluster[ 20 ] is 0x04001b72 
+cluster[ 21 ] is 0x04010030 
+cluster[ 22 ] is 0x0410002d 
+cluster[ 23 ] is 0x0411002a 
+cluster[ 24 ] is 0x0408003b 
+cluster[ 25 ] is 0x0409003c 
+cluster[ 26 ] is 0x04180037 
+cluster[ 27 ] is 0x04190034 
+cluster[ 28 ] is 0x0402002d 
+cluster[ 29 ] is 0x04030036 
+cluster[ 30 ] is 0x0412002a 
+cluster[ 31 ] is 0x04130035 
+cluster[ 32 ] is 0x040a002f 
+cluster[ 33 ] is 0x040b002e 
+In Clusterreader::read_cluster(),  cluster=(this->*reader)();
+In Clusterreader::read_cluster(),  stattist_.print(0)
+the cluster type is events
+case Clusterreader::input_ok: checkpoint_11;
+
+
+In do_convert_asynchron(): while(weiter) checkpoint_1;
+In do_convert_asynchron(): reset FDs, point2;
+In do_convert_asynchron(): input_OK, else break point_3;
+The result of select() function is 2, point_4
+In Clusterreader::read_cluster(),  cluster = 0;
+buf->head[ 0 ] is 0x00000034 
+buf->head[ 1 ] is 0x12345678 
+buf->head[ 2 ] is 0x0000000a 
+buf->head[ 3 ] is 0x00000000 
+the d= new int[size] is 27120040, and size is 53 
+cluster[ 0 ] is 0x00000034 
+cluster[ 1 ] is 0x12345678 
+cluster[ 2 ] is 0x00000000 
+cluster[ 3 ] is 0x00000003 
+cluster[ 4 ] is 0x00000001 
+cluster[ 5 ] is 0x50f969ac 
+cluster[ 6 ] is 0x000e1625 
+cluster[ 7 ] is 0x00000000 
+cluster[ 8 ] is 0x00000000 
+cluster[ 9 ] is 0x00000000 
+cluster[ 10 ] is 0x00000001 
+cluster[ 11 ] is 0x00000029 
+cluster[ 12 ] is 0x00000002 
+cluster[ 13 ] is 0x00000001 
+cluster[ 14 ] is 0x00000001 
+cluster[ 15 ] is 0x00000004 
+cluster[ 16 ] is 0x00000024 
+cluster[ 17 ] is 0x00000001 
+cluster[ 18 ] is 0x00000022 
+cluster[ 19 ] is 0x40034021 
+cluster[ 20 ] is 0x04001b6b 
+cluster[ 21 ] is 0x04010035 
+cluster[ 22 ] is 0x0410002e 
+cluster[ 23 ] is 0x04110032 
+cluster[ 24 ] is 0x0408003b 
+cluster[ 25 ] is 0x0409003c 
+cluster[ 26 ] is 0x04180038 
+cluster[ 27 ] is 0x0419003c 
+cluster[ 28 ] is 0x0402002d 
+cluster[ 29 ] is 0x0403003c 
+cluster[ 30 ] is 0x0412002a 
+cluster[ 31 ] is 0x0413003a 
+cluster[ 32 ] is 0x040a002f 
+cluster[ 33 ] is 0x040b0032 
+In Clusterreader::read_cluster(),  cluster=(this->*reader)();
+In Clusterreader::read_cluster(),  stattist_.print(0)
+the cluster type is events
+if(FD_ISSET(rpath, &readfds)), checkpoint_5;
+if(FD_ISSET(wpath, &writefds)), checkpoint_6;
+else: checkpoint_8;
+event[ 0 ] is 0x00000029 
+event[ 1 ] is 0x00000001 
+event[ 2 ] is 0x00000001 
+event[ 3 ] is 0x00000001 
+event[ 4 ] is 0x00000000 
+event[ 5 ] is 0x00000000 
+event[ 6 ] is 0x00000000 
+event[ 7 ] is 0x00000000 
+event[ 8 ] is 0x00000000 
+event[ 9 ] is 0x00000000 
+event[ 10 ] is 0x00000000 
+event[ 11 ] is 0x00000000 
+event[ 12 ] is 0x00000000 
+event[ 13 ] is 0x00000000 
+event[ 14 ] is 0x00000000 
+event[ 15 ] is 0x00000000 
+event[ 16 ] is 0x00000000 
+event[ 17 ] is 0x00000000 
+event[ 18 ] is 0x00000000 
+event[ 19 ] is 0x00000000 
+event[ 20 ] is 0x00000000 
+event[ 21 ] is 0x00000000 
+event[ 22 ] is 0x00000000 
+event[ 23 ] is 0x00000000 
+event[ 24 ] is 0x00000000 
+event[ 25 ] is 0x00000000 
+event[ 26 ] is 0x00000000 
+event[ 27 ] is 0x00000000 
+event[ 28 ] is 0x00000000 
+event[ 29 ] is 0x00000000 
+event[ 30 ] is 0x00000000 
+event[ 31 ] is 0x00000000 
+event[ 32 ] is 0x00000000 
+event[ 33 ] is 0x00000000 
+if(event), checkpoint_9;
+if(event),sender, checkpoint_9_1;
+if(event), send(), checkpoint_9_2;
+
+
+In do_convert_asynchron(): while(weiter) checkpoint_1;
+In do_convert_asynchron(): reset FDs, point2;
+In do_convert_asynchron(): input_OK, else break point_3;
+The result of select() function is 1, point_4
+if(FD_ISSET(wpath, &writefds)), checkpoint_6;
+else: checkpoint_8;
+event[ 0 ] is 0x00000029 
+event[ 1 ] is 0x00000002 
+event[ 2 ] is 0x00000001 
+event[ 3 ] is 0x00000001 
+event[ 4 ] is 0x00000001 
+event[ 5 ] is 0x50f969ab 
+event[ 6 ] is 0x000e1512 
+event[ 7 ] is 0x00000000 
+event[ 8 ] is 0x00000000 
+event[ 9 ] is 0x00000000 
+event[ 10 ] is 0x00000001 
+event[ 11 ] is 0x00000029 
+event[ 12 ] is 0x00000001 
+event[ 13 ] is 0x00000001 
+event[ 14 ] is 0x00000001 
+event[ 15 ] is 0x00000004 
+event[ 16 ] is 0x00000024 
+event[ 17 ] is 0x00000001 
+event[ 18 ] is 0x00000022 
+event[ 19 ] is 0x40034021 
+event[ 20 ] is 0x04001b72 
+event[ 21 ] is 0x04010030 
+event[ 22 ] is 0x0410002d 
+event[ 23 ] is 0x0411002a 
+event[ 24 ] is 0x0408003b 
+event[ 25 ] is 0x0409003c 
+event[ 26 ] is 0x04180037 
+event[ 27 ] is 0x04190034 
+event[ 28 ] is 0x0402002d 
+event[ 29 ] is 0x04030036 
+event[ 30 ] is 0x0412002a 
+event[ 31 ] is 0x04130035 
+event[ 32 ] is 0x040a002f 
+event[ 33 ] is 0x040b002e 
+if(event), checkpoint_9;
+if(event),sender, checkpoint_9_1;
+if(event), send(), checkpoint_9_2;
+
+
+In do_convert_asynchron(): while(weiter) checkpoint_1;
+In do_convert_asynchron(): reset FDs, point2;
+In do_convert_asynchron(): input_OK, else break point_3;
+The result of select() function is 1, point_4
+if(FD_ISSET(wpath, &writefds)), checkpoint_6;
+else: checkpoint_8;
+In Clusterreader::read_cluster(),  cluster = 0;
+buf->head[ 0 ] is 0x00000034 
+buf->head[ 1 ] is 0x12345678 
+buf->head[ 2 ] is 0x0000000a 
+buf->head[ 3 ] is 0x00000000 
+the d= new int[size] is 27119800, and size is 53 
+cluster[ 0 ] is 0x00000034 
+cluster[ 1 ] is 0x12345678 
+cluster[ 2 ] is 0x00000000 
+cluster[ 3 ] is 0x00000003 
+cluster[ 4 ] is 0x00000001 
+cluster[ 5 ] is 0x50f969ad 
+cluster[ 6 ] is 0x000e1627 
+cluster[ 7 ] is 0x00000000 
+cluster[ 8 ] is 0x00000000 
+cluster[ 9 ] is 0x00000000 
+cluster[ 10 ] is 0x00000001 
+cluster[ 11 ] is 0x00000029 
+cluster[ 12 ] is 0x00000003 
+cluster[ 13 ] is 0x00000001 
+cluster[ 14 ] is 0x00000001 
+cluster[ 15 ] is 0x00000004 
+cluster[ 16 ] is 0x00000024 
+cluster[ 17 ] is 0x00000001 
+cluster[ 18 ] is 0x00000022 
+cluster[ 19 ] is 0x40034021 
+cluster[ 20 ] is 0x04001b6d 
+cluster[ 21 ] is 0x0401002f 
+cluster[ 22 ] is 0x0410002c 
+cluster[ 23 ] is 0x0411002a 
+cluster[ 24 ] is 0x0408003b 
+cluster[ 25 ] is 0x0409003c 
+cluster[ 26 ] is 0x04180036 
+cluster[ 27 ] is 0x04190035 
+cluster[ 28 ] is 0x0402002c 
+cluster[ 29 ] is 0x04030035 
+cluster[ 30 ] is 0x0412002a 
+cluster[ 31 ] is 0x04130035 
+cluster[ 32 ] is 0x040a002f 
+cluster[ 33 ] is 0x040b002e 
+In Clusterreader::read_cluster(),  cluster=(this->*reader)();
+In Clusterreader::read_cluster(),  stattist_.print(0)
+the cluster type is events
+case Clusterreader::input_ok: checkpoint_11;
+
+
+In do_convert_asynchron(): while(weiter) checkpoint_1;
+In do_convert_asynchron(): reset FDs, point2;
+In do_convert_asynchron(): input_OK, else break point_3;
+The result of select() function is 1, point_4
+if(FD_ISSET(wpath, &writefds)), checkpoint_6;
+else: checkpoint_8;
+event[ 0 ] is 0x00000029 
+event[ 1 ] is 0x00000003 
+event[ 2 ] is 0x00000001 
+event[ 3 ] is 0x00000001 
+event[ 4 ] is 0x00000001 
+event[ 5 ] is 0x50f969ac 
+event[ 6 ] is 0x000e1625 
+event[ 7 ] is 0x00000000 
+event[ 8 ] is 0x00000000 
+event[ 9 ] is 0x00000000 
+event[ 10 ] is 0x00000001 
+event[ 11 ] is 0x00000029 
+event[ 12 ] is 0x00000002 
+event[ 13 ] is 0x00000001 
+event[ 14 ] is 0x00000001 
+event[ 15 ] is 0x00000004 
+event[ 16 ] is 0x00000024 
+event[ 17 ] is 0x00000001 
+event[ 18 ] is 0x00000022 
+event[ 19 ] is 0x40034021 
+event[ 20 ] is 0x04001b6b 
+event[ 21 ] is 0x04010035 
+event[ 22 ] is 0x0410002e 
+event[ 23 ] is 0x04110032 
+event[ 24 ] is 0x0408003b 
+event[ 25 ] is 0x0409003c 
+event[ 26 ] is 0x04180038 
+event[ 27 ] is 0x0419003c 
+event[ 28 ] is 0x0402002d 
+event[ 29 ] is 0x0403003c 
+event[ 30 ] is 0x0412002a 
+event[ 31 ] is 0x0413003a 
+event[ 32 ] is 0x040a002f 
+event[ 33 ] is 0x040b0032 
+if(event), checkpoint_9;
+if(event),sender, checkpoint_9_1;
+if(event), send(), checkpoint_9_2;
+
+
+In do_convert_asynchron(): while(weiter) checkpoint_1;
+In do_convert_asynchron(): reset FDs, point2;
+In do_convert_asynchron(): input_OK, else break point_3;
+The result of select() function is 1, point_4
+if(FD_ISSET(wpath, &writefds)), checkpoint_6;
+else: checkpoint_8;
+In Clusterreader::read_cluster(),  cluster = 0;
+buf->head[ 0 ] is 0x00000034 
+buf->head[ 1 ] is 0x12345678 
+buf->head[ 2 ] is 0x0000000a 
+buf->head[ 3 ] is 0x00000000 
+the d= new int[size] is 27120040, and size is 53 
+cluster[ 0 ] is 0x00000034 
+cluster[ 1 ] is 0x12345678 
+cluster[ 2 ] is 0x00000000 
+cluster[ 3 ] is 0x00000003 
+cluster[ 4 ] is 0x00000001 
+cluster[ 5 ] is 0x50f969ae 
+cluster[ 6 ] is 0x000e160d 
+cluster[ 7 ] is 0x00000000 
+cluster[ 8 ] is 0x00000000 
+cluster[ 9 ] is 0x00000000 
+cluster[ 10 ] is 0x00000001 
+cluster[ 11 ] is 0x00000029 
+cluster[ 12 ] is 0x00000004 
+cluster[ 13 ] is 0x00000001 
+cluster[ 14 ] is 0x00000001 
+cluster[ 15 ] is 0x00000004 
+cluster[ 16 ] is 0x00000024 
+cluster[ 17 ] is 0x00000001 
+cluster[ 18 ] is 0x00000022 
+cluster[ 19 ] is 0x40034021 
+cluster[ 20 ] is 0x04001b6d 
+cluster[ 21 ] is 0x04010031 
+cluster[ 22 ] is 0x0410002d 
+cluster[ 23 ] is 0x0411002b 
+cluster[ 24 ] is 0x0408003a 
+cluster[ 25 ] is 0x0409003b 
+cluster[ 26 ] is 0x04180036 
+cluster[ 27 ] is 0x04190034 
+cluster[ 28 ] is 0x0402002d 
+cluster[ 29 ] is 0x04030035 
+cluster[ 30 ] is 0x04120029 
+cluster[ 31 ] is 0x04130033 
+cluster[ 32 ] is 0x040a002f 
+cluster[ 33 ] is 0x040b002d 
+In Clusterreader::read_cluster(),  cluster=(this->*reader)();
+In Clusterreader::read_cluster(),  stattist_.print(0)
+the cluster type is events
+case Clusterreader::input_ok: checkpoint_11;
+
+
+In do_convert_asynchron(): while(weiter) checkpoint_1;
+In do_convert_asynchron(): reset FDs, point2;
+In do_convert_asynchron(): input_OK, else break point_3;
+The result of select() function is 1, point_4
+if(FD_ISSET(wpath, &writefds)), checkpoint_6;
+else: checkpoint_8;
+event[ 0 ] is 0x00000029 
+event[ 1 ] is 0x00000004 
+event[ 2 ] is 0x00000001 
+event[ 3 ] is 0x00000001 
+event[ 4 ] is 0x00000001 
+event[ 5 ] is 0x50f969ad 
+event[ 6 ] is 0x000e1627 
+event[ 7 ] is 0x00000000 
+event[ 8 ] is 0x00000000 
+event[ 9 ] is 0x00000000 
+event[ 10 ] is 0x00000001 
+event[ 11 ] is 0x00000029 
+event[ 12 ] is 0x00000003 
+event[ 13 ] is 0x00000001 
+event[ 14 ] is 0x00000001 
+event[ 15 ] is 0x00000004 
+event[ 16 ] is 0x00000024 
+event[ 17 ] is 0x00000001 
+event[ 18 ] is 0x00000022 
+event[ 19 ] is 0x40034021 
+event[ 20 ] is 0x04001b6d 
+event[ 21 ] is 0x0401002f 
+event[ 22 ] is 0x0410002c 
+event[ 23 ] is 0x0411002a 
+event[ 24 ] is 0x0408003b 
+event[ 25 ] is 0x0409003c 
+event[ 26 ] is 0x04180036 
+event[ 27 ] is 0x04190035 
+event[ 28 ] is 0x0402002c 
+event[ 29 ] is 0x04030035 
+event[ 30 ] is 0x0412002a 
+event[ 31 ] is 0x04130035 
+event[ 32 ] is 0x040a002f 
+event[ 33 ] is 0x040b002e 
+if(event), checkpoint_9;
+if(event),sender, checkpoint_9_1;
+if(event), send(), checkpoint_9_2;
+
+
+In do_convert_asynchron(): while(weiter) checkpoint_1;
+In do_convert_asynchron(): reset FDs, point2;
+In do_convert_asynchron(): input_OK, else break point_3;
+The result of select() function is 1, point_4
+if(FD_ISSET(wpath, &writefds)), checkpoint_6;
+else: checkpoint_8;
+In Clusterreader::read_cluster(),  cluster = 0;
+buf->head[ 0 ] is 0x00000034 
+buf->head[ 1 ] is 0x12345678 
+buf->head[ 2 ] is 0x0000000a 
+buf->head[ 3 ] is 0x00000000 
+the d= new int[size] is 27119800, and size is 53 
+cluster[ 0 ] is 0x00000034 
+cluster[ 1 ] is 0x12345678 
+cluster[ 2 ] is 0x00000000 
+cluster[ 3 ] is 0x00000003 
+cluster[ 4 ] is 0x00000001 
+cluster[ 5 ] is 0x50f969af 
+cluster[ 6 ] is 0x000e1604 
+cluster[ 7 ] is 0x00000000 
+cluster[ 8 ] is 0x00000000 
+cluster[ 9 ] is 0x00000000 
+cluster[ 10 ] is 0x00000001 
+cluster[ 11 ] is 0x00000029 
+cluster[ 12 ] is 0x00000005 
+cluster[ 13 ] is 0x00000001 
+cluster[ 14 ] is 0x00000001 
+cluster[ 15 ] is 0x00000004 
+cluster[ 16 ] is 0x00000024 
+cluster[ 17 ] is 0x00000001 
+cluster[ 18 ] is 0x00000022 
+cluster[ 19 ] is 0x40034021 
+cluster[ 20 ] is 0x04001b6c 
+cluster[ 21 ] is 0x04010030 
+cluster[ 22 ] is 0x0410002d 
+cluster[ 23 ] is 0x0411002a 
+cluster[ 24 ] is 0x0408003a 
+cluster[ 25 ] is 0x0409003b 
+cluster[ 26 ] is 0x04180036 
+cluster[ 27 ] is 0x04190035 
+cluster[ 28 ] is 0x0402002c 
+cluster[ 29 ] is 0x04030035 
+cluster[ 30 ] is 0x0412002a 
+cluster[ 31 ] is 0x04130033 
+cluster[ 32 ] is 0x040a002e 
+cluster[ 33 ] is 0x040b002d 
+In Clusterreader::read_cluster(),  cluster=(this->*reader)();
+In Clusterreader::read_cluster(),  stattist_.print(0)
+the cluster type is events
+case Clusterreader::input_ok: checkpoint_11;
+
+
+In do_convert_asynchron(): while(weiter) checkpoint_1;
+In do_convert_asynchron(): reset FDs, point2;
+In do_convert_asynchron(): input_OK, else break point_3;
+The result of select() function is 1, point_4
+if(FD_ISSET(wpath, &writefds)), checkpoint_6;
+else: checkpoint_8;
+event[ 0 ] is 0x00000029 
+event[ 1 ] is 0x00000005 
+event[ 2 ] is 0x00000001 
+event[ 3 ] is 0x00000001 
+event[ 4 ] is 0x00000001 
+event[ 5 ] is 0x50f969ae 
+event[ 6 ] is 0x000e160d 
+event[ 7 ] is 0x00000000 
+event[ 8 ] is 0x00000000 
+event[ 9 ] is 0x00000000 
+event[ 10 ] is 0x00000001 
+event[ 11 ] is 0x00000029 
+event[ 12 ] is 0x00000004 
+event[ 13 ] is 0x00000001 
+event[ 14 ] is 0x00000001 
+event[ 15 ] is 0x00000004 
+event[ 16 ] is 0x00000024 
+event[ 17 ] is 0x00000001 
+event[ 18 ] is 0x00000022 
+event[ 19 ] is 0x40034021 
+event[ 20 ] is 0x04001b6d 
+event[ 21 ] is 0x04010031 
+event[ 22 ] is 0x0410002d 
+event[ 23 ] is 0x0411002b 
+event[ 24 ] is 0x0408003a 
+event[ 25 ] is 0x0409003b 
+event[ 26 ] is 0x04180036 
+event[ 27 ] is 0x04190034 
+event[ 28 ] is 0x0402002d 
+event[ 29 ] is 0x04030035 
+event[ 30 ] is 0x04120029 
+event[ 31 ] is 0x04130033 
+event[ 32 ] is 0x040a002f 
+event[ 33 ] is 0x040b002d 
+if(event), checkpoint_9;
+if(event),sender, checkpoint_9_1;
+if(event), send(), checkpoint_9_2;
+
+
+In do_convert_asynchron(): while(weiter) checkpoint_1;
+In do_convert_asynchron(): reset FDs, point2;
+In do_convert_asynchron(): input_OK, else break point_3;
+The result of select() function is 1, point_4
+if(FD_ISSET(wpath, &writefds)), checkpoint_6;
+else: checkpoint_8;
+In Clusterreader::read_cluster(),  cluster = 0;
+buf->head[ 0 ] is 0x00000006 
+buf->head[ 1 ] is 0x12345678 
+buf->head[ 2 ] is 0x0000000a 
+buf->head[ 3 ] is 0x00000000 
+the d= new int[size] is 27114984, and size is 7 
+cluster[ 0 ] is 0x00000006 
+cluster[ 1 ] is 0x12345678 
+cluster[ 2 ] is 0x10000000 
+cluster[ 3 ] is 0x00000003 
+cluster[ 4 ] is 0x00000001 
+cluster[ 5 ] is 0x50f969b1 
+cluster[ 6 ] is 0x00072652 
+cluster[ 7 ] is 0x00000000 
+cluster[ 8 ] is 0x00000021 
+cluster[ 9 ] is 0x00000000 
+cluster[ 10 ] is 0x78ce3778 
+cluster[ 11 ] is 0x00007f1e 
+cluster[ 12 ] is 0x78ce3778 
+cluster[ 13 ] is 0x00007f1e 
+cluster[ 14 ] is 0x00000020 
+cluster[ 15 ] is 0x00000000 
+cluster[ 16 ] is 0x00000070 
+cluster[ 17 ] is 0x00000000 
+cluster[ 18 ] is 0x00000058 
+cluster[ 19 ] is 0x00000000 
+cluster[ 20 ] is 0x0041ce70 
+cluster[ 21 ] is 0x00000000 
+cluster[ 22 ] is 0x019dbea8 
+cluster[ 23 ] is 0x00000000 
+cluster[ 24 ] is 0x019dbec8 
+cluster[ 25 ] is 0x00000000 
+cluster[ 26 ] is 0xffffffff 
+cluster[ 27 ] is 0x00000000 
+cluster[ 28 ] is 0x019db7c8 
+cluster[ 29 ] is 0x00000000 
+cluster[ 30 ] is 0x019dbee8 
+cluster[ 31 ] is 0x00000000 
+cluster[ 32 ] is 0x00000000 
+cluster[ 33 ] is 0x00000000 
+In Clusterreader::read_cluster(),  cluster=(this->*reader)();
+In Clusterreader::read_cluster(),  stattist_.print(0)
+no_more_data; size=6; optsize=3 opt time: 2013-01-18 16:26:41
+the cluster type is got_no_more_data
+case Clusterreader::input_ok: checkpoint_11;
+
+
+In do_convert_asynchron(): while(weiter) checkpoint_1;
+In do_convert_asynchron(): reset FDs, point2;
+5 events from 7 clusters processed
+huagen@ikp475:~/ems/build/events++$ 

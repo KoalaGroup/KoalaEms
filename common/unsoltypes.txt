@@ -1,0 +1,47 @@
+Unsol_Alarm:
+
+x[0] version==1
+x[1, 2] timestamp
+x[3] severity: 0: green 1: yellow 2: red 3: infradead
+x[4] I_counter
+x[5...4+I_counter] arbitrary integer information for automatic error handling
+x[6+I_counter] S_counter
+S_counter pairs of <flags string>
+    flags:
+        1: text to log
+        2: sound to play
+        3: picture to show
+        4: program to execute
+        5: addressee of mail
+        6: text of mail
+
+If no sound is given (default!!!) sound is choosen by severity
+    green: no sound
+    yello: some complaint
+    red  : cry!
+
+If no picture is given:
+    don't display a picture
+
+If no program is given:
+    don't start a program
+
+If no mail text is given:
+    don't send mail
+
+If no addressee is given:
+    send mail as spam
+
+If no text is given:
+    ignore this and all following messages from this ved forever
+
+Unsol_DeviceDisconnect:
+
+x[0] device type (lvd, camac ...)
+x[1] crate index
+x[2] status: 0: unchanged, 1: online, -1: offline
+x[3] initialisation status
+       -1: error
+        1: still initialised
+        0: was offline
+        2: different crate or configuration

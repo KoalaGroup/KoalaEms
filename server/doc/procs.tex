@@ -1,0 +1,21 @@
+\section{Allgemeines}
+
+Argumente sind, soweit nicht anders beschrieben, Integerzahlen (32 Bit)
+Generelle Fehlermeldungen (Anzahl der Argumente, Existenz von Variablen, Modultypen etc.) sind nicht gesondert aufgeführt.
+
+Die Beschreibung einer lokalen Prozedur hat folgendes Format:
+
+\begin{procdesc}{
+	Name der Funktion, wie er zur Identifizierung verwendet wird (siehe "`list
+	of capabilities"')
+}{kurze Beschreibung der Wirkung}
+\args{
+	Typ und Bedeutung der beim Aufruf anzugebenden Argumente (Wenn es sich um
+	einfache Integerzahlen handelt, wird auf den Typ nicht weiter eingegangen.)
+}
+\descr{genauere Erklärung}
+\data{Anzahl und Bedeutung der in den jeweiligen Ausgabestrom geschriebenen Daten}
+\rand{eventuelle Seiteneffekte (auf Hardware, Veränderung von Variablen \ldots)}
+\errors{mögliche Fehlermeldungen}
+\rem{Kommentare, technische Einzelheiten}
+\end{procdesc}

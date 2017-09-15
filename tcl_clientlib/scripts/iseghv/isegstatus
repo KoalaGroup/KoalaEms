@@ -1,0 +1,408 @@
+#! /bin/sh
+#\
+exec emswish $0 $*
+
+#!/usr/local/bin/wish
+
+wm withdraw .
+
+wm title . {ISEG HV}
+tk_focusFollowsMouse
+
+set global_display [. cget -screen]
+if {$global_display==""} {
+  if {[info exists env(DISPLAY)]} {
+    set global_display $env(DISPLAY)
+  }
+}
+
+ems_connect vertex3 4096
+set global_ved [ems_open can]
+set global_bus 0
+set global_module 2
+
+array set iseg {
+    act_voltage 0x80
+    act_current 0x90
+    status_chan 0xb0
+    status_0    0xc0
+    status_1    0xc4
+    status_2    0xc8
+    status_3    0xf8
+    logon       0xd8
+    serial      0xe0
+    nominal     0xf4
+}
+
+proc create_channel_frame {parent} {
+  global global_const
+
+  set self [string trimright $parent .].channel
+  frame $self -relief sunken -borderwidth 2
+
+  label $self.v -text {V} -anchor w
+  label $self.a -text {mA} -anchor w
+  grid x $self.v $self.a
+
+  for {set ch 0} {$ch<$global_const(module_channels)} {incr ch} {
+    frame $self.${ch}bar -height 2 -background black
+    label $self.${ch}idx -text $ch -anchor w
+    entry $self.${ch}Uset -textvariable global_status(Uset_$ch)
+    entry $self.${ch}Iset -textvariable global_status(Iset_$ch)
+    label $self.${ch}s1 -textvariable global_status(stat1_$ch) -anchor w -width 4
+    label $self.${ch}Ucurr -textvariable global_status(Ucurr_$ch) -anchor e
+    label $self.${ch}Icurr -textvariable global_status(Icurr_$ch) -anchor e
+    label $self.${ch}s2 -textvariable global_status(stat2_$ch) -anchor w -width 4
+    grid $self.${ch}bar - - - -sticky ew
+    grid $self.${ch}idx $self.${ch}Uset $self.${ch}Iset $self.${ch}s1
+    grid x $self.${ch}Ucurr $self.${ch}Icurr $self.${ch}s2
+  }
+  return $self
+}
+
+proc create_module_frame {parent} {
+  set self [string trimright $parent .].module
+  frame $self -relief flat -borderwidth 0;# -background green
+
+  frame $self.const -relief sunken -borderwidth 2;# -background red
+  frame $self.stat -relief sunken -borderwidth 2;# -background yellow
+
+  set N 0
+  label $self.const.l$N -text {Module} -anchor w
+  label $self.const.r$N -textvariable global_const(module_idx) -anchor e
+  incr N
+  label $self.const.l$N -text {class} -anchor w
+  label $self.const.r$N -textvariable global_const(module_class) -anchor e
+  incr N
+  label $self.const.l$N -text {serial} -anchor w
+  label $self.const.r$N -textvariable global_const(module_serial) -anchor e
+  incr N
+  label $self.const.l$N -text {firm} -anchor w
+  label $self.const.r$N -textvariable global_const(module_firm) -anchor e
+  incr N
+  label $self.const.l$N -text {mode} -anchor w
+  label $self.const.r$N -textvariable global_status(module_mode) -anchor e
+  incr N
+  label $self.const.l$N -text {channels} -anchor w
+  label $self.const.r$N -textvariable global_const(module_channels) -anchor e
+  incr N
+  label $self.const.l$N -text {Umax/V} -anchor w
+  label $self.const.r$N -textvariable global_const(Umax) -anchor e
+  incr N
+  label $self.const.l$N -text {Imax/mA} -anchor w
+  label $self.const.r$N -textvariable global_const(Imax) -anchor e
+  incr N
+
+  for {set i 0} {$i<$N} {incr i} {
+    grid $self.const.l$i $self.const.r$i -sticky we
+  }
+
+  label $self.stat.l0 -text {no error} -anchor w
+  label $self.stat.r0 -textvariable global_status(mod_sum) -anchor e
+  label $self.stat.l1 -text {not ramping} -anchor w
+  label $self.stat.r1 -textvariable global_status(mod_nramp) -anchor e
+  label $self.stat.l2 -text {safety loop} -anchor w
+  label $self.stat.r2 -textvariable global_status(mod_sloop) -anchor e
+  label $self.stat.l3 -text {not stable} -anchor w
+  label $self.stat.r3 -textvariable global_status(mod_stable) -anchor e
+  label $self.stat.l4 -text {fine adj.} -anchor w
+  label $self.stat.r4 -textvariable global_status(mod_fadj) -anchor e
+  label $self.stat.l5 -text {Vsuppl} -anchor w
+  label $self.stat.r5 -textvariable global_status(mod_suppl) -anchor e
+  label $self.stat.l6 -text {kill enable} -anchor w
+  label $self.stat.r6 -textvariable global_status(mod_kill) -anchor e
+
+  grid $self.stat.l0 $self.stat.r0 -sticky we
+  grid $self.stat.l1 $self.stat.r1 -sticky we
+  grid $self.stat.l2 $self.stat.r2 -sticky we
+  grid $self.stat.l3 $self.stat.r3 -sticky we
+  grid $self.stat.l4 $self.stat.r4 -sticky we
+  grid $self.stat.l5 $self.stat.r5 -sticky we
+  grid $self.stat.l6 $self.stat.r6 -sticky we
+  grid columnconfigure $self 0 -weight 1
+  grid columnconfigure $self 1 -weight 1
+
+  grid $self.const -sticky nswe
+  grid $self.stat -sticky nswe
+  grid rowconfigure $self 0 -weight 1
+  grid rowconfigure $self 1 -weight 1
+
+  return $self
+}
+
+proc create_status {parent} {
+  global global_status
+
+  set self [string trimright $parent .].status
+  frame $self -relief raised -borderwidth 2;# -background blue
+
+  set module_frame [create_module_frame $self]
+  set channel_frame [create_channel_frame $self]
+  #grid $module_frame -sticky ns
+  #grid $channel_frame -sticky ns -column 1 -row 0
+  grid $module_frame $channel_frame
+  grid configure $module_frame -sticky ns
+  grid configure $channel_frame -sticky ns
+
+
+  #pack $module_frame -side left -fill y -expand 1
+  #pack $channel_frame -side left -fill y
+  pack $self
+}
+
+proc decode_modstat {stat} {
+  global global_status
+
+  set global_status(mod_sum) [expr ($stat&1)!=0]
+  set global_status(mod_nramp) [expr ($stat&2)!=0]
+  set global_status(mod_sloop) [expr ($stat&4)!=0]
+  set global_status(mod_stable) [expr ($stat&8)!=0]
+  set global_status(mod_fadj) [expr ($stat&0x10)!=0]
+  set global_status(mod_suppl) [expr ($stat&0x20)!=0]
+  set global_status(mod_kill) [expr ($stat&0x40)!=0]
+}
+
+proc put_response {r} {
+    puts -nonewline "response:"
+    foreach v $r {
+        puts -nonewline [format { %02x} $v]
+    }
+    puts {}
+}
+
+proc bcd2dec {bcd} {
+    set dec [expr $bcd&0xf]
+    incr dec [expr (($bcd>>4)&0xf)*10]
+    return $dec
+}
+
+proc iseg_nominal {ved bus module} {
+    global global_status
+    global global_const
+    global iseg
+
+    if {[catch {set r [$ved command1 iseghv_rw $bus 1 $module $iseg(nominal) 0]} mist]} {
+        puts $mist
+    } else {
+        # put_response $r
+        if {[lindex $r 0]==0} {
+            set d [lrange $r 5 end]
+            set mantU [lindex $d 0]
+            set expU [lindex $d 1]
+            set mantI [lindex $d 2]
+            set expI [lindex $d 3]
+            if {$expI&0x80} {set expI [expr $expI-256]}
+            set global_const(Umax) [expr $mantU*pow(10, $expU)]
+            set global_const(Imax) [expr $mantI*pow(10, $expI)*1000]
+        } else {
+            puts "iseg_nominal: error!"
+        }
+    }
+}
+
+proc iseg_logon {ved bus module} {
+    global global_status
+    global global_const
+    global iseg
+
+    if {[catch {set r [$ved command1 iseghv_write $bus $module $iseg(logon) 1 0]} mist]} {
+        puts "iseg_logoff: $mist"
+    } else {
+        # put_response $r
+    }
+    if {[catch {set r [$ved command1 iseghv_rw $bus 1 $module $iseg(logon) 0]} mist]} {
+        puts "iseg_logon: $mist"
+    } else {
+        # put_response $r
+        if {[lindex $r 0]==0} {
+            set global_const(module_class) [lindex $r 6]
+            set stat [lindex $r 5]
+            decode_modstat $stat
+            switch $global_const(module_class) {
+                0 {set global_const(module_res) 50000.}
+                1 {set global_const(module_res) 1000000.}
+                2 {set global_const(module_res) 1000000.}
+                3 {set global_const(module_res) 1000000.}
+                6 {set global_const(module_res) 50000.}
+                7 {set global_const(module_res) 1000000.}
+                default {puts "class $global_const(module_class) not known"}
+            }
+        } else {
+            puts "iseg_logon: error!"
+        }
+    }
+    if {[catch {set r [$ved command1 iseghv_write $bus $module $iseg(logon) 1 1]} mist]} {
+        puts "iseg_logon1: $mist"
+    } else {
+        # put_response $r
+    }
+}
+
+proc iseg_serial {ved bus module} {
+    global global_status
+    global global_const
+    global iseg
+
+    # direction 1; data-id 0xe0; num=0
+    # puts "$ved command1 iseghv_rw $bus 1 $module 0xe0 0"
+    if {[catch {set r [$ved command1 iseghv_rw $bus 1 $module $iseg(serial) 0]} mist]} {
+        puts "iseg_serial: $mist"
+    } else {
+        # put_response $r
+        if {[lindex $r 0]==0} {
+            set id [expr ([lindex $r 1]>>3)&0x3f]
+            set ser [bcd2dec [lindex $r 7]]
+            incr ser [expr [bcd2dec [lindex $r 6]]*100]
+            incr ser [expr [bcd2dec [lindex $r 5]]*10000]
+            set firm [bcd2dec [lindex $r 9]]
+            incr firm [expr ([lindex $r 8]&0xf)*100]
+            set mode [expr ([lindex $r 8]>>4)&0xf]
+            set channels [expr [lindex $r 10]&0xf]
+            # puts [format {id=%d ser=%06d ver=%03d mode=%d, %d channels} \
+                    $id $ser $firm $mode $channels]
+            set global_const(module_serial) $ser
+            set global_const(module_firm) $firm
+            set global_status(module_mode) $mode
+            set global_const(module_channels) $channels
+        } else {
+            puts "iseg_serial: error!"
+        }
+    }
+}
+
+proc iseg_voltage {ved bus module} {
+    global global_status
+    global global_const
+    global iseg
+
+    for {set ch 0} {$ch<$global_const(module_channels)} {incr ch} {
+        if {[catch {set r [$ved command1 iseghv_rw $bus 1 $module \
+                [expr $iseg(act_voltage)+$ch] 0]} mist]} {
+            puts "iseg_voltage: $mist"
+        } else {
+            # put_response $r
+            if {[lindex $r 0]==0} {
+                set d [lrange $r 5 end]
+                set U [expr [lindex $d 0]*256+[lindex $d 1]]
+                set U [expr $U*$global_const(Umax)/$global_const(module_res)]
+                set global_status(Ucurr_$ch) $U
+            } else {
+                puts "iseg_voltage: error!"
+            }
+        }
+    }
+}
+
+proc iseg_current {ved bus module} {
+    global global_status
+    global global_const
+    global iseg
+
+    for {set ch 0} {$ch<$global_const(module_channels)} {incr ch} {
+        if {[catch {set r [$ved command1 iseghv_rw $bus 1 $module \
+                [expr $iseg(act_current)+$ch] 0]} mist]} {
+            puts "iseg_current: $mist"
+        } else {
+            # put_response $r
+            if {[lindex $r 0]==0} {
+                set d [lrange $r 5 end]
+                set I [expr [lindex $d 0]*256+[lindex $d 1]]
+                set I [expr $I*$global_const(Imax)/$global_const(module_res)]
+                set global_status(Icurr_$ch) $I
+            } else {
+                puts "iseg_current: error!"
+            }
+        }
+    }
+}
+
+proc decode_channelstat {chan b1 b0} {
+    global global_status
+    set s {}
+    if {$b0&0x01} {append s {t}} else {append s { }}
+    if {$b0&0x02} {append s {s}} else {append s { }}
+    if {$b0&0x80} {append s {i}} else {append s { }}
+    set global_status(stat1_$chan) $s
+    set s {}
+    if {$b1&0x02} {append s {p}} else {append s { }}
+    if {$b1&0x04} {append s {o}} else {append s { }}
+    if {$b1&0x08} {append s {r}} else {append s { }}
+    if {$b1&0x10} {append s {e}} else {append s { }}
+    if {$b1&0x20} {append s {x}} else {append s { }}
+    if {$b1&0x40} {append s {c}} else {append s { }}
+    if {$b1&0x80} {append s {v}} else {append s { }}
+    set global_status(stat2_$chan) $s
+}
+
+proc iseg_channelstat {ved bus module} {
+    global global_status
+    global global_const
+    global iseg
+
+    for {set ch 0} {$ch<$global_const(module_channels)} {incr ch} {
+        if {[catch {set r [$ved command1 iseghv_rw $bus 1 $module \
+                [expr $iseg(status_chan)+$ch] 0]} mist]} {
+            puts "iseg_current: $mist"
+        } else {
+            # put_response $r
+            set d [lrange $r 5 end]
+            decode_channelstat $ch [lindex $d 0] [lindex $d 1]
+        }
+    }
+}
+
+proc iseg_status0 {ved bus module} {
+    global global_status
+    global global_const
+    global iseg
+
+    if {[catch {set r [$ved command1 iseghv_rw $bus 1 $module $iseg(status_0) 0]} mist]} {
+        puts "iseg_status0: $mist"
+    } else {
+        # put_response $r
+        if {[lindex $r 0]==0} {
+            set d [lrange $r 5 end]
+            set stat [lindex $d 0]
+            decode_modstat $stat
+        } else {
+            puts "iseg_status0: error!"
+        }
+    }
+}
+
+proc update_status {} {
+    global global_ved
+    global global_bus
+    global global_module
+
+    iseg_status0 $global_ved $global_bus $global_module
+    iseg_voltage $global_ved $global_bus $global_module
+    iseg_current $global_ved $global_bus $global_module
+    iseg_channelstat $global_ved $global_bus $global_module
+
+    after 3000 update_status
+    update idletasks
+}
+
+proc get_constants {} {
+    global global_ved
+    global global_bus
+    global global_module
+
+    iseg_logon $global_ved $global_bus $global_module
+    iseg_serial $global_ved $global_bus $global_module
+    iseg_nominal $global_ved $global_bus $global_module
+}
+
+get_constants
+set global_const(module_idx) $global_module
+
+create_status .
+update idletasks
+
+wm deiconify .
+
+after 1000 update_status
+
+set xcv 0
+vwait xcv

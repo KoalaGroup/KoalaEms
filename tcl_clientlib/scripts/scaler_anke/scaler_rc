@@ -1,0 +1,44 @@
+# VEDs, in denen Scaler stehen
+# VED 'dummy' ist nur ein Beispiel
+set global_setup(veds) {q04 dummy}
+# VED, das fuer die Eventratenmessung benutzt wird
+set global_setup(evrate_ved) q04
+# Host, auf dem xh laeuft
+set global_setup(xh_host) zelas3
+# Port, fuer xh
+set global_setup(xh_port) 1234
+# Updateintervall
+set global_setup(updateinterval) 2
+
+set global_setup(extra) {
+  global_setup_modullists
+  global_setup_is
+  global_setup_variables
+  global_setup_memberlists
+  global_setup_usedchannels
+}
+
+global global_setup_modullists
+ladd global_setup(extra) global_setup_modullists
+set global_setup_modullists(q04) {20 0x14104434}
+set global_setup_modullists(dummy) {20 0x14104434 22 0x14104434 23 0x14104434}
+
+global global_setup_is
+ladd global_setup(extra) global_setup_is
+set global_setup_is(q04) {{1 1}}
+set global_setup_is(dummy) {{1 2} {2 3}}
+
+global global_setup_variables
+ladd global_setup(extra) global_setup_variables
+set global_setup_variables(q04) {{1 64}}
+set global_setup_variables(dummy) {{1 64} {2 128}}
+
+global global_setup_memberlists
+ladd global_setup(extra) global_setup_memberlists
+set global_setup_memberlists(q04) {{20}}
+set global_setup_memberlists(dummy) {{20} {22 23}}
+
+global global_setup_usedchannels
+ladd global_setup(extra) global_setup_usedchannels
+set global_setup_usedchannels(q04) {{{1 2 3}}}
+set global_setup_usedchannels(dummy) {{{2 3 4}} {{3 4 5} {}}}

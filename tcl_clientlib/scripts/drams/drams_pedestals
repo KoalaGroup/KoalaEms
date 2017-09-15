@@ -1,0 +1,129 @@
+#! /bin/sh
+#\
+exec emssh $0 $*
+
+proc got_ok {args} {
+  global fertig
+  puts "got_ok: $args"
+  set fertig 1
+}
+
+proc got_error {args} {
+  global fertig
+  puts "got_error: $args"
+  set fertig -1
+}
+
+proc unsolproc {args} {
+  puts "unsolproc: $args"
+}
+
+proc mess_ped {ved is var loops delay channel} {
+  global fertig
+
+  $ved unsol unsolproc
+
+  if [catch {$is command1 DRAMS_mess_ped $var $loops $delay $channel : got_ok ? got_error} mist] {
+    puts $mist
+    set fertig -1
+    return
+  }
+
+  vwait fertig
+}
+
+proc set_ped {ved is var fac} {
+  global fertig
+
+  if [catch {$is command1 DRAMS_set_ped $var $fac} mist] {
+    puts $mist
+    set fertig -1
+    return
+  }
+
+  vwait fertig
+}
+
+puts ""
+puts "Measuring DRAMS Pedestals"
+puts "========================="
+puts ""
+
+set vedname e02
+set isidx 1
+set var 7
+set loops 1000
+set delay 1
+set channel 0
+set fac 3500
+
+puts "Vedname        : $vedname"
+puts "Number of loops: $loops"
+puts "Delay          : [expr $delay*10] ms"
+
+set ems_host ikpe1103
+set ems_port 4096
+#set ems_host ikpe1102
+#set ems_port 4096
+
+if [catch {ems_connect $ems_host $ems_port} mist] {
+  puts "$mist"
+  exit
+}
+
+if [catch {set ved [ems_open $vedname]} mist] {
+  puts "$mist"
+  exit
+}
+
+if [catch {set is [$ved is open $isidx]} mist] {
+  puts "$mist"
+  exit
+}
+
+set confmode [$ved confmode asynchron]
+
+mess_ped $ved $is $var $loops $delay $channel
+if {$fertig<0} {
+  exit
+}
+
+$ved confmode synchron
+
+set pedestals [$ved var read $var]
+if [catch {set pedfile [open pedlist {WRONLY CREAT TRUNC} 0644]} mist] {
+  puts $mist
+  exit
+}
+if [catch {set pedfile_s [open pedlist.s {WRONLY CREAT TRUNC} 0644]} mist] {
+  puts $mist
+  exit
+}
+set time [clock format [clock seconds]]
+puts $pedfile $time
+puts $pedfile ""
+puts $pedfile_s "# $time"
+puts $pedfile_s ""
+
+set n [llength $pedestals]
+puts "n=$n pedfile: $pedfile pedfile.s: $pedfile_s"
+set lines [expr $n/2]
+set i 0;
+for {set l 0} {$l<$lines} {incr l} {
+  puts -nonewline $pedfile [format {%3d:} $l]
+  puts -nonewline $pedfile [format { %6.1f} [expr [lindex $pedestals $i]/1000.]]
+  incr i
+  puts -nonewline $pedfile [format { %6.1f} [expr [lindex $pedestals $i]/1000.]]
+  incr i
+  puts $pedfile ""
+}
+puts $pedfile_s "set pedlist \{}
+puts $pedfile_s $pedestals
+puts $pedfile_s "array set \}"
+close $pedfile
+close $pedfile_s
+
+set_ped $ved $is $var $fac
+
+$ved close
+ems_disconnect

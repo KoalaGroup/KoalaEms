@@ -1,0 +1,8 @@
+
+               init  reset          start    stop  pause  resume
+
+uninitialized  idle  uninitialized  -----    ----  -----  ------
+idle           idle  uninitialized  running  ----  -----  ------
+running        idle  uninitialized  -----    idle  pause  ------
+pause          idle  uninitialized  -----    idle  -----  running
+

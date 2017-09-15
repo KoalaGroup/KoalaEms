@@ -1,0 +1,18 @@
+CONF = ../../../CONF
+COMMON = ../../../../COMMON
+
+include $(CONF)/rules.make
+
+cfiles = directcamac.r camacblock.r lam.r
+lib = lib.l
+
+all: $(lib)
+
+$(lib): $(cfiles)
+	merge $^ >-$@
+
+######################################################
+
+directcamac.r: debug.stamp debug.h errorcodes.h
+camacblock.r: debug.stamp debug.h ../camac.h
+lam.r: errorcodes.h

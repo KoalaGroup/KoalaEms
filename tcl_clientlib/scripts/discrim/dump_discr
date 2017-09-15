@@ -1,0 +1,94 @@
+#! /bin/sh
+# $Id: dump_discr,v 1.1 2000/03/24 19:06:44 wuestner Exp $\
+exec emswish $0 $*
+
+# Vorbereitung fuer 'autoload' von Prozeduren
+if [info exists env(EMSTCL_HOME)] {
+  set discrim_library $env(EMSTCL_HOME)/discrim
+  set common_library $env(EMSTCL_HOME)/common
+  set EMSTCL_HOME $env(EMSTCL_HOME)
+} else {
+  set discrim_library /usr/local/ems/lib/discrim
+  set common_library /usr/local/ems/lib/common
+  set EMSTCL_HOME /usr/local/ems/lib
+}
+lappend auto_path $discrim_library $common_library
+
+# Kommandozeilenargumente verarbeiten
+process_args
+set global_verbose [info exists namedarg(verbose)]
+if {$global_verbose} printargs
+
+if [info exists namedarg(help)] {
+  printhelp
+  exit
+}
+
+set global_setupfile(base) discr_rc
+set global_setupfile(default) ~/.$global_setupfile(base)
+
+if [info exists namedarg(setup)] {
+  set num_setup_files [llength [glob -nocomplain -- $namedarg(setup)]]
+  if {$num_setup_files!=1} {
+    if {$num_setup_files==0} {
+      puts "no file $namedarg(setup)"
+    } else {
+      puts "filename $namedarg(setup) ambigous"
+    }
+  exit
+  }
+  set global_setupfile(restored) $namedarg(setup)
+  set global_setupfile(save) $namedarg(setup)
+  set global_setupfile(use_default) 0
+} else {
+  set files0 [glob -nocomplain -- .$global_setupfile(base)]
+  set files1 [glob -nocomplain -- ~/.$global_setupfile(base)]
+  set files2 [glob -nocomplain -- ~/$global_setupfile(base)]
+  if {[llength $files0]>0} {
+    set file [lindex $files0 0]
+  } elseif {[llength $files1]>0} {
+    set file [lindex $files1 0]
+  } elseif {[llength $files2]>0} {
+    set file [lindex $files2 0]
+  } else {
+    set file ""
+  }
+  if {"$file"!=""} {
+    set global_setupfile(restored) $file
+    set global_setupfile(save) $file
+  } else {
+    set global_setupfile(restored) ""
+    set global_setupfile(save) ~/.$global_setupfile(base)
+  }
+  set global_setupfile(use_default) 1
+}
+if {$global_setupfile(restored)!=""} {
+  restore_setup $global_setupfile(restored)
+} else {
+  puts "there exists no setupfile $global_setupfile(save), but it is needed."
+  exit
+}
+
+use_args
+
+if {[init_commu_and_ved]<0} {
+  exit
+}
+
+set filename $global_setup(dumpfile)_[clock seconds]
+set file [open $filename {WRONLY CREAT EXCL}]
+puts "file=$file"
+
+foreach modul $global_setup(moduls) {
+  set slot [lindex $modul 0]
+  set type [lindex $modul 1]
+  switch $type {
+    4413 {dump_4413 $slot $file}
+    C193 {dump_C193 $slot $file}
+  }
+}
+close $file
+if [catch {exec ln -fs $filename $global_setup(dumpfile)} mist] {
+  puts "$mist"
+}
+

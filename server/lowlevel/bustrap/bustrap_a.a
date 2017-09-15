@@ -1,0 +1,107 @@
+*******************************************************************************
+*                                                                             *
+* bustrap.a                                                                   *
+*                                                                             *
+* OS9                                                                         *
+*                                                                             *
+* created: 07.10.94                                                           *
+* last changed: 21.10.94                                                      *
+*                                                                             *
+* PW                                                                          *
+*                                                                             *
+*******************************************************************************
+
+  psect ssm_a,0,0,0,0,0
+
+  vsect
+trap_pc: ds.l 1
+trapproc: ds.l 1
+  ends
+
+*******************************************************************************
+
+btrap:
+  jmp     ([trapproc,a6])
+btrap0:
+  move.l  a0,(trap_pc,a6)
+  movem.l (a5),d0-d7/a0-a7
+  movem.l d0/a0-a5,-(a7)
+  move.l  (trap_pc,a6),d0
+  move.l  a0,d1
+  bsr     btrap_hand
+  movem.l (a7)+,d0/a0-a5
+  rts
+
+*******************************************************************************
+
+* int init_bustrap()
+
+init_bustrap:
+  movem.l d2-d7/a0-a4,-(a7)
+  suba.l  a0,a0
+  sub.l   d0,d0
+  lea     traptab(pc),a1
+  os9     F$STrap
+  bcs.s   notrap
+  clr.l   d0
+  movem.l (a7)+,d2-d7/a0-a4
+  rts
+
+notrap:
+  move.l  d1,errno(a6)
+  moveq.l #-1,d0
+  movem.l (a7)+,d2-d7/a0-a4
+  rts
+
+*******************************************************************************
+
+* int done_bustrap()
+
+done_bustrap:
+  movem.l d2-d7/a0-a4,-(a7)
+  suba.l  a0,a0
+  sub.l   d0,d0
+  lea     (traptab0,pc),a1
+  os9     F$STrap
+  bcs.s   notrap0
+  clr.l   d0
+  movem.l (a7)+,d2-d7/a0-a4
+  rts
+
+notrap0:
+  move.l  d1,errno(a6)
+  moveq.l #-1,d0
+  movem.l (a7)+,d2-d7/a0-a4
+  rts
+
+*******************************************************************************
+
+traptab:
+  dc.w    T_BusErr,btrap-*-4
+  dc.w    -1
+
+traptab0:
+  dc.w    T_BusErr,0
+  dc.w    -1
+
+*******************************************************************************
+
+* chk_acc(char* addr, int size)
+
+chk_acc:
+  movem.l d2-d7/a0-a4,-(a7)
+  move.l  d0,a0
+ll
+  move.b  (a0),d0
+  addq.l  #1,a0
+  dbf     d1,ll
+  movem.l (a7)+,d2-d7/a0-a4
+  rts
+
+*******************************************************************************
+
+  ends
+  end
+
+*******************************************************************************
+*******************************************************************************

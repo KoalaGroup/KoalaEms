@@ -1,0 +1,74 @@
+#!/usr/local/bin/emssh
+
+# syntax: test_CAMAC_module.ems commu_host server_name slot_id
+
+if {$argc < 3} {
+	puts "syntax: $argv0 commu_host server_name slot_id"
+	exit -1
+}
+set commu_host [lindex $argv 0]
+set server_name [lindex $argv 1]
+set slot_id [lindex $argv 2]
+
+ems_connect $commu_host 4096
+set ved [ems_open $server_name]
+
+for {set i 0} {$i<32} {incr i} {
+	puts -nonewline "F=$i "
+	switch $i {
+		0	{puts {Read Group 1 Register}}
+		1	{puts {Read Group 2 Register}}
+		2	{puts {Read and Clear Group 1 Register}}
+		3	{puts {Read Complement Group 1 Register}}
+		4	{puts {Non-standard}}
+		5	{puts {Reserved}}
+		6	{puts {Non-standard}}
+		7	{puts {Reserved}}
+		8	{puts {Test Look-at-Me}}
+		9	{puts {Clear Group 1 Register}}
+		10	{puts {Clear Look-at-Me}}
+		11	{puts {Clear Group 2 Register}}
+		12	{puts {Non-standard}}
+		13	{puts {Reserved}}
+		14	{puts {Non-standard}}
+		15	{puts {Reserved}}
+		16	{puts {Overwrite Group 1 Register}}
+		17	{puts {Overwrite Group 2 Register}}
+		18	{puts {Selective Set Group 1 Register}}
+		19	{puts {Selective Set Group 2 Register}}
+		20	{puts {Non-standard}}
+		21	{puts {Selective Clear Group 1 Register}}
+		22	{puts {Non-standard}}
+		23	{puts {Selective Clear Group 2 Register}}
+		24	{puts {Disable}}
+		25	{puts {Execute}}
+		26	{puts {Enable}}
+		27	{puts {Test Status}}
+		28	{puts {Non-standard}}
+		29	{puts {Reserved}}
+		30	{puts {Non-standard}}
+		31	{puts {Reserved}}
+	}
+	for {set j 0} {$j<16} {incr j} {
+		set temp "F=$i A=$j "
+		if {$i>=0 && $i<=7} {
+#			read commands
+			append temp [format "%x" [expr 0xffffff & [$ved command1 nAFread $slot_id $j $i]]]
+		} elseif {$i>=16 && $i<=23} {
+#			write commands
+			$ved command1 nAFwrite $slot_id $j $i 1
+		} else {
+#			control commands
+			$ved command1 nAFcntl $slot_id $j $i
+		}
+		set qx [$ved command1 QX]
+		set q [expr 0x80000000 & $qx]
+		set x [expr 0x40000000 & $qx]
+		if {$q} {append temp { Q}}
+		if {$x} {append temp { X}}
+		if {$q || $x} {puts $temp}
+		after 1
+	}
+}
+
+$ved close 

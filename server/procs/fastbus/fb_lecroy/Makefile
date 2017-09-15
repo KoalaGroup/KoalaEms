@@ -1,0 +1,44 @@
+# Generated automatically from Makefile.in by configure.
+# procs/fastbus/fb_lecroy/Makefile.in
+# $ZEL: Makefile.in,v 1.8 2005/02/11 17:56:58 wuestner Exp $
+
+CONF = ../../../conf
+
+srcdir = .
+
+include $(CONF)/rules.make
+include $(CONF)/config.make
+
+cfiles = fb_lc1810_init.c  \
+         fb_lc1872a_init.c fb_lc1872a_read.c  \
+         fb_lc1875_init.c fb_lc1875_read.c  \
+         fb_lc1875a_init.c fb_lc1875a_read.c  \
+         fb_lc1876_init.c fb_lc1876_read.c  \
+         fb_lc1877_init.c fb_lc1877_read.c  \
+         fb_lc1879_init.c fb_lc1879_read.c  \
+         fb_lc1881_read.c fb_lc1881_init.c  \
+         fb_lc1881_read_seq.c  \
+         fb_lc1885f_read.c fb_lc1885f_init.c  \
+         fb_lc_util.c \
+         ../fastbus_verify.c
+         #fb_lc1875p_read.c fb_lc_asm.c
+
+ofiles = $(cfiles:.c=.o)
+depfiles = $(cfiles)
+
+FASTBUSTYPES = $(shell echo $(fastbus)|tr '[:lower:]' '[:upper:]')
+FASTBUSFLAGS=$(foreach typ,$(FASTBUSTYPES),-DFASTBUS_$(typ) )
+CFLAGS += $(FASTBUSFLAGS)
+
+lib = ../../libprocs.a
+
+all: $(lib)
+
+$(lib): $(lib)($(ofiles))
+	$(RANLIB) $@
+
+depend: xdepend
+
+.PHONY: depend
+
+#######################################

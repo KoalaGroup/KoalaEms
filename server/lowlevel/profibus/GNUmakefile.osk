@@ -1,0 +1,12 @@
+CONF = ../../CONF
+COMMON = ../../../COMMON
+
+include $(COMMON)/rules.make
+
+cfiles = profi.r
+asmfiles = xsrqcmem.r
+
+all: lib.l
+
+lib.l: $(cfiles) $(asmfiles)
+	merge $^ >-$@

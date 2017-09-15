@@ -1,0 +1,343 @@
+#!/usr/local/bin/emssh
+
+set plot_prolog {set data style lines
+set linestyle 1 linewidth 11
+set xlabel 'deadtime/{/Symbol m}sec'
+set mxtics 10
+set mytics 10
+set nologscale x
+set logscale y
+set grid
+}
+for {set i 1} {$i<=30} {incr i} {
+    append plot_prolog "set linestyle $i lw 1\n"
+}
+append plot_prolog {
+set term post enh col solid
+}
+
+set plot_epilog {set term X
+set output
+replot
+}
+
+proc _ {s} {
+    return [string map {_ \\_} $s]
+}
+
+proc init {facility} {
+    global host port ved
+    global targets trigger veds
+    global shift size
+    set prefix init.
+
+    if [string equal $facility {}] {
+        set facilities [glob -types f ${prefix}*]
+        puts -nonewline {valid facilities are:}
+        foreach f $facilities {
+            if {![string match .bck $f]} {
+                set f [string range $f [string length ${prefix}] end]
+                puts -nonewline "  $f"
+            }
+        }
+        puts {}
+        return -1
+    }
+
+    set shift -1
+    set size  -1
+
+    if [catch {source ${prefix}$facility}] {
+        global errorInfo
+        puts "cannot init $facility"
+        set error [lindex [split $errorInfo \n] 0]
+        puts $error
+        return -1
+    }
+
+    ems_connect $host $port
+    set veds {}
+    foreach i $targets {
+        if [catch {lappend veds [ems_open $i]} mist] {
+            puts $mist
+            return -1
+        }
+    }
+
+    return 0
+}
+
+proc save_histo {f hits overflows zeros fact hist} {
+
+    set l [llength $hist]
+    set sum 0
+    for {set i 0} {$i<$l} {incr i} {
+        incr sum [lindex $hist $i]
+    }
+
+    puts $f "# sum $sum"
+
+    if {$sum==0} {
+        return 0
+    }
+
+    set bin $zeros
+
+    set c [expr 1./double($sum)]
+
+    for {set i 0} {$i<$l} {incr i} {
+        puts $f "[expr $bin*$fact] [expr double([lindex $hist $i])*$c]"
+        incr bin
+    }
+    return $sum
+}
+
+proc do_arr {ved trig is proc procname arr dir} {
+    global log
+    global pf_ved ls_ved
+    global pf_is ls_is
+    global pf_proc ls_proc
+    global time_unit
+
+    file mkdir $dir
+
+    set arrname [$ved command1 perfspect_info $trig $is $proc $arr | string]
+    #puts "arr $arr: $arrname"
+
+    set time [clock seconds]
+    set l [$ved command1 perfspect_get $trig $is $proc $arr]
+    #puts $l
+    set headerlen [lindex $l 0]
+    set rl [lrange $l 1 end]
+    if {$headerlen==4} {
+        set spectsize [lindex $rl 0]
+        set scale 0
+        set hits [lindex $rl 1]
+        set overflows [lindex $rl 2]
+        set zeros [lindex $rl 3]
+    } elseif {$headerlen==5} {
+        set spectsize [lindex $rl 0]
+        set scale [lindex $rl 1]
+        set hits [lindex $rl 2]
+        set overflows [lindex $rl 3]
+        set zeros [lindex $rl 4]
+    } else {
+        puts "headerlen=$headerlen; 4 or 5 expected"
+        return
+    }
+
+    set fact [expr (1<<$scale)*$time_unit($ved)]
+
+    set rl [lrange $rl $headerlen end]
+
+    set nonzeros [lindex $rl 0]
+    set hist [lrange $rl 1 end]
+
+    set f [open $dir/$arr {WRONLY CREAT TRUNC} 0666]
+    puts $f "# ved [$ved name]"
+    puts $f "# trigger $trig"
+    puts $f "# is $is"
+    puts $f "# proc $proc"
+    puts $f "# procname $procname"
+    puts $f "# array $arr"
+    puts $f "# arrayname $arrname"
+    puts $f "# time $time"
+    puts $f "# ftime [clock format $time -format {%Y-%m-%d %H:%M UTC} -gmt 1]"
+    puts $f "# spectsize $spectsize"
+    puts $f "# scale $scale"
+    puts $f "# unit $time_unit($ved)"
+    puts $f "# hits $hits"
+    puts $f "# overflows $overflows"
+    puts $f "# zeros $zeros"
+    puts $f "#"
+    set sum [save_histo $f $hits $overflows $zeros $fact $hist]
+    puts $log "  array $arr $arrname sum=$sum"
+    close $f
+
+    if {$sum>0} {
+        if {$arr<0} { # start or stop
+            if {$ls_ved>0} {puts -nonewline $pf_ved {,}}
+            incr ls_ved
+            puts -nonewline $pf_ved "\\\n  '$dir/$arr' title [_ '${is}_${procname}_$arrname'] ls $ls_ved"
+        }
+
+        if {$ls_is>0} {puts -nonewline $pf_is {,}}
+        incr ls_is
+        puts -nonewline $pf_is "\\\n  '$dir/$arr' title [_ '${is}_${procname}_$arrname'] ls $ls_is"
+
+        if {$ls_proc>0} {puts -nonewline $pf_proc {,}}
+        incr ls_proc
+        puts -nonewline $pf_proc "\\\n  '$dir/$arr' title [_ '${is}_${procname}_$arrname'] ls $ls_proc"
+    }
+}
+
+proc do_proc {ved trig is proc procname dir} {
+    global pf_proc ls_proc head_time
+    global plot_prolog plot_epilog
+
+    file mkdir $dir
+
+    set f [open $dir/procname {WRONLY CREAT TRUNC} 0666]
+    puts $f $procname
+    close $f
+
+    set arrs [$ved command1 perfspect_info $trig $is $proc]
+    #puts "proc $proc $procname: $arrs extra-arrays"
+
+    set pf_proc [open $dir/gnu.plot {WRONLY CREAT TRUNC} 0666]
+    set ls_proc 0
+    puts $pf_proc [_ "set title 'readout time Distribution VED [$ved name] trigger $trig IS $is proc $proc $procname $head_time'"]
+    puts $pf_proc $plot_prolog
+    puts $pf_proc "set output '[$ved name]_${trig}_${is}_${proc}_${procname}.ps'"
+    puts -nonewline $pf_proc {plot [0:][:]}
+    for {set arr -1} {$arr<$arrs} {incr arr} {
+        do_arr $ved $trig $is $proc $procname $arr $dir
+    }
+    do_arr $ved $trig $is $proc $procname -2 $dir
+    puts $pf_proc {}
+    puts $pf_proc $plot_epilog
+    close $pf_proc
+}
+
+proc do_is {ved trig is dir} {
+    global pf_is ls_is head_time
+    global plot_prolog plot_epilog
+    set caparr cap_$ved
+    global $caparr log
+
+    file mkdir $dir
+
+    set IS [$ved is open $is]
+    set ISid [$IS id]
+    set proclist [$IS readoutlist upload $trig]
+    puts "[$ved name] trig $trig is $is"
+    puts "  $proclist"
+    puts $log "[$ved name] trig $trig is $is"
+    puts $log "  $proclist"
+
+    set f [open $dir/proclist {WRONLY CREAT TRUNC} 0666]
+    puts $f $proclist
+    close $f
+
+    set procs [$ved command1 perfspect_info $trig $is]
+    #puts "procs for [$ved name] trigger $trig: $procs"
+
+    set pf_is [open $dir/gnu.plot {WRONLY CREAT TRUNC} 0666]
+    set ls_is 0
+    puts $pf_is [_ "set title 'readout time Distribution VED [$ved name] trigger $trig IS $is $head_time'"]
+    puts $pf_is $plot_prolog
+    puts $pf_is "set output '[$ved name]_${trig}_$is.ps'"
+    puts -nonewline $pf_is {plot [0:][:]}
+    for {set i 0} {$i<[llength $procs]} {incr i} {
+        set procname [set ${caparr}([lindex $procs $i])]
+        puts $log "proc $i $procname"
+        do_proc $ved $trig $is $i $procname $dir/$i
+    }
+    puts $pf_is {}
+    puts $pf_is $plot_epilog
+    close $pf_is
+}
+
+proc do_trig {ved trig dir} {
+    global pf_ved ls_ved head_time
+    global plot_prolog plot_epilog
+
+    file mkdir $dir
+
+    set iss [$ved command1 perfspect_info $trig]
+    #puts "iss for [$ved name] trigger $trig: $iss"
+
+    set pf_ved [open $dir/gnu.plot {WRONLY CREAT TRUNC} 0666]
+    set ls_ved 0
+    puts $pf_ved [_ "set title 'readout time Distribution VED [$ved name] trigger $trig $head_time'"]
+    puts $pf_ved $plot_prolog
+    puts $pf_ved "set output '[$ved name]_$trig.ps'"
+    puts -nonewline $pf_ved {plot [0:][:]}
+    foreach is $iss {
+        do_is $ved $trig $is $dir/$is
+    }
+    puts $pf_ved {}
+    puts $pf_ved $plot_epilog
+    close $pf_ved
+}
+
+proc do_ved {ved dir} {
+    global trigger log
+    global time_unit
+    set caparr cap_$ved
+    global $caparr
+
+    puts "=== VED [$ved name] ==="
+    puts $log "VED [$ved name]"
+    foreach i [$ved caplist] {
+        set ${caparr}([lindex $i 0]) [lindex $i 1]
+    }
+
+    #set time_unit($ved) [expr [$ved command1 perfspect_unit]]
+    set time_unit($ved) [expr 100/1000.]; # unit in us
+
+    if {![llength $trigger]} {
+        set trigs [$ved command1 perfspect_info]
+    } else {
+        set trigs $trigger
+    }
+    
+    foreach trig $trigs {
+        do_trig $ved $trig $dir/$trig
+    }
+}
+
+proc read_and_save_histos {} {
+    global veds facility log head_time
+
+    set time [clock seconds]
+    set head_time [clock format $time -format {%Y-%m-%d %H:%M UTC} -gmt 1]
+    set file_time [clock format $time -format {%Y-%m-%d_%H:%M} -gmt 1]
+    set dir ${facility}/${facility}_$file_time
+
+    file mkdir $dir
+    catch "file delete current_$facility"
+    exec /bin/ln -sf $dir current_$facility
+
+    set log [open $dir/log {WRONLY CREAT TRUNC} 0666]
+
+    foreach ved $veds {
+        do_ved $ved $dir/[$ved name]
+    }
+
+    close $log
+}
+
+proc set_and_clear {} {
+    global veds shift size
+    foreach ved $veds {
+        if [catch {$ved command1 perfspect_setup $size $shift} mist] {
+            puts "ved [$ved name] does not support perfspect: $mist"
+        }
+    }
+}
+
+proc main {} {
+    global argc argv0 argv facility
+
+    if {$argc<1} {
+        puts "usage: $argv0 facility \[clear\]"
+        set facility {}
+    } else {
+        set facility [lindex $argv 0]
+    }
+
+    set res [init $facility]
+    if {$res<0} return
+
+    if {($argc>1) && [string equal [lindex $argv 1] "clear"]} {
+        puts "clear all"
+        set_and_clear
+    } else {
+        read_and_save_histos
+    }
+
+    return
+}
+
+main

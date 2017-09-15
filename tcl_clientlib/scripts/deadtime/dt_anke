@@ -1,0 +1,103 @@
+#! /bin/sh
+#\
+exec emssh $0 $*
+
+set delay 1000
+set host ikpp60
+set port 4096
+set vedname [lindex $argv 0]
+
+proc loop {} {
+  global delay ved
+  global last_event last_rejectcount
+  global last_time
+
+# ved_e08 command {Timestamp 1 GetSyncStatist {3 3 -1 0}}
+# 0 1   timestamp 979502211 600865
+# 2     size 28
+# 3     eventcount 1365
+# 4 5   rejected 0 93707
+# 6     nr of following structures 2
+# 0      typ 1
+# 1      entries 1363
+# 2      overflows 711
+# 3      minimum 734
+# 4      maximum 16749532
+# 5 6    summe 1 4224288229
+# 7 8    summe**2 5 125245
+# 9      histsize 0853
+# 10     histscale 3000
+# 11     num 0
+# 12     leading zeros 0
+# 0      typ 2
+# ...  357 350 1029 16719572 1 665965394 4294967293 2623789458 3000 0 0
+
+  puts ""
+  set l [$ved command {Timestamp 1 GetSyncStatist {3 3 -1 0}}]
+  set sec [lindex $l 0]
+  set usec [lindex $l 1]
+  set time [expr double($sec)+double($usec)/1000000.]
+
+  set event [lindex $l 3]
+  set rejectcount [lindex $l 5]
+  set hrejectcount [lindex $l 4]
+  if {$hrejectcount!=0} {puts "hrejectcount=$hrejectcount"}
+
+  set num [lindex $l 6]
+  set rl [lrange $l 7 end]
+  for {set i 0} {$i<$num} {incr i} {
+    #puts "i=$i list=$rl"
+    set typ [lindex $rl 0]
+    set summe($typ) [lindex $rl 6]
+    set hsumme($typ) [lindex $rl 5]
+    if {$hsumme($typ)!=0} {puts "hsumme($typ)=$hsumme($typ)"}
+
+    set rl [lrange $rl 12 end]
+  }
+
+  puts "Event $event"
+
+  if {$last_event>0} {
+    set rejected [expr $rejectcount-$last_rejectcount]
+    set measured [expr $event-$last_event]
+    set triggered [expr $measured+$rejected]
+    puts -nonewline "measured: $measured triggered: $triggered"
+    if {$triggered>0} {
+      set dt_rel [expr double($rejected)/double($triggered)]
+      puts " dead time: [expr $dt_rel*100.]%"
+    } else {
+      puts ""
+    }
+    set tdeadtime [expr double($summe(2))/10000000.]
+    set ldeadtime [expr double($summe(1))/10000000.]
+    set tdiff [expr $time-$last_time]
+    puts "elapsed time: $tdiff tdt: $tdeadtime s ldt: $ldeadtime s"
+    if {$measured>0} {
+      set tdt_ev [expr $tdeadtime/$measured*1000.]
+      set ldt_ev [expr $ldeadtime/$measured*1000.]
+      puts "tdt/ev: $tdt_ev ms ldt/ev: $ldt_ev ms"
+    }
+  }
+
+  set last_event $event
+  set last_rejectcount $rejectcount
+  set last_time $time
+
+  after $delay loop
+}
+
+proc init {} {
+  global host port vedname
+  global ved
+  global last_event
+
+  ems_connect $host $port
+  set ved [ems_open $vedname]
+  set last_event -1
+}
+
+init
+loop
+set xcv 0
+vwait xcv
+

@@ -1,0 +1,21 @@
+D/console////
+D/daten////
+D/delayedread////
+D/real////
+D/vicraw////
+/GNUmakefile.osk/1.5/Tue May  3 09:11:34 2011//
+/Makefile.in/1.10/Thu Jul  4 13:54:02 2013//
+/chstdout.c/1.11/Tue May  3 09:11:34 2011//
+/debuglevel.c/1.7/Tue May  3 09:11:34 2011//
+/delay.c/1.9/Tue May  3 09:11:34 2011//
+/error.c/1.9/Tue May  3 09:11:34 2011//
+/exit.c/1.7/Tue May  3 09:11:34 2011//
+/maxevcount.c/1.8/Tue May  3 09:11:34 2011//
+/onreadouterror.c/1.7/Tue May  3 09:11:34 2011//
+/printevent.c/1.10/Tue May  3 09:11:34 2011//
+/procedures.config/1.16/Thu Jul  4 13:54:02 2013//
+/random.c/1.14/Tue May  3 09:11:34 2011//
+/readoutprior.c/1.5/Tue May  3 09:11:34 2011//
+/select_statist.c/1.7/Tue May  3 09:11:34 2011//
+/unsol.c/1.16/Tue May  3 09:11:34 2011//
+/xprintf.c/1.1/Thu Jan 17 22:43:45 2013//

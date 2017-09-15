@@ -1,0 +1,13 @@
+CONF = ../../CONF
+COMMON = ../../../COMMON
+
+include $(CONF)/rules.make
+
+cfiles = ringbuffer.r
+
+all: lib.l
+
+lib.l: $(cfiles)
+	merge $^ >-$@
+
+ringbuffer.r: sconf.h debug.h errorcodes.h

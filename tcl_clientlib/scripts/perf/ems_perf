@@ -1,0 +1,79 @@
+#! /bin/sh
+#\
+exec emswish $0 $*
+
+# Vorbereitung fuer 'autoload' von Prozeduren
+if [info exists env(EMSTCL_HOME)] {
+  set perf_library $env(EMSTCL_HOME)/perf
+  set common_library $env(EMSTCL_HOME)/common
+} else {
+  set perf_library /usr/local/ems/lib/perf
+  set common_library /usr/local/ems/lib/common
+}
+lappend auto_path $perf_library $common_library
+
+# lappend sources_with_ns create_display.tcl perfloop.tcl
+# foreach i $sources_with_ns {
+#   source $i
+# }
+
+# Kommandozeilenargumente verarbeiten
+process_args
+set global_verbose [info exists namedarg(verbose)]
+if {$global_verbose} printargs
+
+if [info exists namedarg(help)] {
+  printhelp
+  exit
+}
+
+bind Entry <Delete> {
+       tkEntryBackspace %W
+}
+
+#wm withdraw .
+set_options
+set maintitle "EMS Perf. Monitor"
+if [regexp #.* [winfo name .] number] {
+  append maintitle $number
+}
+wm title . $maintitle
+wm maxsize . 10000 10000
+tk_focusFollowsMouse
+
+set tcl_precision 17
+
+set global_display [display_name]
+set global_setupfile(default) [setupfile_name $global_display]
+
+if [info exists namedarg(setup)] {
+  set num_setup_files [llength [glob -nocomplain -- $namedarg(setup)]]
+  if {$num_setup_files!=1} {
+    if {$num_setup_files==0} {
+      puts "no file $namedarg(setup)"
+    } else {
+      puts "filename $namedarg(setup) ambigous"
+    }
+  exit
+  }
+  set global_setupfile(restored) $namedarg(setup)
+  set global_setupfile(save) $namedarg(setup)
+  set global_setupfile(use_default) 0
+} else {
+  set global_setupfile(restored) [find_setupfile $global_setupfile(default) $global_display ~/ems_perfrc]
+  set global_setupfile(save) $global_setupfile(default)
+  set global_setupfile(use_default) 1
+}
+if {$global_setupfile(restored)!=""} {
+  restore_setup $global_setupfile(restored)
+}
+
+# und, wenn noetig, Setup vervollstaendigen
+correct_setup
+use_args
+
+set dialog_nr 0
+start_gui
+ems_confmode asynchron
+ems_unsolcommand ServerDisconnect {ServerDisconnect %v}
+::Loop::start 10

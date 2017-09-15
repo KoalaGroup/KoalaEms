@@ -1,0 +1,283 @@
+dnl Process this file with autoconf to produce a configure script.
+dnl $Id: configure.in,v 2.22 2011/03/31 18:36:28 wuestner Exp $
+
+AC_INIT(objecttypes.h)
+AC_CONFIG_AUX_DIR(../confsupp)
+
+AC_PREFIX_DEFAULT(/usr/local/ems)
+
+AC_CANONICAL_SYSTEM
+
+. $srcdir/patchlevel
+
+dnl Checks for programs.
+AC_PROG_CC
+AC_PROG_MAKE_SET
+AC_PROG_INSTALL
+AC_PROG_LN_S
+
+dnl Checks for libraries.
+
+dnl Checks for header files.
+AC_CHECK_HEADER(sys/cdefs.h,AC_DEFINE(HAVE_SYS_CDEFS_H))
+AC_CHECK_HEADER(strings.h,[AC_DEFINE(HAVE_STRINGS_H)
+have_strings_h=yes])
+if test "$have_strings_h" = yes ; then
+  AC_EGREP_CPP(strerror,strings.h,,AC_DEFINE(NEED_STRERROR))
+else
+  AC_EGREP_CPP(strerror,string.h,,AC_DEFINE(NEED_STRERROR))
+fi
+
+AC_CHECK_FUNCS(cgetcap,, GETCAPSRC='$(GETCAPSRC)')
+AC_SUBST(GETCAPSRC)
+
+dnl Checks for sizes of builtin types
+
+AC_CHECK_SIZEOF(char)
+AC_CHECK_SIZEOF(short)
+AC_CHECK_SIZEOF(int)
+AC_CHECK_SIZEOF(long)
+AC_CHECK_SIZEOF(void *)
+AC_CHECK_SIZEOF(float)
+AC_CHECK_SIZEOF(double)
+
+AC_MSG_CHECKING(for long long support)
+have_long_long=no
+AC_TRY_COMPILE([], [
+  long long x; x = (long long)0;
+  ], AC_DEFINE(HAVE_LONG_LONG) have_long_long=yes)
+AC_MSG_RESULT($have_long_long)
+if test "$have_long_long" = yes ; then
+AC_CHECK_SIZEOF(long long)
+fi
+AC_MSG_CHECKING(for long double support)
+have_long_double=no
+AC_TRY_COMPILE([], [
+  long double x; x = (long double)0;
+  ], AC_DEFINE(HAVE_LONG_DOUBLE) have_long_double=yes)
+AC_MSG_RESULT($have_long_double)
+if test "$have_long_double" = yes ; then
+AC_CHECK_SIZEOF(long double)
+fi
+
+candidates="char short int long"
+if test "$have_long_long" = yes ; then
+  candidates=$candidates" long_long"
+fi
+
+for xsize in 1 2 4 8 ; do
+  for i in $candidates ; do
+    eval size=\$ac_cv_sizeof_$i
+    if test $size = $xsize ; then
+      typ=`echo $i|sed -e 's|_| |g'` 
+      dnl echo found $xsize : $typ
+      eval EMS_I${xsize}=\"$typ\"
+      break
+    fi
+  done
+done
+AC_SUBST(EMS_I1)
+AC_SUBST(EMS_I2)
+AC_SUBST(EMS_I4)
+AC_SUBST(EMS_I8)
+
+SOCKLEN_TYPE=""
+AC_MSG_CHECKING([3rd argument of accept is socklen_t*])
+AC_CACHE_VAL(ems_cv_header_socklen_type_socklen_t,
+AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <sys/socket.h>
+], [
+int res;
+int sock;
+struct sockaddr *address;
+socklen_t len=0;
+res=accept(sock, address, &len);
+],
+ems_cv_header_socklen_type_socklen_t=yes,
+ems_cv_header_socklen_type_socklen_t=no))
+AC_MSG_RESULT($ems_cv_header_socklen_type_socklen_t)
+if test $ems_cv_header_socklen_type_socklen_t = yes ; then
+    SOCKLEN_TYPE=socklen_t
+fi
+
+if test "$SOCKLEN_TYPE" = "" ; then
+  AC_MSG_CHECKING([3rd argument of accept is size_t*])
+  AC_CACHE_VAL(ems_cv_header_socklen_type_size_t,
+  AC_TRY_COMPILE([
+  #include <sys/types.h>
+  #include <sys/socket.h>
+  ], [
+  int res;
+  int sock;
+  struct sockaddr *address;
+  size_t len=0;
+  res=accept(sock, address, &len);
+  ],
+  ems_cv_header_socklen_type_size_t=yes,
+  ems_cv_header_socklen_type_size_t=no))
+  AC_MSG_RESULT($ems_cv_header_socklen_type_size_t)
+  if test $ems_cv_header_socklen_type_size_t = yes ; then
+      SOCKLEN_TYPE=size_t
+  fi
+fi
+
+if test "$SOCKLEN_TYPE" = "" ; then
+  AC_MSG_CHECKING([3rd argument of accept is int*])
+  AC_CACHE_VAL(ems_cv_header_socklen_type_int,
+  AC_TRY_COMPILE([
+  #include <sys/types.h>
+  #include <sys/socket.h>
+  ], [
+  int res;
+  int sock;
+  struct sockaddr *address;
+  int len=0;
+  res=accept(sock, address, &len);
+  ],
+  ems_cv_header_socklen_type_int=yes,
+  ems_cv_header_socklen_type_int=no))
+  AC_MSG_RESULT($ems_cv_header_socklen_type_int)
+  if test $ems_cv_header_socklen_type_int = yes ; then
+      SOCKLEN_TYPE=int
+  fi
+fi
+if test "$SOCKLEN_TYPE" = "" ; then
+  AC_MSG_ERROR(cannot determine type of 3rd argument of accept)
+fi
+AC_SUBST(SOCKLEN_TYPE)
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+AC_C_CONST
+dnl AC_C_CROSS
+if test "$cross_compiling" = "yes" ; then
+  AR=$target-ar
+  RANLIB=$target-ranlib
+  case $target_cpu in
+    i386 | i486 ) ;;
+    m68k ) AC_DEFINE(WORDS_BIGENDIAN) ;;
+    * ) AC_MSG_ERROR(kann target-byteorder nicht bestimmen) ;;
+  esac
+else
+  AR=ar
+  AC_PROG_RANLIB
+  AC_C_BIGENDIAN
+fi
+AC_SUBST(AR)
+AC_SUBST(LN_S)
+
+AC_ARG_ENABLE(debug, [  --enable-debug ])
+dnl Set compilation flags
+if test "$GCC" = yes ; then
+  case $build_os in
+    *)
+      CFLAGS=""
+      CFLAGS=$CFLAGS" -ansi"
+      CFLAGS="$CFLAGS -Werror -Wall -Wextra"
+      CFLAGS="$CFLAGS -Wcomment"
+      CFLAGS="$CFLAGS -Wformat"
+      CFLAGS="$CFLAGS -Wimplicit"
+      CFLAGS="$CFLAGS -Wmissing-declarations"
+      CFLAGS="$CFLAGS -Wmissing-prototypes"
+      CFLAGS="$CFLAGS -Wstrict-prototypes"
+      CFLAGS="$CFLAGS -Wparentheses"
+      CFLAGS="$CFLAGS -Wpointer-arith"
+      CFLAGS="$CFLAGS -Wreturn-type"
+      if test "$enable_debug" = yes ; then
+        CFLAGS=$CFLAGS" -g"
+      else
+        CFLAGS=$CFLAGS" -O2"
+        CFLAGS="$CFLAGS -Wunused"
+      fi
+    ;;
+  esac
+else
+  case $build_os in
+    ultrix*)
+      if test "$enable_debug" = yes ; then
+        CFLAGS="-std1 -g"
+      else
+        CFLAGS="-std1 -O2"
+      fi
+    ;;
+    osf*)
+      if test "$enable_debug" = yes ; then
+        CFLAGS="-std1 -g -portable -warnprotos"
+      else
+        CFLAGS="-std1 -O4 -portable -warnprotos"
+      fi
+    ;;
+  esac
+fi
+AC_SUBST(CFLAGS)
+
+dnl Check for shared objects
+AC_MSG_CHECKING(whether we should create shared objects)
+makeshared=false
+if test "$GCC" = yes ; then
+  case $target_os in
+    x_netbsd*)
+      CFLAGS=$CFLAGS" -fpic"
+      LDOFLAGS='-shared'
+      LDONONEFLAG=""
+      SHLIBSUFFIX=.so
+      makeshared=true
+    ;;
+    x_linux*)
+      LDOFLAGS='-shared --whole-archive'
+      LDONONEFLAG="--no-whole-archive"
+      SHLIBSUFFIX=.so
+      makeshared=true
+    ;;
+    *)
+      makeshared=false
+    ;;
+  esac
+else
+  case $target_os in
+    x_netbsd*)
+      LDOFLAGS='-shared'
+      LDONONEFLAG=""
+      SHLIBSUFFIX=.so
+      makeshared=true
+    ;;
+    x_linux*)
+      LDOFLAGS='-shared --whole-archive -rpath $(LIB_DIR)'
+      LDONONEFLAG="--no-whole-archive"
+      SHLIBSUFFIX=.so
+      makeshared=true
+    ;;
+    x_osf*)
+      LDOFLAGS='-shared -rpath $(LIB_DIR) -exact_version'
+      LDOFLAGS=$LDOFLAGS' -set_version $(SELFVER)'
+      LDOFLAGS=$LDOFLAGS' -error_unresolved'
+      if test "$enable_debug" = yes ; then
+        LDOFLAGS="$LDOFLAGS -g"
+      fi
+      LDONONEFLAG="-none"
+      SHLIBSUFFIX=.so
+      makeshared=true
+    ;;
+    *)
+      makeshared=false
+    ;;
+  esac
+fi
+if test $makeshared = true ; then
+  AC_MSG_RESULT(yes)
+  SLIBS='$(slibs)'
+else
+  AC_MSG_RESULT(no)
+fi
+AC_SUBST(SLIBS)
+AC_SUBST(LDOFLAGS)
+AC_SUBST(LDONONEFLAG)
+AC_SUBST(SELFVER)
+AC_SUBST(SHLIBSUFFIX)
+
+dnl Checks for library functions.
+dnl AC_REPLACE_FUNCS(strdup)
+dnl AC_REPLACE_FUNCS(strerror)
+
+AC_CONFIG_HEADER(config.h)
+AC_OUTPUT(Makefile emsctypes.h emssocktypes.h)

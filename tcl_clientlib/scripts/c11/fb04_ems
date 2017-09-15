@@ -1,0 +1,37 @@
+#####################################################################################
+# fastbus
+puts "open f04"
+rename [ems_open ikpf04 fastbus] f04
+
+puts "init f04"
+f04 modullist create $FB04_ML
+rename [f04 is create 1 1] is1
+is1 memberlist create "$FB04_IS"
+f04 var create  1  1
+f04 var create  3  1
+f04 var create  5  1
+f04 var create 13 26
+f04 var create 15 26
+is1 command1 fb_lc_create_pat $LC_CAT_1810  1
+is1 command1 fb_lc_create_pat $LC_TDC_1877  3
+is1 command1 fb_lc_create_pat $LC_ADC_1881  5
+is1 command1 fb_lc_create_list $LC_TDC_1877  13
+is1 command1 fb_lc_create_list $LC_ADC_1881  15
+format {%08x} [f04 var read 1]
+format {%08x} [f04 var read 3]
+format {%08x} [f04 var read 5]
+eval "is1 command1 fb_lc1810_setup $setup_1810"
+eval "is1 command1 fb_lc1877_setup $setup_1877"
+eval "is1 command1 fb_lc1881_setup $setup_1881r"
+
+f04 command1 ResetTrigger 3
+
+#is1 readoutlist create 1 1 {fb_lc1810_check.2 {25} fb_lc1881_readout.3 {5 15 1} fb_lc1877_readout.3 {3 13 0 1 20 5} fb_lc1810_reset.1 {}}
+#is1 readoutlist create 1 1 {fb_lc1810_check.2 {25} fb_lc1881_readout.3 {5 15 1} fb_lc1810_reset.1 {}}
+#is1 readoutlist create 1 1 {fb_lc1810_check.2 {25} fb_lc1810_reset.1 {}}
+is1 readoutlist create 1 1 {Timestamp {}}
+f04 trigger create GSI_Trig 3 0 50 25
+
+puts "start f04"
+f04 readout start
+#####################################################################################

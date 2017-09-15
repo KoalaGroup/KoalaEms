@@ -1,0 +1,113 @@
+set ped_00_01  "0x00000000"
+set ped_00_02  "$ped_00_01 $ped_00_01"
+set ped_00_04  "$ped_00_02 $ped_00_02"
+set ped_00_08  "$ped_00_04 $ped_00_04"
+set ped_00_16  "$ped_00_08 $ped_00_08"
+set ped_00_32  "$ped_00_16 $ped_00_16"
+set ped_00_64  "$ped_00_32 $ped_00_32"
+set ped_ff_01  "0x00000fff"
+set ped_ff_02  "$ped_ff_01 $ped_ff_01"
+set ped_ff_04  "$ped_ff_02 $ped_ff_02"
+set ped_ff_08  "$ped_ff_04 $ped_ff_04"
+set ped_ff_16  "$ped_ff_08 $ped_ff_08"
+set ped_ff_32  "$ped_ff_16 $ped_ff_16"
+set ped_ff_64  "$ped_ff_32 $ped_ff_32"
+
+set ped_81_00  "$ped_ff_64"
+set ped_81_01  "$ped_00_01 $ped_ff_01 $ped_ff_02 $ped_ff_04 $ped_ff_08 $ped_ff_16 \
+                $ped_ff_32"
+set ped_81_02  "$ped_00_02 $ped_ff_02 $ped_ff_04 $ped_ff_08 $ped_ff_16 $ped_ff_32"
+set ped_81_03  "$ped_00_02 $ped_00_01 $ped_ff_01 $ped_ff_04 $ped_ff_08 $ped_ff_16 \
+                $ped_ff_32"
+set ped_81_04  "$ped_00_04 $ped_ff_04 $ped_ff_08 $ped_ff_16 $ped_ff_32"
+set ped_81_05  "$ped_00_04 $ped_00_01 $ped_ff_01 $ped_ff_02 $ped_ff_08 $ped_ff_16 \
+                $ped_ff_32"
+set ped_81_06  "$ped_00_04 $ped_00_02 $ped_ff_02 $ped_ff_08 $ped_ff_16 $ped_ff_32"
+set ped_81_07  "$ped_00_04 $ped_00_02 $ped_00_01 $ped_ff_01 $ped_ff_08 $ped_ff_16 \
+                $ped_ff_32"
+set ped_81_08  "$ped_00_08 $ped_ff_08 $ped_ff_16 $ped_ff_32"
+set ped_81_09  "$ped_00_08 $ped_00_01 $ped_ff_01 $ped_ff_02 $ped_ff_04 $ped_ff_16 \
+                $ped_ff_32"
+set ped_81_10  "$ped_00_08 $ped_00_02 $ped_ff_02 $ped_ff_04 $ped_ff_16 $ped_ff_32"
+set ped_81_11  "$ped_00_08 $ped_00_02 $ped_00_01 $ped_ff_01 $ped_ff_04 $ped_ff_16 \
+                $ped_ff_32"
+set ped_81_12  "$ped_00_08 $ped_00_04 $ped_ff_04 $ped_ff_16 $ped_ff_32"
+set ped_81_13  "$ped_00_08 $ped_00_04 $ped_00_01 $ped_ff_01 $ped_ff_02 $ped_ff_16 \
+                $ped_ff_32"
+set ped_81_14  "$ped_00_08 $ped_00_04 $ped_00_02 $ped_ff_02 $ped_ff_16 $ped_ff_32"
+set ped_81_15  "$ped_00_08 $ped_00_04 $ped_00_02 $ped_00_01 $ped_ff_01 $ped_ff_16 \
+                $ped_ff_32"
+set ped_81_16  "$ped_00_16 $ped_ff_16 $ped_ff_32"
+set ped_81_17  "$ped_00_16 $ped_00_01 $ped_ff_01 $ped_ff_02 $ped_ff_04 $ped_ff_08 \
+                $ped_ff_32"
+set ped_81_18  "$ped_00_16 $ped_00_02 $ped_ff_02 $ped_ff_04 $ped_ff_08 $ped_ff_32"
+set ped_81_19  "$ped_00_16 $ped_00_02 $ped_00_01 $ped_ff_01 $ped_ff_04 $ped_ff_08 \
+                $ped_ff_32"
+set ped_81_20  "$ped_00_16 $ped_00_04 $ped_ff_04 $ped_ff_08 $ped_ff_32"
+set ped_81_21  "$ped_00_16 $ped_00_04 $ped_00_01 $ped_ff_01 $ped_ff_02 $ped_ff_08 \
+                $ped_ff_32"
+set ped_81_22  "$ped_00_16 $ped_00_04 $ped_00_02 $ped_ff_02 $ped_ff_08 $ped_ff_32"
+set ped_81_23  "$ped_00_16 $ped_00_04 $ped_00_02 $ped_00_01 $ped_ff_01 $ped_ff_08 \
+                $ped_ff_32"
+set ped_81_24  "$ped_00_16 $ped_00_08 $ped_ff_08 $ped_ff_32"
+set ped_81_25  "$ped_00_16 $ped_00_08 $ped_00_01 $ped_ff_01 $ped_ff_02 $ped_ff_04 \
+                $ped_ff_32"
+set ped_81_26  "$ped_00_16 $ped_00_08 $ped_00_02 $ped_ff_02 $ped_ff_04 $ped_ff_32"
+set ped_81_27  "$ped_00_16 $ped_00_08 $ped_00_02 $ped_00_01 $ped_ff_01 $ped_ff_04 \
+                $ped_ff_32"
+set ped_81_28  "$ped_00_16 $ped_00_08 $ped_00_04 $ped_ff_04 $ped_ff_32"
+set ped_81_29  "$ped_00_16 $ped_00_08 $ped_00_04 $ped_00_01 $ped_ff_01 $ped_ff_02 \
+                $ped_ff_32"
+set ped_81_30  "$ped_00_16 $ped_00_08 $ped_00_04 $ped_00_02 $ped_ff_02 $ped_ff_32"
+set ped_81_31  "$ped_00_16 $ped_00_08 $ped_00_04 $ped_00_02 $ped_00_01 $ped_ff_01 \
+                $ped_ff_32"
+set ped_81_32  "$ped_00_32 $ped_ff_32"
+set ped_81_33  "$ped_00_32 $ped_00_01 $ped_ff_01 $ped_ff_02 $ped_ff_04 $ped_ff_08 \
+                $ped_ff_16"
+set ped_81_34  "$ped_00_32 $ped_00_02 $ped_ff_02 $ped_ff_04 $ped_ff_08 $ped_ff_16"
+set ped_81_35  "$ped_00_32 $ped_00_02 $ped_00_01 $ped_ff_01 $ped_ff_04 $ped_ff_08 \
+                $ped_ff_16"
+set ped_81_36  "$ped_00_32 $ped_00_04 $ped_ff_04 $ped_ff_08 $ped_ff_16"
+set ped_81_37  "$ped_00_32 $ped_00_04 $ped_00_01 $ped_ff_01 $ped_ff_02 $ped_ff_08 \
+                $ped_ff_16"
+set ped_81_38  "$ped_00_32 $ped_00_04 $ped_00_02 $ped_ff_02 $ped_ff_08 $ped_ff_16"
+set ped_81_39  "$ped_00_32 $ped_00_04 $ped_00_02 $ped_00_01 $ped_ff_01 $ped_ff_08 \
+                $ped_ff_16"
+set ped_81_40  "$ped_00_32 $ped_00_08 $ped_ff_08 $ped_ff_16"
+set ped_81_41  "$ped_00_32 $ped_00_08 $ped_00_01 $ped_ff_01 $ped_ff_02 $ped_ff_04 \
+                $ped_ff_16"
+set ped_81_42  "$ped_00_32 $ped_00_08 $ped_00_02 $ped_ff_02 $ped_ff_04 $ped_ff_16"
+set ped_81_43  "$ped_00_32 $ped_00_08 $ped_00_02 $ped_00_01 $ped_ff_01 $ped_ff_04 \
+                $ped_ff_16"
+set ped_81_44  "$ped_00_32 $ped_00_08 $ped_00_04 $ped_ff_04 $ped_ff_16"
+set ped_81_45  "$ped_00_32 $ped_00_08 $ped_00_04 $ped_00_01 $ped_ff_01 $ped_ff_02 \
+                $ped_ff_16"
+set ped_81_46  "$ped_00_32 $ped_00_08 $ped_00_04 $ped_00_02 $ped_ff_02 $ped_ff_16"
+set ped_81_47  "$ped_00_32 $ped_00_08 $ped_00_04 $ped_00_02 $ped_00_01 $ped_ff_01 \
+                $ped_ff_16"
+set ped_81_48  "$ped_00_32 $ped_00_16 $ped_ff_16"
+set ped_81_49  "$ped_00_32 $ped_00_16 $ped_00_01 $ped_ff_01 $ped_ff_02 $ped_ff_04 \
+                $ped_ff_08"
+set ped_81_50  "$ped_00_32 $ped_00_16 $ped_00_02 $ped_ff_02 $ped_ff_04 $ped_ff_08"
+set ped_81_51  "$ped_00_32 $ped_00_16 $ped_00_02 $ped_00_01 $ped_ff_01 $ped_ff_04 \
+                $ped_ff_08"
+set ped_81_52  "$ped_00_32 $ped_00_16 $ped_00_04 $ped_ff_04 $ped_ff_08"
+set ped_81_53  "$ped_00_32 $ped_00_16 $ped_00_04 $ped_00_01 $ped_ff_01 $ped_ff_02 \
+                $ped_ff_08"
+set ped_81_54  "$ped_00_32 $ped_00_16 $ped_00_04 $ped_00_02 $ped_ff_02 $ped_ff_08"
+set ped_81_55  "$ped_00_32 $ped_00_16 $ped_00_04 $ped_00_02 $ped_00_01 $ped_ff_01 \
+                $ped_ff_08"
+set ped_81_56  "$ped_00_32 $ped_00_16 $ped_00_08 $ped_ff_08"
+set ped_81_57  "$ped_00_32 $ped_00_16 $ped_00_08 $ped_00_01 $ped_ff_01 $ped_ff_02 \
+                $ped_ff_04"
+set ped_81_58  "$ped_00_32 $ped_00_16 $ped_00_08 $ped_00_02 $ped_ff_02 $ped_ff_04"
+set ped_81_59  "$ped_00_32 $ped_00_16 $ped_00_08 $ped_00_02 $ped_00_01 $ped_ff_01 \
+                $ped_ff_04"
+set ped_81_60  "$ped_00_32 $ped_00_16 $ped_00_08 $ped_00_04 $ped_ff_04"
+set ped_81_61  "$ped_00_32 $ped_00_16 $ped_00_08 $ped_00_04 $ped_00_01 $ped_ff_01 \
+                $ped_ff_02"
+set ped_81_62  "$ped_00_32 $ped_00_16 $ped_00_08 $ped_00_04 $ped_00_02 $ped_ff_02"
+set ped_81_63  "$ped_00_32 $ped_00_16 $ped_00_08 $ped_00_04 $ped_00_02 $ped_00_01 \
+                $ped_ff_01"
+set ped_81_64  "$ped_00_64"
+

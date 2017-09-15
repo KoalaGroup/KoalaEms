@@ -1,0 +1,21 @@
+#!/usr/local/bin/klient
+open drams
+is 0
+downloaddomain ml 0 7 $DRAMS_CONTROL 8 $DRAMS_RECEIVER 9 $DRAMS_EVENT 4 $T_TRIG 17 $CAEN_IO
+ResetTrigger(4)
+
+createis 1 11
+downloadismodullist 7 8 9
+downloadreadoutlist 20 1 {DRAMS_Readout()}
+DRAMS_zero_ped()
+DRAMS_zero_thresh()
+DRAMS_prepare()
+
+createis 2 12
+downloadismodullist
+downloadreadoutlist 10 1 {Timestamp()}
+
+downloaddomain trig 0 GSI_soft_Trig 4 1 30 10 10
+downloaddomain dataout 0 ringbuffer 30000 0 socket zelux7 4445
+start ro
+flush

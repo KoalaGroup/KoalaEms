@@ -1,0 +1,16 @@
+CONF = ../../../CONF
+COMMON = ../../../../COMMON
+
+include $(CONF)/rules.make
+
+cfiles = fsctrigger.r
+lib = lib.l
+
+all: $(lib)
+
+$(lib): $(cfiles)
+	merge $^ >-$@
+
+#############################################
+
+fsctrigger.r: errorcodes.h ../../../LOWLEVEL/CAMAC/camac.h modultypes.h debug.stamp debug.h

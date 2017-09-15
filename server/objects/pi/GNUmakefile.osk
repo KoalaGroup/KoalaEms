@@ -1,0 +1,24 @@
+CONF = ../../CONF
+COMMON = ../../../COMMON
+
+include $(CONF)/rules.make
+
+include $(CONF)/config.make
+
+cfiles = pi.r
+lib = lib.l
+subdirs = $(invocations)
+
+all: $(lib)
+
+$(lib): $(cfiles) $(subdirs) invocations.stamp
+	merge $(cfiles) $(addsuffix /sublib.l,$(subdirs)) >-$@
+
+$(subdirs): FORCE
+	$(MAKE) -C $@ all
+
+.PHONY: FORCE
+
+#########################################
+
+pi.r: sconf.h errorcodes.h debug.h objecttypes.h

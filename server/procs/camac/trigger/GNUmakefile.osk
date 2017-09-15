@@ -1,0 +1,15 @@
+CONF = ../../../CONF
+COMMON = ../../../../COMMON
+
+include $(CONF)/rules.make
+
+cfiles = trigger.r
+
+all: lib.l
+
+lib.l: $(cfiles)
+	merge $^ >-lib.l
+
+#############################################################
+
+trigger.r: errorcodes.h modultypes.h ../../../LOWLEVEL/CAMAC/camac.h ../../../TRIGGER/CAMAC/GSI/gsitrigger.h

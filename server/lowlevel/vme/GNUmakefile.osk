@@ -1,0 +1,15 @@
+CONF = ../../CONF
+COMMON = ../../../COMMON
+
+include $(COMMON)/rules.make
+
+cfiles = directvme.r
+
+all: lib.l
+
+lib.l: $(cfiles)
+	merge $^ >-$@
+
+######################################################
+
+directvme.r: directvme.h $(CONF)/sconf.h $(COMMON)/swap.h

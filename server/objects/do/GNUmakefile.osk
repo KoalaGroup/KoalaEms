@@ -1,0 +1,16 @@
+CONF = ../../CONF
+COMMON = ../../../COMMON
+
+include $(CONF)/rules.make
+
+cfiles = dataout.r
+lib = lib.l
+
+all: $(lib)
+
+$(lib): $(cfiles)
+	merge $^ >-$@
+
+################################################
+
+dataout.r: limits.stamp debug.h errorcodes.h ../DOMAIN/dom_dataout.h

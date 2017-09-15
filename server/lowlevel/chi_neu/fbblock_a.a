@@ -1,0 +1,329 @@
+*******************************************************************************
+*                                                                             *
+* fbblock_a.a                                                                 *
+*                                                                             *
+* OS9                                                                         *
+*                                                                             *
+* created: 22.10.94                                                           *
+* last changed: 25.10.94                                                      *
+*                                                                             *
+* PW                                                                          *
+*                                                                             *
+*******************************************************************************
+
+  use "chi_map.d"
+  psect fbblock_a,0,0,0,0,0
+
+*******************************************************************************
+
+* int FRCB(int pa, int sa, int dest, int count)
+FRCB:
+
+  movem.l d2/a1-a2,-(a7)
+  move.l  (P_BASE_A,a6),a0
+  move.l  #F_BASE,a1
+  move.l  #REG_BASE,a2
+
+  move.l  20(a7),d2               count
+  move.l  d2,LDWC(a1)
+  move.l  16(a7),d2               buffer
+  sub.l   #M_BASE,d2
+  lsr.l   #2,d2
+  move.l  d2,LDAC(a1)
+  move.l  d0,CGEO(a0)             pa
+FRCB_p:
+  move.l  d1,SECAD(a0)            sa
+  move.w  #$ff,SSENABLE(a1)
+  tst.b   BHR(a0)
+FRCB_poll
+  btst.b  #3,POLLREG0(a2)
+  beq.s   FRCB_ok
+  bra.s   FRCB_poll
+FRCB_ok
+  clr.w   SSENABLE(a1)
+  tst.b   DISCON(a0)
+  move.l  RDWC(a1),d0
+  andi.l  #$ffffff,d0
+
+  movem.l (a7)+,d2/a1-a2
+  rts
+
+*******************************************************************************
+
+* int FWCB(int pa, int sa, int source, int count)
+FWCB:
+
+  movem.l d2/a1-a2,-(a7)
+  move.l  (P_BASE_A,a6),a0
+  move.l  #F_BASE,a1
+  move.l  #REG_BASE,a2
+
+  move.l  20(a7),d2               count
+  addq.l  #1,d2                   +1 for write
+  move.l  d2,LDWC(a1)
+  move.l  16(a7),d2               buffer
+  sub.l   #M_BASE,d2
+  lsr.l   #2,d2
+  move.l  d2,LDAC(a1)
+  move.l  d0,CGEO(a0)             pa
+FWCB_p:
+  move.l  d1,SECAD(a0)            sa
+  move.w  #$ff,SSENABLE(a1)
+  tst.b   BHW(a0)
+FWCB_poll
+  btst.b  #3,POLLREG0(a2)
+  beq.s   FWCB_ok
+  bra.s   FWCB_poll
+FWCB_ok
+  clr.w   SSENABLE(a1)
+  tst.b   DISCON(a0)
+  move.l  RDWC(a1),d0
+  andi.l  #$ffffff,d0
+  subi.l  #1,d0
+  movem.l (a7)+,d2/a1-a2
+  rts
+
+*******************************************************************************
+
+* int FRDB(int pa, int sa, int dest, int count)
+FRDB:
+
+  movem.l d2/a1-a2,-(a7)
+  move.l  (P_BASE_A,a6),a0
+  move.l  #F_BASE,a1
+  move.l  #REG_BASE,a2
+
+  move.l  20(a7),d2               count
+  move.l  d2,LDWC(a1)
+  move.l  16(a7),d2               buffer
+  sub.l   #M_BASE,d2
+  lsr.l   #2,d2
+  move.l  d2,LDAC(a1)
+  move.l  d0,DGEO(a0)             pa
+FRDB_p:
+  move.l  d1,SECAD(a0)            sa
+  move.w  #$ff,SSENABLE(a1)
+  tst.b   BHR(a0)
+FRDB_poll
+  btst.b  #3,POLLREG0(a2)
+  beq.s   FRDB_ok
+  bra.s   FRDB_poll
+FRDB_ok
+  clr.w   SSENABLE(a1)
+  tst.b   DISCON(a0)
+  move.l  RDWC(a1),d0
+  andi.l  #$ffffff,d0
+
+  movem.l (a7)+,d2/a1-a2
+  rts
+
+*******************************************************************************
+
+* int FWDB(int pa, int sa, int source, int count)
+FWDB:
+
+  movem.l d2/a1-a2,-(a7)
+  move.l  (P_BASE_A,a6),a0
+  move.l  #F_BASE,a1
+  move.l  #REG_BASE,a2
+
+  move.l  20(a7),d2               count
+  addq.l  #1,d2                   +1 for write
+  move.l  d2,LDWC(a1)
+  move.l  16(a7),d2               buffer
+  sub.l   #M_BASE,d2
+  lsr.l   #2,d2
+  move.l  d2,LDAC(a1)
+  move.l  d0,DGEO(a0)             pa
+FWDB_p:
+  move.l  d1,SECAD(a0)            sa
+  move.w  #$ff,SSENABLE(a1)
+  tst.b   BHW(a0)
+FWDB_poll
+  btst.b  #3,POLLREG0(a2)
+  beq.s   FWDB_ok
+  bra.s   FWDB_poll
+FWDB_ok
+  clr.w   SSENABLE(a1)
+  tst.b   DISCON(a0)
+  move.l  RDWC(a1),d0
+  andi.l  #$ffffff,d0
+  subi.l  #1,d0
+  movem.l (a7)+,d2/a1-a2
+  rts
+
+*******************************************************************************
+
+* int FRCBM(int pa, int sa, int dest, int count)
+FRCBM:
+
+  movem.l d2/a1-a2,-(a7)
+  move.l  (P_BASE_A,a6),a0
+  move.l  #F_BASE,a1
+  move.l  #REG_BASE,a2
+
+  move.l  20(a7),d2               count
+  move.l  d2,LDWC(a1)
+  move.l  16(a7),d2               buffer
+  sub.l   #M_BASE,d2
+  lsr.l   #2,d2
+  move.l  d2,LDAC(a1)
+  move.l  d0,CBREG(a0)            pa
+FRCBM_p:
+  move.l  d1,SECAD(a0)            sa
+  move.w  #$ff,SSENABLE(a1)
+  tst.b   BHR(a0)
+FRCBM_poll
+  btst.b  #3,POLLREG0(a2)
+  beq.s   FRCBM_ok
+  bra.s   FRCBM_poll
+FRCBM_ok
+  clr.w   SSENABLE(a1)
+  tst.b   DISCON(a0)
+  move.l  RDWC(a1),d0
+  andi.l  #$ffffff,d0
+
+  movem.l (a7)+,d2/a1-a2
+  rts
+
+*******************************************************************************
+
+* int FWCBM(int pa, int sa, int source, int count)
+FWCBM:
+
+  movem.l d2/a1-a2,-(a7)
+  move.l  (P_BASE_A,a6),a0
+  move.l  #F_BASE,a1
+  move.l  #REG_BASE,a2
+
+  move.l  20(a7),d2               count
+  addq.l  #1,d2                   +1 for write
+  move.l  d2,LDWC(a1)
+  move.l  16(a7),d2               buffer
+  sub.l   #M_BASE,d2
+  lsr.l   #2,d2
+  move.l  d2,LDAC(a1)
+  move.l  d0,CBREG(a0)            pa
+FWCBM_p:
+  move.l  d1,SECAD(a0)            sa
+  move.w  #$ff,SSENABLE(a1)
+  tst.b   BHW(a0)
+FWCBM_poll
+  btst.b  #3,POLLREG0(a2)
+  beq.s   FWCBM_ok
+  bra.s   FWCBM_poll
+FWCBM_ok
+  clr.w   SSENABLE(a1)
+  tst.b   DISCON(a0)
+  move.l  RDWC(a1),d0
+  andi.l  #$ffffff,d0
+  subi.l  #1,d0
+  movem.l (a7)+,d2/a1-a2
+  rts
+
+*******************************************************************************
+
+* int FRDBM(int pa, int sa, int dest, int count)
+FRDBM:
+
+  movem.l d2/a1-a2,-(a7)
+  move.l  (P_BASE_A,a6),a0
+  move.l  #F_BASE,a1
+  move.l  #REG_BASE,a2
+
+  move.l  20(a7),d2               count
+  move.l  d2,LDWC(a1)
+  move.l  16(a7),d2               buffer
+  sub.l   #M_BASE,d2
+  lsr.l   #2,d2
+  move.l  d2,LDAC(a1)
+  move.l  d0,DBREG(a0)            pa
+FRDBM_p:
+  move.l  d1,SECAD(a0)            sa
+  move.w  #$ff,SSENABLE(a1)
+  tst.b   BHR(a0)
+FRDBM_poll
+  btst.b  #3,POLLREG0(a2)
+  beq.s   FRDBM_ok
+  bra.s   FRDBM_poll
+FRDBM_ok
+  clr.w   SSENABLE(a1)
+  tst.b   DISCON(a0)
+  move.l  RDWC(a1),d0
+  andi.l  #$ffffff,d0
+
+  movem.l (a7)+,d2/a1-a2
+  rts
+
+*******************************************************************************
+
+* int FWDBM(int pa, int sa, int source, int count)
+FWDBM:
+
+  movem.l d2/a1-a2,-(a7)
+  move.l  (P_BASE_A,a6),a0
+  move.l  #F_BASE,a1
+  move.l  #REG_BASE,a2
+
+  move.l  20(a7),d2               count
+  addq.l  #1,d2                   +1 for write
+  move.l  d2,LDWC(a1)
+  move.l  16(a7),d2               buffer
+  sub.l   #M_BASE,d2
+  lsr.l   #2,d2
+  move.l  d2,LDAC(a1)
+  move.l  d0,DBREG(a0)             pa
+FWDBM_p:
+  move.l  d1,SECAD(a0)            sa
+  move.w  #$ff,SSENABLE(a1)
+  tst.b   BHW(a0)
+FWDBM_poll
+  btst.b  #3,POLLREG0(a2)
+  beq.s   FWDBM_ok
+  bra.s   FWDBM_poll
+FWDBM_ok
+  clr.w   SSENABLE(a1)
+  tst.b   DISCON(a0)
+  move.l  RDWC(a1),d0
+  andi.l  #$ffffff,d0
+  subi.l  #1,d0
+  movem.l (a7)+,d2/a1-a2
+  rts
+
+*******************************************************************************
+
+* int FRDB_S(int pa, int dest, int count) wie FRDB ohne secondary address
+FRDB_S:
+
+  movem.l d2/a1-a2,-(a7)
+  move.l  (P_BASE_A,a6),a0
+  move.l  #F_BASE,a1
+  move.l  #REG_BASE,a2
+
+  move.l  16(a7),d2               count
+  move.l  d2,LDWC(a1)
+  sub.l   #M_BASE,d1              buffer
+  lsr.l   #2,d1
+  move.l  d1,LDAC(a1)
+  move.l  d0,DGEO(a0)             pa
+FRDB_S_p:
+* muss sein, sonst werden count Worte gelesen (unabhaengig von SS!=0)
+  move.w  #$ff,SSENABLE(a1)
+  tst.b   BHR(a0)
+FRDB_S_poll
+  btst.b  #3,POLLREG0(a2)
+  beq.s   FRDB_S_ok
+  bra.s   FRDB_S_poll
+FRDB_S_ok
+  clr.w   SSENABLE(a1)
+  tst.b   DISCON(a0)
+  move.l  RDWC(a1),d0
+  andi.l  #$ffffff,d0
+
+  movem.l (a7)+,d2/a1-a2
+  rts
+
+  ends
+
+*******************************************************************************
+*******************************************************************************

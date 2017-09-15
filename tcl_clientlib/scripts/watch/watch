@@ -1,0 +1,63 @@
+###############################################################################
+
+proc showstations {} {
+
+}
+
+###############################################################################
+#main
+
+# wm withdraw . (nur fuer emswish)
+
+set watch_library  /usr/local/ems/lib/watch
+set common_library /usr/local/ems/lib/common
+lappend auto_path $watch_library $common_library
+
+process_args
+#printargs
+
+if {[info exists posarg(0)]==0} {
+  puts "usage showved ([-h <host>] [-p <port>])|[-s <socket>] <ved_name> ..."
+  exit
+}
+set vedname $posarg(0)
+
+if [catch {
+  if [info exists namedarg(s)] {
+    puts "execute: ems_connect $namedarg(s)"
+    ems_connect $namedarg(s)
+  } elseif {[info exists namedarg(h)] || [info exists namedarg(p)]} {
+    set host "localhost"
+    set port 4096
+    if [info exists namedarg(h)] {set host $namedarg(h)}
+    if [info exists namedarg(p)] {set port $namedarg(p)}
+    puts "execute: ems_connect $host $port"
+    ems_connect $host $port
+  } else {
+    puts "execute: ems_connect"
+    ems_connect
+  }
+} mist] {
+  puts $mist
+  exit
+}
+
+if [info exists namedarg(d)] {
+  showstations
+  exit
+}
+
+if [catch {set commu [ems_open commu_l controller]} mist] {
+  puts $mist
+  exit
+}
+
+if [info exists posarg] {
+  foreach i [array names posarg] {
+    set ved $posarg($i)
+     $commu command1 Add_station 3 1 $ved
+  }
+} else {
+  $commu command1 Add_all 3
+}
+

@@ -1,0 +1,14 @@
+CONF = ../../CONF
+COMMON = ../../../COMMON
+
+include $(CONF)/rules.make
+
+cfiles = dummy_dataout.r
+lib =lib.l
+
+all: $(lib)
+
+$(lib): $(cfiles)
+	merge $^ >-$@
+
+dummy_dataout.r: sconf.h debug.h errorcodes.h

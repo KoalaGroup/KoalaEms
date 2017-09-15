@@ -1,0 +1,39 @@
+# Generated automatically from Makefile.in by configure.
+# lowlevel/tileforth/Makefile.in
+# $ZEL: Makefile.in,v 1.5 2007/09/17 00:35:51 wuestner Exp $
+
+CC = c89
+CONF = ../../conf
+
+include $(CONF)/rules.make
+include $(CONF)/config.make
+
+CFLAGS += -g -std
+
+ofiles = nforth.o startup.o init.o kernel.o memory.o error.o  \
+	in.o nout.o names.o
+
+all: lib.a
+
+lib.a: $(ofiles)
+	ar rslc $@ $^
+
+################################################################################ 
+init.o: errorcodes.h nforth.h startup.h
+nforth.o: kernel.h error.h memory.h out.h in.h nforth.h
+kernel.o: kernel.h memory.h error.h in.h out.h compiler.v.c locals.v.c  \
+	string.v.c float.v.c memory.v.c queues.v.c multi_tasking.v.c  \
+	exceptions.v.c xdrstring.v.c procedures.v.c errorcodes.h  \
+	../../main/requests.h ../../../common/requesttypes.h  \
+	../../procs/listprocs.h xdrstring.h swap.h
+memory.o: kernel.h memory.h out.h
+error.o: kernel.h memory.h error.h out.h
+memory.o: kernel.h memory.h out.h
+error.o: kernel.h memory.h error.h out.h
+in.o: in.h 
+startup.o: nforth.h out.h names.h ../../../common/requesttypes.h  \
+	../../procs/listprocs.h
+names.o: names.c ../../../common/requesttypes.h
+names.c: names.c.m4 ../../../common/errorcodes.inc  \
+	../../../common/requesttypes.inc
+	m4 names.c.m4 >$@

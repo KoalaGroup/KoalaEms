@@ -1,0 +1,111 @@
+ems_disconnect
+ems_unsolcommand
+ems_connect
+ems_openveds
+ems_connected
+ems_open
+ems_connection
+ems_veds
+
+<VED>
+  |- close
+  |- closecommand
+  |- name
+  |- type
+  |- reset
+  |- var
+     |- create
+     |- delete
+     |- read
+     |- write
+     |- size
+  |- identify
+  |- namelist
+     |- null
+     |- ved
+     |- domain
+     |- is
+     |- var
+     |- pi
+     |- do
+     |- <integer>
+  |- unsol
+  |- typedunsol
+  |- event
+  |- readout
+     |- start
+     |- stop
+     |- resume
+     |- reset
+     |- status
+  |- datain
+     |- create
+     |- delete
+     |- upload
+  |- dataout
+     |- create
+     |- delete
+     |- upload
+     |- status
+     |- wind
+     |- write
+     |- writefile
+     |- enable
+  |- caplist
+     |- proc
+     |- trigg
+  |- version_separator
+  |- is
+     |- list
+     |- exists
+     |- create
+     |- open
+     |- delete
+     |- id
+  |- openis
+  |- modullist
+     |- create
+     |- upload
+     |- delete
+  |- command
+  |- command1
+  |- lam
+     |- create
+     |- delete
+     |- upload
+     |- start
+     |- stop
+     |- resume
+     |- reset
+     |- status
+     |- proclist
+        |- create
+        |- delete
+        |- upload
+  |- trigger
+     |- create
+     |- upload
+     |- delete
+
+<IS>
+  |- close
+  |- delete
+  |- closecommand
+  |- deletecommand
+  |- id
+  |- idx
+  |- version_separator
+  |- caplist
+  |- command
+  |- command1
+  |- memberlist
+     |- create
+     |- upload
+     |- delete
+  |- readoutlist
+     |- create
+     |- upload
+     |- delete
+  |- status
+  |- enable
+  |- ved

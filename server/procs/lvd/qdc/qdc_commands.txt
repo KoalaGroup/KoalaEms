@@ -1,0 +1,30 @@
+lvd_qdc_init            branch addr daqmode
+
+lvd_qdc_window          branch addr latency width [raw]
+
+lvd_qdc_getwindow       branch addr [raw]
+
+lvd_qdc_iwstart         branch addr [iwstart]
+
+lvd_qdc_iwlength        branch addr [iwlength]
+
+lvd_qdc_intlength       branch addr [intlength]
+
+lvd_qdc_dac             branch addr channel dac
+
+lvd_qdc_getdac          branch addr 
+
+lvd_qdc_inhibit         branch addr [mask]
+
+lvd_qdc_threshold       branch addr channel threshold
+
+lvd_qdc_getthreshold    branch addr 
+
+lvd_qdc_raw             branch addr [mask]
+
+lvd_qdc_anal            branch addr [anal_ctrl]
+
+lvd_qdc_noise           branch addr 
+
+lvd_qdc_mean            branch addr 
+

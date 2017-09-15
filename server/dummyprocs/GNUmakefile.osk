@@ -1,0 +1,39 @@
+CONF = ../CONF
+COMMON = ../../COMMON
+
+include $(CONF)/rules.make
+
+include $(CONF)/config.make
+
+cfiles = $(addsuffix .r,$(dummyprocs)) get_mod_type.r
+
+all: libdummy.l
+
+libdummy.l: $(cfiles) mergefile dummyprocs.stamp
+	merge -z=mergefile >-$@
+
+addall: $(dummyprocs)
+
+$(dummyprocs):
+	echo $@.r >+mergefile
+
+mergefile: dummyprocs.stamp
+	-$(RM) $@
+	$(MAKE) addall
+	echo get_mod_type.r >+$@
+
+$(addsuffix .c,$(dummyprocs)): template.sed
+	sed s/DUMMYPROC/$(basename $@)/g $< >-$@
+
+.PHONY: addall $(dummyprocs)
+
+clean:
+	copy get_mod_type.c get_mod_type.sav
+	-$(RM) *.c mergefile
+	copy get_mod_type.sav get_mod_type.c
+	-$(RM) get_mod_type.sav
+
+############################################################
+
+$(addsuffix .r,$(dummyprocs)): $(COMMON)/errorcodes.h
+get_mod_type.r: $(COMMON)/modultypes.h

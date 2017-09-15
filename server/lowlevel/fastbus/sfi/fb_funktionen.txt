@@ -1,0 +1,47 @@
+Fastbusfunktionen:
+
+lowlevel:
+  sfifastbus.h:
+FRC     --> FRC_
+FRCa    --> FRCa_
+FRCM    --> FRCM_
+FRD     --> FRD_
+FRDa    --> FRDa_
+FRDM    --> FRDM_
+FWC     --> FWC_
+FWCa    --> FWCa_
+FWCM    --> FWCM_
+FWD     --> FWD_
+FWDa    --> FWDa_
+FWDM    --> FWDM_
+FRCB    --> FRCB_direct
+FRDB    --> FRDB_direct
+FRDB_S  --> FRDB_S_direct
+FWCB    --> FWCB_
+FWDB    --> FWDB_
+sscode  --> sscode_
+FCDISC  --> FCDISC_       disconnect
+FCWW    --> FCWW_         write word
+FCWWss  --> FCWWss_       write word; no SA; return SScode
+FCRWS   --> FCRWS_
+FCWWS   --> FCWWS_
+FCRW    --> FCRW_         read word
+FCPC    --> FCPC_         primary address cycle; control
+FCPD    --> FCPD_         primary address cycle; data
+FCWSAss --> FCWSAss_
+FBPULSE --> FBPULSE_
+FBPULSE_reset --> FBPULSE_reset_
+
+  sfi_util.c:
+void SFIout_seq(u_int32_t val)
+void FBPULSE_(sfi_info* info, int outmask)
+
+  sfi_fbblock_direct.c:
+int FRDB_direct(sfi_info* sfi, u_int32_t pa, u_int32_t sa, u_int32_t* dest,
+    u_int32_t count)
+int FRCB_direct(sfi_info* sfi, u_int32_t pa, u_int32_t sa, u_int32_t* dest,
+    u_int32_t count)
+int FRDB_S_direct(sfi_info* sfi, u_int32_t pa, u_int32_t* dest,
+    u_int32_t count)
+
+local procedures:

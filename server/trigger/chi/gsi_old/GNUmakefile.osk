@@ -1,0 +1,18 @@
+CONF = ../../../CONF
+COMMON = ../../../../COMMON
+
+include $(COMMON)/rules.make
+
+cfiles = gsitrigger.r gsitrigmod.r
+
+all: lib.l
+
+lib.l: $(cfiles)
+	merge $^ >-$@
+
+###################################################
+
+gsitrigger.r: $(CONF)/sconf.h debug.h errorcodes.h unsoltypes.h  \
+	gsitrigger.h ../../../LOWLEVEL/CHI_GSI/chi_gsi.h
+
+gsitrigmod.r: $(CONF)/sconf.h debug.h errorcodes.h gsitrigger.h

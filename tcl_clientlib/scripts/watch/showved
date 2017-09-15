@@ -1,0 +1,19 @@
+#! /bin/sh
+#\
+exec emssh $0 $*
+
+# Vorbereitung fuer 'autoload' von Prozeduren
+if [info exists env(EMSTCL_HOME)] {
+  set watch_library $env(EMSTCL_HOME)/watch
+  set common_library $env(EMSTCL_HOME)/common
+  set EMSTCL_HOME $env(EMSTCL_HOME)
+} else {
+  set watch_library /usr/local/ems/lib/watch
+  set common_library /usr/local/ems/lib/common
+  set EMSTCL_HOME /usr/local/ems/lib
+}
+lappend auto_path $watch_library $common_library
+
+main
+
+puts "mehr gibt's nicht"

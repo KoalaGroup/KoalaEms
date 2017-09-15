@@ -1,0 +1,735 @@
+dnl $Id: configure.in,v 2.28 2010/09/10 22:33:20 wuestner Exp $
+dnl Process this file with autoconf to produce a configure script.
+dnl $ems/commu
+AC_INIT(commu.cc)
+AC_CONFIG_AUX_DIR(../confsupp)
+lems=/usr/local/ems
+AC_PREFIX_DEFAULT(/usr/local/ems)
+
+dnl Checks for programs.
+AC_PROG_CXX
+AC_PROG_CXXCPP
+AC_PROG_RANLIB
+AC_PROG_MAKE_SET
+AC_PROG_INSTALL
+AC_CANONICAL_SYSTEM
+
+. $srcdir/patchlevel
+
+AC_ARG_ENABLE(debug, [  --enable-debug ])
+dnl Set compilation flags
+CXX_ANSI=0
+if test "$GXX" = yes ; then
+  CXX_ANSI=1
+  CXXFLAGS="-D__STD_STRICT_ANSI -ansi"
+  CXXFLAGS="$CXXFLAGS -Wall -Woverloaded-virtual"
+  if test "$enable_debug" = yes ; then
+    CXXFLAGS="$CXXFLAGS -g"
+  else
+    CXXFLAGS="$CXXFLAGS -O2"
+  fi
+  WERROR="-Werror"
+else
+  WERROR=""
+  case $build_os in
+    ultrix*)
+      if test "$enable_debug" = yes ; then
+        CXXFLAGS="-g"
+      else
+        CXXFLAGS="-O2"
+      fi
+    ;;
+    osf*)
+      CXXFLAGS=""
+      AC_MSG_CHECKING(for cxx version)
+      AC_LANG_CPLUSPLUS
+      AC_TRY_RUN([
+        main()
+          {
+          int x;
+          #ifdef __DECCXX_VER
+            if (__DECCXX_VER>=60000000)
+              x=0;
+            else
+              x=1;
+          #else
+          x=2;
+          #endif
+          exit(x);
+          }
+        ],
+        cxxver=new,
+        cxxver=old,
+        cxxver=none
+      )
+      case $cxxver in
+        new)
+          AC_MSG_RESULT(6 or newer)
+          CXXFLAGS="$CXXFLAGS -use_ld_input -std strict_ansi -ptr ../cxx_repository -tall -nopure_cname"
+          CXX_ANSI=1
+          for i in SUPPORTVER ; do
+            eval $i=`echo \`eval echo \\\\$\$i\`|sed 's/\./a\./'`
+          done
+        ;;
+        old)
+          AC_MSG_RESULT(5 or older)
+        ;;
+        none)
+          AC_MSG_RESULT(unknown)
+        ;;
+      esac
+      CXXLIB="-lcxx"
+      if test "$enable_debug" = yes ; then
+        CXXFLAGS="$CXXFLAGS -v -g"
+      else
+        CXXFLAGS="$CXXFLAGS -O2"
+      fi
+    ;;
+  esac
+fi
+
+AC_ARG_ENABLE(dynamic, [  --enable-dynamic use shared objects])
+AC_MSG_CHECKING(whether we should use shared objects)
+case $target_os in
+  x_linux*)
+    if test "$enable_dynamic" != yes ; then
+      LDFLAGS=-static
+    fi
+  ;;
+  x_NetBSD-*|FreeBSD-*)
+    # Not available on all versions:  check for include file.
+    if test -e /usr/include/dlfcn.h; then
+      dynamic=true
+      SHLIBSUFFIX=.so
+    fi
+  ;;
+  osf*)
+    if test "$GXX" = yes ; then
+      dynamic=false
+      LDFLAGS=-static
+    else
+      if test "$enable_dynamic" = yes ; then
+    	LDFLAGS="-call_shared"
+    	dynamic=true
+        SHLIBSUFFIX=.so
+      else
+    	LDFLAGS="-non_shared"
+    	dynamic=false
+      fi
+    fi
+  ;;
+esac
+EXEC=commu
+if test "$dynamic" = true ; then
+  AC_MSG_RESULT(yes)
+  LIBSUFFIX=$SHLIBSUFFIX
+else
+  AC_MSG_RESULT(no)
+  LIBSUFFIX=.a
+fi
+
+AC_SUBST(CXXFLAGS)
+AC_SUBST(COMMONVER)
+AC_SUBST(SUPPORTVER)
+
+dnl required packages:
+dnl ems_common
+dnl ems-support
+dnl ems-clientlib
+dnl
+dnl options:
+dnl
+dnl cosylog (Rossendorf)
+dnl cosydb  (Watzlawick)
+dnl (obd)
+dnl anno
+dnl
+
+AC_ARG_WITH(ems-libs, [  --with-ems-libs search first in this directory for ems libraries],
+	emslibs=$withval, emslibs="")
+
+EMS_SEARCH_COMMON
+EMS_SEARCH_COMMONLIB(.$COMMONVER$LIBSUFFIX)
+AC_SUBST(EMSCOMMON)
+AC_SUBST(EMSEXCOMMON)
+AC_SUBST(EMSCOMMONLIB)
+
+EMS_SEARCH_SUPPORT
+EMS_SEARCH_SUPPORTLIB(.$SUPPORTVER$LIBSUFFIX)
+AC_SUBST(EMSSUPPORT)
+AC_SUBST(EMSSUPPORTLIB)
+
+WENDYLIBS=""
+WENDYLIBDIRS=""
+
+AC_ARG_ENABLE(cosy11, [  --enable-cosy11 interface for Wendy])
+if test "$enable_cosy11" = yes ; then
+  AC_ARG_WITH(cosyloginc, [  --with-cosyloginc=DIR cosylog includes],
+	  cosyloginc=$withval, cosyloginc=/usr/users/cacq)
+  if test "$cosyloginc" != 'no' ; then
+	  case $target in
+	      mips-dec-ultrix*)
+	    	  watzsys='mips'
+	          ;;
+	      alpha-dec-osf*)
+	    	  watzsys='axp'
+	          ;;
+	      *)
+	    	  AC_MSG_ERROR(cosylog geht nur auf mips oder alpha)
+	    	  ;;
+	  esac
+	  AC_CHECKING(for CosyLogIFC.h)
+	  for f in $cosyloginc\
+			  $cosyloginc/include\
+			  $cosyloginc/source/common\
+			  $cosyloginc/source/mdb ; do
+		  AC_MSG_CHECKING(ob CosyLogIFC.h in $f ist)
+		  if test -f "$f/CosyLogIFC.h" ; then
+			  AC_MSG_RESULT(yes)
+			  cosylog_include=-I`(cd "$f";pwd)`
+			  break
+		  else
+			  AC_MSG_RESULT(no)
+		  fi
+	  done
+	  if test -z "$cosylog_include" ; then
+		  AC_MSG_ERROR([CosyLogIFC.h not found; try --with-cosylog=no])
+	  fi
+	  DEFFLAGS="$DEFFLAGS -DCOSYLOG"
+	  COSYLOGSRC='$(cosylogsrc)'
+  fi
+
+  AC_ARG_WITH(cosyloglib, [  --with-cosyloglib=DIR cosylog library],
+	  cosyloglib=$withval, cosyloglib=$cosyloginc)
+  if test "$cosyloglib" != 'no' ; then
+    case $target in
+      mips-dec-ultrix*)
+	watzsys='mips'
+	;;
+      alpha-dec-osf*)
+	watzsys='axp'
+	;;
+      *)
+	AC_MSG_ERROR(cosylog geht nur auf mips oder alpha)
+	;;
+    esac
+    for f in $cosyloglib\
+	      $cosyloglib/lib\
+	      $cosyloglib/lib/$watzsys\
+	      $cosyloglib/$watzsys\
+	      $cosyloglib/$target\
+	      $cosyloglib/$target_cpu\
+	      $cosyloglib/$target_os\
+	      $cosyloglib/$target/lib\
+	      $cosyloglib/$target_cpu/lib\
+	      $cosyloglib/$target_os/lib ; do
+      AC_MSG_CHECKING(ob libtest.a in $f ist)
+      if test -f "$f/libtest.a" ; then
+	AC_MSG_RESULT(yes)
+	cosylog_lib=`(cd "$f";pwd)`
+	break
+      else
+	AC_MSG_RESULT(no)
+      fi
+    done
+    if test -z "$cosylog_lib" ; then
+      AC_MSG_ERROR([libtest.a not found; try --with-cosylog=no])
+    fi
+    WENDYLIBS="$WENDYLIBS -ltest"
+    WENDYLIBDIRS="$WENDYLIBDIRS -L$cosylog_lib"
+    watzlib=true
+  fi
+
+  AC_ARG_WITH(cosydbinc, [  --with-cosydbinc=DIR cosydb includes],
+	  cosydbinc=$withval, cosydbinc=/usr/users/cacq)
+  if test "$cosydbinc" != 'no' ; then
+	  case $target in
+	      mips-dec-ultrix*)
+	    	  watzsys='mips'
+	          ;;
+	      alpha-dec-osf*)
+	    	  watzsys='axp'
+	          ;;
+	      *)
+	    	  AC_MSG_ERROR(cosydb geht nur auf mips oder alpha)
+	    	  ;;
+	  esac
+	  AC_CHECKING(for exp_control_params.c)
+	  for f in $cosydbinc\
+			  $cosydbinc/include\
+			  $cosydbinc/source/common\
+			  $cosydbinc/source/mdb ; do
+		  AC_MSG_CHECKING(ob exp_control_params.c in $f ist)
+		  if test -f "$f/exp_control_params.c" ; then
+			  AC_MSG_RESULT(yes)
+			  cosydb_include_a=-I`(cd "$f";pwd)`
+			  break
+		  else
+			  AC_MSG_RESULT(no)
+		  fi
+	  done
+	  if test -z "$cosydb_include_a" ; then
+		  AC_MSG_ERROR([exp_control_params.c not found; try --with-cosydb=no])
+	  fi
+	  AC_CHECKING(for exp_control_structure.c)
+	  for f in $cosydbinc\
+			  $cosydbinc/include\
+			  $cosydbinc/source/common\
+			  $cosydbinc/source/mdb ; do
+		  AC_MSG_CHECKING(ob exp_control_structure.c in $f ist)
+		  if test -f "$f/exp_control_structure.c" ; then
+			  AC_MSG_RESULT(yes)
+			  cosydb_include_b=-I`(cd "$f";pwd)`
+			  break
+		  else
+			  AC_MSG_RESULT(no)
+		  fi
+	  done
+	  if test -z "$cosydb_include_b" ; then
+		  AC_MSG_ERROR([exp_control_structure.c not found; try --with-cosydb=no])
+	  fi
+	  DEFFLAGS="$DEFFLAGS -DCOSYDB"
+	  COSYDBSRC='$(cosydbsrc)'
+  fi
+
+  AC_ARG_WITH(cosydblib, [  --with-cosydblib=DIR cosydb library],
+	  cosydblib=$withval, cosydblib=/usr/users/cacq)
+  if test "$cosydblib" != 'no' ; then
+    case $target in
+      mips-dec-ultrix*)
+	watzsys='mips'
+	;;
+      alpha-dec-osf*)
+	watzsys='axp'
+	;;
+      *)
+	AC_MSG_ERROR(cosydb geht nur auf mips oder alpha)
+	;;
+    esac
+    for f in $cosydblib\
+	      $cosydblib/lib\
+	      $cosydblib/lib/$watzsys\
+	      $cosydblib/$watzsys\
+	      $cosydblib/$target\
+	      $cosydblib/$target_cpu\
+	      $cosydblib/$target_os\
+	      $cosydblib/$target/lib\
+	      $cosydblib/$target_cpu/lib\
+	      $cosydblib/$target_os/lib ; do
+      AC_MSG_CHECKING(ob libtest.a in $f ist)
+      if test -f "$f/libtest.a" ; then
+	AC_MSG_RESULT(yes)
+	cosydb_lib=`(cd "$f";pwd)`
+	break
+      else
+	AC_MSG_RESULT(no)
+      fi
+    done
+    if test -z "$cosydb_lib" ; then
+      AC_MSG_ERROR([libtest.a not found; try --with-cosydb=no])
+    fi
+    if test "$watzlib" != 'true' ; then
+      WENDYLIBS="$WENDYLIBS -ltest"
+    fi
+    if  test "cosylog_lib" != "$cosydb_lib" ; then
+      WENDYLIBDIRS="$WENDYLIBDIRS -L$cosydb_lib"
+    fi
+  fi
+fi
+AC_SUBST(COSYLOGSRC)
+AC_SUBST(cosylog_include)
+AC_SUBST(COSYDBSRC)
+AC_SUBST(ODBSRC)
+AC_SUBST(cosydb_include_a)
+AC_SUBST(cosydb_include_b)
+AC_SUBST(WENDYLIBS)
+AC_SUBST(WENDYLIBDIRS)
+
+AC_ARG_ENABLE(anno, [  --enable-anno announce], [
+  if test $enable_anno = yes ; then
+    ANNOSRC='$(annosrc)'
+  else
+    ANNOSRC=''
+  fi
+], [
+  ANNOSRC=''
+])
+AC_SUBST(ANNOSRC)
+
+AC_ARG_WITH(logfile, [  --with-logfile=filename write logfile],
+	if test -z "$withval"; then
+		with_logfile=/var/tmp/commulog
+	fi
+	DEFFLAGS="$DEFFLAGS -DDEFLOGFILE=$with_logfile")
+
+AC_ARG_WITH(usocket, [  --with-usocket=name unixsocket],,
+	with_usocket=/var/tmp/emscomm)
+DEFFLAGS="$DEFFLAGS -DDEFUSOCKET=$with_usocket"
+
+AC_ARG_WITH(isocket, [  --with-isocket=port internetport],,
+	with_isocket=4096)
+DEFFLAGS="$DEFFLAGS -DDEFISOCKET=$with_isocket"
+
+AC_ARG_WITH(dsocket, [  --with-dsocket=name decnetsocket],,
+	with_dsocket=none)
+DEFFLAGS="$DEFFLAGS -DDEFDSOCKET=$with_dsocket"
+
+AC_ARG_WITH(commlist, [  --with-commlist=name],,
+	with_commlist=/etc/commlist)
+DEFFLAGS="$DEFFLAGS -DDEFCOMMBEZ=$with_commlist"
+
+commu_checkBoth=0
+AC_CHECK_FUNC(connect, commu_checkSocket=0, commu_checkSocket=1)
+if test "$commu_checkSocket" = 1; then
+    AC_CHECK_LIB(socket, main, libs="$libs -lsocket", commu_checkBoth=1)
+fi
+if test "$commu_checkBoth" = 1; then
+    commu_oldLibs=$libs
+    libs="$libs -lsocket -lnsl"
+    AC_CHECK_FUNC(accept, commu_checkNsl=0, [libs=$commu_oldLibs])
+fi
+AC_CHECK_FUNC(gethostbyname, , AC_CHECK_LIB(nsl, main, [libs="$libs -lnsl"]))
+
+dnl if test "$GXX" = yes ; then
+dnl   libs="$libs -lg++"
+dnl fi
+
+AC_SUBST(DEFFLAGS)
+AC_SUBST(LDFLAGS)
+AC_SUBST(EXEC)
+AC_SUBST(libs)
+
+AC_LANG_SAVE
+AC_LANG_CPLUSPLUS
+AC_CHECK_HEADERS(sys/cdefs.h strings.h paths.h sys/select.h)
+
+AC_CHECK_HEADERS(String.h)
+AC_CHECK_HEADERS(string)
+
+AC_MSG_CHECKING(whether we have to use namespaces)
+SAVED_CXXFLAGS=$CXXFLAGS
+CXXFLAGS="$CXXFLAGS $WERROR"
+AC_CACHE_VAL(ems_cv_namespaces,
+AC_TRY_COMPILE([
+#if defined (__STD_STRICT_ANSI) || defined (__STRICT_ANSI__)
+#include <iostream>
+#else
+#include <iostream.h>
+#endif
+namespace xxx {
+int i;
+}
+using namespace std;
+], [
+xxx::i=13;
+],
+ems_cv_namespaces=yes,
+ems_cv_namespaces=no))
+AC_MSG_RESULT($ems_cv_namespaces)
+if test $ems_cv_namespaces = yes ; then
+    AC_DEFINE(HAVE_NAMESPACES)
+fi
+CXXFLAGS=$SAVED_CXXFLAGS
+
+AC_MSG_CHECKING([whether socket() is defined])
+AC_CACHE_VAL(ems_cv_header_socket_def,
+AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <sys/socket.h>
+], [
+int s;
+s=socket(0, 0, 0);
+],
+ems_cv_header_socket_def=yes,
+ems_cv_header_socket_def=no))
+AC_MSG_RESULT($ems_cv_header_socket_def)
+if test $ems_cv_header_socket_def = no ; then
+    AC_DEFINE(NEED_SOCKETDEF)
+fi
+
+AC_MSG_CHECKING([whether connect() is defined])
+AC_CACHE_VAL(ems_cv_header_connect_def,
+AC_EGREP_CPP(connect, [
+dnl #include <sys/connect.h>
+#include <sys/socket.h>
+],
+ems_cv_header_connect_def=yes,
+ems_cv_header_connect_def=no))
+AC_MSG_RESULT($ems_cv_header_connect_def)
+if test $ems_cv_header_connect_def = no ; then
+    AC_DEFINE(NEED_CONNECTDEF)
+fi
+
+AC_MSG_CHECKING([whether listen() is defined])
+AC_CACHE_VAL(ems_cv_header_listen_def,
+AC_EGREP_CPP(listen, [#include <sys/socket.h>],
+ems_cv_header_listen_def=yes,
+ems_cv_header_listen_def=no))
+AC_MSG_RESULT($ems_cv_header_listen_def)
+if test $ems_cv_header_listen_def = no ; then
+    AC_DEFINE(NEED_LISTENDEF)
+fi
+
+AC_MSG_CHECKING([whether bzero() is defined])
+AC_CACHE_VAL(ems_cv_header_bzero_def,
+AC_EGREP_CPP(bzero, [#include <string.h>],
+ems_cv_header_bzero_def=yes,
+ems_cv_header_bzero_def=no))
+AC_MSG_RESULT($ems_cv_header_bzero_def)
+if test $ems_cv_header_bzero_def = no ; then
+	AC_DEFINE(NEED_BZERODEF)
+fi
+
+AC_MSG_CHECKING([whether getdtablesize() is defined])
+AC_CACHE_VAL(ems_cv_header_getdtablesize_def,
+AC_EGREP_CPP(getdtablesize, [#include <unistd.h>],
+ems_cv_header_getdtablesize_def=yes,
+ems_cv_header_getdtablesize_def=no))
+AC_MSG_RESULT($ems_cv_header_getdtablesize_def)
+if test $ems_cv_header_getdtablesize_def = no ; then
+	AC_DEFINE(NEED_GETDTABLESIZEDEF)
+fi
+
+AC_MSG_CHECKING([whether select() is defined])
+AC_CACHE_VAL(ems_cv_header_select_def,
+AC_EGREP_CPP(select, [#include <sys/select.h>],
+ems_cv_header_select_def=yes,
+ems_cv_header_select_def=no))
+AC_MSG_RESULT($ems_cv_header_select_def)
+if test $ems_cv_header_select_def = no ; then
+	AC_DEFINE(NEED_SELECTDEF)
+fi
+
+AC_MSG_CHECKING([whether ntohl() is properly defined])
+AC_CACHE_VAL(ems_cv_header_ntohl_def,
+AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <netinet/in.h>
+], [
+unsigned int res;
+res=ntohl(17);
+], ems_cv_header_ntohl_def=yes, ems_cv_header_ntohl_def=no))
+AC_MSG_RESULT($ems_cv_header_ntohl_def)
+if test $ems_cv_header_ntohl_def = no ; then
+	AC_DEFINE(NEED_NTOHLDEF)
+fi
+
+AC_MSG_CHECKING([whether inet_ntoa() is properly defined])
+AC_CACHE_VAL(ems_cv_header_inet_ntoa_def,
+AC_TRY_COMPILE([
+#include <arpa/inet.h>
+#include <netinet/in.h>
+], [
+char* a;
+struct in_addr ad;
+a=inet_ntoa(ad);
+], ems_cv_header_inet_ntoa_def=yes, ems_cv_header_inet_ntoa_def=no))
+AC_MSG_RESULT($ems_cv_header_inet_ntoa_def)
+if test $ems_cv_header_inet_ntoa_def = no ; then
+	AC_DEFINE(NEED_INET_NTOADEF)
+fi
+
+AC_MSG_CHECKING([whether gettimeofday() is defined])
+AC_CACHE_VAL(ems_cv_header_gettimeofday_def,
+AC_EGREP_CPP(gettimeofday, [#include <sys/time.h>],
+ems_cv_header_gettimeofday_def=yes,
+ems_cv_header_gettimeofday_def=no))
+AC_MSG_RESULT($ems_cv_header_gettimeofday_def)
+if test $ems_cv_header_gettimeofday_def = no ; then
+	AC_DEFINE(NEED_GETTIMEOFDAYDEF)
+fi
+
+AC_MSG_CHECKING([whether socketpair() is defined])
+AC_CACHE_VAL(ems_cv_header_socketpair_def,
+AC_EGREP_CPP(socketpair, [#include <sys/socket.h>],
+ems_cv_header_socketpair_def=yes,
+ems_cv_header_socketpair_def=no))
+AC_MSG_RESULT($ems_cv_header_socketpair_def)
+if test $ems_cv_header_socketpair_def = no ; then
+	AC_DEFINE(NEED_SOCKETPAIRDEF)
+fi
+
+AC_MSG_CHECKING([whether setsockopt() is defined])
+AC_CACHE_VAL(ems_cv_header_setsockopt_def,
+AC_EGREP_CPP(setsockopt, [#include <sys/socket.h>],
+ems_cv_header_setsockopt_def=yes,
+ems_cv_header_setsockopt_def=no))
+AC_MSG_RESULT($ems_cv_header_setsockopt_def)
+if test $ems_cv_header_setsockopt_def = no ; then
+	AC_DEFINE(NEED_SETSOCKOPTDEF)
+fi
+
+AC_MSG_CHECKING([whether getsockopt() is defined])
+AC_CACHE_VAL(ems_cv_header_getsockopt_def,
+AC_EGREP_CPP(getsockopt, [#include <sys/socket.h>],
+ems_cv_header_getsockopt_def=yes,
+ems_cv_header_getsockopt_def=no))
+AC_MSG_RESULT($ems_cv_header_getsockopt_def)
+if test $ems_cv_header_getsockopt_def = no ; then
+    AC_DEFINE(NEED_GETSOCKOPTDEF)
+fi
+
+AC_MSG_CHECKING([whether getsockname() is defined])
+AC_CACHE_VAL(ems_cv_header_getsockname_def,
+AC_EGREP_CPP(getsockname, [
+#include <sys/types.h>
+#include <sys/socket.h>
+],
+ems_cv_header_getsockname_def=yes,
+ems_cv_header_getsockname_def=no))
+AC_MSG_RESULT($ems_cv_header_getsockname_def)
+if test $ems_cv_header_getsockname_def = no ; then
+    AC_DEFINE(NEED_GETSOCKNAMEDEF)
+fi
+
+AC_MSG_CHECKING([whether bind() is defined])
+AC_CACHE_VAL(ems_cv_header_bind_def,
+AC_EGREP_CPP(bind, [#include <sys/socket.h>],
+ems_cv_header_bind_def=yes,
+ems_cv_header_bind_def=no))
+AC_MSG_RESULT($ems_cv_header_bind_def)
+if test $ems_cv_header_bind_def = no ; then
+	AC_DEFINE(NEED_BINDDEF)
+fi
+
+AC_MSG_CHECKING([whether accept() is defined])
+AC_CACHE_VAL(ems_cv_header_accept_def,
+AC_EGREP_CPP(accept, [#include <sys/socket.h>],
+ems_cv_header_accept_def=yes,
+ems_cv_header_accept_def=no))
+AC_MSG_RESULT($ems_cv_header_accept_def)
+if test $ems_cv_header_accept_def = no ; then
+	AC_DEFINE(NEED_ACCEPTDEF)
+fi
+
+AC_MSG_CHECKING([whether sendto() is defined])
+AC_CACHE_VAL(ems_cv_header_sendto_def,
+AC_EGREP_CPP(sendto, [#include <sys/socket.h>],
+ems_cv_header_sendto_def=yes,
+ems_cv_header_sendto_def=no))
+AC_MSG_RESULT($ems_cv_header_sendto_def)
+if test $ems_cv_header_sendto_def = no ; then
+	AC_DEFINE(NEED_SENDTODEF)
+fi
+
+AC_MSG_CHECKING([whether openlog() is defined])
+AC_CACHE_VAL(ems_cv_header_openlog_def,
+AC_EGREP_CPP(openlog, [#include <syslog.h>],
+ems_cv_header_openlog_def=yes,
+ems_cv_header_openlog_def=no))
+AC_MSG_RESULT($ems_cv_header_openlog_def)
+if test $ems_cv_header_openlog_def = no ; then
+	AC_DEFINE(NEED_SYSLOGDEF)
+fi
+
+AC_MSG_CHECKING([whether getwd() is defined])
+AC_CACHE_VAL(ems_cv_header_getwd_def,
+AC_EGREP_CPP(getwd, [#include <unistd.h>],
+ems_cv_header_getwd_def=yes,
+ems_cv_header_getwd_def=no))
+AC_MSG_RESULT($ems_cv_header_getwd_def)
+if test $ems_cv_header_getwd_def = no ; then
+	AC_DEFINE(NEED_GETWDDEF)
+fi
+
+AC_MSG_CHECKING([whether gethostbyname() is defined])
+AC_CACHE_VAL(ems_cv_header_gethostbyname_def,
+AC_EGREP_CPP(gethostbyname,  [#include <netdb.h>],
+ems_cv_header_gethostbyname_def=yes,
+ems_cv_header_gethostbyname_def=no))
+AC_MSG_RESULT($ems_cv_header_gethostbyname_def)
+if test $ems_cv_header_gethostbyname_def = no ; then
+	AC_DEFINE(NEED_GETHOSTBYNAMEDEF)
+fi
+
+AC_MSG_CHECKING([whether gethostname() is defined])
+AC_CACHE_VAL(ems_cv_header_gethostname_def,
+	AC_EGREP_CPP(gethostname, [#include <unistd.h>],
+		ems_cv_header_gethostname_def=yes,
+		ems_cv_header_gethostname_def=no))
+AC_MSG_RESULT($ems_cv_header_gethostname_def)
+if test $ems_cv_header_gethostname_def = no ; then
+	AC_DEFINE(NEED_GETHOSTNAMEDEF)
+fi
+
+AC_MSG_CHECKING([whether bool is defined])
+AC_CACHE_VAL(ems_cv_header_bool_def,
+AC_TRY_COMPILE([], [
+bool b;
+b=true;
+], ems_cv_header_bool_def=yes, ems_cv_header_bool_def=no))
+AC_MSG_RESULT($ems_cv_header_bool_def)
+if test $ems_cv_header_bool_def = no ; then
+	AC_DEFINE(NEED_BOOL)
+fi
+
+SOCKLEN_TYPE=""
+AC_MSG_CHECKING([3rd argument of accept is socklen_t*])
+AC_CACHE_VAL(ems_cv_header_socklen_type_socklen_t,
+AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <sys/socket.h>
+], [
+int res;
+int sock;
+struct sockaddr *address;
+socklen_t len=0;
+res=accept(sock, address, &len);
+],
+ems_cv_header_socklen_type_socklen_t=yes,
+ems_cv_header_socklen_type_socklen_t=no))
+AC_MSG_RESULT($ems_cv_header_socklen_type_socklen_t)
+if test $ems_cv_header_socklen_type_socklen_t = yes ; then
+    SOCKLEN_TYPE=socklen_t
+fi
+
+if test "$SOCKLEN_TYPE" = "" ; then
+  AC_MSG_CHECKING([3rd argument of accept is size_t*])
+  AC_CACHE_VAL(ems_cv_header_socklen_type_size_t,
+  AC_TRY_COMPILE([
+  #include <sys/types.h>
+  #include <sys/socket.h>
+  ], [
+  int res;
+  int sock;
+  struct sockaddr *address;
+  size_t len=0;
+  res=accept(sock, address, &len);
+  ],
+  ems_cv_header_socklen_type_size_t=yes,
+  ems_cv_header_socklen_type_size_t=no))
+  AC_MSG_RESULT($ems_cv_header_socklen_type_size_t)
+  if test $ems_cv_header_socklen_type_size_t = yes ; then
+      SOCKLEN_TYPE=size_t
+  fi
+fi
+
+if test "$SOCKLEN_TYPE" = "" ; then
+  AC_MSG_CHECKING([3rd argument of accept is int*])
+  AC_CACHE_VAL(ems_cv_header_socklen_type_int,
+  AC_TRY_COMPILE([
+  #include <sys/types.h>
+  #include <sys/socket.h>
+  ], [
+  int res;
+  int sock;
+  struct sockaddr *address;
+  int len=0;
+  res=accept(sock, address, &len);
+  ],
+  ems_cv_header_socklen_type_int=yes,
+  ems_cv_header_socklen_type_int=no))
+  AC_MSG_RESULT($ems_cv_header_socklen_type_int)
+  if test $ems_cv_header_socklen_type_int = yes ; then
+      SOCKLEN_TYPE=int
+  fi
+fi
+if test "$SOCKLEN_TYPE" = "" ; then
+  AC_MSG_ERROR(cannot determine type of 3rd argument of accept)
+fi
+AC_SUBST(SOCKLEN_TYPE)
+
+AC_LANG_RESTORE
+
+AC_CONFIG_HEADER(config.h)
+AC_OUTPUT(Makefile config_types.h)

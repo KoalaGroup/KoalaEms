@@ -1,0 +1,21 @@
+/*
+ * common/emsctypes.h.in
+ * $ZEL: emsctypes.h.in,v 1.4 2006/03/10 14:14:56 wuestner Exp $
+ */
+
+#ifndef _emsctypes_h_
+#define _emsctypes_h_
+
+typedef signed @EMS_I1@ ems_i8;
+typedef unsigned @EMS_I1@ ems_u8;
+
+typedef signed @EMS_I2@ ems_i16;
+typedef unsigned @EMS_I2@ ems_u16;
+
+typedef signed @EMS_I4@ ems_i32;
+typedef unsigned @EMS_I4@ ems_u32;
+
+typedef signed @EMS_I8@ ems_i64;
+typedef unsigned @EMS_I8@ ems_u64;
+
+#endif /* _emsctypes_h_ */

@@ -1,0 +1,146 @@
+/* $ZEL: config.h.in,v 2.12 2003/09/30 16:37:30 wuestner Exp $ */
+
+#ifndef _config_h_
+#define _config_h_
+
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+
+#ifndef _BSD_SOURCE
+#define _BSD_SOURCE
+#endif
+
+#ifdef __linux__
+/*
+ * #define _LARGEFILE_SOURCE
+ * #define _LARGEFILE64_SOURCE
+ * #define _FILE_OFFSET_BITS 64
+ */
+#define LINUX_LARGEFILE O_LARGEFILE
+#else
+#define LINUX_LARGEFILE 0
+#endif
+
+#include <emsctypes.h>
+
+/* Define as the return type of signal handlers (int or void).  */
+#undef RETSIGTYPE
+
+/* Define if you have the ANSI C header files.  */
+#undef STDC_HEADERS
+
+/* Define if you can safely include both <sys/time.h> and <time.h>.  */
+#undef TIME_WITH_SYS_TIME
+
+/* Gibt es <sys/cdefs.h>? */
+#undef HAVE_SYS_CDEFS_H
+
+/* Gibt es <sys/select.h>? */
+#undef HAVE_SYS_SELECT_H
+
+/* Define if you have the String.h header file */
+#undef HAVE_STRING_H
+
+/* Define if you have the string header file */
+#undef HAVE_STRING
+
+/* Define if you have namespaces */
+#undef HAVE_NAMESPACES
+
+/* Define if you have the gettimeofday function.  */
+#undef HAVE_GETTIMEOFDAY
+
+/* Define if you have the select function.  */
+#undef HAVE_SELECT
+
+/* Define if you have the socket function.  */
+#undef HAVE_SOCKET
+
+/* Define if you have the strerror function.  */
+#undef HAVE_STRERROR
+
+/* Define if you have the <sys/time.h> header file.  */
+#undef HAVE_SYS_TIME_H
+
+/* Define if you have the <unistd.h> header file.  */
+#undef HAVE_UNISTD_H
+
+/* Define if you have the <paths.h> header file.  */
+#undef HAVE_PATHS_H
+
+#if !defined(__cplusplus) && !defined(c_plusplus)
+/* Define to empty if the keyword does not work.  */
+#undef const
+#endif /* cplusplus */
+
+/* Define if you dont have a valid declaration for accept() */
+#undef NEED_ACCEPTDEF
+
+/* Define if you dont have a valid declaration for sendto() */
+#undef NEED_SENDTODEF
+
+/* Define if you dont have a valid declaration for bind() */
+#undef NEED_BINDDEF
+
+/* Define if you dont have a valid declaration for bzero() */
+#undef NEED_BZERODEF
+
+/* Define if you dont have a valid declaration for getdtablesize() */
+#undef NEED_GETDTABLESIZEDEF
+
+/* Define if you dont have a valid declaration for gethostbyname() */
+#undef NEED_GETHOSTBYNAMEDEF
+
+/* Define if you dont have a valid declaration for gethostname() */
+#undef NEED_GETHOSTNAMEDEF
+
+/* Define if you dont have a valid declaration for getrusage() */
+#undef NEED_GETRUSAGEDEF
+
+/* Define if you dont have a valid declaration for getsockopt() */
+#undef NEED_GETSOCKOPTDEF
+
+/* Define if you dont have a valid declaration for getsockname() */
+#undef NEED_GETSOCKNAMEDEF
+
+/* Define if you dont have a valid declaration for gettimeofday() */
+#undef NEED_GETTIMEOFDAYDEF
+
+/* Define if you dont have a valid declaration for getwd() */
+#undef NEED_GETWDDEF
+
+/* Define if you dont have a valid declaration for inet_addr() */
+#undef NEED_INET_ADDRDEF
+
+/* Define if you dont have a valid declaration for inet_ntoa() */
+#undef NEED_INET_NTOADEF
+
+/* Define if you dont have a valid declaration for listen() */
+#undef NEED_LISTENDEF
+
+/* Define if you dont have a valid declaration for ntohl() and htons() */
+#undef NEED_NTOHLDEF
+
+/* Define if you dont have a valid declaration for select() */
+#undef NEED_SELECTDEF
+
+/* Define if you dont have a valid declaration for select() */
+#undef NEED_SOCKETDEF
+
+/* Define if you dont have a valid declaration for select() */
+#undef NEED_CONNECTDEF
+
+/* Define if you dont have a valid declaration for setsockopt() */
+#undef NEED_SETSOCKOPTDEF
+
+/* Define if you dont have a valid declaration for socketpair() */
+#undef NEED_SOCKETPAIRDEF
+
+/* Define if you dont have valid declarations for syslog */
+#undef NEED_SYSLOGDEF
+
+/* Define if you dont have bool type */
+#undef NEED_BOOL
+
+#endif /* _config_h_ */

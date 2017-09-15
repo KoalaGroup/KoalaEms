@@ -1,0 +1,177 @@
+#! /bin/sh
+#\
+exec wish $0 $*
+
+# $ZEL: tsm_status,v 1.3 2010/09/10 21:53:58 wuestner Exp $
+# copyright 1998, 1999, 2001
+#   Peter Wuestner; Zentrallabor fuer Elektronik; Forschungszentrum Juelich
+#
+
+proc set_libraries {} {
+    global auto_path
+    # Vorbereitung fuer 'autoload' von Prozeduren
+    if [info exists env(EMSTCL_HOME)] {
+        set common_library $env(EMSTCL_HOME)/common
+        set EMSTCL_HOME $env(EMSTCL_HOME)
+    } else {
+        set common_library /usr/local/ems/lib/common
+        set EMSTCL_HOME /usr/local/ems/lib
+    }
+
+    lappend auto_path $common_library
+}
+
+proc crate_main_win {} {
+    global status
+    global entry_ro
+
+    frame .sp -borderwidth 3 -relief ridge
+    frame .sp.status -borderwidth 0 -relief flat
+    label .sp.status.l0 -text "Updated"
+    label .sp.status.c0 -text ": "
+    entry .sp.status.e0 -textvariable status(updated) -relief flat\
+        -state $entry_ro -width 0
+    label .sp.status.l1 -text "Name"
+    label .sp.status.c1 -text ": "
+    entry .sp.status.e1 -textvariable status(filename) -relief flat\
+        -state $entry_ro -width 0
+    label .sp.status.l2 -text "Start"
+    label .sp.status.c2 -text ": "
+    entry .sp.status.e2 -textvariable status(start) -relief flat\
+        -state $entry_ro -width 0
+    label .sp.status.l3 -text "Size"
+    label .sp.status.c3 -text ": "
+    entry .sp.status.e3 -textvariable status(size) -relief flat\
+        -state $entry_ro -justify right -width 15
+    label .sp.status.l4 -text "Saved"
+    label .sp.status.c4 -text ": "
+    entry .sp.status.e4 -textvariable status(saved) -relief flat\
+        -state $entry_ro -justify right -width 15
+    label .sp.status.l5 -text "Speed (average)"
+    label .sp.status.c5 -text ": "
+    entry .sp.status.e5 -textvariable status(avspeed) -relief flat\
+        -state $entry_ro -width 0
+    label .sp.status.l6 -text "Speed (actual)"
+    label .sp.status.c6 -text ": "
+    entry .sp.status.e6 -textvariable status(actspeed) -relief flat\
+        -state $entry_ro -width 0
+    label .sp.status.l7 -text "End (av)"
+    label .sp.status.c7 -text ": "
+    entry .sp.status.e7 -textvariable status(avend) -relief flat\
+        -state $entry_ro -width 0
+    label .sp.status.l8 -text "End"
+    label .sp.status.c8 -text ": "
+    entry .sp.status.e8 -textvariable status(end) -relief flat\
+        -state $entry_ro -width 0
+
+    for {set r 0} {$r<9} {incr r} {
+        grid configure .sp.status.l$r -column 0 -row $r -sticky w
+        grid configure .sp.status.c$r -column 1 -row $r -sticky w
+        grid configure .sp.status.e$r -column 2 -row $r -sticky w
+    }
+    grid columnconfigure .sp.status 2 -weight 1
+    pack .sp.status -fill x -expand 1 -padx 5 -pady 5
+
+    pack .sp -side left -fill x -expand 1
+
+    update idletasks
+}
+
+proc xformat {v} {
+  set s {}
+  while {$v>999} {
+    set a [expr $v%1000]
+    set v [expr $v/1000]
+    set s [format {,%03d%s} $a $s]
+  }
+  set s [format {%d%s} $v $s]
+  return $s
+}
+
+proc update_state {fname} {
+    global status
+
+    set f [open $fname r]
+    fconfigure $f -translation binary
+    set block [read $f]
+    set res [binary scan $block {a1024 wwwwwwww} filename size start position speed updated res2 res3 res4]
+    close $f
+
+    set status(updated) [clock format $updated]
+    set status(filename) [string trimright $filename \x00]
+    set status(start) [clock format $start]
+    set status(size) [xformat $size]
+    set status(saved) [xformat $position]
+    set status(actspeed) [format {%.3f MByte/s} [expr $speed/1024.]]
+    set tdiff0 [expr $updated-$start]
+    if {$tdiff0>0} {
+        set avspeed [expr $position/$tdiff0/1024]
+        set status(avspeed) [format {%.3f MByte/s} [expr $avspeed/1024.]]
+        set tdiffav [expr $size/1024/$avspeed]
+        set tdiffav1 [expr $tdiffav-$tdiff0]
+        set avend [expr $start+$tdiffav]
+        set status(avend) "[clock format $avend] ($tdiffav1 s)"
+    } else {
+        set status(avspeed) "unknown"
+        set status(avend) "unknown"
+    }
+    set sdiff [expr $size-$position]
+    if {$speed>0} {
+        set tdiff1 [expr $sdiff/1024/$speed]
+        set end [expr $updated+$tdiff1]
+        set status(end) "[clock format $end] ($tdiff1 s)"
+    } else {
+        set status(end) "unknown"
+    }
+    update idletasks
+}
+
+proc update_loop {} {
+    global namedarg posarg
+    global alarm
+
+    if [info exists posarg(0)] {
+        set fname $posarg(0)
+    } else {
+        set fname /tmp/tsm_archive_ems.progress
+    }
+
+    while {1} {
+        update_state $fname
+        update
+        set alarm 0
+        after 1000 set alarm 1
+        vwait alarm
+    }
+}
+
+proc main {} {
+    global entry_ro
+
+    set_libraries
+
+    # readonly attribute for "entry"
+    if {[info tclversion]>8.3} {
+        set entry_ro {readonly}
+    } else {
+        set entry_ro {disabled}
+    }
+
+    # Kommandozeilenargumente verarbeiten
+    process_args
+
+    set global_display [display_name]
+
+    set maintitle {TSM Transfer Status}
+    if [regexp #.* [winfo name .] number] {
+      append maintitle "$number"
+    }
+    wm title . $maintitle
+    wm maxsize . 10000 10000
+    tk_focusFollowsMouse
+    crate_main_win
+
+    update_loop
+}
+
+main

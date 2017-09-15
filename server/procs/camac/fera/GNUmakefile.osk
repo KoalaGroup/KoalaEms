@@ -1,0 +1,17 @@
+CONF = ../../../CONF
+COMMON = ../../../../COMMON
+
+include $(CONF)/rules.make
+
+cfiles = FERAsetup.r FERAreadout.r FERAmesspeds.r StandardFERA.r
+
+all: lib.l
+
+lib.l: $(cfiles)
+	merge $^ >-lib.l
+
+#############################################################################
+
+$(cfiles): errorcodes.h modultypes.h ../../../LOWLEVEL/CAMAC/camac.h
+FERAsetup.h: fera.h
+FERAreadout.r FERAmesspeds.r: $(CONF)/sconf.h $(COMMON)/debug.h

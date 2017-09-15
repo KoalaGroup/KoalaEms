@@ -1,0 +1,66 @@
+SYSDEV = /dd
+LOCAL = /dd/LOCAL
+NETSOFT = /dd
+
+EXTRAINCDIR = $(LOCAL)/DEFS
+EXTRALIBDIR = $(LOCAL)/LIB
+SCSILIB = -l$(EXTRALIBDIR)/stt_intf_c.r -l$(EXTRALIBDIR)/scsi_intf_c.r
+SSMLIB = -l$(EXTRALIBDIR)/ssm.r
+PPIDLIB = -l$(EXTRALIBDIR)/getppid.r
+IOLIB = -l$(EXTRALIBDIR)/iocalls.r
+GETOPT = -l$(EXTRALIBDIR)/getopt.r
+
+NETINCL = $(NETSOFT)/DEFS
+NETLIBDIR = $(NETSOFT)/LIB
+NETLIB = -l$(NETLIBDIR)/socklib.l -l$(NETLIBDIR)/netdb.l
+
+BERKLIB = -l$(SYSDEV)/LIB/berklib.l
+PROFILIBDIR = /bt/PEP/PROFINET.alt/LIB
+PROFILIB = -l$(PROFILIBDIR)/pbL2llf.l
+
+GNULIB = $(LOCAL)/LIB
+
+INCDIR = $(SYSDEV)/DEFS
+
+zuerst: all
+
+ifeq ($(CC),cc)
+
+CFLAGS = -BP -k=2 -DNOVOLATILE -v=$(CONF) -v=$(COMMON) -v=$(INCDIR)  \
+	-v=$(EXTRAINCDIR)
+
+%.r : %.c
+	$(CC) $(CFLAGS) $< -r=$(RDIR)
+
+else
+
+CC = gcc2
+#CFLAGS = -O2 -mc68020 -mremote -mnostack-check -fomit-frame-pointer  \
+#	-finline-functions -fstrength-reduce -funroll-loops -I$(CONF)  \
+#	-I$(COMMON) -I$(EXTRAINCDIR)
+#LF = -mc68020
+CFLAGS := -O2 -mremote -mnostack-check -fomit-frame-pointer  \
+	-finline-functions -fstrength-reduce -funroll-loops -I$(CONF)  \
+	-I$(COMMON) -I$(EXTRAINCDIR)
+LF :=
+
+endif
+
+vpath %.h $(COMMON):$(CONF)
+vpath %.d $(COMMON)
+vpath %.stamp $(CONF)
+
+%r : %a
+	(setenv CDEF $(COMMON);$(AS) $< -o=$@)
+
+% :: %.m4
+	m4 $(M4FLAGS) $< >$@
+
+tiefenrein:
+	$(foreach m,$(wildcard */GNUmakefile),(chd $(patsubst %/,%,$(dir $m)); $(MAKE) clean);)
+	-$(RM) *.r *.l
+
+clean: tiefenrein
+
+.PHONY: clean tiefenrein
+

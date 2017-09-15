@@ -1,0 +1,14 @@
+CONF = ../../CONF
+COMMON = ../../../COMMON
+
+include $(COMMON)/rules.make
+
+cfiles = socketcomm.r
+
+all: lib.l emsnetgate
+
+lib.l: $(cfiles)
+	merge $^ >-$@
+
+emsnetgate: emsnetgate.r
+	$(CC) $(LF) $^ $(NETLIB) $(PPIDLIB) -L$(GNULIB) -o $@

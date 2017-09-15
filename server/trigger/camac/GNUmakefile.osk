@@ -1,0 +1,17 @@
+CONF = ../../CONF
+COMMON = ../../../COMMON
+
+include $(CONF)/rules.make
+
+cfiles = qtrigger.r multiqtrigger.r
+lib = lib.l
+
+all: $(lib)
+
+$(lib): $(cfiles)
+	merge $^ >-$@
+
+###########################################
+
+$(cfiles): errorcodes.h ../../LOWLEVEL/CAMAC/camac.h
+multiqtrigger.r: $(CONF)/sconf.h

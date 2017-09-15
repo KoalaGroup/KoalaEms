@@ -1,0 +1,131 @@
+/******************************************************************************
+*                                                                             *
+* pipecomm.c                                                                  *
+*                                                                             *
+* OS9                                                                         *
+*                                                                             *
+* 19.02.93                                                                    *
+*                                                                             *
+* MD                                                                          *
+*                                                                             *
+******************************************************************************/
+
+#include <config.h>
+#include <debug.h>
+#include <msg.h>
+#include <requesttypes.h>
+
+#define DEFPORT "/pipe/comm"
+static int pin,pout;
+extern msgheader header;
+
+/*****************************************************************************/
+
+int init_comm(port)
+char *port;
+{
+char pinname[265];
+char poutname[265];
+
+if (port)
+  {
+  strcpy(pinname, port);
+  strcpy(poutname, port);
+  }
+else
+  {
+  strcpy(pinname, DEFPORT);
+  strcpy(poutname, DEFPORT);
+  }
+strcat(pinname, "in");
+strcat(poutname, "out");
+DV(D_COMM, printf("inpipe: %s, outpipe: %s\n", pinname, poutname);)
+if ((pin=creat(pinname, 3))==-1) {perror("create inpipe"); return(-1);}
+if ((pout=creat(poutname, 3))==-1) {perror("create outpipe"); return(-1);}
+return(0);
+}
+
+/*****************************************************************************/
+
+Request get_request(reqbuf, siz)
+int **reqbuf, *siz;
+{
+int len, restlen, da, size;
+char *bufptr;
+int *msg;
+
+T(get_request)
+restlen=sizeof(msgheader);
+bufptr=(char*)&header;
+while(restlen)
+  {
+  da=read(pin, bufptr, restlen);
+  if(da>0)    /*falls Error, wird nicht gezaehlt*/
+    {
+    DV(D_COMM, printf("%d Headerbytes angekommen\n",da);)
+    bufptr+=da;
+    restlen-=da;
+    }
+  }
+size=*siz=header.size;
+DV(D_COMM, printf("Es folgen %d Bytes!\n", size*sizeof(int));)
+if (size>0)
+  {
+  msg= *reqbuf=(int*)calloc(size, sizeof(int));
+  restlen=size*sizeof(int);
+  bufptr=(char*)msg;
+  while(restlen)
+    {
+    da=read(pin, bufptr, restlen);
+    if(da>0)
+      {
+      DV(D_COMM, printf("%d Bytes angekommen\n", da);)
+      bufptr+=da;
+      restlen-=da;
+      }
+    }
+  }
+else
+  *reqbuf=(int*)0;
+return(header.type);
+}
+
+/*****************************************************************************/
+
+Request get_request_noblock(reqbuf, siz)
+int **reqbuf, *siz;
+{
+T(get_request_noblock)
+if(_gs_rdy(pin)<1)return(Req_Nothing);
+return(get_request(reqbuf,siz));
+}
+
+/*****************************************************************************/
+
+send_confirmation(header, confbuf, size)
+msgheader *header;
+int *confbuf;
+int size;
+{
+int res;
+
+T(send_confirmation)
+header->size=size;
+res=write(pout, (char*)header, sizeof(msgheader));
+DV(D_COMM, printf("sent msgheader: %d bytes of %d.\n", res, sizeof(msgheader));)
+res=write(pout, (char*)confbuf, size*sizeof(int));
+DV(D_COMM, printf("sent body: %d bytes of %d.\n", res, size*sizeof(int));)
+}
+
+/*****************************************************************************/
+
+free_msg(msg)
+int *msg;
+{
+T(free_msg)
+if (msg) free((char*)msg);
+}
+
+/*****************************************************************************/
+/*****************************************************************************/
+

@@ -1,0 +1,27 @@
+CONF = ../../CONF
+COMMON = ../../../COMMON
+
+include $(CONF)/rules.make
+
+cfiles = chi_init.r fbutil_a.r fbutil_c.r globals.r  \
+	fbsingle_a.r fbsinglea_a.r fbustrap_a.r  \
+	fbustrap_c.r  \
+	fbcycle_a.r fbsingle_c.r fbblock_a.r
+
+all: lib.l
+
+lib.l: $(cfiles)
+	merge $^ >-$@
+
+######################################################
+
+chi_init.r: debug.h errorcodes.h globals.h fbacc.h chi_map.h  \
+	../BUSTRAP/bustrap.h
+fbutil_c.r: debug.h globals.h fbacc.h  chi_map.h $(COMMON)/modultypes.h
+fbutil_a.r: chi_map.d
+fbsingle_a.r: chi_map.d
+fbsinglea_a.r: chi_map.d
+fbustrap_c.r: fbacc.h ../BUSTRAP/bustrap.h
+fbcycle_a.r: chi_map.d
+fbsingle_c.r: globals.h
+fbblock_a.r: chi_map.d

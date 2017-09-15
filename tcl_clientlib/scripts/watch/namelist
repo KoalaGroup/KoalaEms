@@ -1,0 +1,73 @@
+#! /bin/sh
+#\
+exec emssh $0 $*
+
+proc objectname {obj} {
+  switch $obj {
+    1 {set erg VED}
+    2 {set erg Domain}
+    3 {set erg "Instrumentation System"}
+    4 {set erg Variable}
+    5 {set erg "Program Invocation"}
+    6 {set erg Dataoutputs}
+    default {set erg "unknown objecttype $obj"}
+  }
+  return $erg
+}
+
+proc sub_objectname {obj subobj} {
+  if {$obj==2} {
+    switch $subobj {
+      1 {set erg Modullist}
+      2 {set erg LAMproclist}
+      3 {set erg Trigger}
+      4 {set erg Event}
+      5 {set erg Datain}
+      6 {set erg Dataout}
+      default {set erg "unknown subobjecttype $subobj"}
+    }
+  } elseif {$obj==5} {
+    switch $subobj {
+      1 {set erg Readout}
+      2 {set erg LAM}
+      default {set erg "unknown subobjecttype $subobj"}
+    }
+  } else {
+    set erg "unknown subobjecttype $subobj"
+  }
+}
+
+proc getnamelist {ved} {
+  set all [$ved namelist null]
+  foreach i $all {
+    puts "[objectname $i]:"
+    if [catch {set objs [$ved namelist $i]} mist] {
+#      puts $mist
+      set subobjs [$ved namelist $i null]
+        foreach j $subobjs {
+          puts "  [sub_objectname $i $j]:"
+          set objs [$ved namelist $i $j]
+          if {$objs=={}} {puts "    none"} else { puts "    $objs"}
+        }
+    } else {
+      if {$objs=={}} {puts "  none"} else { puts "  $objs"}
+    }
+  }
+}
+
+#main
+if {$argc!=1} {
+  puts "usage namelist <ved_name>"
+  exit
+  }
+set vedname [lindex $argv 0]
+
+if [catch {set ved [ems_open $vedname]} mist] {
+  puts $mist
+  exit
+  }
+
+getnamelist $ved
+
+$ved close
+exit

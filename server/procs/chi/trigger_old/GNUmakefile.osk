@@ -1,0 +1,16 @@
+SERVER := ../../..
+CONF := $(SERVER)/CONF
+COMMON := $(SERVER)/../COMMON
+TRIGG := $(SERVER)/TRIGGER/CHI/GSI
+include $(COMMON)/rules.make
+
+cfiles = gsi_soft.r trigger.r
+
+all: lib.l
+
+lib.l: $(cfiles)
+	merge $^ >-lib.l
+
+gsi_soft.r:	$(CONF)/sconf.h $(COMMON)/errorcodes.h $(TRIGG)/gsitrigger.h
+
+trigger.r:	$(CONF)/sconf.h $(COMMON)/errorcodes.h $(TRIGG)/gsitrigger.h

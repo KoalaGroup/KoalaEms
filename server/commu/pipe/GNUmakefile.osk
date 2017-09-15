@@ -1,0 +1,13 @@
+CONF = ../../CONF
+COMMON = ../../../COMMON
+
+include $(COMMON)/rules.make
+
+cfiles = pipecomm.r
+
+all: lib.l
+
+lib.l: $(cfiles)
+	merge $^ >-$@
+
+pipecomm.r: sconf.h debug.h errorcodes.h msg.h requesttypes.h intmsgtypes.h

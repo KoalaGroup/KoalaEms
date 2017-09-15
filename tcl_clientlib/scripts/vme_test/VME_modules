@@ -1,0 +1,55 @@
+set known_VME_modules {CAENgeneric SIS3800generic}
+
+proc VME_check_SIS3800generic {ved addr} {
+  set crate 0
+  set a_4 [$ved command1 vmeprobe $crate [expr $addr+4] 4]
+  if {$a_4!=0} {return -1}
+  set v_4 [$ved command1 vmeread $crate [expr $addr+4] 4 1]
+  if {$v_4==4294967295} {return -1}
+  set modultype [expr ($v_4>>16)&0xffff]
+  set version [expr ($v_4>>12)&0xf]
+  puts [format {%08x: SIS%04x Version %x} $addr $modultype $version]
+}
+
+proc VME_check_CAENgeneric {ved addr} {
+  set crate 0
+  set a_fa [$ved command1 vmeprobe $crate [expr $addr+0xfa] 2]
+  if {$a_fa!=0} {return -1}
+  set v_fa [$ved command1 vmeread2 $crate [expr $addr+0xfa]]
+  if {$v_fa!=0xfaf5} {return -1}
+  set a_fe [$ved command1 vmeprobe $crate [expr $addr+0xfe] 2]
+  set a_fc [$ved command1 vmeprobe $crate [expr $addr+0xfc] 2]
+  if {$a_fe!=0 || $a_fc!=0} {return -1}
+  set v_fe [$ved command1 vmeread2 $crate [expr $addr+0xfe]]
+  set v_fc [$ved command1 vmeread2 $crate [expr $addr+0xfc]]
+  set modultype [expr $v_fc&0x3ff]
+  set manufacturer [expr ($v_fc>>10)&0x3f]
+  set version [expr ($v_fe>>12)&0xf]
+  set sernum [expr $v_fe&0xfff]
+  switch $modultype {
+    60 {set modulname V551B}
+    52 {set modulname V550}
+    default {set modulname "(unknown type $modultype)"}
+  }
+  puts [format {%08x: CAEN %s Ser. Nr. %d} $addr $modulname $sernum]
+  puts [format {          manufacturer %d; version %d} $manufacturer $version]
+  return 0
+}
+
+proc VME_check_modules {ved addr} {
+  global known_VME_modules
+  #puts "checking [format {%08x} $addr]"
+  foreach modul $known_VME_modules {
+    VME_check_$modul $ved $addr
+  }
+}
+
+proc VME_ident {ved scale args} {
+  foreach i $args {
+    VME_check_modules $ved [expr $i*$scale]
+  }
+}
+
+proc listvme {ved} {
+  VME_ident $ved 0x1000 0 2 3 4 5 6 7 8 0x10 0x20 0x30 0x40 0x50
+}

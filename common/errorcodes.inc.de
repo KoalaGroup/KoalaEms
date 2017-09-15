@@ -1,0 +1,106 @@
+dnl ***************************************************************************
+dnl                                                                           *
+dnl errorcodes.inc                                                            *
+dnl                                                                           *
+dnl 25.11.94                                                                  *
+dnl                                                                           *
+dnl ***************************************************************************
+
+dnl $Id: errorcodes.inc.de,v 2.1 2000/06/08 11:17:02 wuestner Exp $
+
+e_code(IllRequest      ,falscher Requesttyp)
+e_code(NotImpl         ,Request ist nicht implementiert)
+
+e_code(ArgNum          ,falsche Anzahl der Argumente)
+e_code(ArgRange        ,ein Argument liegt nicht im zulaessigen Bereich)
+
+e_code(IllObject       ,unbekannter (oder nicht implementierter) Objekttyp)
+e_code(ObjNonDel       ,Objekt ist nicht loeschbar)
+e_code(ObjDef          ,Objekt ist schon definiert)
+
+e_code(IllVar          ,falscher Variablenindex)
+e_code(NoVar           ,Variable ist nicht definiert)
+e_code(VarDef          ,Variable ist schon definiert)
+e_code(IllVarSize      ,Variable hat andere Groesze)
+
+e_code(IllDomain       ,falscher Domainindex)
+e_code(NoDomain        ,Domain existiert nicht)
+e_code(DomainDef       ,Domain ist schon definiert)
+e_code(IllDomainType   ,unbekannter Domaintyp)
+
+e_code(IllIS           ,falscher Instrumentierungssystemindex)
+e_code(NoIS            ,Instrumentierungssystem ist nicht definiert)
+e_code(ISDef           ,Instrumentierungssystem ist schon definiert)
+e_code(NoISModulList   ,Modulliste fuer das IS fehlt)
+e_code(NoReadoutList   ,keine Readoutliste fuer diese Triggernummer)
+e_code(IllTrigPatt     ,falsches Triggermuster)
+
+e_code(IllPI           ,falscher Index fuer Programinvocation)
+e_code(NoPI            ,Programinvocation nicht definiert)
+e_code(PIDef           ,Programinvocation ist schon definiert)
+e_code(IllPIType       ,unbekannter Typ der Programinvocation)
+e_code(PIActive        ,Programinvocation laeuft)
+e_code(PINotActive     ,Programinvocation laeuft nicht)
+e_code(NoTrigger       ,keine Triggerinformation geladen)
+e_code(NoSuchTrig      ,unbekannte Triggerprozedur)
+
+e_code(IllCapTyp       ,Capabilitytyp nicht verfuegbar)
+e_code(BadProcList     ,Fehler beim Testen einer Prozedurliste)
+e_code(ExecProcList    ,Fehler beim Ausfuehren einer Prozedurliste)
+
+e_code(TapeOpen_       ,Tape bereits geoeffnet)
+e_code(TapeNotOpen_    ,Tape nicht geoeffnet)
+e_code(DataoutBusy     ,Ausgabegeraet ist beschaeftigt)
+e_code(TapeEnabled_    ,Tape bereits enabled)
+e_code(TapeNotEnabled_ ,Tape nicht enabled)
+
+e_code(NoMem           ,zu wenig Speicher)
+e_code(BufOverfl       ,Datenpuffer zu klein)
+e_code(NoVED           ,VED-ID nicht bekannt)
+e_code(System          ,Fehler bei Systemaufruf)
+
+e_code(Program         ,Programmfehler)
+e_code(IllDo           ,falscher DataOutObjekt-Index)
+e_code(NoDo            ,DataOutObjekt existiert nicht)
+e_code(TrigProc        ,Fehler in der Triggerprozedur (oder in deren Argumenten))
+e_code(Other           ,anderer Fehler)
+e_code(HWTestFailed    ,Hardwaretest ist fehlgeschlagen)
+e_code(HW              ,Fehler in der Hardware)
+e_code(BadModTyp       ,Falscher Modultyp)
+e_code(NotOwner        ,nicht Eigentuemer des Objekts)
+e_code(AddrTypNotImpl  ,Adresstyp nicht implementiert)
+e_code(BufTypNotImpl   ,Buffertyp nicht implementiert)
+
+
+pl_code(NoSuchProc     ,falscher Prozedur-ID)
+pl_code(BadArgCounter  ,mehr Argumente als die Readoutliste lang ist)
+pl_code(ArgNum         ,falsche Anzahl der Argumente)
+pl_code(ArgRange       ,ein Argument liegt nicht im zulaessigen Bereich)
+pl_code(IllVar         ,Falscher Variablenindex)
+pl_code(NoVar          ,Variable nicht definiert)
+pl_code(IllVarSize     ,Variable hat falsche Groesse)
+pl_code(NoMem          ,zu wenig Speicher)
+pl_code(BadHWAddr      ,unzulaessige Hardware-Adresse)
+pl_code(NoISModulList  ,Modulliste fuer das IS fehlt)
+pl_code(BadISModList   ,Modulliste unpassend)
+pl_code(IllModAddr     ,unzulaessige Adresse in der Modulliste)
+pl_code(NotInModList   ,Modultyp nicht gefunden)
+pl_code(BadModTyp      ,Falscher Modultyp)
+pl_code(HWTestFailed   ,Hardwaretest ist fehlgeschlagen)
+pl_code(HW             ,Fehler in der Hardware)
+pl_code(VarDef         ,Variable ist schon definiert)
+pl_code(Other          ,anderer Fehler)
+pl_code(RecursiveCall  ,Fehler in Rekursion)
+pl_code(System         ,Fehler bei Systemaufruf)
+pl_code(Program        ,Programmfehler)
+pl_code(Busy           ,Geraet ist beschaeftigt)
+
+rt_code(OutDev         ,Fehler im Ausgabegeraet)
+rt_code(Trig           ,Fehler bei der Triggersynchronisation)
+rt_code(Mismatch       ,Falsche Eventnummer)
+rt_code(ExecProcList   ,Fehler beim Ausfuehren einer Prozedurliste)
+rt_code(Other          ,anderer Fehler)
+rt_code(InDev          ,Fehler im Eingabegeraet)
+
+dnl ***************************************************************************
+dnl ***************************************************************************

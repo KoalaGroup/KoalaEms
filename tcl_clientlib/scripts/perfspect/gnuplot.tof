@@ -1,0 +1,39 @@
+set title 'readout time Distribution'
+set data style lines
+set linestyle 1 linewidth 11
+set xlabel 'deadtime/{/Symbol m}sec'
+set mxtics 10
+set mytics 10
+set nologscale x
+set nologscale y
+set grid
+
+set linestyle 1 lw 1
+set linestyle 2 lw 1
+set linestyle 3 lw 1
+set linestyle 4 lw 1
+set linestyle 5 lw 1
+set linestyle 6 lw 1
+set linestyle 7 lw 1
+set linestyle 8 lw 1
+set linestyle 9 lw 1
+set linestyle 10 lw 1
+
+set term post enh col solid
+set output 'tof_dt.ps'
+
+plot [0:250][:] \
+    'current_tof/t03_-1' title 'start' ls 4,\
+    'current_tof/t03_-2' title 'end' ls 6,\
+    'current_tof/t03_0' title 'after conversion' ls 5,\
+    'current_tof/t03_1' title 'before read' ls 6,\
+    'current_tof/t03_2' title 'FRDB_S' ls 7,\
+    'current_tof/t03_3' title 'FRDB_S' ls 8,\
+    'current_tof/t03_4' title 'FRDB_S' ls 9,\
+    'current_tof/t03_5' title 'FRDB_S' ls 5,\
+    'current_tof/t03_6' title 'after read' ls 10
+
+set term X
+set output
+
+replot

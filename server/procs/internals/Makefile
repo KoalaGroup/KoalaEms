@@ -1,0 +1,10 @@
+# Generated automatically from Makefile.in by configure.
+# procs/internals/Makefile.in
+# $ZEL: Makefile.in,v 1.3 2007/09/17 00:35:51 wuestner Exp $
+
+CONF = ../../conf
+
+srcdir = .
+
+include $(CONF)/rules.make
+include $(CONF)/config.make

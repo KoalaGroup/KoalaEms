@@ -1,0 +1,55 @@
+\subsection{\path{camac/caennet}}
+
+\def\caencontr{
+	Die Prozedur arbeitet mit dem CAENnet-Controller C-139. (Das ist die
+	"altere, langsamere Version.) Damit k"onnen die Hochspannungsger"ate
+	SY 127 und SY 227 angesteuert werden.\\
+}
+\def\caenerr{
+	Wenn ein CAENnet-Protokollfehler auftritt, wird \plerr{HW} zur"uckgeliefert
+	und der vom CAENnet-Controller gelieferte Fehlercode im Datenblock abgelegt.
+	Wenn der CAENnet-Controller nicht reagiert, wird nur \plerr{HW}  zur"uckgeliefert.
+}
+
+\begin{procdesc}{CAENnetRead}{
+	liest einen Parameter oder eine Parameter-Gruppe aus einem
+	CAENnet-Slave
+}
+\args{n (des Controllers), CAENnet-Crate-Nummer, Kanalnummer, Parameternummer}
+\descr{
+	\caencontr
+	Die Kanalnummer kann sich auf einen tats"achlichen Kanal oder auch auf
+	logische Gruppen (im Handbuch wird dies als "`Target"' bezeichnet) beziehen. Die
+	Parameternummer kann einen einzelnen Wert oder auch einen
+	Parameterblock bezeichnen.\\
+	Diese Funktion liest alle f"ur die jeweilige Kanal-Parameter-Kombination
+	gelieferten Daten aus. Das sind (f"ur ein SY127 $\rightarrow$ 40 Kan"ale mit
+	je 14 Parametern) maximal $560 (+3 \hbox{Patternworte})$ Worte.
+}
+\data{Parameterwert(e)}
+\errors{\caenerr}
+\rem{
+	siehe Beschreibung der Channel- und Parameternummern 
+	in~\cite{hardware:caenc139}
+}
+\end{procdesc}
+
+\begin{procdesc}{CAENnetWrite}
+{schreibt einen Parameter in einen CAENnet-Slave}
+\args{
+	n (des Controllers), CAENnet-Crate-Nummer, Kanalnummer,
+	Parameternummer, Parameterwert
+}
+\descr{
+	\caencontr
+	Die Kanalnummer kann sich auf einen tats"achlichen Kanal oder auch auf
+	logische Gruppen (im Handbuch wird dies als "`Target"' bezeichnet) beziehen.\\
+	Es wird ein einzelner Parameterwert f"ur den gew"ahlten Kanal bzw. die
+	Gruppe geschrieben.
+}
+\errors{\caenerr}
+\rem{
+	siehe Beschreibung der Channel- und Parameternummern
+	in~\cite{hardware:caenc139}
+}
+\end{procdesc}

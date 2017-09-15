@@ -1,0 +1,84 @@
+#! /bin/sh
+#\
+exec emswish $0 $*
+
+#!/usr/local/bin/wish
+
+set ved_library /usr/local/ems/lib/ved
+
+if [info exists env(EMSTCL_HOME)] {
+  set ved_library $env(EMSTCL_HOME)/ved
+  #set common_library $env(EMSTCL_HOME)/common
+  set EMSTCL_HOME $env(EMSTCL_HOME)
+} else {
+  set ved_library /usr/local/ems/lib/ved
+  #set common_library /usr/local/ems/lib/common
+  set EMSTCL_HOME /usr/local/ems/lib
+}
+lappend auto_path $ved_library
+
+process_args
+
+if [info exists namedarg(help)] {
+  puts "usage: $argv0 \[-setup {file}\]"
+  exit
+}
+
+#load libemstcl.so ems
+#load libtkfont.so tkf
+
+#bind Entry <Delete> {
+#  tkEntryBackspace %W
+#}
+#bind Entry <apLineDel> {
+#  if [%W selection present] {
+#    %W delete sel.first sel.last
+#  } else {
+#    %W delete insert
+#  }
+#}
+
+wm withdraw .
+
+proc good_bye {} {
+  global global_setup global_setup_file
+  if $global_setup(autosave) {
+    save_setup $global_setup_file
+  }
+exit
+}
+
+wm title . VED
+tk_focusFollowsMouse
+
+set global_display [. cget -screen]
+if {$global_display==""} {
+  if {[info exists env(DISPLAY)]} {
+    set global_display $env(DISPLAY)
+  }
+}
+
+if [info exists namedarg(setup)] {
+  set global_setup_file $namedarg(setup)
+} else {
+  regsub -all { } "~/.[winfo name .]rc_$global_display" {} global_setup_file
+#  puts "setup_file=$global_setup_file"
+}
+restore_setup $global_setup_file
+
+set global_setup(list_font) {-*-courier-medium-r-*-*-14-*-*-*-*-*-*-*}
+set global_setup(slist_font) {-*-courier-medium-r-*-*-12-*-*-*-*-*-*-*}
+
+create_menu .
+frame .bar -height 3 -background #000
+create_status .
+pack_main
+update idletasks
+
+create_commu_win .
+create_ved_win
+create_output
+
+update idletasks
+wm deiconify .
+autostart

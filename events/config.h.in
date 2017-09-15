@@ -1,0 +1,63 @@
+/* config.h.in.  Generated automatically from configure.in by autoheader.  */
+
+#ifndef _config_h_
+#define _config_h_
+
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+
+#ifndef _BSD_SOURCE
+#define _BSD_SOURCE
+#endif
+
+#ifdef __linux__
+/*
+ * #define _LARGEFILE_SOURCE
+ * #define _LARGEFILE64_SOURCE
+ * #define _FILE_OFFSET_BITS 64
+ */
+#define LINUX_LARGEFILE O_LARGEFILE
+#else
+#define LINUX_LARGEFILE 0
+#endif
+
+#include <emsctypes.h>
+
+/* Define if you have the ANSI C header files.  */
+#undef STDC_HEADERS
+
+/* Define if you have the sys/cdefs header file */
+#undef HAVE_SYS_CDEFS_H
+
+/* Define if you have the String.h header file */
+#undef HAVE_STRING_H
+
+/* Define if you have the string header file */
+#undef HAVE_STRING
+
+/* Define if you dont have a valid declaration for ntohl() and htons() */
+#undef NEED_NTOHLDEF
+
+/* Define if you dont have a declaration for sigpause() */
+#undef NEED_SIGPAUSEDEF
+
+/* Define if you dont have a declaration for gettimeofday() */
+#undef NEED_GETTIMEOFDAYDEF
+
+/* Define if you dont have a declaration for random() */
+#undef NEED_RANDOMDEF
+
+/* Define if you dont have a declaration for ioctl() */
+#undef NEED_IOCTLDEF
+
+/* Define if you dont have bool type */
+#undef NEED_BOOL
+
+/* Define if struct sigaction.sa_handler dosn't accept an argument */
+#undef SA_HANDLER_VOID
+
+/* Define if you have namespaces */
+#undef HAVE_NAMESPACES
+
+#endif /* _config_h_ */

@@ -1,0 +1,17 @@
+proc FRDBtest {ved slot size loops} {
+  for {set i 0} {$i<$size} {incr i} {$ved command1 FWD $slot $i $i}
+  for {set j 0} {$j<$loops} {incr j} {
+    if {$j%10==0} {puts "loop $j"}
+    set res [$ved command1 FRDB $slot 0 $size]
+    if {([lindex $res 0]!=0) || ([lindex $res 1]!=$size)} {
+      puts "loop $loop: res\[0..1\]=[lrange $res 0 1]"
+      return
+    }
+    for {set i 0; set n 2} {$i<$size} {incr i; incr n} {
+      if {[lindex $res $n]!=$i} {
+        puts "loop $loop: res\[$i+2\]=[lindex $res $n]"
+        return
+      }
+    }
+  }
+}

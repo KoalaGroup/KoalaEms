@@ -1,0 +1,39 @@
+CONF = ../CONF
+COMMON = ../../COMMON
+
+include $(CONF)/rules.make
+
+include $(CONF)/config.make
+
+cfiles = commands.r proclist.r listprocs.r
+asmfiles = scan_proclist.r
+lib = libprocs.l
+subdirs = $(procs)
+
+all: $(lib)
+
+$(lib): $(cfiles) $(asmfiles) $(subdirs) procs.stamp
+	merge $(cfiles) $(asmfiles) $(addsuffix /lib.l,$(subdirs)) >-$@
+
+$(subdirs): FORCE
+	$(MAKE) -C $@ all
+
+listprocs.c: procedures
+
+prozedurfiles = $(addsuffix /procedures.config,$(procs))
+
+procedures: procs.stamp
+	merge $(addsuffix /procedures.config,$(procs))  >-$@
+
+clean:
+	-$(RM) listprocs.c
+	-$(RM) procedures
+
+.PHONY: FORCE
+
+#####################################################################
+
+commands.r: sconf.h errorcodes.h debug.h ../OBJECTS/IS/is.h
+proclist.r: sconf.h listprocs.h debug.h errorcodes.h
+listprocs.r: listprocs.h sconf.h debug.h
+scan_proclist.r: errorcodes.d

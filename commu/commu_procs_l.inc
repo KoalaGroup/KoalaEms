@@ -1,0 +1,6 @@
+proc(echo)
+proc(add_all)
+proc(add_station)
+proc(add_commu)
+proc(globalunsol)
+proc(globalvedname)

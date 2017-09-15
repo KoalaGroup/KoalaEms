@@ -1,0 +1,6 @@
+set host zelas3
+set port 4096
+
+set targets {393}
+
+set trigger {1}

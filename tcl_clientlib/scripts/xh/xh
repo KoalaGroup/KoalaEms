@@ -1,0 +1,106 @@
+#! /bin/sh
+#\
+exec histowish $0 $*
+# $ZEL: xh,v 1.6 2004/11/18 12:07:44 wuestner Exp $
+# copyright 1998 ... 2004
+#   Peter Wuestner; Zentralinstitut fuer Elektronik; Forschungszentrum Juelich
+#
+
+if [info exists env(EMSTCL_HOME)] {
+  set xh_library $env(EMSTCL_HOME)/xh
+  set common_library $env(EMSTCL_HOME)/common
+} else {
+  set xh_library /usr/local/ems/lib/xh
+  set common_library /usr/local/ems/lib/common
+}
+lappend auto_path $xh_library $common_library
+
+process_args
+set global_verbose [info exists namedarg(verbose)]
+if {$global_verbose} printargs
+
+if [info exists namedarg(help)] {
+  puts "usage: $argv0 \[-port {port}\] \[-setup {file}\]"
+  exit
+}
+
+bind Entry <Delete> {
+       tkEntryBackspace %W
+}
+#bind Entry <apLineDel> {
+#       if [%W selection present] {
+#      %W delete sel.first sel.last
+#  } else {
+#      %W delete insert
+#  }
+#}
+wm withdraw .
+set_options
+#wm title . XH
+wm maxsize . 10000 10000
+
+tk_focusFollowsMouse
+
+# set global_display [. cget -screen]
+# if {$global_display==""} {
+#   if {[info exists env(DISPLAY)]} {
+#     set global_display $env(DISPLAY)
+#   }
+# }
+
+set global_display [display_name]
+#puts "global_display: $global_display"
+
+set global_setupfile(default) [setupfile_name $global_display]
+#puts "global_setupfile(default): $global_setupfile(default)"
+
+if [info exists namedarg(setup)] {
+  set num_setup_files [llength [glob -nocomplain -- $namedarg(setup)]]
+  if {$num_setup_files!=1} {
+    if {$num_setup_files==0} {
+      puts "no file $namedarg(setup)"
+    } else {
+      puts "filename $namedarg(setup) ambigous"
+    }
+  exit
+  }
+  set global_setupfile(restored) $namedarg(setup)
+  set global_setupfile(save) $namedarg(setup)
+  set global_setupfile(use_default) 0
+} else {
+  set global_setupfile(restored) [find_setupfile $global_setupfile(default) $global_display ~/xhrc]
+  set global_setupfile(save) $global_setupfile(default)
+  set global_setupfile(use_default) 1
+}
+#puts "global_setupfile(restored): $global_setupfile(restored)"
+if {$global_setupfile(restored)!=""} {
+#  puts "setup_file=$global_setupfile(restored)"
+  restore_setup $global_setupfile(restored)
+}
+
+correct_setup
+
+set tcl_precision 17
+
+if [info exists namedarg(port)] {
+  set global_setup(port) $namedarg(port)
+}
+
+regsub -all { } "/var/tmp/xh/[winfo name .]cache_$global_display" {} global_datacachedir
+puts "datacachedir: $global_datacachedir"
+exec mkdir -p $global_datacachedir
+
+set menuwin [create_menu .]
+frame .bar -height 3 -background #00f
+canvas .canvas -height $global_setup(height) -width $global_setup(width)\
+    -highlightthickness 0 -bg gray80
+set cv(win) .canvas
+set cv(scroll) [scrollbar .scroll -orient horizontal -relief ridge -bg gray80]
+set cv(legend) [create_legend]
+
+pack_all
+update idletasks
+wm deiconify .
+cv_init
+set global_setup(port) [comm_init $global_setup(port)]
+xh_start

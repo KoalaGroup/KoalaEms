@@ -1,0 +1,13 @@
+CONF = ../../CONF
+COMMON = ../../../COMMON
+
+include $(CONF)/rules.make
+
+include $(CONF)/config.make
+
+cfiles = profile.r $(profilelib).r
+
+all: lib.l
+
+lib.l: $(cfiles) profilelib.stamp
+	merge $^ >-$@

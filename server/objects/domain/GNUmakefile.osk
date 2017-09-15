@@ -1,0 +1,33 @@
+CONF = ../../CONF
+COMMON = ../../../COMMON
+
+include $(CONF)/rules.make
+
+include $(CONF)/config.make
+
+cfiles = domain.r $(foreach d,$(domains),dom_$(d).r)
+lib = lib.l
+
+all: $(lib)
+
+$(lib): $(cfiles) domains.stamp
+	merge $(cfiles) >-$@
+
+###################################################
+
+dom_datain.r: sconf.h $(COMMON)/objecttypes.h $(COMMON)/errorcodes.h  \
+	$(COMMON)/debug.h  \
+	domobj.h dommlobj.h domlamobj.h domtrigobj.h domevobj.h domdoobj.h  \
+	domdiobj.h
+dom_trigger.r: sconf.h $(COMMON)/debug.h $(COMMON)/errorcodes.h dom_trigger.h  \
+	domtrigobj.h
+dom_ml.r: sconf.h $(COMMON)/debug.h $(COMMON)/modultypes.h  \
+	$(COMMON)/errorcodes.h dom_ml.h dommlobj.h
+dom_lam.r: sconf.h $(COMMON)/debug.h $(COMMON)/errorcodes.h  \
+	../pi/lam/lam.h domlamobj.h
+dom_event.r: sconf.h $(COMMON)/debug.h $(COMMON)/errorcodes.h objecttypes.h  \
+	domevobj.h
+dom_dataout.r: sconf.h $(COMMON)/debug.h $(COMMON)/errorcodes.h  \
+	$(COMMON)/xdrstring.h ../../DATAOUT/dataout.h dom_dataout.h domdoobj.h
+dom_datain.r: sconf.h $(COMMON)/debug.h $(COMMON)/errorcodes.h  \
+	$(COMMON)/xdrstring.h dom_datain.h domdiobj.h

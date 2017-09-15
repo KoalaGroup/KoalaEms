@@ -1,0 +1,14 @@
+CONF = ../../CONF
+COMMON = ../../../COMMON
+
+include $(COMMON)/rules.make
+
+cfiles = chi_ext_trigger.r
+
+all: lib.l
+
+lib.l: $(cfiles)
+	merge $^ >-$@
+
+$(cfiles): errorcodes.h $(CONF)/sconf.h $(COMMON)/debug.h  \
+	$(COMMON)/errorcodes.h ../../PROCS/FASTBUS/fbacc.h
