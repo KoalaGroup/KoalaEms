@@ -28,7 +28,7 @@ CPPFLAGS = @CPPFLAGS@ -I$(srcdir) -I. -I$(COMMON_INCLUDE)  \
 	-DHAVE_CONFIG_H
         #  -I$(CLIENTLIB_INCLUDE)
 
-CFLAGS = -O3 -std=c99 -Werror -Wall -Wextra -Wuninitialized -Wcomment \
+CFLAGS = -O3 -std=c99  -Wall -Wextra -Wuninitialized -Wcomment \
     -Wformat -Wimplicit -Wmissing-declarations -Wmissing-prototypes \
     -Wstrict-prototypes -Wparentheses -Wpointer-arith -Wreturn-type \
     -Wunused -Wno-sign-compare -Wno-unused-parameter

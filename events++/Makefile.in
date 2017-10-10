@@ -88,9 +88,6 @@ USEFULLEXECS := cluster2event event_deflector evselect
 usefull: $(USEFULLEXECS)
 all: $(EXECS)
 
-lvd_triggsync: lvd_triggsync.o cluster_data_timed.o
-	$(CXX) -o $@ $^ $(LIBS)
-
 parse_f1raw: parse_f1raw.o cluster_data.o
 	$(CXX) -o $@ $^ $(LIBS)
 

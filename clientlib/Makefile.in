@@ -72,7 +72,7 @@ clientcommxx.cc:
 clientcommlibxx.cc:
 	$(LN_S) $(srcdir)/clientcommlib.c $@
 
-depend: sed.in $(CXXSRC)
+depend: sed.in $(XSRC)
 	cp Makefile Makefile.bak
 	sed -e '/^# DO NOT DELETE THIS LINE/,$$d' < Makefile.bak > Makefile
 	echo '# DO NOT DELETE THIS LINE' >> Makefile
@@ -95,7 +95,7 @@ clean:
 	-rm -f *.o *.a *.so @SO_LOCATION@
 
 realclean: clean
-	-rm -f  $(CXXSRC) core sed.in
+	-rm -f  $(XSRC) core sed.in
 
 distclean: realclean
 	rm -f Makefile Makefile.bak config.cache config.log config.status config.h
