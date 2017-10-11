@@ -3,7 +3,7 @@
  * created 2010-07-28 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: lc3420.c,v 1.4 2011/04/06 20:30:30 wuestner Exp $";
+    "$ZEL: lc3420.c,v 1.5 2015/04/06 21:33:27 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -63,7 +63,7 @@ check_module_type(int n)
         /* the real code will iterate over all suitable members of
            memberlist or modullist, thus we do not need further checks */
     } else {
-        if (!valid_module(n, modul_camac, 0)) {
+        if (!valid_module(n, modul_camac)) {
             printf("lc3420.c: !valid_module\n");
             return -1;
         }

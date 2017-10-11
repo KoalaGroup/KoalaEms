@@ -1,24 +1,24 @@
-/******************************************************************************
-*                                                                             *
-* proc_addr.cc                                                                *
-*                                                                             *
-* OSF1/ULTRIX                                                                 *
-*                                                                             *
-* created: 09.09.94                                                           *
-* last changed: 18.09.95                                                      *
-*                                                                             *
-* PW                                                                          *
-*                                                                             *
-******************************************************************************/
+/*
+ * proclib/proc_addr.cc
+ * 
+ * created: 09.09.94
+ */
 
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <stdlib.h>
 #include <proc_addrtrans.hxx>
 #include <ved_errors.hxx>
 #include <versions.hxx>
 
-VERSION("Jun 12 1998", __FILE__, __DATE__, __TIME__,
-"$ZEL: proc_addrtrans.cc,v 2.5 2004/11/26 14:44:25 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: proc_addrtrans.cc,v 2.6 2014/07/14 15:11:53 wuestner Exp $")
 #define XVERSION
+
+using namespace std;
 
 /*
 Domain datain:
@@ -104,7 +104,7 @@ C_add_trans::operator int()
 {
 if (!ok)
   {
-  OSTRINGSTREAM s;
+  ostringstream s;
   s << "Object C_add_trans has to be initialized with C_VED::UploadDataoutAddr";
   throw new C_ved_error(0, s);
   }
@@ -137,7 +137,7 @@ if (!masterdriver)
     case STR340     :
     case FVSBI      :
       {
-      OSTRINGSTREAM s;
+      ostringstream s;
       s << "Module can not work as master";
       throw new C_ved_error(0, s);
       }
@@ -147,7 +147,7 @@ if (!masterdriver)
       break;
     case E7         :
       {
-      OSTRINGSTREAM s;
+      ostringstream s;
       s << "E7 not yet implemented";
       throw new C_ved_error(0, s);
       }

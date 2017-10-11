@@ -1,20 +1,26 @@
 /*
- * proc_communicator.hxx
+ * proclib/proc_communicator.hxx
  * 
  * created: 11.06.97 PW
- * 25.03.1998 PW: adapded for <string>
- * 12.06.1998 PW: adapted for STD_STRICT_ANSI
+ * 
+ * $ZEL: proc_communicator.hxx,v 2.8 2014/07/14 15:11:53 wuestner Exp $
  */
 
 #ifndef _proc_communicator_hxx_
 #define _proc_communicator_hxx_
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <sys/time.h>
 #include <nocopy.hxx>
 
 class C_confirmation;
+
+using namespace std;
 
 /*****************************************************************************/
 
@@ -33,8 +39,8 @@ class C_communicator : public nocopy
     static int counter;
     typedef enum {none, local, tcp, decnet} typ;
     typ contyp;
-    STRING host;
-    STRING socket;
+    string host;
+    string socket;
     int port;
     int path_; //nur fuer callback verwendet
     struct timeval deftimeout_;
@@ -42,8 +48,8 @@ class C_communicator : public nocopy
     void ccallbackm(int, int, int);
   public:
     void init();
-    void init(const STRING& socket);
-    void init(const STRING& host, int port);
+    void init(const string& socket);
+    void init(const string& host, int port);
     void done();
     int valid() const;
     int path() const;

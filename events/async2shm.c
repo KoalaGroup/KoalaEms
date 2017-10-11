@@ -2,7 +2,7 @@
  * ems/events/async2shm.c
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: async2shm.c,v 1.2 2011/09/01 21:46:35 wuestner Exp $";
+    "$ZEL: async2shm.c,v 1.3 2013/10/30 18:22:51 wuestner Exp $";
 
 #define _GNU_SOURCE
 #include <stdio.h>
@@ -403,7 +403,6 @@ do_select(void)
             res=sock_read(sock);
             if (res<0) {
                 close_socket(sock);
-                return -1;
             } else if (res>0) {
                 res=do_write(sock->ddescr);
                 sock->ddescr=0;

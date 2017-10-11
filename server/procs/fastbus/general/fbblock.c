@@ -6,7 +6,7 @@
  * 04.Jun.2002 PW multi crate support                                            *
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: fbblock.c,v 1.12 2011/04/06 20:30:32 wuestner Exp $";
+    "$ZEL: fbblock.c,v 1.13 2015/04/06 21:33:32 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -57,7 +57,7 @@ plerrcode proc_FRCB(ems_u32* p)
 plerrcode test_proc_FRCB(ems_u32* p)
 {
 if (p[0]!=3) return(plErr_ArgNum);
-        if (!valid_module(p[1], modul_fastbus, 0)) return plErr_ArgRange;
+        if (!valid_module(p[1], modul_fastbus)) return plErr_ArgRange;
 return(plOK);
 }
 #ifdef PROCPROPS
@@ -99,7 +99,7 @@ plerrcode proc_FRDB(ems_u32* p)
 plerrcode test_proc_FRDB(ems_u32* p)
 {
     if (p[0]!=3) return(plErr_ArgNum);
-    if (!valid_module(p[1], modul_fastbus, 0)) return plErr_ArgRange;
+    if (!valid_module(p[1], modul_fastbus)) return plErr_ArgRange;
 
     wirbrauchen=2+p[3];
 #if PERFSPECT
@@ -146,7 +146,7 @@ plerrcode proc_FRDB_S(ems_u32* p)
 plerrcode test_proc_FRDB_S(ems_u32* p)
 {
 if (p[0]!=2) return(plErr_ArgNum);
-        if (!valid_module(p[1], modul_fastbus, 0)) return plErr_ArgRange;
+        if (!valid_module(p[1], modul_fastbus)) return plErr_ArgRange;
 wirbrauchen=2+p[2];
 return(plOK);
 }
@@ -199,7 +199,7 @@ return(plErr_IllVar);
 #else
 if ((res=var_attrib(p[3], &size))!=plOK) return(res);
 if (size!=1) return(plErr_IllVarSize);
-        if (!valid_module(p[1], modul_fastbus, 0)) return plErr_ArgRange;
+        if (!valid_module(p[1], modul_fastbus)) return plErr_ArgRange;
 wirbrauchen=-1; /* content of variable(p[3] may change */
 return(plOK);
 #endif
@@ -248,7 +248,7 @@ plerrcode test_proc_FWCB(ems_u32* p)
 {
 if (p[0]<3) return(plErr_ArgNum);
 if (p[0]!=(p[3]+3)) return(plErr_ArgNum);
-        if (!valid_module(p[1], modul_fastbus, 0)) return plErr_ArgRange;
+        if (!valid_module(p[1], modul_fastbus)) return plErr_ArgRange;
 wirbrauchen=2;
 return(plOK);
 }
@@ -292,7 +292,7 @@ plerrcode test_proc_FWDB(ems_u32* p)
 {
 if (p[0]<3) return(plErr_ArgNum);
 if (p[0]!=(p[3]+3)) return(plErr_ArgNum);
-        if (!valid_module(p[1], modul_fastbus, 0)) return plErr_ArgRange;
+        if (!valid_module(p[1], modul_fastbus)) return plErr_ArgRange;
 wirbrauchen=2;
 return(plOK);
 }
@@ -347,7 +347,7 @@ plerrcode test_proc_simulated_FRDB(ems_u32* p)
 {
     if (p[0]!=3)
         return plErr_ArgNum;
-    if (!valid_module(p[1], modul_fastbus, 0))
+    if (!valid_module(p[1], modul_fastbus))
         return plErr_ArgRange;
 
     wirbrauchen=p[3]+2;

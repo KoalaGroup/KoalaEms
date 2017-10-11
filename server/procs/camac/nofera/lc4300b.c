@@ -2,10 +2,10 @@
  * camac/nofera/lc4300B.c
  * 
  * created: 2010-dec-15 PW
- * $ZEL: lc4300b.c,v 1.5 2011/04/06 20:30:30 wuestner Exp $
+ * $ZEL: lc4300b.c,v 1.6 2015/04/06 21:33:28 wuestner Exp $
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: lc4300b.c,v 1.5 2011/04/06 20:30:30 wuestner Exp $";
+    "$ZEL: lc4300b.c,v 1.6 2015/04/06 21:33:28 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -111,7 +111,7 @@ test_proc_lc4300b_init(ems_u32* p)
     if (p[2]>255)
         return plErr_ArgRange;
     /* LC4300B?*/
-    if (!valid_module(p[1], modul_camac, 0))
+    if (!valid_module(p[1], modul_camac))
         return plErr_ArgRange;
     module=ModulEnt(p[1]);
     if (module->modultype!=FERA_ADC_4300B && module->modultype!=FERA_TDC_4300B)
@@ -194,7 +194,7 @@ test_proc_lc4300b_pedestals(ems_u32* p)
     if (p[0]!=1 && p[0]!=17)
         return plErr_ArgNum;
     /* LC4300B?*/
-    if (!valid_module(p[1], modul_camac, 0))
+    if (!valid_module(p[1], modul_camac))
         return plErr_ArgRange;
     module=ModulEnt(p[1]);
     if (module->modultype!=FERA_ADC_4300B && module->modultype!=FERA_TDC_4300B)
@@ -247,7 +247,7 @@ test_proc_lc4300b_start(ems_u32* p)
     if (p[0]!=1)
         return plErr_ArgNum;
     /* LC4300B?*/
-    if (!valid_module(p[1], modul_camac, 0))
+    if (!valid_module(p[1], modul_camac))
         return plErr_ArgRange;
     module=ModulEnt(p[1]);
     if (module->modultype!=FERA_ADC_4300B && module->modultype!=FERA_TDC_4300B)
@@ -305,7 +305,7 @@ test_proc_lc4300b_read(ems_u32* p)
     if (p[0]!=1)
         return plErr_ArgNum;
     /* LC4300B?*/
-    if (!valid_module(p[1], modul_camac, 0))
+    if (!valid_module(p[1], modul_camac))
         return plErr_ArgRange;
     module=ModulEnt(p[1]);
     if (module->modultype!=FERA_ADC_4300B && module->modultype!=FERA_TDC_4300B)

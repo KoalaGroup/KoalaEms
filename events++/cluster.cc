@@ -5,14 +5,15 @@
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
 #include <time.h>
 #include "cluster.hxx"
 #include <versions.hxx>
 
-VERSION("Apr 20 1998", __FILE__, __DATE__, __TIME__,
-"$ZEL: cluster.cc,v 1.6 2004/11/26 14:40:11 wuestner Exp $")
+VERSION("2014-07-14", __FILE__, __DATE__, __TIME__,
+"$ZEL: cluster.cc,v 1.8 2014/07/14 16:18:17 wuestner Exp $")
 #define XVERSION
+
+using namespace std;
 
 ///////////////////////////////////////////////////////////////////////////////
 ostream& C_cluster::print(ostream& os)
@@ -70,6 +71,9 @@ switch (typ())
     break;
   case clusterty_no_more_data:
     break;
+  case clusterty_async_data:
+    os<<" clusterty_async_data not handled!"<<endl;
+    break;
   }
 return os;
 }
@@ -81,7 +85,7 @@ os<<hex;
 for (int i=0; (i<max) && (i<size_);)
   {
   for (int j=0; (j<4) && (i<max) && (i<size_); i++, j++)
-    os<<setw(8)<<(unsigned int)d[i]<<" ";
+    os<<setw(8)<<reinterpret_cast<unsigned int&>(d[i])<<" ";
   os<<endl;
   }
 os<<dec;
@@ -95,7 +99,7 @@ char ff=os.fill('0');
 os<<hex;
 for (int i=0; (i<max) && (i<size_); i++)
   {
-  os<<setw(8)<<(void*)(d+i)<<": "<<d[i]<<endl;
+  os<<setw(8)<<d+i<<": "<<d[i]<<endl;
   }
 os<<dec;
 os.fill(ff);
@@ -146,6 +150,10 @@ switch (typ())
   case clusterty_file:
   case clusterty_no_more_data:
     {} // nothing to do
+    break;
+  case clusterty_async_data:
+    cerr<<" clusterty_async_data not handled!"<<endl;
+    break;
   }
 initialised=1;
 }

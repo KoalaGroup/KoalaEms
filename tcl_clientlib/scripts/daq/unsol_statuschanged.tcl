@@ -1,9 +1,10 @@
-# $ZEL: unsol_statuschanged.tcl,v 1.3 2005/03/29 14:09:51 wuestner Exp $
+# $ZEL: unsol_statuschanged.tcl,v 1.11 2011/04/12 22:50:15 wuestner Exp $
 # copyright 2000
 #   Peter Wuestner; Zentrallabor fuer Elektronik; Forschungszentrum Juelich
 #
 
 proc unsol_statuschanged {space v h d} {
+    global global_daq
     set action [lindex $d 0]
     set object [lindex $d 1]
 
@@ -60,6 +61,9 @@ proc unsol_statuschanged {space v h d} {
         10 {
             set action_name finish
         }
+        11 {
+            set action_name file_created
+        }
         default {
             set action_name $action
         }
@@ -97,10 +101,29 @@ proc unsol_statuschanged {space v h d} {
         6 {
             # Object_do
             #puts "obj_do_changed $action_name"
-            obj_do_changed $v [lindex $d 2] $action
+            if {$action==11} {
+                #display_do_filename $v [lindex $d 2] [lrange $d 3 end]
+                output "filename: [lrange $d 3 end]" tag_blue
+                xdr2string [lrange $d 3 end] name
+                set global_daq(filename) $name
+            } else {
+                obj_do_changed $v [lindex $d 2] $action
+            }
         }
         default {
             output_append "  unknown object $object ($action_name)" tag_orange
+            output_append "  v=$v" tag_orange
+            foreach i $v {
+                output_append "    $i"
+            }
+            output_append "  h=$h" tag_orange
+            foreach i $h {
+                output_append "    [format {%08x} $i]"
+            }
+            output_append "  d=$d" tag_orange
+            foreach i $d {
+                output_append "    [format {%08x} $i]"
+            }
         }
     }
 }

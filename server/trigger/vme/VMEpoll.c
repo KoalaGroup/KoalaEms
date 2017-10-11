@@ -3,7 +3,7 @@
  * created: 20.10.99 AM
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: VMEpoll.c,v 1.10 2011/04/06 20:30:36 wuestner Exp $";
+    "$ZEL: VMEpoll.c,v 1.11 2015/04/21 16:44:35 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -104,7 +104,7 @@ plerrcode init_trig_VMEpoll(ems_u32* p, struct triggerinfo* trinfo)
         *outptr++=MAX_TRIGGER-1;
         return plErr_ArgRange;
     }
-    if (!valid_module(p[2], modul_vme, 0))
+    if (!valid_module(p[2], modul_vme))
         return plErr_ArgRange;
 
     priv=calloc(1, sizeof(struct private));

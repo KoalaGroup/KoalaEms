@@ -3,7 +3,7 @@
  * created: 25.Jan.2001 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: vme_simple.c,v 1.10 2011/04/06 20:30:35 wuestner Exp $";
+    "$ZEL: vme_simple.c,v 1.11 2015/04/06 21:33:33 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -26,7 +26,7 @@ static plerrcode
 test_vmeparm(ems_u32* p, int n)
 {
     if (p[0]!=n) return(plErr_ArgNum);
-    if (!valid_module(p[1], modul_vme, 0)) return plErr_ArgRange;
+    if (!valid_module(p[1], modul_vme)) return plErr_ArgRange;
     wirbrauchen = 1;
     return plOK;
 }
@@ -411,7 +411,7 @@ plerrcode test_proc_VMEread(ems_u32* p)
 {
     if (p[0]!=5)
         return plErr_ArgNum;
-    if (!valid_module(p[1], modul_vme, 0))
+    if (!valid_module(p[1], modul_vme))
         return plErr_ArgRange;
     wirbrauchen=(p[4]*p[5]+3)/4;
     if (!wirbrauchen)
@@ -451,7 +451,7 @@ plerrcode test_proc_VMEread_pipe(ems_u32* p)
 {
     if (p[0]!=5)
         return plErr_ArgNum;
-    if (!valid_module(p[1], modul_vme, 0))
+    if (!valid_module(p[1], modul_vme))
         return plErr_ArgRange;
     wirbrauchen=(p[4]*p[5]+3)/4;
     if (!wirbrauchen)
@@ -489,7 +489,7 @@ plerrcode proc_VME24read(ems_u32* p)
 plerrcode test_proc_VME24read(ems_u32* p)
 {
     if (p[0]!=4) return plErr_ArgNum;
-    if (!valid_module(p[1], modul_vme, 0)) return plErr_ArgRange;
+    if (!valid_module(p[1], modul_vme)) return plErr_ArgRange;
     wirbrauchen=(p[3]*p[4]+3)/4;
     if (!wirbrauchen) wirbrauchen=1;
     return plOK;
@@ -526,7 +526,7 @@ plerrcode proc_VMEwrite(ems_u32* p)
 plerrcode test_proc_VMEwrite(ems_u32* p)
 {
     if (p[0]<5) return plErr_ArgNum;
-    if (!valid_module(p[1], modul_vme, 0)) return plErr_ArgRange;
+    if (!valid_module(p[1], modul_vme)) return plErr_ArgRange;
     if (p[0]!=5+(p[4]*p[5]+3)/4) return plErr_ArgNum;
     wirbrauchen = 1;
     return plOK;
@@ -561,7 +561,7 @@ plerrcode proc_VME24write(ems_u32* p)
 plerrcode test_proc_VME24write(ems_u32* p)
 {
     if (p[0]<4) return plErr_ArgNum;
-    if (!valid_module(p[1], modul_vme, 0)) return plErr_ArgRange;
+    if (!valid_module(p[1], modul_vme)) return plErr_ArgRange;
     if (p[0]!=4+(p[3]*p[4]+3)/4) return plErr_ArgNum;
     wirbrauchen = 1;
     return plOK;

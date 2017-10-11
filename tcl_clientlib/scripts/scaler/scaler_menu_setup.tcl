@@ -1,3 +1,6 @@
+# $ZEL: scaler_menu_setup.tcl,v 1.3 2011/11/27 00:12:47 wuestner Exp $
+# copyright 1998-2011
+#   P. Wuestner; Zentralinstitut fuer Elektronik; Forschungszentrum Juelich
 #
 # Diese Prozedur erzeugt das Setupmenu im Hauptmenu
 #
@@ -16,6 +19,9 @@ proc create_menu_setup {parent} {
   $self.m add checkbutton -label "Interval Slider" -underline 0 \
       -variable global_setup(interval_slider)\
       -command repack_all
+
+  $self.m add command -label "Show Log Window" -underline 0 \
+      -command map_output
 
   $self.m add separator
 

@@ -1,7 +1,7 @@
 #! /bin/sh
 #\
 exec histowish $0 $*
-# $ZEL: xh,v 1.6 2004/11/18 12:07:44 wuestner Exp $
+# $ZEL: xh,v 1.7 2011/11/26 02:03:38 wuestner Exp $
 # copyright 1998 ... 2004
 #   Peter Wuestner; Zentralinstitut fuer Elektronik; Forschungszentrum Juelich
 #
@@ -41,13 +41,6 @@ wm maxsize . 10000 10000
 
 tk_focusFollowsMouse
 
-# set global_display [. cget -screen]
-# if {$global_display==""} {
-#   if {[info exists env(DISPLAY)]} {
-#     set global_display $env(DISPLAY)
-#   }
-# }
-
 set global_display [display_name]
 #puts "global_display: $global_display"
 
@@ -86,9 +79,21 @@ if [info exists namedarg(port)] {
   set global_setup(port) $namedarg(port)
 }
 
-regsub -all { } "/var/tmp/xh/[winfo name .]cache_$global_display" {} global_datacachedir
+if {[info exists env(LOGNAME)]} {
+    set logname $env(LOGNAME)
+} else {
+    set logname {unknown}
+}
+set cachebase {/var/tmp/xh}
+set cachename [winfo name .]_${logname}_$global_display
+regsub -all { } $cachebase/$cachename {} cachename
+if {[catch {file mkdir $cachename} mist]} {
+    puts "error creating directory $cachename: $mist"
+    exit
+}
+file attributes $cachebase -permissions 01777
+set global_datacachedir $cachename
 puts "datacachedir: $global_datacachedir"
-exec mkdir -p $global_datacachedir
 
 set menuwin [create_menu .]
 frame .bar -height 3 -background #00f

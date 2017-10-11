@@ -1,13 +1,16 @@
 /*
- * inbuf.cc
+ * support/inbuf.cc
  * 
  * created 04.02.1995 PW
- * 16.03.1998 PW: adapded for <string>
- * 05.06.1998 PW: adapted for STD_STRICT_ANSI
+ * 
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <errno.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -24,9 +27,11 @@
 #include "inbuf.hxx"
 #include "versions.hxx"
 
-VERSION("Mar 16 1998", __FILE__, __DATE__, __TIME__,
-"$ZEL: inbuf.cc,v 2.27 2006/11/27 10:36:20 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: inbuf.cc,v 2.28 2014/07/14 15:09:53 wuestner Exp $")
 #define XVERSION
+
+using namespace std;
 
 /*****************************************************************************/
 
@@ -76,19 +81,19 @@ C_inbuf::C_inbuf()
 {}
 /*****************************************************************************/
 
-C_inbuf::C_inbuf(const STRING& name)
+C_inbuf::C_inbuf(const string& name)
 {
 int path=open(name.c_str(), O_RDONLY, 0);
 if (path==-1)
   {
-  OSTRINGSTREAM ss;
+  ostringstream ss;
   ss << "open file \"" << name << "\"";
   throw new C_unix_error(errno, ss);
   }
 struct stat status;
 if (fstat(path, &status)<0)
   {
-  OSTRINGSTREAM ss;
+  ostringstream ss;
   ss << "fstat \"" << name << "\"";
   close(path);
   throw new C_unix_error(errno, ss);
@@ -97,7 +102,7 @@ dsize=status.st_size;
 grow(dsize);
 if (::read(path, buffer, dsize)!=dsize)
   {
-  OSTRINGSTREAM ss;
+  ostringstream ss;
   ss << "read \"" << name << "\"";
   close(path);
   throw new C_unix_error(errno, ss);
@@ -253,7 +258,7 @@ return *this;
 
 /*****************************************************************************/
 
-C_inbuf& C_inbuf::operator >>(STRING& str)
+C_inbuf& C_inbuf::operator >>(string& str)
 {
 ems_u32* ptr=buffer+idx;
 char* s;

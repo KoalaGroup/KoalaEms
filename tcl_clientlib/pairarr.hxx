@@ -1,7 +1,7 @@
 /*
  * pairarr.hxx
  * 
- * $ZEL: pairarr.hxx,v 1.5 2004/11/18 12:35:53 wuestner Exp $
+ * $ZEL: pairarr.hxx,v 1.6 2014/07/14 15:13:26 wuestner Exp $
  * 
  * created 08.09.96
  */
@@ -10,7 +10,13 @@
 #define _pairarr_hxx_
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
+
+using namespace std;
 
 /*****************************************************************************/
 
@@ -25,10 +31,10 @@ class C_pairarr {
     virtual ~C_pairarr();
   protected:
     int valid_;
-    STRING errormessage;
+    string errormessage;
   public:
     int invalid() const {return !valid_;}
-    const STRING& errormsg() const {return errormessage;}
+    const string& errormsg() const {return errormessage;}
     virtual int checkidx(int) =0;
     virtual int size() =0;
     virtual int notempty() const =0;

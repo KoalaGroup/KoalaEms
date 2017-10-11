@@ -2,13 +2,15 @@
  * commu_client.cc
  * 
  * created 29.07.94
- * 26.03.1998 PW: adapded for <string>
- * 14.06.1998 PW: adapted for STD_STRICT_ANSI
- * 11.09.1998 PW: regulaer changed to policies
+ * 
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <errno.h>
 #include <sys/time.h>
 #include <sys/types.h>
@@ -30,9 +32,11 @@
 #include <ems_errors.hxx>
 #include "versions.hxx"
 
-VERSION("Sep 11 1998", __FILE__, __DATE__, __TIME__,
-"$ZEL: commu_client.cc,v 2.27 2006/02/16 21:06:27 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: commu_client.cc,v 2.29 2014/07/14 15:12:19 wuestner Exp $")
 #define XVERSION
+
+using namespace std;
 
 /*****************************************************************************/
 
@@ -803,7 +807,7 @@ C_station* station;
 C_client* client;
 msgheader header;
 C_outbuf buf;
-STRING sname("sMIST"), cname("cMIST");
+string sname("sMIST"), cname("cMIST");
 
 cname=name();
 
@@ -882,7 +886,7 @@ return rhs.print(os);
 /*****************************************************************************/
 /*****************************************************************************/
 
-C_clientlist::C_clientlist(int size, STRING name)
+C_clientlist::C_clientlist(int size, string name)
 :C_list<C_client>(size, name), leer_(1)
 {
 TR(C_clientlist::C_clientlist)
@@ -909,14 +913,22 @@ leer_=(count==0);
 
 void C_clientlist::free(int ident)
 {
+#if 0
 int i, j;
+#else
+int i;
+#endif
 
 TR(C_clientlist::free)
 i=0;
 while ((i<firstfree) && (ident!=list[i]->ident())) i++;
 if (i==firstfree) return;
 delete list[i];
+#if 0
 for (j=i; i<firstfree-1; i++) list[i]=list[i+1];
+#else
+for (; i<firstfree-1; i++) list[i]=list[i+1];
+#endif
 firstfree--;
 shrinklist();
 counter();
@@ -960,11 +972,11 @@ else
 
 /*****************************************************************************/
 
-C_client* C_clientlist::get(const STRING& name) const
+C_client* C_clientlist::get(const string& name) const
 {
 int i;
 
-TR(C_clientlist::get(const STRING&) const)
+TR(C_clientlist::get(const string&) const)
 i=0;
 while ((i<firstfree) && (name!=list[i]->name())) i++;
 if (i==firstfree)

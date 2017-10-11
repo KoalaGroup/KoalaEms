@@ -1,3 +1,8 @@
+# $ZEL: scaler_print_win.tcl,v 1.3 2011/11/27 00:13:42 wuestner Exp $
+# copyright 1998-2011
+#   P. Wuestner; Zentralinstitut fuer Elektronik; Forschungszentrum Juelich
+#
+
 proc print_reset {} {
   global global_setup static_print
 

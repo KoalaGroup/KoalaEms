@@ -1,7 +1,7 @@
 /*
  * emstcl_ved.hxx
  *
- * $ZEL: emstcl_ved.hxx,v 1.21 2010/02/03 00:15:51 wuestner Exp $
+ * $ZEL: emstcl_ved.hxx,v 1.22 2014/07/14 15:13:25 wuestner Exp $
  * created: 06.09.95 PW
  */
 
@@ -9,11 +9,17 @@
 #define _emstcl_ved_hxx_
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <proc_ved.hxx>
 #include <proc_modullist.hxx>
 #include <tcl.h>
 #include "findstring.hxx"
+
+using namespace std;
 
 /*****************************************************************************/
 
@@ -23,17 +29,17 @@ class E_confirmation {
   public:
     E_confirmation(Tcl_Interp*, E_ved*, const C_confirmation&);
     ~E_confirmation();
-    STRING tclprocname() const;
-    STRING origtclprocname() const {return origprocname;}
+    string tclprocname() const;
+    string origtclprocname() const {return origprocname;}
     void create_tcl_proc();
-    static STRING new_E_confirmation(Tcl_Interp*, E_ved*,
+    static string new_E_confirmation(Tcl_Interp*, E_ved*,
         const C_confirmation&);
     int ConfirmationCommand(int, const char*[]);
     int deleted;
   protected:
     Tcl_Interp* interp;
     Tcl_Command tclcommand;
-    STRING origprocname;
+    string origprocname;
     E_ved* ved;
     static const E_confirmation** econfirmations;
     static int num_econfirmations, max_econfirmations;
@@ -58,14 +64,14 @@ class E_ved: virtual public C_VED {
   public:
     E_ved(Tcl_Interp*, const char*, C_VED::VED_prior);
     virtual ~E_ved();
-    STRING tclprocname() const;
-    STRING origtclprocname() const {return origprocname;}
+    string tclprocname() const;
+    string origtclprocname() const {return origprocname;}
     void create_tcl_proc();
     virtual int VedCommand(int, const char*[]);
-    typedef int (E_ved::*former)(OSTRINGSTREAM&, const C_confirmation*, int,
-            int, const STRING*);
-    STRING unsolcomm[NrOfUnsolmsg];
-    STRING defunsolcomm;
+    typedef int (E_ved::*former)(ostringstream&, const C_confirmation*, int,
+            int, const string*);
+    string unsolcomm[NrOfUnsolmsg];
+    string defunsolcomm;
     struct confbackentry
       {
       confbackentry():xid(-1), formargs(0), numformargs(0), ok_command(0),
@@ -76,11 +82,11 @@ class E_ved: virtual public C_VED {
       int former_default;
       int former_implicit;
       former form;
-      STRING* formargs;
+      string* formargs;
       int numformargs;
       Tcl_DString*/*String*/ ok_command;
       Tcl_DString*/*String*/ err_command;
-      void set_formargs(int, const STRING& arg);
+      void set_formargs(int, const string& arg);
       void print() const;
       };
     class confbackbox
@@ -95,10 +101,10 @@ class E_ved: virtual public C_VED {
         void xid(int id) {entry->xid=id;}
         //void needtest(int needtest) {entry->needtest=needtest;}
         void form(former form) {entry->form=form;}
-        int callformer(E_ved*, OSTRINGSTREAM&, const C_confirmation*);
-        void formargs(int idx, const STRING& arg) {entry->set_formargs(idx, arg);}
-        //void ok_command(STRING ok_command) {entry->ok_command=ok_command;}
-        //void err_command(STRING err_command) {entry->err_command=err_command;}
+        int callformer(E_ved*, ostringstream&, const C_confirmation*);
+        void formargs(int idx, const string& arg) {entry->set_formargs(idx, arg);}
+        //void ok_command(string ok_command) {entry->ok_command=ok_command;}
+        //void err_command(string err_command) {entry->err_command=err_command;}
         void print() const {entry->print();}
         int numformargs() const {return entry->numformargs;}
         int isdefault() const {return entry->former_default;}
@@ -134,7 +140,7 @@ class E_ved: virtual public C_VED {
   protected:
     Tcl_Interp* interp;
     Tcl_Command tclcommand;
-    STRING origprocname;
+    string origprocname;
     int destructed;
     static const char* commnames[];
     //static int Ems_VedCommand(ClientData, Tcl_Interp*, int, char*[]);
@@ -143,7 +149,7 @@ class E_ved: virtual public C_VED {
     int numconfbacks, maxconfbacks;
     virtual const char* typname() const {return "unknown";}
     virtual int exec_comm(int, int, const char*[]);
-    STRING ccomm;
+    string ccomm;
     int hasconfback(int) const;
     void deletecommand();
     //static void timerdummy(ClientData);
@@ -226,36 +232,36 @@ class E_ved: virtual public C_VED {
     const char* formername(former) const;
     void installconfback(confbackentry*);
     void installconfback(confbackbox& box) {installconfback(box.get());}
-    int f_dummy(OSTRINGSTREAM&, const C_confirmation*, int, int, const STRING*);
-    int f_command(OSTRINGSTREAM&, const C_confirmation*, int, int, const STRING*);
-    int f_void(OSTRINGSTREAM&, const C_confirmation*, int, int, const STRING*);
-    virtual int f_lamupload(OSTRINGSTREAM&, const C_confirmation*, int, int, const STRING*);
-    int f_lamstatus(OSTRINGSTREAM&, const C_confirmation*, int, int, const STRING*);
-    int f_dostatus(OSTRINGSTREAM&, const C_confirmation*, int, int, const STRING*);
-    int f_ioaddr(OSTRINGSTREAM&, const C_confirmation*, int, int, const STRING*);
-    int ff_ioaddr(OSTRINGSTREAM&, const C_data_io*);
-    int f_identify(OSTRINGSTREAM&, const C_confirmation*, int, int, const STRING*);
-    virtual int f_createis(OSTRINGSTREAM&, const C_confirmation*, int, int, const STRING*);
-    int f_integer(OSTRINGSTREAM&, const C_confirmation*, int, int, const STRING*);
-    int f_integerlist(OSTRINGSTREAM&, const C_confirmation*, int, int, const STRING*);
-    int f_rawintegerlist(OSTRINGSTREAM&, const C_confirmation*, int, int, const STRING*);
-    int f_intfmt(OSTRINGSTREAM&, const C_confirmation*, int, int, const STRING*);
-    int f_domevent(OSTRINGSTREAM&, const C_confirmation*, int, int, const STRING*);
-    int f_modullist(OSTRINGSTREAM&, const C_confirmation*, int, int, const STRING*);
-    void ff_modullist(OSTRINGSTREAM&, const C_modullist*, int version);
-    virtual int f_trigger(OSTRINGSTREAM&, const C_confirmation*, int, int, const STRING*);
-    int f_readvar(OSTRINGSTREAM&, const C_confirmation*, int, int, const STRING*);
-    int f_isstatus(OSTRINGSTREAM&, const C_confirmation*, int, int, const STRING*);
-    void ff_isstatus(OSTRINGSTREAM&, const C_isstatus*);
-    int f_readoutstatus(OSTRINGSTREAM&, const C_confirmation*, int, int, const STRING*);
-    virtual int f_readoutlist(OSTRINGSTREAM&, const C_confirmation*, int, int, const STRING*);
-    //virtual int f_printconf(OSTRINGSTREAM&, const C_confirmation*, int, int, const STRING*);
-    virtual int f_printconf_raw(OSTRINGSTREAM&, const C_confirmation*, int, int, const STRING*);
-    virtual int f_printconf_text(OSTRINGSTREAM&, const C_confirmation*, int, int, const STRING*);
-    virtual int f_printconf_tabular(OSTRINGSTREAM&, const C_confirmation*, int, int, const STRING*);
-    int f_stringlist(OSTRINGSTREAM&, const C_confirmation*, int, int, const STRING*);
-    int f_string(OSTRINGSTREAM&, const C_confirmation*, int, int, const STRING*);
-    int f_confirmation(OSTRINGSTREAM&, const C_confirmation*, int, int, const STRING*);
+    int f_dummy(ostringstream&, const C_confirmation*, int, int, const string*);
+    int f_command(ostringstream&, const C_confirmation*, int, int, const string*);
+    int f_void(ostringstream&, const C_confirmation*, int, int, const string*);
+    virtual int f_lamupload(ostringstream&, const C_confirmation*, int, int, const string*);
+    int f_lamstatus(ostringstream&, const C_confirmation*, int, int, const string*);
+    int f_dostatus(ostringstream&, const C_confirmation*, int, int, const string*);
+    int f_ioaddr(ostringstream&, const C_confirmation*, int, int, const string*);
+    int ff_ioaddr(ostringstream&, const C_data_io*);
+    int f_identify(ostringstream&, const C_confirmation*, int, int, const string*);
+    virtual int f_createis(ostringstream&, const C_confirmation*, int, int, const string*);
+    int f_integer(ostringstream&, const C_confirmation*, int, int, const string*);
+    int f_integerlist(ostringstream&, const C_confirmation*, int, int, const string*);
+    int f_rawintegerlist(ostringstream&, const C_confirmation*, int, int, const string*);
+    int f_intfmt(ostringstream&, const C_confirmation*, int, int, const string*);
+    int f_domevent(ostringstream&, const C_confirmation*, int, int, const string*);
+    int f_modullist(ostringstream&, const C_confirmation*, int, int, const string*);
+    void ff_modullist(ostringstream&, const C_modullist*, int version);
+    virtual int f_trigger(ostringstream&, const C_confirmation*, int, int, const string*);
+    int f_readvar(ostringstream&, const C_confirmation*, int, int, const string*);
+    int f_isstatus(ostringstream&, const C_confirmation*, int, int, const string*);
+    void ff_isstatus(ostringstream&, const C_isstatus*);
+    int f_readoutstatus(ostringstream&, const C_confirmation*, int, int, const string*);
+    virtual int f_readoutlist(ostringstream&, const C_confirmation*, int, int, const string*);
+    //virtual int f_printconf(ostringstream&, const C_confirmation*, int, int, const string*);
+    virtual int f_printconf_raw(ostringstream&, const C_confirmation*, int, int, const string*);
+    virtual int f_printconf_text(ostringstream&, const C_confirmation*, int, int, const string*);
+    virtual int f_printconf_tabular(ostringstream&, const C_confirmation*, int, int, const string*);
+    int f_stringlist(ostringstream&, const C_confirmation*, int, int, const string*);
+    int f_string(ostringstream&, const C_confirmation*, int, int, const string*);
+    int f_confirmation(ostringstream&, const C_confirmation*, int, int, const string*);
     int confbacknum() const {return numconfbacks;}
     confbackentry* extractconfback(int);
 };

@@ -44,5 +44,5 @@ proc correct_setup {} {
     set global_setup(data_autorestore) 0}
 
   if {[info exists global_setup(data_autodir)] == 0} {
-    set global_setup(data_autodir) /var/tmp/xh}
+    set global_setup(data_autodir) ~/.xh}
 }

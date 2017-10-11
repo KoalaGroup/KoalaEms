@@ -1,10 +1,10 @@
 /*
- * lowlevel/mmaped_data/mmappeddata.c
+ * lowlevel/mmapped_data/mmappeddata.c
  * 
  * created: 2011-08-04 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: mmappeddata.c,v 1.2 2011/08/16 19:18:06 wuestner Exp $";
+    "$ZEL: mmappeddata.c,v 1.3 2014/09/10 15:29:57 wuestner Exp $";
 
 #include <sconf.h>
 #include <errno.h>
@@ -23,7 +23,7 @@ static const char* cvsid __attribute__((unused))=
 #include "mmapped_data.h"
 #include "mmappeddata.h"
 
-RCS_REGISTER(cvsid, "lowlevel/cosybeam")
+RCS_REGISTER(cvsid, "lowlevel/mmapped_data")
 
 struct mmaphandle {
     char *filename;
@@ -216,7 +216,7 @@ plerrcode read_mmapped_data(ems_u32** outptr, ems_u32 handle,
     plerrcode pres=plOK;
 
     if (handle>=nummaps || !map->addr) {
-        printf("read_mmaped_data: invalid handle %d\n", handle);
+        printf("read_mmapped_data: invalid handle %d\n", handle);
         return plErr_ArgRange;
     }
     mem=(struct mem*)map->addr;
@@ -232,7 +232,7 @@ plerrcode read_mmapped_data(ems_u32** outptr, ems_u32 handle,
 
     if (!mem->valid) {
         /* ... but nobody sets valid to 'false' */
-        printf("read_mmaped_data: mem content not valid\n");
+        printf("read_mmapped_data: mem content not valid\n");
         return plErr_Other;
     }
 

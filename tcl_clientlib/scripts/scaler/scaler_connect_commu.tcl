@@ -1,4 +1,4 @@
-# $ZEL: scaler_connect_commu.tcl,v 1.3 2006/08/13 17:32:04 wuestner Exp $
+# $ZEL: scaler_connect_commu.tcl,v 1.4 2014/08/19 20:20:50 wuestner Exp $
 # copyright 1998
 #   P. Wuestner; Zentralinstitut fuer Elektronik; Forschungszentrum Juelich
 #
@@ -23,7 +23,7 @@ proc connect_commu {} {
         }
     }} mist] {
     output $mist
-    disconnect_commu
+    disconnect_commu connect_commu
     set res -1
   } else {
     output_append "ok."
@@ -32,9 +32,10 @@ proc connect_commu {} {
   return $res
 }
 
-proc disconnect_commu {} {
+proc disconnect_commu {text} {
   if [ems_connected] {
-    output "disconnect from commu ..."
+    output "disconnect from commu: $text"
+    update idletasks
     if [catch ems_disconnect mist] {
       output_append $mist
     } else {

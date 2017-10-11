@@ -16,6 +16,7 @@ enum clustertypes {
     clusterty_wendy_setup,
     clusterty_file,
     clusterty_async_data,
+    clusterty_async_data2,
     clusterty_no_more_data=0x10000000
 };
 
@@ -36,6 +37,10 @@ struct is_info {
     int importance;
     int decoding_hints; /* 0x0: no hint 0x1: lvds-superevent */
 };
+
+Achtung: die ved_info-Versionen sind offenbar vermischt worden.
+Der gueltige Code ist in
+    server/dataout/cluster/cl_interface.c::create_ved_cluster
 
 struct ved_info1 {
   int VEDid;
@@ -128,7 +133,8 @@ struct checksum {
 flags:
            0: nothing special
   0x00000001: fragmented
-  0x00000010: further fragments following
+  0x00000002: further fragments following
+  0x00000010: retained (for clusterty_async_data2 only)
 
 struct cluster {
   int size;                        // Anzahl aller folgenden Worte
@@ -192,6 +198,15 @@ struct cluster {
         int fragment_id;             // z.Z.==0; noch keine Fragmente
         opaque data<>;
       } async_data;
+    case clusterty_async_data2:
+      struct {
+        int options<>;               // timestamp required
+        int flags;                   // 0x00000020: retained message
+        int fragment_id;             // z.Z.==0; noch keine Fragmente
+        int version;
+        string identifier<>;         // z.B. mqtt://COSY/bpm
+        opaque payload<>;
+      } async_data2;
     case clusterty_no_more_data:
       int options<>;
   } content;

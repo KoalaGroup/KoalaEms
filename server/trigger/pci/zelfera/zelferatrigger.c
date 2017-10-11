@@ -34,7 +34,7 @@ done_trig_zelfera(struct triggerinfo* trinfo)
 {
         struct trigprocinfo* tinfo=(struct trigprocinfo*)trinfo->tinfo;
 
-#if 0
+#if 1
         printf("done_trig_zelfera\n");
 #endif
         free(tinfo->private);
@@ -45,17 +45,17 @@ done_trig_zelfera(struct triggerinfo* trinfo)
 static int
 get_trig_zelfera(struct triggerinfo* trinfo)
 {
-#if 0
+#if 1
         struct trigprocinfo* tinfo=(struct trigprocinfo*)trinfo->tinfo;
         struct private* priv=(struct private*)tinfo->private;
 	struct feraeventinfo i;
 	int res;
 #endif
 
-#if 0
+#if 1
         printf("get_trig_zelfera\n");
 #endif
-#if 0
+#if 1
 	i.flags = FERAWAIT;
 	i.timeout = 1;
 	res = ioctl(priv->p, FERAEVENT, &i);
@@ -76,7 +76,7 @@ get_trig_zelfera(struct triggerinfo* trinfo)
 static void
 reset_trig_zelfera(struct triggerinfo* trinfo)
 {
-#if 0
+#if 1
     printf("reset_trig_zelfera\n");
 #endif
 }
@@ -89,7 +89,7 @@ init_trig_zelfera(ems_u32* p, struct triggerinfo* trinfo)
         struct FERA_procs* fera_procs;
         plerrcode pres;
 
-#if 0
+#if 1
         printf("init_trig_zelfera\n");
 #endif
 

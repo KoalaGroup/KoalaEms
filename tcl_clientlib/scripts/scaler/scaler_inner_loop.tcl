@@ -1,4 +1,4 @@
-# $Id: scaler_inner_loop.tcl,v 1.1 1998/09/10 18:35:05 wuestner Exp $
+# $ZEL: scaler_inner_loop.tcl,v 1.3 2014/08/19 20:20:50 wuestner Exp $
 # © 1998 P. Wüstner; Zentrallabor für Elektronik; Forschungszentrum Jülich
 #
 # global vars:
@@ -48,7 +48,8 @@ proc inner_loop {} {
     output_append "command was: $kommando"
     output_append $mist
     output_append "will restart in 120 seconds"
-    disconnect_commu
+    update idletasks
+    disconnect_commu inner_loop
     set global_after(outer_loop) [after 120000 outer_loop]
     return
   }

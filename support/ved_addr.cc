@@ -5,7 +5,11 @@
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <typeinfo>
 #include <cerrno>
 #include <unistd.h>
@@ -18,9 +22,11 @@
 #include "xdrstrdup.hxx"
 #include "errors.hxx"
 
-VERSION("2008-Nov-15", __FILE__, __DATE__, __TIME__,
-"$ZEL: ved_addr.cc,v 2.12 2009/02/09 21:55:41 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: ved_addr.cc,v 2.13 2014/07/14 15:09:53 wuestner Exp $")
 #define XVERSION
+
+using namespace std;
 
 /*****************************************************************************/
 C_VED_addr::C_VED_addr()
@@ -66,7 +72,7 @@ bool C_VED_addr::operator !=(const C_VED_addr& addr) const
 return(!operator==(addr));
 }
 /*****************************************************************************/
-C_VED_addr_builtin::C_VED_addr_builtin(const STRING& name)
+C_VED_addr_builtin::C_VED_addr_builtin(const string& name)
 :name_(name)
 {}
 /*****************************************************************************/
@@ -109,7 +115,7 @@ bool C_VED_addr_builtin::operator !=(const C_VED_addr& addr) const
 return(!operator==(addr));
 }
 /*****************************************************************************/
-C_VED_addr_unix::C_VED_addr_unix(const STRING& socket)
+C_VED_addr_unix::C_VED_addr_unix(const string& socket)
 :sockname_(socket)
 {}
 /*****************************************************************************/
@@ -162,7 +168,7 @@ bool C_VED_addr_unix::operator !=(const C_VED_addr& addr) const
 return(!operator==(addr));
 }
 /*****************************************************************************/
-C_VED_addr_inet::C_VED_addr_inet(const STRING& host, unsigned short port)
+C_VED_addr_inet::C_VED_addr_inet(const string& host, unsigned short port)
 :hostname_(host), port_(port)
 {}
 /*****************************************************************************/
@@ -216,7 +222,7 @@ bool C_VED_addr_inet::operator !=(const C_VED_addr& addr) const
 return(!operator==(addr));
 }
 /*****************************************************************************/
-C_VED_addr_inet_path::C_VED_addr_inet_path(const STRING& host,
+C_VED_addr_inet_path::C_VED_addr_inet_path(const string& host,
     unsigned short portnum, C_strlist* pathes)
 :C_VED_addr_inet(host, portnum), pathes(pathes)
 {}
@@ -228,7 +234,7 @@ C_VED_addr_inet_path::C_VED_addr_inet_path(C_inbuf& inbuf)
 
     pathes=new C_strlist(n);
     for (int i=0; i<n; i++) {
-        STRING s;
+        string s;
         inbuf >> s;
         pathes->set(i, s.c_str());
     }
@@ -390,7 +396,7 @@ C_VED_addr* extract_ved_addr(C_inbuf& inbuf)
         case C_VED_addr::inet_path: addr=new C_VED_addr_inet_path(inbuf); break;
         case C_VED_addr::VICbus:    addr=new C_VED_addr_vic(inbuf); break;
         default: {
-            OSTRINGSTREAM s;
+            ostringstream s;
             s << "extract_ved_addr(C_inbuf&): unknown type " << static_cast<int>(typ);
             throw new C_program_error(s);
         }

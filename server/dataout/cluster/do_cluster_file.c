@@ -60,6 +60,8 @@ struct do_special_file {
     pid_t filter;
     char filename[MAXPATHLEN+1];
     char filtername[MAXPATHLEN+1];
+    time_t next_reopen; /* time of next reopen; 0 if no reopen required */
+    time_t reopen_interval; /* interval for reopen; 0 if no reopen required */
 };
 
 static int globidx=0;
@@ -534,10 +536,9 @@ expand_filename_runnr(char* filename)
  * expected by the tsm progams
  */
 static int
-expand_filename_time(char* filename)
+expand_filename_time(char* filename, struct timeval *now)
 {
     char help[MAXPATHLEN+1];
-    struct timeval tv;
     struct tm* tm;
     time_t tt;
 
@@ -546,8 +547,7 @@ expand_filename_time(char* filename)
 
     strcpy(help, filename);
 
-    gettimeofday(&tv, 0);
-    tt=tv.tv_sec;
+    tt=now->tv_sec;
     tm=gmtime(&tt);
     strftime(filename, MAXPATHLEN, help, tm);
     return 0;
@@ -694,18 +694,18 @@ open_filter(int* p, char* filtername)
  * "/bin/gzip -6|/local/data[01]//ems/%Y-%m-%d/%Y-%m-%d_%H:%M:%S"
  *
  */
-
-static errcode do_cluster_file_start(int do_idx)
+static
+errcode do_cluster_file_open(int do_idx)
 {
     /*
-    called from start readout
+    called from start_readout or reopen
     */
     struct do_special_file* special=
             (struct do_special_file*)dataout_cl[do_idx].s;
-    struct do_cluster_data* dat=&dataout_cl[do_idx].d.c_data;
     union callbackdata data;
     int p, res, choices=0, loop=0, again;
     data.i=do_idx;
+    struct timeval now;
 
     T(cluster/do_cluster_file.c:do_cluster_file_start)
 #if 0
@@ -716,6 +716,16 @@ static errcode do_cluster_file_start(int do_idx)
     printf("file_start: dataout[%d].logfilename=%s\n", do_idx,
             dataout[do_idx].logfilename);
 #endif
+
+    gettimeofday(&now, 0);
+    special->reopen_interval=dataout[do_idx].address_arg_num>0?
+        dataout[do_idx].address_args[0]:0;
+    if (special->reopen_interval) {
+        special->next_reopen=(now.tv_sec/special->reopen_interval+1)*
+                special->reopen_interval;
+    } else {
+        special->next_reopen=0;
+    }
 
     do {
         int lock;
@@ -729,7 +739,7 @@ static errcode do_cluster_file_start(int do_idx)
         if (expand_filename_runnr(special->filename)<0) {
             return Err_System;
         }
-        if (expand_filename_time(special->filename)<0) {
+        if (expand_filename_time(special->filename, &now)<0) {
             return Err_System;
         }
         again=0;
@@ -764,7 +774,7 @@ static errcode do_cluster_file_start(int do_idx)
                 O_WRONLY|O_CREAT|O_EXCL|LINUX_LARGEFILE, 0644);
 
     if (p<0) {
-        complain("do_cluster_file_start(do_idx=%d): can't open file \"%s\": %s\n",
+        complain("do_cluster_file_open(do_idx=%d): can't open file \"%s\": %s\n",
                 do_idx, special->filename, strerror(errno));
         goto error;
     }
@@ -772,6 +782,7 @@ static errcode do_cluster_file_start(int do_idx)
     if (special->filtername[0]) {
         special->filter=open_filter(&p, special->filtername);
         if (!special->filter) {
+            complain("cannot open filter \"%s\"", special->filtername);
             close(p);
             goto error;
         }
@@ -781,6 +792,7 @@ static errcode do_cluster_file_start(int do_idx)
         special->filter=0;
     }
     fcntl(p, F_SETFD, FD_CLOEXEC);
+//printf("do_cluster_file_open(idx=%d): special->path:=%d\n", do_idx, p);
     special->path=p;
 #if 0
     printf("file_start: &dataout[%d].logfilename=%p\n", do_idx,
@@ -797,6 +809,27 @@ static errcode do_cluster_file_start(int do_idx)
         goto error;
     }
 
+    return OK;
+
+error:
+    free_tsm_lock(do_idx);
+    return Err_System;
+}
+/*****************************************************************************/
+static errcode do_cluster_file_start(int do_idx)
+{
+    /*
+    called from start readout
+    */
+    struct do_cluster_data* dat=&dataout_cl[do_idx].d.c_data;
+    errcode eres;
+
+    T(cluster/do_cluster_file.c:do_cluster_file_start)
+
+    eres=do_cluster_file_open(do_idx);
+    if (eres!=OK)
+        return eres;
+
     dataout_cl[do_idx].suspended=0;
     dataout_cl[do_idx].vedinfo_sent=0;
 
@@ -811,10 +844,6 @@ static errcode do_cluster_file_start(int do_idx)
     dataout_cl[do_idx].do_status=Do_running;
 
     return OK;
-
-error:
-    free_tsm_lock(do_idx);
-    return Err_System;
 }
 /*****************************************************************************/
 static plerrcode
@@ -841,6 +870,7 @@ static errcode do_cluster_file_reset(int do_idx)
         int res;
 
         close(special->path);
+//printf("do_cluster_file_reset(idx=%d): special->path=-1\n", do_idx);
         special->path=-1;
         free_tsm_lock(do_idx);
         res=announce_file_closed(do_idx);
@@ -851,6 +881,55 @@ static errcode do_cluster_file_reset(int do_idx)
     }
 
     return OK;
+}
+/*****************************************************************************/
+static errcode
+do_cluster_file_reopen(int do_idx)
+{
+    struct do_special_file* special=
+        (struct do_special_file*)dataout_cl[do_idx].s;
+
+    printf("do_cluster_file(%d): reopen file\n", do_idx);
+
+    if (special->path>=0) {
+        close(special->path);
+//printf("do_cluster_file_reopen(idx=%d): special->path:=-1\n", do_idx);
+        special->path=-1;
+        free_tsm_lock(do_idx);
+        if (announce_file_closed(do_idx)<0)
+            complain("announce_file_closed failed\n");
+    }
+
+    return do_cluster_file_open(do_idx);
+}
+/*****************************************************************************/
+errcode
+do_cluster_file_check_reopen(int do_idx)
+{
+    struct do_special_file* special=
+        (struct do_special_file*)dataout_cl[do_idx].s;
+    struct timeval now;
+    errcode eres;
+
+    if (special->next_reopen==0)
+        return OK;
+
+    gettimeofday(&now, 0);
+    if (now.tv_sec<=special->next_reopen)
+        return OK;
+
+    eres=do_cluster_file_reopen(do_idx);
+
+    /* this check is probably not necessary (reopen is only called if
+       reopen_interval is not zero), but who knows ... */
+    if (special->reopen_interval) {
+        special->next_reopen=(now.tv_sec/special->reopen_interval+1)*
+                special->reopen_interval;
+    } else {
+        special->next_reopen=0;
+    }
+
+    return eres;
 }
 /*****************************************************************************/
 static void do_cluster_file_freeze(int do_idx)
@@ -870,6 +949,7 @@ static void do_cluster_file_patherror(int do_idx, int error)
     T(dataout/cluster/do_cluster_file.c:do_cluster_file_patherror)
     if (special->path>=0) {
         close(special->path);
+//printf("do_cluster_file_patherror(idx=%d): special->path:=-1\n", do_idx);
         special->path=-1;
         free_tsm_lock(do_idx);
         announce_file_error(do_idx);
@@ -890,6 +970,7 @@ static void do_cluster_file_cleanup(int do_idx)
     }
     free(special);
     dataout_cl[do_idx].s=0;
+//printf("do_cluster_file_cleanup(idx=%d)\n", do_idx);
 }
 /*****************************************************************************/
 static void
@@ -898,11 +979,33 @@ do_cluster_file_advertise(int do_idx, struct Cluster* cl)
     struct do_special_file* special=
         (struct do_special_file*)dataout_cl[do_idx].s;
     struct dataout_info *do_info=dataout+do_idx;
+    errcode err;
     int res, bytes;
 
     T(dataout/cluster/do_cluster_file.c:do_cluster_file_advertise)
 
     if (cl->predefined_costumers && !cl->costumers[do_idx]) return;
+
+    /*
+     * At this point we should give the dataout the chance to
+     * switch to a new file.
+     * This is not a good idea if our events consists of subevents
+     * from different servers (and are saved in different clusters),
+     * but if we have a single data source only this is a good idea.
+     * The main use is for MQTT data.
+     */
+     if ((err=do_cluster_file_check_reopen(do_idx))!=OK) {
+         dataout_cl[do_idx].errorcode=err;
+         dataout_cl[do_idx].do_status=Do_error;
+         if (dataout[do_idx].wieviel==0) {
+             send_unsol_var(Unsol_RuntimeError, 4, rtErr_OutDev, do_idx, 0,
+                    err);
+             announce_file_error(do_idx);
+             fatal_readout_error();
+         }
+         return;
+     }
+
     bytes=cl->size*sizeof(int);
     if ((res=write(special->path, (char*)cl->data, bytes))!=bytes) {
         ems_u32 buf[4];
@@ -1003,10 +1106,13 @@ errcode do_cluster_file_init(int do_idx)
     dataout_cl[do_idx].doswitch=
         readout_active==Invoc_notactive?Do_enabled:Do_disabled;
 
+//printf("do_cluster_file_init(idx=%d): special->path:=-1\n", do_idx);
     special->path=-1;
     special->filter=0;
     special->filename[0]=0;
     special->filtername[0]=0;
+    special->next_reopen=0;
+    special->reopen_interval=0;
     dataout_cl[do_idx].seltask=0;
     return OK;
 }

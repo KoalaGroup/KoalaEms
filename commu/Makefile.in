@@ -109,7 +109,7 @@ depend: sed.in $(M4HDR) $(M4SRC)
 	done
 
 sed.in:
-#	echo 's|/usr/include/[^ ]*||g' >sed.in
+	echo 's|/usr/include/[^ ]*||g' >sed.in
 	echo '/.*: $$/d' >>sed.in
 	echo '/^ *\\ *$$/d' >>sed.in
 

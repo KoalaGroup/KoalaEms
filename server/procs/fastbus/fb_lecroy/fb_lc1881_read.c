@@ -3,7 +3,7 @@
  * created 27.12.94 MiZi/PeWue/MaWo
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: fb_lc1881_read.c,v 1.21 2011/04/06 20:30:31 wuestner Exp $";
+    "$ZEL: fb_lc1881_read.c,v 1.22 2015/04/06 21:33:31 wuestner Exp $";
 
 #include <config.h>
 #include <errno.h>
@@ -879,7 +879,7 @@ plerrcode test_proc_fb_lc1881_readout_p5(ems_u32* p)
     for (i=memberlist[0]; i>0; i--) {
         ml_entry* module;
 
-        if (!valid_module(i, modul_fastbus, 0)) continue;
+        if (!valid_module(i, modul_fastbus)) continue;
         module=ModulEnt(i);
 
         if ((module->modultype!=LC_ADC_1881)&&

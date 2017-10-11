@@ -5,7 +5,6 @@
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
 #include <unistd.h>
 #include <readargs.hxx>
 #include <errno.h>
@@ -21,14 +20,15 @@
 #include <errors.hxx>
 #include <versions.hxx>
 
-VERSION("Feb 01 2001", __FILE__, __DATE__, __TIME__,
-"$ZEL: event_deflector.cc,v 1.6 2004/11/26 14:40:16 wuestner Exp $")
+VERSION("2014-07-14", __FILE__, __DATE__, __TIME__,
+"$ZEL: event_deflector.cc,v 1.8 2014/07/14 16:18:17 wuestner Exp $")
 #define XVERSION
 
-#define swap_int(a) ( ((a) << 24) | \
-		      (((a) << 8) & 0x00ff0000) | \
-		      (((a) >> 8) & 0x0000ff00) | \
-	((unsigned int)(a) >>24) )
+#define U32(a) (static_cast<u_int32_t>(a))
+#define swap_int(a) ( (U32(a) << 24) | \
+                      ((U32(a) << 8) & 0x00ff0000) | \
+                      ((U32(a) >> 8) & 0x0000ff00) | \
+                       (U32(a) >>24) )
 
 C_readargs* args;
 
@@ -71,7 +71,8 @@ int bigendian;
 int copy_empty;
 
 /*****************************************************************************/
-int readargs()
+static int
+readargs(void)
 {
 args->addoption("inport", "iport", 11110, "Port for incoming clusters",
     "inport");
@@ -89,7 +90,8 @@ return 0;
 }
 /*****************************************************************************/
 extern "C" {
-void inthand(int sig)
+static void
+inthand(int sig)
 {}
 }
 /*****************************************************************************/
@@ -123,7 +125,8 @@ if (fbuf) fbuf->decr();
 delete path;
 }
 /*****************************************************************************/
-int xread(int s, char* buf, int count)
+static int
+xread(int s, char* buf, int count)
 {
 int idx=0, res;
 while (count)
@@ -154,9 +157,14 @@ return 0;
 int sockdescr::do_read()
 {
 unsigned int head[2], *cluster;
+#if 0
 int wenden, swap, size, evsize, evidx, evnum, n, p;
+#else
+int wenden, swap, size, evsize, evnum, n, p;
+#endif
 
-if (xread(*path, (char*)head, 2*sizeof(int))<0) return -1;
+if (xread(*path, reinterpret_cast<char*>(head), 2*sizeof(int))<0)
+    return -1;
 switch (head[1])
   {
   case 0x12345678: wenden=0; break;
@@ -172,7 +180,7 @@ if (!cluster)
   cerr<<"new cluster("<<size-1<<"): "<<strerror(errno)<<endl;
   return -1;
   }
-if (xread(*path, (char*)cluster, (size-1)*sizeof(int))<0)
+if (xread(*path, reinterpret_cast<char*>(cluster), (size-1)*sizeof(int))<0)
   {
   delete[] cluster;
   return -1;
@@ -202,8 +210,10 @@ if (evnum!=1)
     }
   }
 evsize=wenden?swap_int(cluster[p]):cluster[p]; /* size of event */
+#if 0
 evidx=wenden?swap_int(cluster[p+1]):cluster[p+1]; /* event index */
-/*cerr<<"EVENT "<<evidx<<endl;*/
+cerr<<"EVENT "<<evidx<<endl;
+#endif
 
 if ((evsize>3) || copy_empty)
   {
@@ -243,7 +253,8 @@ return 0;
 int sockdescr::do_write()
 {
     ssize_t res;
-    res=write(*path, (char*)(fbuf->buf)+idx, fbuf->size*sizeof(int)-idx);
+    res=write(*path, reinterpret_cast<char*>(fbuf->buf)+idx,
+            fbuf->size*sizeof(int)-idx);
     if (res<=0) {
         if ((res<0) && (errno==EINTR)) return 0;
         if (res==0) errno=EPIPE;
@@ -265,7 +276,8 @@ int sockdescr::do_write()
     return 0;
 }
 /*****************************************************************************/
-void do_accept_server_outsock(tcp_socket& server_outsock)
+static void
+do_accept_server_outsock(tcp_socket& server_outsock)
 {
 sock* newsock;
 try
@@ -303,7 +315,8 @@ catch (...)
 /*cerr<<"new outsock ("<<(int)(*newsock)<<") accepted"<<endl;*/
 }
 /*****************************************************************************/
-void delete_outsock(int idx)
+static void
+delete_outsock(int idx)
 {
     //int path=*(outsock[idx]->path);
     delete outsock[idx];
@@ -313,7 +326,8 @@ void delete_outsock(int idx)
     /*cerr<<"outsock("<<path<<") deleted"<<endl;*/
 }
 /*****************************************************************************/
-void do_accept_server_insock(tcp_socket& server_insock)
+static void
+do_accept_server_insock(tcp_socket& server_insock)
 {
 sock* newinsock;
 try
@@ -350,7 +364,9 @@ catch (...)
 /*cerr<<"new insock accepted"<<endl;*/
 }
 /*****************************************************************************/
-void dump_fds(char* txt, int nfds, fd_set* readfds, fd_set* writefds)
+#if 0
+static void
+dump_fds(char* txt, int nfds, fd_set* readfds, fd_set* writefds)
 {
 int i;
 cerr<<txt<<": nfds="<<nfds<<endl;
@@ -367,8 +383,10 @@ for (i=0; i<nfds; i++)
   }
 cerr<<endl;
 }
+#endif
 /*****************************************************************************/
-void main_loop(tcp_socket& server_insock, tcp_socket& server_outsock)
+static void
+main_loop(tcp_socket& server_insock, tcp_socket& server_outsock)
 {
 /*
 cerr<<"server_insock_path="<<(int)server_insock<<endl;
@@ -400,7 +418,8 @@ while (1)
 
   nfds++;
   /*dump_fds("before select", nfds, &readfds, &writefds);*/
-  res=select(nfds, &readfds, &writefds, (fd_set*)0, (struct timeval*)0);
+  res=select(nfds, &readfds, &writefds, reinterpret_cast<fd_set*>(0),
+        reinterpret_cast<struct timeval*>(0));
   /*dump_fds("after select", nfds, &readfds, &writefds);*/
   if (res<=0)
     {
@@ -443,7 +462,8 @@ while (1)
   }
 }
 /*****************************************************************************/
-int checkendian()
+static int
+checkendian(void)
 {
 int endian;
 

@@ -2,24 +2,28 @@
  * proc_is.hxx
  * 
  * created: 05.09.95
- * 25.03.1998 PW: adapded for <string>
- * 12.06.1998 PW: adapted for STD_STRICT_ANSI
- * 24.02.1999 PW: [ro_]add_param(int|float|double|char) defined as inline
+ * 
+ * $ZEL: proc_is.hxx,v 2.19 2014/07/14 15:11:54 wuestner Exp $
+ * 
  */
-
-// $Id: proc_is.hxx,v 2.18 2007/10/23 11:18:24 wuestner Exp $
 
 #ifndef _proc_is_hxx_
 #define _proc_is_hxx_
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include "proc_ved.hxx"
 #include "proc_plist.hxx"
 #include "proc_isstatus.hxx"
 #include <ems_err.h>
 #include "caplib.hxx"
 #include <outbuf.hxx>
+
+using namespace std;
 
 /*****************************************************************************/
 
@@ -32,7 +36,7 @@ class C_instr_system: public nocopy
     virtual ~C_instr_system();
 
   protected:
-    STRING is_name;
+    string is_name;
     C_VED* ved;
     int ved_id;
     int idx;
@@ -42,7 +46,7 @@ class C_instr_system: public nocopy
     C_proclist readoutlist;
 
   public:
-    STRING name() const {return is_name;}
+    string name() const {return is_name;}
     exec_mode execution_mode(exec_mode mode);
     exec_mode execution_mode() const {return(proclist.execmode);}
     C_proclist* newproclist(){return new C_proclist(__FILE__":65", ved, this,
@@ -66,7 +70,7 @@ class C_instr_system: public nocopy
     int procnum(const char* proc) const
         {return ved->procnum(proc, Capab_listproc);}
     int numprocs() const {return ved->numprocs(Capab_listproc);}
-    STRING procname(int idx) const {return ved->procname(idx, Capab_listproc);}
+    string procname(int idx) const {return ved->procname(idx, Capab_listproc);}
     int is_idx() const {return(idx);}
     int is_id();
     C_isstatus* ISStatus();

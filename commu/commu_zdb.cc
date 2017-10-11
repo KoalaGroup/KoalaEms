@@ -2,14 +2,17 @@
  * commu_zdb.cc
  * 
  * created 17.07.95
- * 26.03.1998 PW: adapded for <string>
- * 14.06.1998 PW: adapted for STD_STRICT_ANSI
+ * 
  */
 
 #include "config.h"
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <sys/param.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -20,13 +23,15 @@
 #include "compat.h"
 #include "versions.hxx"
 
-VERSION("Mar 26 1998", __FILE__, __DATE__, __TIME__,
-"$ZEL: commu_zdb.cc,v 2.9 2006/02/16 20:53:04 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: commu_zdb.cc,v 2.11 2014/07/14 15:12:20 wuestner Exp $")
 #define XVERSION
+
+using namespace std;
 
 /*****************************************************************************/
 
-C_zdb::C_zdb(const STRING& commbezlist)
+C_zdb::C_zdb(const string& commbezlist)
 :liste(commbezlist)
 {
 FILE *list;
@@ -34,7 +39,7 @@ FILE *list;
 list=fopen(liste.c_str(), "r");
 if (list==(FILE*)0)
   {
-  OSTRINGSTREAM s;
+  ostringstream s;
   s<<"fopen "<<liste<<ends;
   throw new C_unix_error(errno, s);
   }
@@ -48,9 +53,9 @@ C_zdb::~C_zdb()
 
 /*****************************************************************************/
 
-C_VED_addr* C_zdb::getVED(const STRING& ved_name_)
+C_VED_addr* C_zdb::getVED(const string& ved_name_)
 {
-STRING ved_name(ved_name_);
+string ved_name(ved_name_);
 FILE *list;
 char name[1024], s[1024];
 char path[1024], host[1024];
@@ -105,7 +110,7 @@ if (found)
   }
 else if (smart)
   {
-  STRING hname; STRING portnum;
+  string hname; string portnum;
   int l=ved_name.length();
 #ifdef NO_ANSI_CXX
   int colon=ved_name.index(":");
@@ -143,7 +148,12 @@ else
 C_strlist* C_zdb::getVEDlist()
 {
 FILE *list;
+#if 0
 int c, i, res;
+#else
+int c, i;
+#endif
+
 C_strlist *strlist;
 char line[1024], name[1024];
 
@@ -163,7 +173,9 @@ while (fgets(line, 256, list)!=NULL)
   {
   if ((line[0]!='\n') && (line[0]!='#'))
     {
+#if 0
     res=sscanf(line, " %s", name);
+#endif
     strlist->set(i++, name);
     }
   }

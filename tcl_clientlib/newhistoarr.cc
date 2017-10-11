@@ -5,14 +5,17 @@
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include "newhistoarr.hxx"
 #include <cmath>
 #include <cfloat>
 #include <cerrno>
 #include <cstring>
 #include "findstring.hxx"
-#include "compat.h"
 #include "pairarr_mem.hxx"
 #include "pairarr_map.hxx"
 #include "pairarr_file.hxx"
@@ -20,9 +23,11 @@
 #include "tcl_cxx.hxx"
 #include <versions.hxx>
 
-VERSION("2009-Feb-25", __FILE__, __DATE__, __TIME__,
-"$ZEL: newhistoarr.cc,v 1.11 2010/02/03 00:15:51 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: newhistoarr.cc,v 1.13 2014/07/14 15:13:26 wuestner Exp $")
 #define XVERSION
+
+using namespace std;
 
 /*****************************************************************************/
 C_histoarrays::C_histoarrays(Tcl_Interp* interp)
@@ -239,9 +244,9 @@ int E_histoarray::xcommand(ClientData clientdata, Tcl_Interp* interp,
     return TCL_OK;
 }
 /*****************************************************************************/
-STRING E_histoarray::tclprocname(void) const
+string E_histoarray::tclprocname(void) const
 {
-    STRING s;
+    string s;
     s=Tcl_GetCommandName(interp, tclcommand);
     return s;
 }
@@ -494,7 +499,7 @@ int E_histoarray::e_get(int objc, Tcl_Obj* const objv[])
         form1=form2=0; // float
     }
 
-    OSTRINGSTREAM st;
+    ostringstream st;
     switch (form1) {
     case 0:
         st << setprecision(20) << time(idx) << ' ';
@@ -576,7 +581,7 @@ int E_histoarray::e_print(int objc, Tcl_Obj* const objv[])
         Tcl_SetObjResult(interp, Tcl_NewStringObj(strdup("empty"), -1));
         return TCL_OK;
     }
-    OSTRINGSTREAM st;
+    ostringstream st;
     print(st);
     Tcl_SetResult_Stream(interp, st);
     return TCL_OK;
@@ -591,7 +596,7 @@ int E_histoarray::e_dump(int objc, Tcl_Obj* const objv[])
     }
     ofstream os(Tcl_GetString(objv[2]));
     if (!os) {
-        OSTRINGSTREAM st;
+        ostringstream st;
         st << "open \"" << Tcl_GetString(objv[2]) << "\" ging schief: errno=" << errno;
         Tcl_SetResult_Stream(interp, st);
         return TCL_ERROR;
@@ -634,16 +639,18 @@ int E_histoarray::e_restore(int objc, Tcl_Obj* const objv[])
 
     ifstream is(Tcl_GetString(objv[2]));
     if (!is) {
-        OSTRINGSTREAM st;
+        ostringstream st;
         st << "open \"" << Tcl_GetString(objv[2]) << "\" ging schief: errno=" << errno;
         Tcl_SetResult_Stream(interp, st);
         return TCL_ERROR;
     }
     clear();
 
-    STRING a, b;
+    string a, b;
     int n=0;
+#if 0
     double last=0;
+#endif
     while (is >> a) {
         is >> b;
         double va, vb;
@@ -653,12 +660,16 @@ int E_histoarray::e_restore(int objc, Tcl_Obj* const objv[])
         if (Tcl_GetDouble(interp, (char*)b.c_str(), &vb)!=TCL_OK) {
             return TCL_ERROR;
         }
-//      if (fabs(va-last)>10)
-//          cerr << "last=" << setprecision(20) << last << "; now=" << va << endl;
-//      else
+#if 0
+        if (fabs(va-last)>10)
+            cerr << "last=" << setprecision(20) << last << "; now=" << va << endl;
+        else
+#endif
             add(va, vb); 
         n++;
+#if 0
         last=va;
+#endif
     }
 
     Tcl_SetObjResult(interp, Tcl_NewIntObj(n));

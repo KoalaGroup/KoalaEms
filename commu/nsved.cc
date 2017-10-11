@@ -6,7 +6,11 @@
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <unistd.h>
 #include <commu_def.hxx>
 #include <signal.h>
@@ -22,9 +26,11 @@
 #include <gnuthrow.hxx>
 #include "versions.hxx"
 
-VERSION("Jun 05 1998", __FILE__, __DATE__, __TIME__,
-"$ZEL: nsved.cc,v 2.9 2004/11/26 15:14:34 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: nsved.cc,v 2.10 2014/07/14 15:12:20 wuestner Exp $")
 #define XVERSION
+
+using namespace std;
 
 /*****************************************************************************/
 

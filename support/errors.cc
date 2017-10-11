@@ -1,16 +1,15 @@
 /*
- * errors.cc
+ * support/errors.cc
  * 
  * created 27.01.95 PW
- * 16.03.1998 PW: adapted for <string>
- * 05.06.1998 PW: adapted for STD_STRICT_ANSI
- * 18.06.1998 PW: errno changed to error
- * 14.07.1998 PW: C_errorbox deleted
- * 13.01.1999 PW: C_error::instance_counter introduced
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <errno.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -19,9 +18,11 @@
 
 #include "errors.hxx"
 
-VERSION("Jan 13 1999", __FILE__, __DATE__, __TIME__,
-"$ZEL: errors.cc,v 2.18 2007/10/23 11:18:06 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: errors.cc,v 2.19 2014/07/14 15:09:53 wuestner Exp $")
 #define XVERSION
+
+using namespace std;
 
 /*****************************************************************************/
 
@@ -76,7 +77,7 @@ typ=ib.getint();
 for (i=0; (i<num) && (list[i].typ!=typ); i++);
 if (i==num)
   {
-    OSTRINGSTREAM s;
+    ostringstream s;
   s << "C_error::C_manager::create(C_inbuf&): unknown type " << typ;
   throw new C_program_error(s);
   }
@@ -140,7 +141,6 @@ return(ob);
 C_error* C_error::create(C_inbuf&)
 {
 throw new C_program_error("C_error::create(C_inbuf&): type not valid");
-NORETURN(0);
 }
 
 /*****************************************************************************/
@@ -161,7 +161,7 @@ C_none_error::~C_none_error()
 
 /*****************************************************************************/
 
-STRING C_none_error::message(void) const
+string C_none_error::message(void) const
 {
 return("none");
 }
@@ -198,13 +198,13 @@ C_unix_error::C_unix_error(int error, const char* message)
 
 /*****************************************************************************/
 
-C_unix_error::C_unix_error(int error, const STRING& msg)
+C_unix_error::C_unix_error(int error, const string& msg)
 :error_(error), message_(msg)
 {}
 
 /*****************************************************************************/
 
-C_unix_error::C_unix_error(int error, OSTRINGSTREAM& s)
+C_unix_error::C_unix_error(int error, ostringstream& s)
 :error_(error)
 {
 //cerr<<"C_unix_error("<<error<<", "<<s.str()<<")"<<endl;
@@ -218,7 +218,7 @@ C_unix_error::~C_unix_error()
 
 /*****************************************************************************/
 
-STRING C_unix_error::message(void) const
+string C_unix_error::message(void) const
 {
 return(message_);
 }
@@ -243,7 +243,7 @@ return(ob);
 
 C_error* C_unix_error::create(C_inbuf& inbuf)
 {
-STRING s;
+string s;
 int error;
 inbuf >> error >> s;
 return(new C_unix_error(error, s));
@@ -258,13 +258,13 @@ C_program_error::C_program_error(const char* message)
 
 /*****************************************************************************/
 
-C_program_error::C_program_error(const STRING& msg)
+C_program_error::C_program_error(const string& msg)
 :message_(msg)
 {}
 
 /*****************************************************************************/
 
-C_program_error::C_program_error(OSTRINGSTREAM& s)
+C_program_error::C_program_error(ostringstream& s)
 {
 message_=s.str();
 }
@@ -276,7 +276,7 @@ C_program_error::~C_program_error()
 
 /*****************************************************************************/
 
-STRING C_program_error::message(void) const
+string C_program_error::message(void) const
 {
 return(message_);
 }
@@ -301,7 +301,7 @@ return(ob);
 
 C_error* C_program_error::create(C_inbuf& inbuf)
 {
-STRING s;
+string s;
 inbuf >> s;
 return(new C_program_error(s));
 }
@@ -353,7 +353,7 @@ os<<"";
 return(os);
 }
 /*****************************************************************************/
-STRING C_status_error::message(void) const
+string C_status_error::message(void) const
 {
 switch (code_)
   {

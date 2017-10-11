@@ -3,7 +3,7 @@
  * created 2013-02-22 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: sis3820.c,v 1.1 2013/07/03 21:15:09 wuestner Exp $";
+    "$ZEL: sis3820.c,v 1.3 2015/04/06 21:33:38 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -123,6 +123,8 @@ plerrcode proc_sis3820init(ems_u32* p)
         if (id!=0x3820) {
             printf("sis3820init(idx=%d): id=%04x version=%d\n", i, id, version);
             return plErr_HWTestFailed;
+        } else {
+            printf("sis3820init(idx=%d): id=%04x version=%d\n", i, id, version);
         }
 
         /* reset module */
@@ -162,7 +164,7 @@ plerrcode test_proc_sis3820init(ems_u32* p)
     for (i=2; i<=p[0]; i++) {
         ml_entry* module;
 
-        if (!valid_module(p[i], modul_vme, 0))
+        if (!valid_module(p[i], modul_vme))
             return plErr_ArgRange;
         module=ModulEnt(p[i]);
         if (module->modultype!=SIS_3820)
@@ -204,7 +206,7 @@ plerrcode test_proc_sis3820clear(ems_u32* p)
     for (i=1; i<=p[0]; i++) {
         ml_entry* module;
 
-        if (!valid_module(p[i], modul_vme, 0))
+        if (!valid_module(p[i], modul_vme))
             return plErr_ArgRange;
         module=ModulEnt(p[i]);
         if (module->modultype!=SIS_3820)
@@ -261,7 +263,7 @@ plerrcode test_proc_sis3820read(ems_u32* p)
     for (i=2; i<=p[0]; i++) {
         ml_entry* module;
 
-        if (!valid_module(p[i], modul_vme, 0))
+        if (!valid_module(p[i], modul_vme))
             return plErr_ArgRange;
         module=ModulEnt(p[i]);
         if (module->modultype!=SIS_3820)
@@ -275,15 +277,14 @@ char name_proc_sis3820read[] = "sis3820read";
 int ver_proc_sis3820read = 1;
 /*****************************************************************************/
 /*
- * p[0]: argcount==number of modules
+ * p[0]: argcount==1+number of modules
  * p[1]: 1: send LNE, 0: don't send LNE
  * p[2...]: indices in memberlist
  */
 plerrcode proc_sis3820read_block(ems_u32* p) {
     int i;
 
-    if (p[1]) {
-    /* LNE */
+    if (p[1]) { /* LNE */
         for (i=2; i<=p[0]; i++) {
             ml_entry* module=ModulEnt(p[i]);
             struct vme_dev* dev=module->address.vme.dev;
@@ -303,6 +304,21 @@ plerrcode proc_sis3820read_block(ems_u32* p) {
                 outptr, 128, 4, &outptr)<0) {
             return plErr_System;
         }
+
+#if 0
+        {
+            /* here we try to clear the overflow IRQ
+               This is not part of the normal readout procedure and should
+               be deleted after veryfying that it works.
+            */
+            ems_u32 overflow;
+
+            dev->read_a32d32(dev, addr+SIS3820_COUNTER_OVERFLOW, &overflow);
+            dev->write_a32d32(dev, addr+SIS3820_COUNTER_OVERFLOW, overflow);
+
+            *outptr++=overflow;
+        }
+#endif
     }
     return plOK;
 }
@@ -316,7 +332,7 @@ plerrcode test_proc_sis3820read_block(ems_u32* p) {
     for (i=2; i<=p[0]; i++) {
         ml_entry* module;
 
-        if (!valid_module(p[i], modul_vme, 0))
+        if (!valid_module(p[i], modul_vme))
             return plErr_ArgRange;
         module=ModulEnt(p[i]);
         if (module->modultype!=SIS_3820)
@@ -355,7 +371,7 @@ plerrcode test_proc_sis3820lne(ems_u32* p) {
     for (i=1; i<=p[0]; i++) {
         ml_entry* module;
 
-        if (!valid_module(p[i], modul_vme, 0))
+        if (!valid_module(p[i], modul_vme))
             return plErr_ArgRange;
         module=ModulEnt(p[i]);
         if (module->modultype!=SIS_3820)
@@ -498,7 +514,7 @@ plerrcode test_proc_sis3820ShadowInit(ems_u32* p)
     for (i=2; i<=p[0]; i++) {
         ml_entry* module;
 
-        if (!valid_module(p[i], modul_vme, 0))
+        if (!valid_module(p[i], modul_vme))
             return plErr_ArgRange;
         module=ModulEnt(p[i]);
         if (module->modultype!=SIS_3820)
@@ -715,7 +731,7 @@ plerrcode test_proc_sis3820ShadowUpdate(ems_u32* p)
     for (i=0; i<p[2]; i++) {
         ml_entry* module;
 
-        if (!valid_module(p[i+3], modul_vme, 0))
+        if (!valid_module(p[i+3], modul_vme))
             return plErr_ArgRange;
         module=ModulEnt(p[i+3]);
         if (module->modultype!=SIS_3820)
@@ -738,5 +754,188 @@ plerrcode test_proc_sis3820ShadowUpdate(ems_u32* p)
 
 char name_proc_sis3820ShadowUpdate[] = "sis3820ShadowUpdate";
 int ver_proc_sis3820ShadowUpdate = 1;
+/*****************************************************************************/
+/*
+ * p[0]: argcount==5
+ * p[1]: index in memberlist
+ * p[2]: mode (0: RORA 1: ROAK)
+ * p[3]: level (1..7)
+ * p[4]: vector (0..255)
+ * p[5]: IRQ source (mask, 8 bit)
+ * IRQ sources:
+ *  0 LNE/clock shadow                    , edge sensitive
+ *  1 FIFO threshold                      , level sensitive
+ *  2 Acquisition completed/Preset reached, edge sensitive
+ *  3 Overflow                            , level sensitive
+ *  4 FIFO almost full                    , edge sensitive
+ *  5 free
+ *  6 free
+ *  7 free
+ *  8 free
+ */
+plerrcode proc_sis3820EnableIrq(ems_u32* p) {
+    ml_entry* module=ModulEnt(p[1]);
+    struct vme_dev* dev=module->address.vme.dev;
+
+    /* disable IRQs */
+    dev->write_a32d32(dev,
+                module->address.vme.addr+SIS3820_IRQ_CONFIG, 0);
+
+    /* clear and disable all IRQ sources */
+    dev->write_a32d32(dev,
+                module->address.vme.addr+SIS3820_IRQ_CONTROL, 0x00ffff00);
+    /* enable IRQ sources */
+    dev->write_a32d32(dev,
+                module->address.vme.addr+SIS3820_IRQ_CONTROL, p[5]&0xff);
+
+    /* set vector and level and enable IRQs */
+    dev->write_a32d32(dev,
+                module->address.vme.addr+SIS3820_IRQ_CONFIG,
+                (p[4]&0xff) |       /* vector */
+                ((p[3]&7)<<8) |     /* level */
+                0x800 |             /* enable */
+                ((p[2]&1)<<12)); /* mode */
+
+    return plOK;
+}
+
+plerrcode test_proc_sis3820EnableIrq(ems_u32* p) {
+    ml_entry* module;
+
+    if (p[0]!=5) {
+        printf("sis3820EnableIrq: %d arguments, but %d expected\n", p[0], 5);
+        return plErr_ArgNum;
+    }
+
+    if (!valid_module(p[1], modul_vme)) {
+        printf("sis3820EnableIrq: module %d is not a VME module\n", p[1]);
+        return plErr_ArgRange;
+    }
+    module=ModulEnt(p[1]);
+    if (module->modultype!=SIS_3820) {
+        printf("sis3820EnableIrq: module %d is not a SIS_3820, it is %08X\n",
+            p[1], module->modultype);
+        return plErr_BadModTyp;
+    }
+
+    if (p[2]>1) {
+        printf("sis3820EnableIrq: arg[2]=%d, but only 0..1 allowd\n", p[2]);
+        return plErr_ArgRange;
+    }
+
+    if (p[3]>7) {
+        printf("sis3820EnableIrq: arg[3]=%d, but only 1..7 allowd\n", p[3]);
+        return plErr_ArgRange;
+    }
+
+    if (p[4]>255) {
+        printf("sis3820EnableIrq: arg[4]=%d, but only 1..7 allowd\n", p[4]);
+        return plErr_ArgRange;
+    }
+
+    if (p[5]>255) {
+        printf("sis3820EnableIrq: arg[5]=%d, but only 8 bit allowd\n", p[5]);
+        return plErr_ArgRange;
+    }
+    wirbrauchen=0;
+    return plOK;
+}
+
+char name_proc_sis3820EnableIrq[] = "sis3820EnableIrq";
+int ver_proc_sis3820EnableIrq = 1;
+/*****************************************************************************/
+/*
+ * p[0]: argcount==1
+ * p[1]: index in memberlist
+ */
+plerrcode proc_sis3820DisableIrq(ems_u32* p) {
+    ml_entry* module=ModulEnt(p[1]);
+    struct vme_dev* dev=module->address.vme.dev;
+
+    /* disable IRQs */
+    dev->write_a32d32(dev,
+                module->address.vme.addr+SIS3820_IRQ_CONFIG, 0);
+
+    /* clear and disable all IRQ sources */
+    dev->write_a32d32(dev,
+                module->address.vme.addr+SIS3820_IRQ_CONTROL, 0x0ff0);
+
+    return plOK;
+}
+
+plerrcode test_proc_sis3820DisableIrq(ems_u32* p) {
+    ml_entry* module;
+
+    if (p[0]!=5) {
+        printf("sis3820DisableIrq: %d arguments, but %d expected\n", p[0], 5);
+        return plErr_ArgNum;
+    }
+
+    if (!valid_module(p[1], modul_vme)) {
+        printf("sis3820DisableIrq: module %d is not a VME module\n", p[1]);
+        return plErr_ArgRange;
+    }
+    module=ModulEnt(p[1]);
+    if (module->modultype!=SIS_3820) {
+        printf("sis3820DisableIrq: module %d is not a SIS_3820, it is %08X\n",
+            p[1], module->modultype);
+        return plErr_BadModTyp;
+    }
+
+    wirbrauchen=0;
+    return plOK;
+}
+
+char name_proc_sis3820DisableIrq[] = "sis3820DisableIrq";
+int ver_proc_sis3820DisableIrq = 1;
+/*****************************************************************************/
+/*
+ * p[0]: argcount==1
+ * p[1]: index in memberlist
+ */
+plerrcode proc_sis3820StatusIrq(ems_u32* p) {
+    ml_entry* module=ModulEnt(p[1]);
+    struct vme_dev* dev=module->address.vme.dev;
+    u_int32_t state, sources;
+
+    /* read IRQ status */
+    dev->read_a32d32(dev,
+                module->address.vme.addr+SIS3820_IRQ_CONFIG, &state);
+
+    /* read source status */
+    dev->read_a32d32(dev,
+                module->address.vme.addr+SIS3820_IRQ_CONTROL, &sources);
+
+    printf("irq state  sis3820[%d] %08X\n", p[1], state);
+    printf("irq source sis3820[%d] %08X\n", p[1], sources);
+
+    return plOK;
+}
+
+plerrcode test_proc_sis3820StatusIrq(ems_u32* p) {
+    ml_entry* module;
+
+    if (p[0]!=1) {
+        printf("sis3820StatusIrq: %d arguments, but %d expected\n", p[0], 5);
+        return plErr_ArgNum;
+    }
+
+    if (!valid_module(p[1], modul_vme)) {
+        printf("sis3820StatusIrq: module %d is not a VME module\n", p[1]);
+        return plErr_ArgRange;
+    }
+    module=ModulEnt(p[1]);
+    if (module->modultype!=SIS_3820) {
+        printf("sis3820StatusIrq: module %d is not a SIS_3820, it is %08X\n",
+            p[1], module->modultype);
+        return plErr_BadModTyp;
+    }
+
+    wirbrauchen=0;
+    return plOK;
+}
+
+char name_proc_sis3820StatusIrq[] = "sis3820StatusIrq";
+int ver_proc_sis3820StatusIrq = 1;
 /*****************************************************************************/
 /*****************************************************************************/

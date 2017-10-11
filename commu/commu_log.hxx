@@ -1,24 +1,29 @@
 /*
  * commu_log.hxx
  * 
- * $ZEL: commu_log.hxx,v 2.11 2004/11/18 19:31:23 wuestner Exp $
+ * $ZEL: commu_log.hxx,v 2.12 2014/07/14 15:12:19 wuestner Exp $
  * 
  * created before 03.09.93
- * 26.03.1998 PW: adapded for <string>
- * 14.06.1998 PW: adapted for STD_STRICT_ANSI
+ * 
  */
 
 #ifndef _commu_log_hxx_
 #define _commu_log_hxx_
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <commu_logg.hxx>
 #include <commu_message.hxx>
 #include <sys/types.h>
 #include <un.h>
 #include <netinet/in.h>
 #include <errors.hxx>
+
+using namespace std;
 
 /*****************************************************************************/
 
@@ -59,9 +64,9 @@ class C_log
     typedef C_log& (*log_manip) (C_log&);
     int base;
     //void putit(const char* s) {sbuffer+=s;}
-    void putit(const STRING& s) {sbuffer+=s;}
+    void putit(const string& s) {sbuffer+=s;}
   protected:
-    STRING sbuffer;
+    string sbuffer;
     loggstruct& log;
     int printtime;
     int level;
@@ -78,7 +83,7 @@ class C_log
     C_log& operator<<(const void*);
     C_log& operator<<(char);
     C_log& operator<<(const char*);
-    C_log& operator<<(const STRING);
+    C_log& operator<<(const string);
     C_log& operator<<(const fd_set*);
     C_log& operator<<(struct sockaddr_un);
     C_log& operator<<(struct sockaddr_in);

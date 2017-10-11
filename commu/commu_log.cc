@@ -2,13 +2,15 @@
  * commu_log.cc
  * 
  * created before 23.02.94
- * 26.03.1998 PW: adapded for <string>
- * 14.06.1998 PW: adapted for STD_STRICT_ANSI
+ * 
  */
 
-
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <sys/types.h>
 #include <errno.h>
 #include <stdlib.h>
@@ -32,9 +34,11 @@
 #include <compat.h>
 #include "versions.hxx"
 
-VERSION("Mar 26 1998", __FILE__, __DATE__, __TIME__,
-"$ZEL: commu_log.cc,v 2.17 2004/11/26 15:14:23 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: commu_log.cc,v 2.18 2014/07/14 15:12:19 wuestner Exp $")
 #define XVERSION
+
+using namespace std;
 
 /*****************************************************************************/
 
@@ -118,7 +122,7 @@ level=t;
 
 C_log& C_log::operator<<(int v)
 {
-    OSTRINGSTREAM ss;
+    ostringstream ss;
     if (base==16) {
         ss.setf(ios::showbase);
         ss << hex << v << ends;
@@ -132,7 +136,7 @@ C_log& C_log::operator<<(int v)
 
 C_log& C_log::operator<<(unsigned int v)
 {
-    OSTRINGSTREAM ss;
+    ostringstream ss;
     if (base==16) {
         ss.setf(ios::showbase);
         ss << hex << v << ends;
@@ -146,7 +150,7 @@ C_log& C_log::operator<<(unsigned int v)
 
 C_log& C_log::operator<<(const void* v)
 {
-    OSTRINGSTREAM ss;
+    ostringstream ss;
     ss << (void*)v << ends;
     putit(ss.str());
     return(*this);
@@ -173,7 +177,7 @@ return(*this);
 
 /*****************************************************************************/
 
-C_log& C_log::operator<<(const STRING v)
+C_log& C_log::operator<<(const string v)
 {
     putit(v);
     return(*this);
@@ -185,7 +189,7 @@ C_log& C_log::operator<<(const fd_set *fds)
 {
     int i, k;
     int count=0;
-    OSTRINGSTREAM ss;
+    ostringstream ss;
 
 #ifdef xxx__linux
     k=1024;
@@ -208,7 +212,7 @@ C_log& C_log::operator<<(const fd_set *fds)
 
 C_log& C_log::operator<<(struct sockaddr_un addr)
 {
-    OSTRINGSTREAM ss;
+    ostringstream ss;
     ss<<"sock_family: "<<addr.sun_family<<", path: "<<addr.sun_path<<ends;
     putit(ss.str());
     return(*this);
@@ -218,7 +222,7 @@ C_log& C_log::operator<<(struct sockaddr_un addr)
 
 C_log& C_log::operator<<(struct sockaddr_in addr)
 {
-    OSTRINGSTREAM ss;
+    ostringstream ss;
     ss<<"sock_family: "<<addr.sin_family<<", port: "<<ntohs(addr.sin_port)
         <<", host: "<<inet_ntoa(addr.sin_addr)<<ends;
     putit(ss.str());
@@ -229,7 +233,7 @@ C_log& C_log::operator<<(struct sockaddr_in addr)
 
 C_log& C_log::operator<<(const C_error& error)
 {
-    OSTRINGSTREAM ss;
+    ostringstream ss;
     ss << error << ends;
     putit(ss.str());
     return(*this);

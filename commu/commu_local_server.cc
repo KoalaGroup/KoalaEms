@@ -9,7 +9,7 @@
 #include "versions.hxx"
 
 VERSION("2009-Aug-21", __FILE__, __DATE__, __TIME__,
-"$ZEL: commu_local_server.cc,v 2.13 2009/08/21 22:02:28 wuestner Exp $")
+"$ZEL: commu_local_server.cc,v 2.14 2014/07/08 17:29:14 wuestner Exp $")
 #define XVERSION
 
 /*****************************************************************************/
@@ -58,10 +58,14 @@ return(0); /* immer ok */
 
 void C_local_server::do_message_internal(C_message* message)
 {
+#if 0
 ems_u32* body;
+#endif
 
 TR(C_local_server::do_message_internal)
+#if 0
 body=message->body;
+#endif
 
 switch (message->header.type.intmsgtype)
   {

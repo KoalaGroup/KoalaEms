@@ -2,12 +2,15 @@
  * proc_veds.cc
  * 
  * created: 11.06.97
- * 16.03.1998 PW: adapded for <string>
- * 12.06.1998 PW: adapted for STD_STRICT_ANSI
+ * 
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <stdlib.h>
 #include <errno.h>
 #include <proc_veds.hxx>
@@ -15,11 +18,13 @@
 #include <compat.h>
 #include <versions.hxx>
 
-VERSION("Jun 12 1998", __FILE__, __DATE__, __TIME__,
-"$ZEL: proc_veds.cc,v 2.7 2006/09/02 14:10:14 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: proc_veds.cc,v 2.8 2014/07/14 15:11:54 wuestner Exp $")
 #define XVERSION
 
 C_veds veds;
+
+using namespace std;
 
 /*****************************************************************************/
 

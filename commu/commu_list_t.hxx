@@ -1,28 +1,33 @@
  /*
  * commu_list.hxx
  *
- * $ZEL: commu_list_t.hxx,v 2.7 2006/02/16 21:03:40 wuestner Exp $
+ * $ZEL: commu_list_t.hxx,v 2.8 2014/07/14 15:12:19 wuestner Exp $
  *
  * created 28.07.94 PW
- * 14.06.1998 PW: adapted for STD_STRICT_ANSI
- * 15.06.1998 PW: rewritten
+ * 
  */
 
 #ifndef _commu_list_hxx_
 #define _commu_list_hxx_
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <nocopy.hxx>
+
+using namespace std;
 
 /*****************************************************************************/
 template <class T>
 class C_list:public nocopy
   {
   public:
-    C_list(int, STRING name);
+    C_list(int, string name);
     virtual ~C_list();
   protected:
-    STRING name_;                         // fuer debugging
+    string name_;                         // fuer debugging
     int growsize;
     T **list;
     int listsize;
@@ -75,7 +80,7 @@ ostream& operator <<(ostream&, const C_intpair&);
 class C_ints:public C_list<C_int>
   {
   public:
-    C_ints(int, STRING name);
+    C_ints(int, string name);
     C_ints(const C_ints&);
     virtual ~C_ints() {}
     void free(int);                    // a --> free
@@ -89,7 +94,7 @@ class C_ints:public C_list<C_int>
 class C_intpairs: public C_list<C_intpair>
   {
   public:
-    C_intpairs(int, STRING name);
+    C_intpairs(int, string name);
     virtual ~C_intpairs() {}
     int a(int) const;                  // b --> a
     int b(int) const;                  // a --> b

@@ -4,7 +4,7 @@
  * 21.Jan.2001 PW: multicrate support
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: tdc.c,v 1.16 2011/04/06 20:30:30 wuestner Exp $";
+    "$ZEL: tdc.c,v 1.17 2015/04/06 21:33:29 wuestner Exp $";
 
 #include <errorcodes.h>
 #include <modultypes.h>
@@ -27,7 +27,7 @@ static plerrcode tdc2277modtest(void)
     int i;
     for (i=1; i<=*memberlist; i++) {
         ml_entry* module;
-        if (!valid_module(i, modul_camac, 0)) {
+        if (!valid_module(i, modul_camac)) {
             *outptr++=memberlist[i];
             return plErr_BadModTyp;
         }

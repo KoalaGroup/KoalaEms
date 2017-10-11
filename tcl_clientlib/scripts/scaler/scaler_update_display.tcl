@@ -1,4 +1,4 @@
-# $ZEL: scaler_update_display.tcl,v 1.2 2006/08/13 17:32:09 wuestner Exp $
+# $ZEL: scaler_update_display.tcl,v 1.3 2011/11/26 02:01:55 wuestner Exp $
 # copyright 1998 P. Wuestner; Zentralinstitut fuer Elektronik; Forschungszentrum Juelich
 #
 # global vars:
@@ -153,5 +153,9 @@ proc update_display {jetzt immer} {
     set scaler_cont_disp($chan) $scaler_cont($chan)
     set scaler_time_disp($chan) $scaler_time($chan)
   }
-  if {!$immer} {set last_display_time $jetzt}
+  if {!$immer} {
+    set last_display_time $jetzt
+  }
+  update idletasks
+  scaler_win_scale_canvas
 }

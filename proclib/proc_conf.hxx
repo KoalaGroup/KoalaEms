@@ -2,20 +2,26 @@
  * proc_conf.hxx
  * 
  * created: 19.08.94 PW
- * 12.06.1998 PW: adapted for STD_STRICT_ANSI
+ *
+ * $ZEL: proc_conf.hxx,v 2.9 2014/07/14 15:11:53 wuestner Exp $
  */
 
 #ifndef _proc_conf_hxx_
 #define _proc_conf_hxx_
 
 #include "config.h"
-#include "cxxcompat.hxx"
-
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <requesttypes.h>
 #include <nocopy.hxx>
 #include <msg.h>
 
 class C_VED;
+
+using namespace std;
 
 /*****************************************************************************/
 

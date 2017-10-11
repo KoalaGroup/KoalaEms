@@ -2,11 +2,15 @@
  * commu_cdb.cc
  * 
  * created: 17.07.95
- * 14.06.1998 PW: adapted for STD_STRICT_ANSI
+ * 
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <errors.hxx>
 #include <commu_log.hxx>
 
@@ -15,8 +19,8 @@
 #include <process_control_structure.c>
 #include "versions.hxx"
 
-VERSION("Jun 05 1996", __FILE__, __DATE__, __TIME__,
-"$ZEL: commu_cdb.cc,v 2.19 2004/11/26 15:14:15 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: commu_cdb.cc,v 2.20 2014/07/14 15:12:19 wuestner Exp $")
 #define XVERSION
 
 typedef struct exp_control_structure ec;
@@ -43,6 +47,8 @@ extern "C"
 
 const int C_cdb::proc_type=3;
 const String C_cdb::proc_basename="Communication";
+
+using namespace std;
 
 /*****************************************************************************/
 

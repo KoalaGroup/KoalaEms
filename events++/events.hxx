@@ -1,21 +1,15 @@
-/******************************************************************************
-*                                                                             *
-* events.hxx                                                                  *
-*                                                                             *
-* OSF1/ULTRIX                                                                 *
-*                                                                             *
-* created 24.01.95                                                            *
-* last changed 04.11.96                                                       *
-*                                                                             *
-* PW                                                                          *
-*                                                                             *
-******************************************************************************/
+/*
+ * events++/events.hxx
+ *                                                                             *
+ * created 24.01.95 PW
+ * $ZEL: events.hxx,v 1.6 2014/07/14 16:18:17 wuestner Exp $
+ */
 
 #ifndef _events_hxx_
 #define _events_hxx_
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <string>
 #include <stdio.h>
 #include <errors.hxx>
 #include <nocopy.hxx>
@@ -23,6 +17,8 @@
 
 //#define MAXEVENT (0x3fff) // 64 kByte -1 Word
 //#define MAXEVENT (0xefff) // 240 kByte -1 Word
+
+using namespace std;
 
 /*****************************************************************************/
 
@@ -178,14 +174,14 @@ class C_evput: public nocopy
   public:
     C_evput(const char* name, int maxevent) :name_(name), maxevent_(maxevent),
         trace(0) {}
-    C_evput(const STRING& name, int maxevent) :name_(name), maxevent_(maxevent),
+    C_evput(const string& name, int maxevent) :name_(name), maxevent_(maxevent),
         trace(0) {}
   protected:
-    STRING name_;
+    string name_;
     int maxevent_;
     int trace;
   public:
-    STRING name() const {return name_;}
+    string name() const {return name_;}
     int settrace(int);
   };
 
@@ -193,7 +189,7 @@ class C_evinput: public C_evput
   {
   public:
     C_evinput(const char* name, int maxevent);
-    C_evinput(const STRING& name, int maxevent);
+    C_evinput(const string& name, int maxevent);
     C_evinput(C_evinput&);
     virtual ~C_evinput();
   protected:
@@ -218,7 +214,7 @@ ostream& operator <<(ostream&, const C_evinput&);
 class C_evpinput: public C_evinput
   {
   public:
-    C_evpinput(const STRING&, int maxevent);
+    C_evpinput(const string&, int maxevent);
     C_evpinput(const char*, int maxevent);
     C_evpinput(int path, int maxevent);
     virtual ~C_evpinput();
@@ -235,7 +231,7 @@ class C_evpinput: public C_evinput
 class C_evtinput: public C_evinput
   {
   public:
-    C_evtinput(const STRING&, int maxevent);
+    C_evtinput(const string&, int maxevent);
     C_evtinput(const char*, int maxevent);
     C_evtinput(int path, int maxevent);
     virtual ~C_evtinput();
@@ -259,7 +255,7 @@ class C_evtinput: public C_evinput
 class C_evfinput: public C_evinput
   {
   public:
-    C_evfinput(const STRING&, int maxevent);
+    C_evfinput(const string&, int maxevent);
     C_evfinput(const char*, int maxevent);
     C_evfinput(FILE*, int maxevent);
     C_evfinput(int path, int maxevent);
@@ -279,7 +275,7 @@ class C_evfinput: public C_evinput
 class C_evoutput: public C_evput
   {
   public:
-    C_evoutput(const STRING&, int maxevent);
+    C_evoutput(const string&, int maxevent);
     C_evoutput(const char*, int maxevent);
     virtual ~C_evoutput();
   protected:
@@ -302,7 +298,7 @@ C_evoutput& flush(C_evoutput&);
 class C_evpoutput: public C_evoutput
   {
   public:
-    C_evpoutput(const STRING&, int maxevent);
+    C_evpoutput(const string&, int maxevent);
     C_evpoutput(const char*, int maxevent);
     C_evpoutput(int, int maxevent);
     virtual ~C_evpoutput();
@@ -318,7 +314,7 @@ class C_evpoutput: public C_evoutput
 class C_evtoutput: public C_evoutput
   {
   public:
-    C_evtoutput(const STRING&, int maxevent);
+    C_evtoutput(const string&, int maxevent);
     C_evtoutput(const char*, int maxevent);
     C_evtoutput(int path, int maxevent);
     virtual ~C_evtoutput();
@@ -337,7 +333,7 @@ class C_evtoutput: public C_evoutput
 class C_evfoutput: public C_evoutput
   {
   public:
-    C_evfoutput(const STRING&, int maxevent);
+    C_evfoutput(const string&, int maxevent);
     C_evfoutput(const char*, int maxevent);
     C_evfoutput(FILE* file, int maxevent);
     C_evfoutput(int path, int maxevent);

@@ -9,20 +9,18 @@
 
 #include <errno.h>
 #include <math.h>
+#include <string.h>
+#include <unistd.h>
 #include "modultypes.h"
+#include "swap_int.h"
 #include "compressed_io.hxx"
 #include "cluster_data.hxx"
 #include <readargs.hxx>
 #include <versions.hxx>
 
-VERSION("2007-Feb-15", __FILE__, __DATE__, __TIME__,
-"$ZEL: parse_lvd.cc,v 1.5 2010/09/04 21:21:27 wuestner Exp $")
+VERSION("2014-07-07", __FILE__, __DATE__, __TIME__,
+"$ZEL: parse_lvd.cc,v 1.6 2014/07/07 20:51:58 wuestner Exp $")
 #define XVERSION
-
-#define swap_int(a) ( ((a) << 24) | \
-                      (((a) << 8) & 0x00ff0000) | \
-                      (((a) >> 8) & 0x0000ff00) | \
-        ((unsigned int)(a) >>24) )
 
 enum mtype {
     t_none, t_unknown, t_scaler, t_timestamp,
@@ -37,12 +35,12 @@ struct ved_statist {
 };
 
 struct ved_info {
-    char *ved;
+    const char *ved;
     enum mtype mtype;
     int crate;
     int is;
     ems_u32* modtypes;
-    char *comment;
+    const char *comment;
     struct ved_statist statist;
 };
 
@@ -100,7 +98,7 @@ struct statist statist;
 
 //---------------------------------------------------------------------------//
 struct smtype {
-    char *name;
+    const char *name;
     enum mtype mtype;
 };
 struct smtype mtypes[]={
@@ -117,7 +115,8 @@ struct smtype mtypes[]={
     {"", t_none}
 };
 
-int readargs()
+static int
+readargs(void)
 {
     args->addoption("crate", "crate", -1, "crate id", "crate");
     args->addoption("is", "is", -1, "IS id", "is");
@@ -155,7 +154,7 @@ int readargs()
     return 0;
 }
 //---------------------------------------------------------------------------//
-int
+static int
 xread(int p, char* b, int num)
 {
     int da=0, rest=num, res;
@@ -183,14 +182,14 @@ xread(int p, char* b, int num)
  *  0: no more data
  * >0: size of record (in words)
  */
-int
+static int
 read_record(int p, ems_u32** buf)
 {
     ems_u32 head[2], *b;
     ems_u32 size;
     int wenden;
 
-    switch (xread(p, (char*)head, 8)) {
+    switch (xread(p, reinterpret_cast<char*>(head), 8)) {
     case -1: // error
         cout<<"read header: "<<strerror(errno)<<endl;
         return -1;
@@ -225,7 +224,7 @@ read_record(int p, ems_u32** buf)
 
     b[0]=head[0];
     b[1]=head[1];
-    switch (xread(p, (char*)(b+2), (size-1)*4)) {
+    switch (xread(p, reinterpret_cast<char*>(b+2), (size-1)*4)) {
     case -1: // error
         cout<<"read body: "<<strerror(errno)<<endl;
         return -1;
@@ -969,11 +968,13 @@ parse_subevent(const ems_subevent* sev)
 static int
 parse_event(const ems_event* event)
 {
+#if 0
     static ems_u32 ev_no=0;
-//     if (event->event_nr!=ev_no+1) {
-//         cout<<"jump from "<<ev_no<<" to "<<event->event_nr<<endl;
-//     }
+    if (event->event_nr!=ev_no+1) {
+        cout<<"jump from "<<ev_no<<" to "<<event->event_nr<<endl;
+    }
     ev_no=event->event_nr;
+#endif
 
 //printf("### got event\n");
     ems_subevent* sev=event->subevents;

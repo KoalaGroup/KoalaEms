@@ -93,6 +93,8 @@ struct vme_dev {
     int (*irq_ack) (struct vme_dev*, ems_u32 level, ems_u32* vector, ems_u32* error);
     int (*mindmalen) (struct vme_dev*, int *len_read, int *len_write);
     int (*minpipelen) (struct vme_dev*, int *len_read, int *len_write);
+    int (*front_io) (struct vme_dev*, int domain, ems_u32, ems_u32*);
+    int (*front_setup) (struct vme_dev*, int domain, ems_u32*);
 
 /*
  * DUMMY must be the last 'function'; it is used to check whether all other

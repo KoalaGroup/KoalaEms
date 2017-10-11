@@ -1,23 +1,28 @@
 /*
  * commu_client.hxx
  *
- * $ZEL: commu_client.hxx,v 2.13 2004/11/18 19:31:05 wuestner Exp $
+ * $ZEL: commu_client.hxx,v 2.14 2014/07/14 15:12:19 wuestner Exp $
  *
  * created 29.07.94
- * 26.03.1998 PW: adapded for <string>
- * 14.06.1998 PW: adapted for STD_STRICT_ANSI
+ * 
  */
 
 #ifndef _commu_client_hxx_
 #define _commu_client_hxx_
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include "commu_station.hxx"
 #include <ems_err.h>
 #include "commu_list_t.hxx"
 #include "commu_message.hxx"
 #include "commu_server.hxx"
+
+using namespace std;
 
 /*****************************************************************************/
 
@@ -64,7 +69,7 @@ ostream& operator <<(ostream&, const C_client&);
 class C_clientlist: public C_list<C_client>
   {
   public:
-    C_clientlist(int, STRING name);
+    C_clientlist(int, string name);
     virtual ~C_clientlist();
   private:
     int leer_;
@@ -72,7 +77,7 @@ class C_clientlist: public C_list<C_client>
     int leer() const {return(leer_);}
     C_io_client* findsock(int) const;
     C_client* get(char*) const;
-    C_client* get(const STRING&) const;
+    C_client* get(const string&) const;
     C_client* get(int) const;
     void free(int);
     void readfield(fd_set*, int&) const;

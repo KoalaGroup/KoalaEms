@@ -1,4 +1,4 @@
-# $ZEL: scaler_menu_commands.tcl,v 1.3 2006/08/13 17:32:06 wuestner Exp $
+# $ZEL: scaler_menu_commands.tcl,v 1.6 2014/08/19 20:20:50 wuestner Exp $
 # copyright 1998
 #   P. Wuestner; Zentralinstitut fuer Elektronik; Forschungszentrum Juelich
 #
@@ -17,7 +17,12 @@
 #-----------------------------------------------------------------------------#
 proc start_stop {} {
   global global_running
-  if {$global_running(outer_loop)} stop_outer_loop else start_outer_loop
+
+  if {$global_running(outer_loop)} {
+    stop_outer_loop
+  } else {
+    start_outer_loop
+  }
 }
 #-----------------------------------------------------------------------------#
 proc update_start_stop {args} {
@@ -39,7 +44,9 @@ proc start_outer_loop {} {
   set global_running(numerical_display) 0
 
   if {$global_setup(graphical_display)} {
-    if {[connect_xh]!=0} {return -1}
+    if {[connect_xh]!=0} {
+        return -1
+    }
     set global_running(graphical_display) 1
   }
   send_names_to_net
@@ -57,11 +64,13 @@ proc stop_outer_loop {} {
   global global_setup global_after
   global global_running
 
+  output stop_outer_loop
+  update idletasks
   set global_running(outer_loop) 0
   foreach i [array names global_after] {
     after cancel $global_after($i)
   }
-  disconnect_commu
+  disconnect_commu stop_outer_loop
   if {$global_running(graphical_display)} {
     disconnect_xh
     set global_running(graphical_display) 0

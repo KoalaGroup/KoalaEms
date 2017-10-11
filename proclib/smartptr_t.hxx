@@ -2,17 +2,23 @@
  * smartptr_t.hxx
  * 
  * created: 15.06.97
- * 25.03.1998 PW: adapded for <string>
- * 12.06.1998 PW: adapted for STD_STRICT_ANSI
+ * 
+ * $ZEL: smartptr_t.hxx,v 1.6 2014/07/14 15:11:54 wuestner Exp $
  */
 
 #ifndef _smartptr_t_hxx_
 #define _smartptr_t_hxx_
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <errors.hxx>
 #include <nocopy.hxx>
+
+using namespace std;
 
 /*****************************************************************************/
 
@@ -21,9 +27,9 @@ class T_smartptr: public nocopy
   {
   protected:
     T* p;
-    STRING name;
+    string name;
   public:
-    T_smartptr(STRING n) :p(0), name(n) {}
+    T_smartptr(string n) :p(0), name(n) {}
     ~T_smartptr() {delete p;}
     operator T*();    // cast auf T*
     operator T&();    // cast auf T&
@@ -44,18 +50,18 @@ class C_ptr_error: public C_error
   {
   public:
     C_ptr_error(const C_ptr_error&);
-    C_ptr_error(OSTRINGSTREAM&);
-    C_ptr_error(STRING);
+    C_ptr_error(ostringstream&);
+    C_ptr_error(string);
     C_ptr_error(const char*);
     virtual ~C_ptr_error();
   protected:
-    STRING message_;
+    string message_;
   public:
     static const int e_ptr;
     virtual int type() const {return(e_ptr);}
     virtual ostream& print(ostream&) const;
     virtual C_outbuf& bufout(C_outbuf&) const;
-    virtual STRING message() const;
+    virtual string message() const;
   };
 
 #endif

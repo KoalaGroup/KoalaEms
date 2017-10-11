@@ -3,7 +3,7 @@
  * created 13.Dec.2003 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: lvdbus.c,v 1.54 2013/01/17 22:44:53 wuestner Exp $";
+    "$ZEL: lvdbus.c,v 1.55 2013/09/24 14:08:03 wuestner Exp $";
 
 #define LOWLIB
 #include <sconf.h>
@@ -72,6 +72,7 @@ lvd_cardtype(ems_u32 ident)
     case LVD_CARDID_VERTEXUN         : return ZEL_LVD_ADC_VERTEXUN;
     case LVD_CARDID_FQDC             : return ZEL_LVD_FQDC;
     case LVD_CARDID_VFQDC            : return ZEL_LVD_VFQDC;
+    case LVD_CARDID_VFQDC_200        : return ZEL_LVD_VFQDC;
     case LVD_CARDID_SQDC             : return ZEL_LVD_SQDC;
     case LVD_CARDID_SYNCH_MASTER     : return ZEL_LVD_MSYNCH;
     case LVD_CARDID_SYNCH_MASTER2    : return ZEL_LVD_MSYNCH;
@@ -131,6 +132,7 @@ cardident(ems_u32 ident, int width)
         name="FAST QDC";
         break;
     case LVD_CARDID_VFQDC:
+    case LVD_CARDID_VFQDC_200:
         name="VERY FAST QDC";
         break;
     case LVD_CARDID_SQDC:
@@ -402,7 +404,7 @@ lvd_stop(struct lvd_dev* dev, int selftrigger)
         }
     }
 
-    res|=lvd_cc_w(dev, cr, 0);
+    res|=(lvd_cc_w(dev, cr, 0)!=2);
 
     for (i=0; i<dev->num_acards; i++) {
         struct lvd_acard* acard=dev->acards+i;

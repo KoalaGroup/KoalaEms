@@ -1,10 +1,9 @@
 /*
  * common/clusterformat.h
  * created: 15.03.1998
- * 09.May.2001 PW: clusterty_file added
  */
 /*
- * static char *rcsid="$ZEL: clusterformat.h,v 1.8 2011/04/12 14:28:29 wuestner Exp $";
+ * static char *rcsid="$ZEL: clusterformat.h,v 1.10 2015/04/06 21:36:56 wuestner Exp $";
  */
 
 #ifndef _clusterformat_h_
@@ -20,6 +19,7 @@ enum clustertypes {
     /*clusterty_x_wendy_setup=3,*/
     clusterty_file=4,
     clusterty_async_data=5,
+    clusterty_async_data2=6, /* includes mqtt */
     clusterty_no_more_data=0x10000000
 };
 

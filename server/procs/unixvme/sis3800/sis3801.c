@@ -3,7 +3,7 @@
  * created 24.Jan.2001 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: sis3801.c,v 1.9 2011/04/06 20:30:35 wuestner Exp $";
+    "$ZEL: sis3801.c,v 1.10 2015/04/06 21:33:38 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -87,7 +87,7 @@ for (i=1; i<=p[0]; i++)
   {
   ml_entry* module;
 
-  if (!valid_module(p[i], modul_vme, 0)) return plErr_ArgRange;
+  if (!valid_module(p[i], modul_vme)) return plErr_ArgRange;
   module=ModulEnt(p[i]);
   if (module->modultype!=SIS_3801) return plErr_BadModTyp;
   }
@@ -157,7 +157,7 @@ plerrcode test_proc_sis3801ShadowInit(ems_u32* p)
         ems_u32 addr;
         unsigned int help, id, version;
 
-        if (!valid_module(p[i], modul_vme, 0))
+        if (!valid_module(p[i], modul_vme))
             return plErr_ArgRange;
         module=ModulEnt(p[i]);
         if (module->modultype!=SIS_3801)
@@ -238,7 +238,7 @@ for (i=1; i<=p[0]; i++)
   {
   ml_entry* module;
 
-  if (!valid_module(p[i], modul_vme, 0)) return plErr_ArgRange;
+  if (!valid_module(p[i], modul_vme)) return plErr_ArgRange;
   module=ModulEnt(p[i]);
   if (module->modultype!=SIS_3801) return plErr_BadModTyp;
   }
@@ -274,7 +274,7 @@ for (i=1; i<=p[0]; i++)
   {
   ml_entry* module;
 
-  if (!valid_module(p[i], modul_vme, 0)) return plErr_ArgRange;
+  if (!valid_module(p[i], modul_vme)) return plErr_ArgRange;
   module=ModulEnt(p[i]);
   if (module->modultype!=SIS_3801) return plErr_BadModTyp;
   }

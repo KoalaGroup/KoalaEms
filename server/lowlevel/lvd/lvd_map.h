@@ -1,6 +1,6 @@
 /*
  * lvd_map.h
- * $ZEL: lvd_map.h,v 1.35 2012/09/12 15:01:39 wuestner Exp $
+ * $ZEL: lvd_map.h,v 1.36 2013/09/24 14:08:03 wuestner Exp $
  * created 21.Aug.2003 (as f1_map.h)
  */
 
@@ -22,7 +22,12 @@
 /* to escape uncertainty: VERTEX univ.= 0x39 and vertex proto=0x38  types:
  * instead of  #define LVD_HWtyp(id) (((id))&0xf8)
 */
+#if 0
 #define LVD_HWtyp(id) (((((id))&0xf8) != 0x38) ? (((id))&0xf8) : (((id))&0xf9))
+#else
+#define LVD_HWtyp(id) \
+    ((((id)&0xf8)==0x38)||(((id)&0xf8)==0x78) ? ((id)&0xf9) : ((id)&0xf8))
+#endif
 #define LVD_HWver(id) ((id)&0x7)
 #define LVD_FWver(id) (((id)>>8)&0xff)
 #define LVD_FWverH(id) (((id)>>12)&0xf)
@@ -43,10 +48,11 @@ enum lvd_cardid {
     LVD_CARDID_SYNCH_MASTER2    = 0x58,
     LVD_CARDID_SYNCH_OUTPUT     = 0x60,
     LVD_CARDID_TRIGGER          = 0x68,
-    LVD_CARDID_FQDC             = 0x70,
-    LVD_CARDID_VFQDC            = 0x78,
+    LVD_CARDID_FQDC             = 0x70, /* 160 MHz */
+    LVD_CARDID_VFQDC            = 0x78, /* 240 MHz */
+    LVD_CARDID_VFQDC_200        = 0x79, /* 200 MHz */
     LVD_CARDID_GPX              = 0x80,
-    LVD_CARDID_SQDC             = 0x90,
+    LVD_CARDID_SQDC             = 0x90, /*  80 MHz */
 };
 
 /* ========================== CMASTER Card ================================== */

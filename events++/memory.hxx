@@ -1,6 +1,6 @@
 /*
  * events++/memory.hxx
- * $ZEL: memory.hxx,v 1.5 2004/02/11 12:36:08 wuestner Exp $
+ * $ZEL: memory.hxx,v 1.6 2014/07/07 20:14:52 wuestner Exp $
  *
  * created: 29.03.1998 PW
  * 11.02.1999 PW: operator new[] and operator delete[] added
@@ -12,6 +12,7 @@
 #include "config.h"
 
 #include <sys/types.h>
+#include <new>
 
 #ifdef HAVE_NAMESPACES
 namespace std{}

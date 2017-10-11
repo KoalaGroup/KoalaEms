@@ -6,7 +6,11 @@
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <errno.h>
 #include <stdlib.h>
 #include <stddef.h>
@@ -33,9 +37,11 @@
 
 extern C_log elog, nlog, dlog;
 
-VERSION("Nov 18 2004", __FILE__, __DATE__, __TIME__,
-"$ZEL: commu_sock.cc,v 2.25 2005/02/22 17:38:37 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: commu_sock.cc,v 2.26 2014/07/14 15:12:19 wuestner Exp $")
 #define XVERSION
+
+using namespace std;
 
 /*****************************************************************************/
 
@@ -141,7 +147,7 @@ return(0);
 // TR(C_unix_socket::setname)
 // strcpy(addr.sun_path, name);
 // }
-void C_unix_socket::setname(const STRING& name)
+void C_unix_socket::setname(const string& name)
 {
     strcpy(addr.sun_path, name.c_str());
 }
@@ -281,7 +287,7 @@ return(::bind(sock, (struct sockaddr*)&addr, sizeof(struct sockaddr_in)));
 //   }
 // addr.sin_port=htons(port);
 // }
-void C_tcp_socket::setname(const STRING& name, int port)
+void C_tcp_socket::setname(const string& name, int port)
 {
     struct hostent *host;
 

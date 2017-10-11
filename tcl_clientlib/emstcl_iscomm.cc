@@ -5,7 +5,11 @@
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include "emstcl.hxx"
 #include "emstcl_is.hxx"
 #include <ved_errors.hxx>
@@ -16,11 +20,11 @@
 #include "tcl_cxx.hxx"
 #include <versions.hxx>
 
-VERSION("2009-Feb-25", __FILE__, __DATE__, __TIME__,
-"$ZEL: emstcl_iscomm.cc,v 1.24 2010/02/03 00:18:28 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: emstcl_iscomm.cc,v 1.26 2014/07/14 15:13:25 wuestner Exp $")
 #define XVERSION
 
-extern "C" int TclGetLong (Tcl_Interp *, char*, long*);
+using namespace std;
 
 /*****************************************************************************/
 
@@ -63,7 +67,7 @@ try
     {
     confback.xid(last_xid_);
     ved->installconfback(confback);
-    OSTRINGSTREAM ss;
+    ostringstream ss;
     ss << last_xid_;
     Tcl_SetResult_Stream(interp, ss);
     }
@@ -139,7 +143,7 @@ try
   if (confmode_==synchron)
     {
     int id=is_id();
-    OSTRINGSTREAM ss;
+    ostringstream ss;
     ss << id;
     Tcl_SetResult_Stream(interp, ss);
     }
@@ -148,7 +152,7 @@ try
     is_id();
     confback.xid(last_xid_);
     (eved)->installconfback(confback);
-    OSTRINGSTREAM ss;
+    ostringstream ss;
     ss << last_xid_;
     Tcl_SetResult_Stream(interp, ss);
     }
@@ -172,7 +176,7 @@ if (argc!=2)
   Tcl_SetObjResult(interp, Tcl_NewStringObj("wrong # args; must be idx", -1));
   return TCL_ERROR;
   }
-OSTRINGSTREAM ss;
+ostringstream ss;
 ss << is_idx();
 Tcl_SetResult_Stream(interp, ss);
 return TCL_OK;
@@ -203,11 +207,11 @@ if (argc!=2)
   }
 try
   {
-  STRING name;
+  string name;
   int num=numprocs();
   for(int id=0; id<num; id++)
     {
-    OSTRINGSTREAM ss;
+    ostringstream ss;
     ss << id << ' ' << procname(id);
     Tcl_AppendElement_Stream(interp, ss);
     }
@@ -279,7 +283,7 @@ E_is::e_command(int argc, const char* argv[])
                         char* s=(char*)pv[i];
                         char* se=s+strlen(s)-1;
                         if (*se!='\'') {
-                            OSTRINGSTREAM ss;
+                            ostringstream ss;
                             ss << "Unmatched ' in " << s;
                             Tcl_SetResult_Stream(interp, ss);
                             res=TCL_ERROR;
@@ -290,7 +294,7 @@ E_is::e_command(int argc, const char* argv[])
                         }
                     } else {
                         long val;
-                        if (TclGetLong(interp, (char*)pv[i], &val)!=TCL_OK)
+                        if (xTclGetLong(interp, (char*)pv[i], &val)!=TCL_OK)
                             res=TCL_ERROR;
                         else
                             add_param((int)val);
@@ -317,7 +321,7 @@ E_is::e_command(int argc, const char* argv[])
     try {
         if (confmode_==synchron) {
             C_confirmation* conf=execute();
-            OSTRINGSTREAM ss;
+            ostringstream ss;
             //(eved)->f_command(ss, conf, 0, 0, 0);
             confback.callformer(eved, ss, conf);
             Tcl_SetResult_Stream(interp, ss);
@@ -326,7 +330,7 @@ E_is::e_command(int argc, const char* argv[])
             execute();
             confback.xid(last_xid_);
             (eved)->installconfback(confback);
-            OSTRINGSTREAM ss;
+            ostringstream ss;
             ss << last_xid_;
             Tcl_SetResult_Stream(interp, ss);
         }
@@ -389,7 +393,7 @@ try
       char* se=s+length-1;
       if (*se!='\'')
         {
-        OSTRINGSTREAM ss;
+        ostringstream ss;
         ss << "Unmatched ' in " << s;
         Tcl_SetResult_Stream(interp, ss);
         res=TCL_ERROR;
@@ -421,7 +425,7 @@ try
     else
       {
       long val;
-      if (TclGetLong(interp, (char*)argv[i], &val)!=TCL_OK)
+      if (xTclGetLong(interp, (char*)argv[i], &val)!=TCL_OK)
         res=TCL_ERROR;
       else
         add_param((int)val);
@@ -432,7 +436,7 @@ try
     if (confmode_==synchron)
       {
       C_confirmation* conf=execute();
-      OSTRINGSTREAM ss;
+      ostringstream ss;
       //(eved)->f_command(ss, conf, 0, 0, 0);
       confback.callformer(eved, ss, conf);
       Tcl_SetResult_Stream(interp, ss);
@@ -443,7 +447,7 @@ try
       execute();
       confback.xid(last_xid_);
       (eved)->installconfback(confback);
-      OSTRINGSTREAM ss;
+      ostringstream ss;
       ss << last_xid_;
       Tcl_SetResult_Stream(interp, ss);
       }
@@ -539,7 +543,7 @@ int E_is::e_memlist_create(int argc, const char* argv[])
         if (confmode_==asynchron) {
             confback.xid(last_xid_);
             (eved)->installconfback(confback);
-            OSTRINGSTREAM ss;
+            ostringstream ss;
             ss << last_xid_;
             Tcl_SetResult_Stream(interp, ss);
         }
@@ -580,7 +584,7 @@ try
     int n=mlist->size();
     for (int i=0; i<n; i++)
       {
-      OSTRINGSTREAM ss;
+      ostringstream ss;
       ss << hex << setiosflags(ios::showbase) << (*mlist)[i];
       Tcl_AppendElement_Stream(interp, ss);
       }
@@ -590,7 +594,7 @@ try
     UploadISModullist();
     confback.xid(last_xid_);
     (eved)->installconfback(confback);
-    OSTRINGSTREAM ss;
+    ostringstream ss;
     ss << last_xid_;
     Tcl_SetResult_Stream(interp, ss);
     }
@@ -630,7 +634,7 @@ try
     {
     confback.xid(last_xid_);
     (eved)->installconfback(confback);
-    OSTRINGSTREAM ss;
+    ostringstream ss;
     ss << last_xid_;
     Tcl_SetResult_Stream(interp, ss);
     }
@@ -670,7 +674,7 @@ try
   if (confmode_==synchron)
     {
     C_isstatus* status=ISStatus();
-    OSTRINGSTREAM ss;
+    ostringstream ss;
     (eved)->ff_isstatus(ss, status);
     delete status;
     Tcl_SetResult_Stream(interp, ss);
@@ -680,7 +684,7 @@ try
     ISStatus();
     confback.xid(last_xid_);
     (eved)->installconfback(confback);
-    OSTRINGSTREAM ss;
+    ostringstream ss;
     ss << last_xid_;
     Tcl_SetResult_Stream(interp, ss);
     }
@@ -720,7 +724,7 @@ try
     {
     confback.xid(last_xid_);
     (eved)->installconfback(confback);
-    OSTRINGSTREAM ss;
+    ostringstream ss;
     ss << last_xid_;
     Tcl_SetResult_Stream(interp, ss);
     }
@@ -790,7 +794,7 @@ try
   if (confmode_==synchron)
     {
     C_confirmation* conf=UploadReadoutlist(trigg);
-    OSTRINGSTREAM ss;
+    ostringstream ss;
     (eved)->f_readoutlist(ss, conf, 0, 0, 0);
     Tcl_SetResult_Stream(interp, ss);
     delete conf;
@@ -800,7 +804,7 @@ try
     UploadReadoutlist(trigg);
     confback.xid(last_xid_);
     (eved)->installconfback(confback);
-    OSTRINGSTREAM ss;
+    ostringstream ss;
     ss << last_xid_;
     Tcl_SetResult_Stream(interp, ss);
     }
@@ -845,7 +849,7 @@ int E_is::e_rolist_setup(int argc, const char* argv[])
         }
         for (int j=0; (res==TCL_OK) && (j<mlc); j++) {
             long arg;
-            if (TclGetLong(interp, (char*)mlv[j], &arg)!=TCL_OK) {
+            if (xTclGetLong(interp, (char*)mlv[j], &arg)!=TCL_OK) {
                 res=TCL_ERROR;
                 break;
             }
@@ -936,7 +940,7 @@ int E_is::e_rolist_create(int argc, const char* argv[])
         if (confmode_==asynchron) {
             confback.xid(last_xid_);
             (eved)->installconfback(confback);
-            OSTRINGSTREAM ss;
+            ostringstream ss;
             ss << last_xid_;
             Tcl_SetResult_Stream(interp, ss);
         }
@@ -1014,7 +1018,7 @@ int E_is::e_rolist_create(int argc, const char* argv[])
                 }
                 for (int j=0; j<mlc; j++) {
                     long arg;
-                    if (TclGetLong(interp, (char*)mlv[j], &arg)!=TCL_OK) {
+                    if (xTclGetLong(interp, (char*)mlv[j], &arg)!=TCL_OK) {
                         Tcl_Free((char*)mlv0);
                         Tcl_Free((char*)mlv);
                         delete[] trigg;
@@ -1047,7 +1051,7 @@ int E_is::e_rolist_create(int argc, const char* argv[])
                     return TCL_ERROR;
                 for (int j=0; j<mlc; j++) {
                     long arg;
-                    if (TclGetLong(interp, (char*)mlv[j], &arg)!=TCL_OK) {
+                    if (xTclGetLong(interp, (char*)mlv[j], &arg)!=TCL_OK) {
                         Tcl_Free((char*)mlv);
                         delete[] trigg;
                         return TCL_ERROR;
@@ -1073,7 +1077,7 @@ int E_is::e_rolist_create(int argc, const char* argv[])
         if (confmode_==asynchron) {
             confback.xid(last_xid_);
             (eved)->installconfback(confback);
-            OSTRINGSTREAM ss;
+            ostringstream ss;
             ss << last_xid_;
             Tcl_SetResult_Stream(interp, ss);
         }
@@ -1141,7 +1145,7 @@ int E_is::e_rolist_delete(int argc, const char* argv[])
                 DeleteReadoutlist(trigg[0]);
                 confback.xid(last_xid_);
                 (eved)->installconfback(confback);
-                OSTRINGSTREAM ss;
+                ostringstream ss;
                 ss << last_xid_;
                 Tcl_SetResult_Stream(interp, ss);
                 res=TCL_OK;

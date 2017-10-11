@@ -1,17 +1,24 @@
 /*
  * proc_dataoutstatus.hxx
  * created: 12.06.97
- * 22.03.1999 PW: device eliminated
+ *
+ * $ZEL: proc_dataoutstatus.hxx,v 2.7 2014/07/14 15:11:53 wuestner Exp $
  */
+
 #ifndef _proc_dataoutstatus_hxx_
 #define _proc_dataoutstatus_hxx_
 
 #include "config.h"
-#include "cxxcompat.hxx"
-
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <inbuf.hxx>
 
 class C_confirmation;
+
+using namespace std;
 
 /*****************************************************************************/
 

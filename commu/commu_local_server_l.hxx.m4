@@ -1,7 +1,7 @@
 /*
  * commu_local_server_l.hxx.m4
  * 
- * $ZEL: commu_local_server_l.hxx.m4,v 2.8 2009/08/21 22:02:28 wuestner Exp $
+ * $ZEL: commu_local_server_l.hxx.m4,v 2.9 2014/07/14 15:12:19 wuestner Exp $
  * 
  * created 05.02.95 PW
  */
@@ -60,7 +60,7 @@ class C_local_server_l: public C_local_server
 
   public:
     //void logstring(const char*);
-    void logstring(const STRING&);
+    void logstring(const string&);
     virtual const C_VED_addr& get_addr() const {return(addr);}
   };
 

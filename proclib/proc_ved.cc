@@ -5,7 +5,11 @@
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <cerrno>
 #include <cstdlib>
 #include <cstring>
@@ -28,8 +32,8 @@
 #include "compat.h"
 #include <versions.hxx>
 
-VERSION("2009-Feb-24", __FILE__, __DATE__, __TIME__,
-"$ZEL: proc_ved.cc,v 2.40 2010/06/20 22:44:07 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: proc_ved.cc,v 2.42 2014/07/14 15:11:54 wuestner Exp $")
 #define XVERSION
 
 const C_VED::VED_prior C_VED::NO_prior=0;     // auxiliary System
@@ -39,9 +43,11 @@ const C_VED::VED_prior C_VED::CCM_prior=2000; // mit Master-Trigger
 const C_VED::VED_prior C_VED::SER_prior=3000;
 const C_VED::VED_prior C_VED::EB_prior=4000;
 
+using namespace std;
+
 /*****************************************************************************/
 
-C_VED::C_VED(const STRING& name, C_VED::VED_prior prior)
+C_VED::C_VED(const string& name, C_VED::VED_prior prior)
 :ved_name(name), namelist("namelist"),
   namelist_dom("namelist_dom"), namelist_pi("namelist_pi"),
   capab_proc_list("capab_proc_list"), capab_trig_list("capab_trig_list"),
@@ -55,7 +61,7 @@ C_VED::C_VED(const STRING& name, C_VED::VED_prior prior)
 
     ved=(ems_u32)OpenVED(name.c_str());
     if (ved==(ems_u32)-1) {
-        OSTRINGSTREAM s;
+        ostringstream s;
         s << "Can't open VED \"" << name <<"\"";
         throw new C_ems_error(EMS_errno, s);
     }
@@ -275,7 +281,7 @@ int C_VED::ReadVariable(int idx)
             throw new C_ved_error(this, conf, "Error in ReadVariable");
         } else {
             if (conf->buffer(1)!=1) {
-                OSTRINGSTREAM s;
+                ostringstream s;
                 s << "Error in ReadVariable: expected size: 1; real size: "
                     << conf->buffer(1);
                 delete conf;
@@ -308,7 +314,7 @@ void C_VED::ReadVariable(int idx, ems_i32* dest, int* size)
             int num;
             num=buff[1];
             if (num>*size) {
-                OSTRINGSTREAM s;
+                ostringstream s;
                 s << "Error in ReadVariable: available size: " << *size
                     << "; required size: " << num;
                 delete conf;
@@ -510,7 +516,7 @@ else
 
 /*****************************************************************************/
 
-STRING C_VED::GetReadoutParams()
+string C_VED::GetReadoutParams()
 {
 int xid;
 
@@ -518,7 +524,7 @@ xid=::GetProgramInvocationParams(ved, Invocation_readout, 0);
 if (confmode_==synchron)
   {
   C_confirmation* conf;
-  STRING st;
+  string st;
   conf=GetConf(xid);
   if (conf->buffer(0)!=OK)
       throw new C_ved_error(this, conf, "Error in GetReadoutParams");
@@ -593,6 +599,7 @@ void C_VED::UploadDataoutAddr(int idx, C_add_trans& addr)
         case Addr_Raw:
             conf[5]: addr;
         case Addr_Socket:
+        case Addr_V6Socket:
         case Addr_LocalSocket:
         case Addr_File:
         Addr_Tape:
@@ -614,18 +621,19 @@ void C_VED::UploadDataoutAddr(int idx, C_add_trans& addr)
             }
             break;
         case Addr_Socket:
+        case Addr_V6Socket:
         case Addr_LocalSocket:
         case Addr_File:
         case Addr_Tape:
         case Addr_Null:
             {
-            OSTRINGSTREAM s;
+            ostringstream s;
             s << "addresstype " << buff[4] << " is not usable";
             throw new C_ved_error(this, s);
             }
         default:
             {
-            OSTRINGSTREAM s;
+            ostringstream s;
             s << "addresstype "<< buff[4] <<" is not known";
             throw new C_ved_error(this, s);
             }
@@ -971,7 +979,7 @@ if (list)
     return(res);
   else
     {
-    OSTRINGSTREAM s;
+    ostringstream s;
     s<<"VED has no "<<(typ==Capab_listproc?"":"trigger ")
         <<"procedure "<< proc;
     throw new C_ved_error(this, s);
@@ -979,7 +987,7 @@ if (list)
   }
 else
   {
-  OSTRINGSTREAM s;
+  ostringstream s;
   s << "VED has no "<<(typ==Capab_listproc?"":"trigger ")
       <<"procedures";
   throw new C_ved_error(this, s);
@@ -999,14 +1007,14 @@ else
 
 /*****************************************************************************/
 
-STRING C_VED::procname(int proc, Capabtyp typ)
+string C_VED::procname(int proc, Capabtyp typ)
 {
 C_capability_list* list=typ==Capab_listproc?capab_proc_list:capab_trig_list;
 if (list)
   return(list->get(proc));
 else
   {
-  OSTRINGSTREAM s;
+  ostringstream s;
   s << "VED has no "<<(typ==Capab_listproc?"":"trigger ")
       <<"procedures";
   throw new C_ved_error(this, s);
@@ -1331,7 +1339,7 @@ catch(C_error*)
 delete[] domain;
 }
 /*****************************************************************************/
-
+#warning Addr_V6Socket is missing
 // Addr_Socket
 void C_VED::DownloadDataout(int idx, InOutTyp typ, int buffersize,
     int priority, IOAddr addrtyp, const char* hostname, int port)
@@ -1357,7 +1365,7 @@ else
   addr=inet_addr(hname);
   if (addr==-1)
     {
-    OSTRINGSTREAM s;
+    ostringstream s;
     s << "DownloadDataout: host \""<< hname << "\" unknown";
     throw new C_ved_error(this, EMSE_HostUnknown, s);
     }
@@ -1540,7 +1548,7 @@ if (confmode_==synchron)
   C_confirmation* conf=GetConf(xid);
   if (conf->buffer(0)!=OK)
     {
-    OSTRINGSTREAM s;
+    ostringstream s;
     s << "Can't delete IS " << idx;
     throw new C_ved_error(this, conf, s);
     }
@@ -1582,7 +1590,7 @@ C_VED::CreateLam(int idx, int id, int is, const char* trigproc,
         throw new C_ved_error(this, "No trigger procedures available");
     iproc=capab_trig_list->get(trigproc);
     if (iproc==-1) {
-        OSTRINGSTREAM s;
+        ostringstream s;
         s << "unknown trigger procedure \"" << trigproc << "\"";
         throw new C_ved_error(this, s);
     }
@@ -1907,7 +1915,7 @@ int i;
 
 if (lamlist->add_proc(proc)==-1)
   {
-  OSTRINGSTREAM s;
+  ostringstream s;
   s << "unknown procedure \"" << proc << "\"";
   throw new C_ved_error(this, s);
   }
@@ -1923,7 +1931,7 @@ void C_VED::lam_add_proc(const char* proc, int arg)
 {
 if (lamlist->add_proc(proc)==-1)
   {
-  OSTRINGSTREAM s;
+  ostringstream s;
   s << "unknown procedure \"" << proc << "\"";
   throw new C_ved_error(this, s);
   }
@@ -1937,7 +1945,7 @@ void C_VED::lam_add_proc(const char* proc)
 {
 if (lamlist->add_proc(proc)==-1)
   {
-  OSTRINGSTREAM s;
+  ostringstream s;
   s << "unknown procedure \"" << proc << "\"";
   throw new C_ved_error(this, s);
   }
@@ -2019,7 +2027,7 @@ if (triglist->proc_num()>0)
   }
 if (triglist->add_proc(proc)==-1)
   {
-  OSTRINGSTREAM s;
+  ostringstream s;
   s << "unknown trigger procedure \"" << proc << "\"";
   throw new C_ved_error(this, s);
   }
@@ -2062,7 +2070,7 @@ if (!capab_trig_list)
 iproc=capab_trig_list->get(proc);
 if (iproc==-1)
   {
-  OSTRINGSTREAM s;
+  ostringstream s;
   s << "unknown trigger procedure \"" << proc << "\"";
   throw new C_ved_error(this, s);
   }
@@ -2107,7 +2115,7 @@ if (!capab_trig_list)
 iproc=capab_trig_list->get(proc);
 if (iproc==-1)
   {
-  OSTRINGSTREAM s;
+  ostringstream s;
   s << "unknown trigger procedure \"" << proc << "\"";
   throw new C_ved_error(this, s);
   }

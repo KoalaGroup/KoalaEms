@@ -1,3 +1,7 @@
+# $ZEL: scaler_commu.tcl,v 1.2 2011/11/27 00:09:17 wuestner Exp $
+# copyright 1998-2011
+#   P. Wuestner; Zentralinstitut fuer Elektronik; Forschungszentrum Juelich
+#
 proc connect_xh {} {
   global global_setup global_xh_path
 

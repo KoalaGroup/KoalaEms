@@ -1,7 +1,7 @@
 /*
  * pairarr_mem.hxx
  * 
- * $ZEL: pairarr_mem.hxx,v 1.5 2004/11/18 12:35:57 wuestner Exp $
+ * $ZEL: pairarr_mem.hxx,v 1.6 2014/07/14 15:13:26 wuestner Exp $
  * 
  * created 13.09.96 PW
  */
@@ -10,8 +10,14 @@
 #define _pairarr_mem_hxx_
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include "pairarr.hxx"
+
+using namespace std;
 
 /*****************************************************************************/
 
@@ -22,7 +28,7 @@ class C_pairarr_mem: public C_pairarr
     C_pairarr_mem(int initialsize, int increment, int maxsize, const char* file);
     virtual ~C_pairarr_mem();
   protected:
-    STRING filename;
+    string filename;
     vt_pair* arr;
     int arrlimit; // max. Groesse ist 2^arrlimit
     int arrmask;  // 2^arrlimit-1

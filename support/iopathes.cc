@@ -5,7 +5,11 @@
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <cerrno>
 #include <unistd.h>
 #include <cstdlib>
@@ -25,15 +29,17 @@
 #include "errors.hxx"
 #include "iopathes.hxx"
 
-VERSION("2009-Feb-25", __FILE__, __DATE__, __TIME__,
-"$ZEL: iopathes.cc,v 1.25 2009/07/03 12:27:23 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: iopathes.cc,v 1.28 2014/07/14 15:09:53 wuestner Exp $")
 #define XVERSION
 
+using namespace std;
+
 ///////////////////////////////////////////////////////////////////////////////
-C_iopath::C_iopath(const STRING& pathname, C_iopath::io_dir dir, int verbatim)
+C_iopath::C_iopath(const string& pathname, C_iopath::io_dir dir, int verbatim)
 :pathname_(pathname), verbatim_(verbatim),
  path_(-1), wbuffersize_(0), wbuffer_(0), sockptr(0), oldsockptr(0),
- typ_(iotype_none), dir_(dir)
+ typ_(iotype_none), dir_(dir), advise(advise_normal)
 {
     open();
 }
@@ -41,12 +47,13 @@ C_iopath::C_iopath(const STRING& pathname, C_iopath::io_dir dir, int verbatim)
 C_iopath::C_iopath(int path, io_dir dir)
 :pathname_(""), verbatim_(-1),
  path_(path), wbuffersize_(0), wbuffer_(0), sockptr(0), oldsockptr(0),
- typ_(iotype_none), dir_(dir)
+ typ_(iotype_none), dir_(dir), advise(advise_normal)
 {
 try
   {
   filemode_=get_mode(path_);
   typ_=detect_type(path_);
+  set_fadvise();
   }
 catch(C_error* e)
   {
@@ -58,9 +65,9 @@ catch(C_error* e)
 C_iopath::C_iopath(const char* hostname, int port, C_iopath::io_dir dir)
 :verbatim_(0),
  path_(-1), wbuffersize_(0), wbuffer_(0), sockptr(0), oldsockptr(0),
- typ_(iotype_none), dir_(dir)
+ typ_(iotype_none), dir_(dir), advise(advise_normal)
 {
-OSTRINGSTREAM st;
+ostringstream st;
 st<<hostname<<':'<<port;
 pathname_=st.str();
 if ((dir_!=iodir_input) && (dir_!=iodir_output))
@@ -73,6 +80,7 @@ try
   path_=socket_open(hostname, port, dir_);
   filemode_=get_mode(path_);
   typ_=detect_type(path_);
+  set_fadvise();
   }
 catch(C_error* e)
   {
@@ -96,7 +104,7 @@ else
   if (path_>0) ::close(path_);
 }
 ///////////////////////////////////////////////////////////////////////////////
-void C_iopath::init(const STRING& pathname, C_iopath::io_dir dir, int verbatim)
+void C_iopath::init(const string& pathname, C_iopath::io_dir dir, int verbatim)
 {
 if (typ_!=iotype_none)
   {
@@ -108,6 +116,48 @@ dir_=dir;
 wbuffersize_=0;
 wbuffer_=0;
 open();
+}
+///////////////////////////////////////////////////////////////////////////////
+void
+C_iopath::set_fadvise(void)
+{
+    if (typ_!=iotype_file)
+        return;
+    
+  if (advise==advise_sequential) {
+    int err=posix_fadvise(path_, 0, 0, POSIX_FADV_SEQUENTIAL);
+    if (err)
+        cerr<<"fadvise(SEQUENTIAL): "<<strerror(err)<<endl;
+  }
+  last_advise_offs=0;
+  fadvise_read=0;
+}
+///////////////////////////////////////////////////////////////////////////////
+void
+C_iopath::do_fadvise(size_t bytes)
+{
+    const unsigned long long threshold=0x1000000; // 16 MByte
+    fadvise_read+=bytes;
+    if (fadvise_read<threshold)
+        return;
+    
+    fadvise_read=0;
+    off_t last_offs=last_advise_offs;
+    last_advise_offs=lseek(path_, 0, SEEK_CUR);
+    if (last_advise_offs==static_cast<off_t>(-1)) {
+        cerr<<"lseek: "<<strerror(errno);
+        return;
+    }
+    // round down to next 16 MByte
+    last_advise_offs&=~(threshold-1);
+    off_t len=last_advise_offs-last_offs;
+    cerr<<"fadvise: "<<last_offs<<" "<<last_advise_offs<<endl;
+    if (len<=0) // possible seek between calls of do_fadvise
+        return;
+    int res=posix_fadvise(path_, last_offs, len, POSIX_FADV_DONTNEED);
+    if (res) {
+        cerr<<"fadvise(DONTNEED): "<<strerror(res)<<endl;
+    }
 }
 ///////////////////////////////////////////////////////////////////////////////
 void C_iopath::open()
@@ -144,6 +194,7 @@ try
     }
   filemode_=get_mode(path_);
   typ_=detect_type(path_);
+  set_fadvise();
   }
 catch(C_error* e)
   {
@@ -176,7 +227,7 @@ sockptr=0;
 typ_=iotype_none;
 }
 ///////////////////////////////////////////////////////////////////////////////
-int C_iopath::file_open(const STRING& pathname, C_iopath::io_dir dir)
+int C_iopath::file_open(const string& pathname, C_iopath::io_dir dir)
 {
     int path;
 
@@ -185,7 +236,7 @@ int C_iopath::file_open(const STRING& pathname, C_iopath::io_dir dir)
             ((dir==iodir_input)?O_RDONLY:O_WRONLY|O_CREAT|O_TRUNC)|
                     LINUX_LARGEFILE, 0640);
     if (path<0) {
-        OSTRINGSTREAM st;
+        ostringstream st;
         st<<"Open file \""<<pathname<<"\" for "
                 <<((dir==iodir_input)?"input":"output");
         throw new C_unix_error(errno, st);
@@ -193,7 +244,7 @@ int C_iopath::file_open(const STRING& pathname, C_iopath::io_dir dir)
     return path;
 }
 ///////////////////////////////////////////////////////////////////////////////
-int C_iopath::socket_open(const STRING& pathname, C_iopath::io_dir dir)
+int C_iopath::socket_open(const string& pathname, C_iopath::io_dir dir)
 {
 if (oldsockptr)
   { /* passive part of connection, listen socket already open */
@@ -202,8 +253,8 @@ if (oldsockptr)
 else
   { /* no listen socket open */
   int active, portnum;
-  STRING pname=pathname;
-  STRING host, port;
+  string pname=pathname;
+  string host, port;
 #ifdef NO_ANSI_CXX
   int colon=pname.index(":");
   active=colon!=0;
@@ -218,7 +269,7 @@ else
   if (port.find_first_not_of("0123456789")==string::npos)
 #endif
     {/* tcp/ip */
-    ISTRINGSTREAM st(port);
+    istringstream st(port);
     st>>portnum;
     if (debuglevel::verbose_level)
       {
@@ -580,6 +631,8 @@ switch (typ_)
   case iotype_file:
     res=::read(path_, data, num);
     if (res==0) throw new C_status_error(C_status_error::err_end_of_file);
+    if (res>0 && (advise&advise_sequential))
+        do_fadvise(res);
     break;
   case iotype_fifo:
   case iotype_socket:
@@ -588,7 +641,7 @@ switch (typ_)
     break;
   case iotype_none:
   default: {
-    OSTRINGSTREAM st;
+    ostringstream st;
     st<<"illegal iotype in C_iopath::read: "<<static_cast<int>(typ_);
     throw new C_program_error(st);
     }
@@ -596,9 +649,9 @@ switch (typ_)
 return res;
 }
 ///////////////////////////////////////////////////////////////////////////////
-STRING C_iopath::readln()
+string C_iopath::readln()
 {
-    STRING st;
+    string st;
     char c;
     do {
         if (::read(path_, &c, 1)!=1)
@@ -631,6 +684,16 @@ if (fcntl(path_, F_SETFL, O_NDELAY)==-1)
 off_t C_iopath::seek(ems_u64 offs, int whence)
 {
 return lseek(path_, offs, whence);
+}
+///////////////////////////////////////////////////////////////////////////////
+void
+C_iopath::fadvise_sequential(bool val)
+{
+    if (val) {
+        advise=static_cast<io_advise>(advise|advise_sequential);
+        set_fadvise();
+    }
+    // val==false not implemented yet
 }
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////

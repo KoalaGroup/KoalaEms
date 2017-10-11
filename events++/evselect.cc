@@ -5,8 +5,10 @@
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
 #include <readargs.hxx>
+#include <iostream>
+#include <sstream>
+#include <string>
 #include <cerrno>
 #include <cstring>
 #include <sys/ioctl.h>
@@ -14,8 +16,8 @@
 #include <compat.h>
 #include <versions.hxx>
 
-VERSION("2009-Feb-25", __FILE__, __DATE__, __TIME__,
-"$ZEL: evselect.cc,v 1.8 2010/09/04 21:20:22 wuestner Exp $")
+VERSION("2014-07-14", __FILE__, __DATE__, __TIME__,
+"$ZEL: evselect.cc,v 1.10 2014/07/14 16:18:17 wuestner Exp $")
 #define XVERSION
 
 C_readargs* args;
@@ -33,12 +35,14 @@ int skip;
 int maxevnum;
 int maxevid;
 int recsize;
-STRING infile;
-STRING outfile;
+string infile;
+string outfile;
+
+using namespace std;
 
 /*****************************************************************************/
-
-int readargs()
+static int
+readargs(void)
 {
 args->addoption("verbose", "v", false, "verbose");
 args->addoption("ignore", "i", 0, "subevents to be ignored", "i_sub");
@@ -113,11 +117,11 @@ return(0);
 }
 
 /*****************************************************************************/
-
-void read_usr_records(C_evoutput& evout)
+static void
+read_usr_records(C_evoutput& evout)
 {
-const STRING prefix(args->getstringopt("usrprefix"));
-const STRING suffix(args->getstringopt("usrsuffix"));
+const string prefix(args->getstringopt("usrprefix"));
+const string suffix(args->getstringopt("usrsuffix"));
 int idx, ok;
 C_event event;
 FILE* f;
@@ -126,10 +130,10 @@ clog << "read_usr_records: prefix=" << prefix << "; suffix=" << suffix << endl;
 idx=0;
 do
   {
-  OSTRINGSTREAM str;
+  ostringstream str;
 
   str << prefix << setfill('0') << setw(4) << idx << suffix << ends;
-  STRING st=str.str();
+  string st=str.str();
   const char* namep=st.c_str();
   clog << "suffix=" << suffix << endl;
   clog << "name=" << namep << endl;
@@ -152,18 +156,18 @@ while (ok);
 }
 
 /*****************************************************************************/
-
-int save_usr_record(C_eventp& event, int idx)
+static int
+save_usr_record(C_eventp& event, int idx)
 {
-const STRING prefix(args->getstringopt("usrprefix"));
-const STRING suffix(args->getstringopt("usrsuffix"));
+const string prefix(args->getstringopt("usrprefix"));
+const string suffix(args->getstringopt("usrsuffix"));
 char name[1024];
 FILE* f;
 int res;
 
-OSTRINGSTREAM str;
+ostringstream str;
 str << prefix << setfill('0') << setw(4) << idx << suffix << ends;
-STRING st=str.str();
+string st=str.str();
 const char* namep=st.c_str();
 clog << "name=" << namep << endl;
 if ((f=fopen(name, "w"))==0)
@@ -182,7 +186,8 @@ return res;
 }
 
 /*****************************************************************************/
-int do_select()
+static int
+do_select()
 {
 C_evinput* evin;
 C_evoutput* evout;
@@ -303,8 +308,8 @@ return 0;
 }
 
 /*****************************************************************************/
-
-int do_copy()
+static int
+do_copy(void)
 {
 C_evinput* evin;
 C_evoutput* evout;

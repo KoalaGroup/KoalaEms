@@ -1,3 +1,8 @@
+# $ZEL: scaler_print.tcl,v 1.3 2011/11/27 00:13:17 wuestner Exp $
+# copyright 1998-2011
+#   P. Wuestner; Zentralinstitut fuer Elektronik; Forschungszentrum Juelich
+#
+
 proc print_scaler {} {
   global global_setup global_setup_names scaler_cont
   global global_num_channels global_setup_print
@@ -19,7 +24,6 @@ proc print_scaler {} {
     }
   }
   append line " >&/dev/console </dev/null &"
-  #puts $line
   eval $line
 }
 

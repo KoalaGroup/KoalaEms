@@ -1,5 +1,5 @@
 /*
- * sockets.cc
+ * support/sockets.cc
  * 
  * created 25.03.95 PW
  */
@@ -7,7 +7,11 @@
 #define _BSD_SOURCE
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <errno.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -32,19 +36,21 @@
 #include "errors.hxx"
 #include "compat.h"
 
-VERSION("2007-04-11", __FILE__, __DATE__, __TIME__,
-"$ZEL: sockets.cc,v 2.24 2007/04/11 11:38:52 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: sockets.cc,v 2.26 2014/07/14 15:09:53 wuestner Exp $")
 #define XVERSION
+
+using namespace std;
 
 /*****************************************************************************/
 
-sock::sock(STRING name)
+sock::sock(string name)
 :name_(name), path_(-1)
 {}
 
 /*****************************************************************************/
 
-sock::sock(int path, STRING name)
+sock::sock(int path, string name)
 :name_(name), path_(path)
 {}
 
@@ -69,13 +75,13 @@ if (::listen(path_, 8)==-1)
 
 /*****************************************************************************/
 
-tcp_socket::tcp_socket(STRING name)
+tcp_socket::tcp_socket(string name)
 :sock(name)
 {}
 
 /*****************************************************************************/
 
-tcp_socket::tcp_socket(int path, STRING name)
+tcp_socket::tcp_socket(int path, string name)
 :sock(path, name)
 {}
 
@@ -107,7 +113,7 @@ if (setsockopt(path_, IPPROTO_TCP, TCP_NODELAY, &optval,
 
 /*****************************************************************************/
 
-void tcp_socket::bind(short port)
+void tcp_socket::bind(unsigned short port)
 {
 struct sockaddr_in addr;
 
@@ -117,7 +123,7 @@ addr.sin_addr.s_addr=htonl(static_cast<in_addr_t>(0x00000000)); // INADDR_ANY
 addr.sin_port=htons(port);
 if (::bind(path_, reinterpret_cast<struct sockaddr*>(&addr), sizeof(struct sockaddr_in))==-1)
   {
-  OSTRINGSTREAM s;
+  ostringstream s;
   s << "tcp socket bind(" << port << ")";
   throw new C_unix_error(errno, s);
   }
@@ -129,7 +135,7 @@ if (setsockopt(path_, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval))<0)
 }
 
 /*****************************************************************************/
-void tcp_socket::connect(const char* name, short port)
+void tcp_socket::connect(const char* name, unsigned short port)
 {
     struct sockaddr_in addr;
     in_addr_t iaddr;
@@ -137,7 +143,7 @@ void tcp_socket::connect(const char* name, short port)
     if ((iaddr=inet_addr(name))==static_cast<in_addr_t>(-1)) {
         struct hostent *host;
         if ((host=gethostbyname(name))==0) {
-            OSTRINGSTREAM s;
+            ostringstream s;
             s << "cannot resolve hostname " << name;
             throw new C_program_error(s);
         }
@@ -150,7 +156,7 @@ void tcp_socket::connect(const char* name, short port)
     addr.sin_port=htons(port);
     int res=::connect(path_, reinterpret_cast<struct sockaddr*>(&addr), sizeof(struct sockaddr_in));
     if ((res!=0) && (errno!=EINPROGRESS)) {
-        OSTRINGSTREAM s;
+        ostringstream s;
         s << "tcp socket connect(" << name << ", " << port << ")";
         throw new C_unix_error(errno, s);
     }
@@ -168,7 +174,7 @@ size=sizeof(struct sockaddr);
 ns=::accept(path_, &addr, &size);
 if (ns==-1)
   {
-  OSTRINGSTREAM s;
+  ostringstream s;
   s << "tcp socket accept(" << name_ << ")";
   throw new C_unix_error(errno, s);
   }
@@ -179,13 +185,13 @@ return(s);
 
 /*****************************************************************************/
 
-unix_socket::unix_socket(STRING name)
+unix_socket::unix_socket(string name)
 :sock(name), fname("") 
 {}
 
 /*****************************************************************************/
 
-unix_socket::unix_socket(int path, STRING name)
+unix_socket::unix_socket(int path, string name)
 :sock(path, name), fname("") 
 {}
 
@@ -226,7 +232,7 @@ int res=::bind(path_, reinterpret_cast<struct sockaddr*>(&addr), sizeof(struct s
 umask(mask);
 if (res==-1)
   {
-  OSTRINGSTREAM s;
+  ostringstream s;
   s << "unix socket bind(" << name << ")";
   throw new C_unix_error(errno, s);
   }
@@ -246,7 +252,7 @@ strcpy(addr.sun_path, name);
 int res=::connect(path_, reinterpret_cast<struct sockaddr*>(&addr), sizeof(struct sockaddr_un));
 if ((res!=0)/* && (errno=!EINPROGRESS)*/)
   {
-  OSTRINGSTREAM s;
+  ostringstream s;
   s << "unix socket connect(" << name << ")";
   throw new C_unix_error(errno, s);
   }
@@ -265,7 +271,7 @@ size=sizeof(struct sockaddr);
 ns=::accept(path_, &addr, &size);
 if (ns==-1)
   {
-  OSTRINGSTREAM s;
+  ostringstream s;
   s << "unix socket accept(" << name_ << ")";
   throw new C_unix_error(errno, s);
   }

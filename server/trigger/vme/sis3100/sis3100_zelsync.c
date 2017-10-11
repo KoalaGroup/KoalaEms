@@ -3,7 +3,7 @@
  * created 2007-Mar-16 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: sis3100_zelsync.c,v 1.23 2011/04/06 20:30:36 wuestner Exp $";
+    "$ZEL: sis3100_zelsync.c,v 1.24 2015/04/21 16:44:35 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -392,7 +392,7 @@ init_trig_sis3100_zelsync(ems_u32* p, struct triggerinfo* trinfo)
     /* read arguments and fill struct sis3100data[] */
     pp=p+2;
     for (i=0; i<priv->numbranches; i++) {
-        if (!valid_module(pp[0], modul_vme, 0)) {
+        if (!valid_module(pp[0], modul_vme)) {
             *outptr++=i;
             free(priv->data);
             free(priv);

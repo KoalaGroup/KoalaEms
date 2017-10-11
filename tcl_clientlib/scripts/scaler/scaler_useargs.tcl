@@ -1,3 +1,8 @@
+# $ZEL: scaler_useargs.tcl,v 1.3 2011/11/27 00:14:58 wuestner Exp $
+# copyright 1998-2011
+#   P. Wuestner; Zentralinstitut fuer Elektronik; Forschungszentrum Juelich
+#
+
 proc use_args {} {
   global global_setup namedarg
 

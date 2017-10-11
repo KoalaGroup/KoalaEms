@@ -5,7 +5,7 @@
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <string>
 #include <cerrno>
 #include <cstring>
 #include <sys/types.h>
@@ -19,9 +19,11 @@
 #include "swap_int.h"
 #include <versions.hxx>
 
-VERSION("2009-Feb-25", __FILE__, __DATE__, __TIME__,
-"$ZEL: evinput.cc,v 1.9 2010/09/04 21:19:16 wuestner Exp $")
+VERSION("2014-07-14", __FILE__, __DATE__, __TIME__,
+"$ZEL: evinput.cc,v 1.11 2014/07/14 16:18:17 wuestner Exp $")
 #define XVERSION
+
+using namespace std;
 
 /*****************************************************************************/
 
@@ -33,7 +35,7 @@ eventbuf=new int[maxevent_];
 
 /*****************************************************************************/
 
-C_evinput::C_evinput(const STRING& name, int maxevent)
+C_evinput::C_evinput(const string& name, int maxevent)
 :C_evput(name, maxevent), status(1), lastwend(unknown), maxexpect(0)
 {
 eventbuf=new int[maxevent_];
@@ -69,10 +71,10 @@ if (strcmp(name, "-")==0)
   path=0;
 else
   {
-  path=open((char*)name, O_RDONLY, 0);
+  path=open(name, O_RDONLY, 0);
   if (path==-1)
     {
-    STRING msg("open file \"");
+    string msg("open file \"");
     msg+=name;
     msg+="\" for input";
     throw new C_unix_error(errno, msg);
@@ -82,7 +84,7 @@ else
 
 /*****************************************************************************/
 
-C_evpinput::C_evpinput(const STRING& name, int maxevent)
+C_evpinput::C_evpinput(const string& name, int maxevent)
 :C_evinput(name, maxevent)
 {
 if (name=="-")
@@ -92,7 +94,7 @@ else
   path=open(name.c_str(), O_RDONLY, 0);
   if (path==-1)
     {
-    STRING msg("open tape \"");
+    string msg("open tape \"");
     msg+=name;
     msg+="\" for input";
     throw new C_unix_error(errno, msg);
@@ -122,7 +124,7 @@ int da, restlen;
 char *bufptr;
 
 restlen=len*sizeof(int);
-bufptr=(char*)buf;
+bufptr=reinterpret_cast<char*>(buf);
 while (restlen)
   {
   da=read(path, bufptr, restlen);
@@ -186,7 +188,7 @@ try
 
   if (eventbuf[0]>maxevent_)
     {
-    OSTRINGSTREAM st;
+    ostringstream st;
     st<<"C_evpinput::operator>>: event too big"<<endl;
     st<<"  size="<<eventbuf[0]<<" max="<<maxevent_<<ends;
     throw new C_program_error(st);
@@ -228,10 +230,10 @@ return(status==0);
 C_evtinput::C_evtinput(const char* name, int maxevent)
 :C_evinput(name, maxevent), blocksize(0), idx(0), filemark_(0), fatal_(0)
 {
-path=open((char*)name, O_RDONLY, 0);
+path=open(name, O_RDONLY, 0);
 if (path==-1)
   {
-  STRING msg("open tape \"");
+  string msg("open tape \"");
   msg+=name;
   msg+="\" for input";
   throw new C_unix_error(errno, msg);
@@ -240,13 +242,13 @@ if (path==-1)
 
 /*****************************************************************************/
 
-C_evtinput::C_evtinput(const STRING& name, int maxevent)
+C_evtinput::C_evtinput(const string& name, int maxevent)
 :C_evinput(name, maxevent), blocksize(0), idx(0), filemark_(0), fatal_(0)
 {
 path=open(name.c_str(), O_RDONLY, 0);
 if (path==-1)
   {
-  STRING msg("open tape \"");
+  string msg("open tape \"");
   msg+=name;
   msg+="\" for input";
   throw new C_unix_error(errno, msg);
@@ -274,7 +276,7 @@ int C_evtinput::readrecord(int* buf)
 {
 int res;
 
-res=read(path, (char*)buf, maxevent_*sizeof(int));
+res=read(path, buf, maxevent_*sizeof(int));
 if (res==-1)
   {
   throw new C_unix_error(errno, "read tape");
@@ -444,7 +446,7 @@ else
   file=fopen(name, "r");
   if (file==0)
     {
-    STRING msg("open file \"");
+    string msg("open file \"");
     msg+=name;
     msg+="\" for input";
     throw new C_unix_error(errno, msg);
@@ -454,7 +456,7 @@ else
 
 /*****************************************************************************/
 
-C_evfinput::C_evfinput(const STRING& name, int maxevent)
+C_evfinput::C_evfinput(const string& name, int maxevent)
 :C_evinput(name, maxevent)
 {
 if (name=="-")
@@ -464,7 +466,7 @@ else
   file=fopen(name.c_str(), "r");
   if (file==0)
     {
-    STRING msg("open file \"");
+    string msg("open file \"");
     msg+=name;
     msg+="\" for input";
     throw new C_unix_error(errno, msg);
@@ -480,7 +482,7 @@ C_evfinput::C_evfinput(int path, int maxevent)
 file=fdopen(path, "r");
 if (file==0)
   {
-  OSTRINGSTREAM st;
+  ostringstream st;
   st<<"fdopen("<<path<<")"<<ends;
   throw new C_unix_error(errno, st);
   }
@@ -557,7 +559,7 @@ try
 
   if (eventbuf[0]>maxevent_)
     {
-    OSTRINGSTREAM st;
+    ostringstream st;
     st<<"C_evfinput::operator>>: event too big"<<endl;
     st<<"  size="<<eventbuf[0]<<" max="<<maxevent_<<ends;
     throw new C_program_error(st);
@@ -565,7 +567,7 @@ try
 
   if (maxexpect && (eventbuf[0]>maxexpect))
     {
-    OSTRINGSTREAM st;
+    ostringstream st;
     st<<"C_evfinput::operator>>: event too big"<<endl;
     st<<"  size="<<eventbuf[0]<<" max="<<maxexpect<<ends;
     throw new C_program_error(st);

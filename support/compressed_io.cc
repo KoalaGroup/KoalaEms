@@ -5,8 +5,11 @@
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
-
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <cerrno>
 #include <fcntl.h>
 #include <unistd.h>
@@ -17,9 +20,11 @@
 #include "compressed_io.hxx"
 #include <versions.hxx>
 
-VERSION("2009-Feb-25", __FILE__, __DATE__, __TIME__,
-"$ZEL: compressed_io.cc,v 1.6 2010/10/13 14:15:52 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: compressed_io.cc,v 1.7 2014/07/14 15:09:53 wuestner Exp $")
 #define XVERSION
+
+using namespace std;
 
 #if 0
 const compressed_input::compressmagic compressed_input::compressmagics[]={

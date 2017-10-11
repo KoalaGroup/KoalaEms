@@ -1,15 +1,16 @@
 /*
- * proc_ioaddr.cc
+ * proclib/proc_ioaddr.cc
  * 
  * created: 09.06.97 PW
- * 25.03.1998 PW: adapded for <string>
- * 12.06.1998 PW: adapted for STD_STRICT_ANSI
- * 18.03.1999 PW: C_buf<<space_for_counter()...
- * 05.May.2001 PW: bugfixes
+ * 
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <errno.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -22,14 +23,22 @@
 #include "compat.h"
 #include <versions.hxx>
 
-VERSION("2007-10-24", __FILE__, __DATE__, __TIME__,
-"$ZEL: proc_ioaddr.cc,v 2.14 2010/06/20 22:41:16 wuestner Exp $")
+VERSION("2014-09-07", __FILE__, __DATE__, __TIME__,
+"$ZEL: proc_ioaddr.cc,v 2.17 2014/09/07 00:43:39 wuestner Exp $")
 #define XVERSION
+
+using namespace std;
 
 /*****************************************************************************/
 
 C_io_addr::C_io_addr(io_direction direction)
-:direction(direction), argnum(0), args(0), forcelists_(0)
+:direction(direction), argnum(0), args(0), forcelists_(false)
+{}
+
+/*****************************************************************************/
+
+C_io_addr::C_io_addr(io_direction direction, bool lists)
+:direction(direction), argnum(0), args(0), forcelists_(lists)
 {}
 
 /*****************************************************************************/
@@ -50,7 +59,7 @@ cerr << "  forcelists_=" << forcelists_ << "; uselists()=" << uselists() << endl
 
 /*****************************************************************************/
 
-int C_io_addr::forcelists(int f)
+bool C_io_addr::forcelists(bool f)
 {
 int x=forcelists_;
 forcelists_=f;
@@ -59,10 +68,23 @@ return x;
 
 /*****************************************************************************/
 
-C_io_addr* C_io_addr::create(io_direction direction, C_inbuf& ib, int lists)
+C_io_addr* C_io_addr::create(io_direction direction, C_inbuf& ib, bool lists)
 {
-IOAddr addrtype;
-addrtype=(IOAddr)ib.getint();
+    IOAddr addrtype;
+
+    // if lists!=0 the new protocol with lists is in use.
+    // in this case is:
+    //   first word: IOAddr
+    //   second word: number of arguments after IOAddr
+    //   ... arguments
+    //
+    // if lists==0 the old protocol is in use.
+    // in this case is:
+    //   first word: IOAddr
+    // the number of arguments after IOAddr is fixed for each addr type
+    //
+
+    addrtype=(IOAddr)ib.getint();
 
 switch (addrtype)
   {
@@ -78,6 +100,8 @@ switch (addrtype)
     return new C_io_addr_driver_syscall(direction, ib, lists);
   case Addr_Socket:
     return new C_io_addr_socket(direction, ib, lists);
+  case Addr_V6Socket:
+    return new C_io_addr_v6socket(direction, ib, lists);
   case Addr_Autosocket:
     return new C_io_addr_autosocket(direction, ib, lists);
   case Addr_LocalSocket:
@@ -92,7 +116,7 @@ switch (addrtype)
     return new C_io_addr_null(direction, ib, lists);
   default:
     {
-    OSTRINGSTREAM s;
+    ostringstream s;
     s << "C_io_addr::create(): IOAddr " << addrtype << " is not known";
     throw new C_program_error(s);
     }
@@ -101,18 +125,18 @@ switch (addrtype)
 
 /*****************************************************************************/
 
-int C_io_addr::uselists() const
+bool C_io_addr::uselists() const
 {
 return forcelists_;
 }
 
 /*****************************************************************************/
-C_io_addr_raw::C_io_addr_raw(io_direction direction, C_inbuf& ib, int lists)
-:C_io_addr(direction)
+C_io_addr_raw::C_io_addr_raw(io_direction direction, C_inbuf& ib, bool lists)
+:C_io_addr(direction, lists)
 {
     int here=0, nargs=0;
+
     if (lists) {
-        forcelists_=1;
         nargs=ib.getint();
         here=ib.index();
     }
@@ -160,12 +184,13 @@ return ss;
 }
 
 /*****************************************************************************/
-C_io_addr_modul::C_io_addr_modul(io_direction direction, C_inbuf& ib, int lists)
-:C_io_addr(direction)
+C_io_addr_modul::C_io_addr_modul(io_direction direction, C_inbuf& ib,
+        bool lists)
+:C_io_addr(direction, lists)
 {
     int here=0, nargs=0;
+
     if (lists) {
-        forcelists_=1;
         nargs=ib.getint();
         here=ib.index();
     }
@@ -186,14 +211,14 @@ C_io_addr_modul::C_io_addr_modul(io_direction direction, C_inbuf& ib, int lists)
 }
 /*****************************************************************************/
 
-C_io_addr_modul::C_io_addr_modul(io_direction direction, const STRING& name,
+C_io_addr_modul::C_io_addr_modul(io_direction direction, const string& name,
     int addr)
 :C_io_addr(direction), name(name), addr(addr)
 {}
 
 /*****************************************************************************/
 
-C_io_addr_modul::C_io_addr_modul(io_direction direction, const STRING& name)
+C_io_addr_modul::C_io_addr_modul(io_direction direction, const string& name)
 :C_io_addr(direction), name(name), addr(0)
 {}
 
@@ -228,12 +253,11 @@ return ss;
 
 /*****************************************************************************/
 C_io_addr_socket::C_io_addr_socket(io_direction direction, C_inbuf& ib,
-    int lists)
-:C_io_addr(direction)
+    bool lists)
+:C_io_addr(direction, lists)
 {
     int here=0, nargs=0;
     if (lists) {
-        forcelists_=1;
         nargs=ib.getint();
         here=ib.index();
     }
@@ -274,7 +298,7 @@ if (iaddr==(unsigned int)INADDR_NONE)
     iaddr=*(unsigned int*)(ent->h_addr_list[0]);
   else
     {
-    OSTRINGSTREAM ss;
+    ostringstream ss;
 #ifdef __osf__
     switch (h_errno)
       {
@@ -317,7 +341,7 @@ host=ntohl(get_iaddr(hostname));
 /*****************************************************************************/
 
 C_io_addr_socket::C_io_addr_socket(io_direction direction, 
-    const STRING& hostname, int port)
+    const string& hostname, int port)
 :C_io_addr(direction), port(port)
 {
 host=ntohl(get_iaddr(hostname.c_str()));
@@ -372,13 +396,97 @@ return ss;
 }
 
 /*****************************************************************************/
-C_io_addr_autosocket::C_io_addr_autosocket(io_direction direction, C_inbuf& ib,
-    int lists)
-:C_io_addr(direction)
+/*****************************************************************************/
+C_io_addr_v6socket::C_io_addr_v6socket(io_direction direction,
+        ip_flags flags, char const *node, char const *service)
+:C_io_addr(direction), node(node), service(service),
+        flags(static_cast<ip_flags>(flags&~ip_passive))
+{}
+/*****************************************************************************/
+C_io_addr_v6socket::C_io_addr_v6socket(io_direction direction,
+        ip_flags flags, char const *service)
+:C_io_addr(direction), node(""), service(service),
+        flags(static_cast<ip_flags>(flags|ip_passive))
+{}
+/*****************************************************************************/
+C_io_addr_v6socket::C_io_addr_v6socket(io_direction direction, C_inbuf& ib,
+        bool lists)
+:C_io_addr(direction, lists)
 {
     int here=0, nargs=0;
     if (lists) {
-        forcelists_=1;
+        nargs=ib.getint();
+        here=ib.index();
+    }
+    u_int32_t flags_;
+    ib >> flags_;
+    ib >> node;
+    if (ib.empty() || (ib.index()-here==nargs)) { // node not given
+        service=node;
+        node="";
+        flags=static_cast<ip_flags>(flags_|ip_passive);
+    } else {
+        ib >> service;
+        flags=static_cast<ip_flags>(flags_&~ip_passive);
+    }
+    if (lists) {
+        argnum=nargs-(ib.index()-here);
+        if (argnum) {
+            args=new int[argnum];
+            for (int i=0; i<argnum; i++) args[i]=ib.getint();
+        }
+    }
+}
+/*****************************************************************************/
+C_outbuf&
+C_io_addr_v6socket::out(C_outbuf& b) const
+{
+    u_int32_t flags_=static_cast<u_int32_t>(flags);
+
+    b << Addr_V6Socket;
+    if (uselists())
+        b<<space_for_counter();
+
+    b<<flags_;
+    if (flags&ip_passive) {
+        b<<service;
+    } else {
+        b<<node;
+        b<<service;
+    }
+
+    if (uselists())
+        b<<set_counter();
+
+    return b;
+}
+/*****************************************************************************/
+ostream&
+C_io_addr_v6socket::print(std::ostream& ss) const
+{
+    if (uselists())
+        ss<<"{";
+    ss << "socket ";
+    if (!(flags&ip_passive))
+        ss << node << ' ';
+    ss << service;
+    for (int i=0; i<argnum; i++)
+        ss<<' '<<args[i];
+    if (uselists())
+        ss << '}';
+    return ss;
+}
+/*****************************************************************************/
+C_io_addr_v6socket::~C_io_addr_v6socket()
+{}
+/*****************************************************************************/
+/*****************************************************************************/
+C_io_addr_autosocket::C_io_addr_autosocket(io_direction direction, C_inbuf& ib,
+    bool lists)
+:C_io_addr(direction, lists)
+{
+    int here=0, nargs=0;
+    if (lists) {
         nargs=ib.getint();
         here=ib.index();
     }
@@ -423,12 +531,11 @@ ostream& C_io_addr_autosocket::print(ostream& ss) const
 }
 /*****************************************************************************/
 C_io_addr_localsocket::C_io_addr_localsocket(io_direction direction,
-    C_inbuf& ib, int lists)
-:C_io_addr(direction)
+    C_inbuf& ib, bool lists)
+:C_io_addr(direction, lists)
 {
     int here=0, nargs=0;
     if (lists) {
-        forcelists_=1;
         nargs=ib.getint();
         here=ib.index();
     }
@@ -444,7 +551,7 @@ C_io_addr_localsocket::C_io_addr_localsocket(io_direction direction,
 /*****************************************************************************/
 
 C_io_addr_localsocket::C_io_addr_localsocket(io_direction direction,
-    const STRING& name)
+    const string& name)
 :C_io_addr(direction), name(name)
 {}
 
@@ -477,12 +584,11 @@ return ss;
 }
 
 /*****************************************************************************/
-C_io_addr_file::C_io_addr_file(io_direction direction, C_inbuf& ib, int lists)
-:C_io_addr(direction)
+C_io_addr_file::C_io_addr_file(io_direction direction, C_inbuf& ib, bool lists)
+:C_io_addr(direction, lists)
 {
     int here=0, nargs=0;
     if (lists) {
-        forcelists_=1;
         nargs=ib.getint();
         here=ib.index();
     }
@@ -496,7 +602,7 @@ C_io_addr_file::C_io_addr_file(io_direction direction, C_inbuf& ib, int lists)
     }
 }
 /*****************************************************************************/
-C_io_addr_file::C_io_addr_file(io_direction direction, const STRING& name)
+C_io_addr_file::C_io_addr_file(io_direction direction, const string& name)
 :C_io_addr(direction), name(name)
 {}
 /*****************************************************************************/
@@ -523,12 +629,11 @@ return b;
 }
 /*****************************************************************************/
 C_io_addr_asynchfile::C_io_addr_asynchfile(io_direction direction, C_inbuf& ib,
-        int lists)
-:C_io_addr(direction)
+        bool lists)
+:C_io_addr(direction, lists)
 {
     int here=0, nargs=0;
     if (lists) {
-        forcelists_=1;
         nargs=ib.getint();
         here=ib.index();
     }
@@ -543,7 +648,7 @@ C_io_addr_asynchfile::C_io_addr_asynchfile(io_direction direction, C_inbuf& ib,
 }
 /*****************************************************************************/
 C_io_addr_asynchfile::C_io_addr_asynchfile(io_direction direction,
-        const STRING& name)
+        const string& name)
 :C_io_addr(direction), name(name)
 {}
 /*****************************************************************************/
@@ -569,12 +674,11 @@ else
 return b;
 }
 /*****************************************************************************/
-C_io_addr_tape::C_io_addr_tape(io_direction direction, C_inbuf& ib, int lists)
-:C_io_addr(direction)
+C_io_addr_tape::C_io_addr_tape(io_direction direction, C_inbuf& ib, bool lists)
+:C_io_addr(direction, lists)
 {
     int here=0, nargs=0;
     if (lists) {
-        forcelists_=1;
         nargs=ib.getint();
         here=ib.index();
     }
@@ -589,7 +693,7 @@ C_io_addr_tape::C_io_addr_tape(io_direction direction, C_inbuf& ib, int lists)
 }
 /*****************************************************************************/
 
-C_io_addr_tape::C_io_addr_tape(io_direction direction, const STRING& name)
+C_io_addr_tape::C_io_addr_tape(io_direction direction, const string& name)
 :C_io_addr(direction), name(name)
 {}
 
@@ -623,12 +727,11 @@ return ss;
 
 /*****************************************************************************/
 
-C_io_addr_null::C_io_addr_null(io_direction direction, C_inbuf& ib, int lists)
-:C_io_addr(direction)
+C_io_addr_null::C_io_addr_null(io_direction direction, C_inbuf& ib, bool lists)
+:C_io_addr(direction, lists)
 {
 if (lists)
   {
-  forcelists_=1;
   argnum=ib.getint();
   if (argnum)
     {
@@ -671,12 +774,11 @@ return ss;
 
 /*****************************************************************************/
 C_io_addr_driver::C_io_addr_driver(io_direction direction, C_inbuf& ib,
-    int lists)
-:C_io_addr(direction)
+    bool lists)
+:C_io_addr(direction, lists)
 {
     int here=0, nargs=0;
     if (lists) {
-        forcelists_=1;
         nargs=ib.getint();
         here=ib.index();
     }
@@ -691,7 +793,7 @@ C_io_addr_driver::C_io_addr_driver(io_direction direction, C_inbuf& ib,
 }
 /*****************************************************************************/
 
-C_io_addr_driver::C_io_addr_driver(io_direction direction, const STRING& name,
+C_io_addr_driver::C_io_addr_driver(io_direction direction, const string& name,
     int space, int offset, int option)
 :C_io_addr(direction), name(name), addr_space(space), offset(offset),
     option(option)
@@ -705,14 +807,14 @@ C_io_addr_driver::~C_io_addr_driver()
 /*****************************************************************************/
 
 C_io_addr_driver_mapped::C_io_addr_driver_mapped(io_direction direction,
-    C_inbuf& ib, int lists)
+    C_inbuf& ib, bool lists)
 :C_io_addr_driver(direction, ib, lists)
 {}
 
 /*****************************************************************************/
 
 C_io_addr_driver_mapped::C_io_addr_driver_mapped(io_direction direction,
-    const STRING& name, int space, int offset, int option)
+    const string& name, int space, int offset, int option)
 :C_io_addr_driver(direction, name, space, offset, option)
 {}
 
@@ -749,14 +851,14 @@ return ss;
 /*****************************************************************************/
 
 C_io_addr_driver_mixed::C_io_addr_driver_mixed(io_direction direction,
-    C_inbuf& ib, int lists)
+    C_inbuf& ib, bool lists)
 :C_io_addr_driver(direction, ib, lists)
 {}
 
 /*****************************************************************************/
 
 C_io_addr_driver_mixed::C_io_addr_driver_mixed(io_direction direction,
-    const STRING& name, int space, int offset, int option)
+    const string& name, int space, int offset, int option)
 :C_io_addr_driver(direction, name, space, offset, option)
 {}
 
@@ -793,14 +895,14 @@ return ss;
 /*****************************************************************************/
 
 C_io_addr_driver_syscall::C_io_addr_driver_syscall(io_direction direction,
-    C_inbuf& ib, int lists)
+    C_inbuf& ib, bool lists)
 :C_io_addr_driver(direction, ib, lists)
 {}
 
 /*****************************************************************************/
 
 C_io_addr_driver_syscall::C_io_addr_driver_syscall(io_direction direction,
-    const STRING& name, int space, int offset, int option)
+    const string& name, int space, int offset, int option)
 :C_io_addr_driver(direction, name, space, offset, option)
 {}
 

@@ -53,7 +53,7 @@ static plerrcode
 test_vmeparm(ems_u32* p, int n)
 {
   if (p[0]!=n) return(plErr_ArgNum);
-  if (!valid_module(p[1], modul_vme, 0)) return plErr_ArgRange;
+  if (!valid_module(p[1], modul_vme)) return plErr_ArgRange;
   wirbrauchen = 1;
   return plOK;
 }

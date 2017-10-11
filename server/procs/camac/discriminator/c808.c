@@ -3,7 +3,7 @@
  * created 2007-04-04 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: c808.c,v 1.2 2011/04/06 20:30:30 wuestner Exp $";
+    "$ZEL: c808.c,v 1.3 2015/04/06 21:33:24 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -119,7 +119,7 @@ plerrcode test_proc_C808init(ems_u32* p)
 
     if (p[0]!=1)
         return plErr_ArgNum;
-    if (!valid_module(p[1], modul_camac, 0))
+    if (!valid_module(p[1], modul_camac))
         return plErr_ArgRange;
     module=ModulEnt(p[1]);
     if (module->modultype!=CAEN_DISC_C808)
@@ -171,7 +171,7 @@ plerrcode test_proc_C808threshold(ems_u32* p)
 
     if (p[0]!=3)
         return plErr_ArgNum;
-    if (!valid_module(p[1], modul_camac, 0))
+    if (!valid_module(p[1], modul_camac))
         return plErr_ArgRange;
     if (ip[2]>15 && ip[2]<-1)
         return plErr_ArgRange;
@@ -211,7 +211,7 @@ plerrcode test_proc_C808enable(ems_u32* p)
 
     if (p[0]!=2)
         return plErr_ArgNum;
-    if (!valid_module(p[1], modul_camac, 0))
+    if (!valid_module(p[1], modul_camac))
         return plErr_ArgRange;
     module=ModulEnt(p[1]);
     if (module->modultype!=CAEN_DISC_C808)
@@ -260,7 +260,7 @@ plerrcode test_proc_C808pulsewidth(ems_u32* p)
 
     if (p[0]!=3)
         return plErr_ArgNum;
-    if (!valid_module(p[1], modul_camac, 0))
+    if (!valid_module(p[1], modul_camac))
         return plErr_ArgRange;
     if (p[2]&~3)
         return plErr_ArgRange;
@@ -311,7 +311,7 @@ plerrcode test_proc_C808deadtime(ems_u32* p)
 
     if (p[0]!=3)
         return plErr_ArgNum;
-    if (!valid_module(p[1], modul_camac, 0))
+    if (!valid_module(p[1], modul_camac))
         return plErr_ArgRange;
     if (p[2]&~3)
         return plErr_ArgRange;
@@ -352,7 +352,7 @@ plerrcode test_proc_C808majthr(ems_u32* p)
 
     if (p[0]!=2)
         return plErr_ArgNum;
-    if (!valid_module(p[1], modul_camac, 0))
+    if (!valid_module(p[1], modul_camac))
         return plErr_ArgRange;
     module=ModulEnt(p[1]);
     if (module->modultype!=CAEN_DISC_C808)
@@ -395,7 +395,7 @@ plerrcode test_proc_C808testpulse(ems_u32* p)
 
     if (p[0]!=1)
         return plErr_ArgNum;
-    if (!valid_module(p[1], modul_camac, 0))
+    if (!valid_module(p[1], modul_camac))
         return plErr_ArgRange;
     module=ModulEnt(p[1]);
     if (module->modultype!=CAEN_DISC_C808)

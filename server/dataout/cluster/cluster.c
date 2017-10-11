@@ -135,7 +135,6 @@ clusters_init(char* args)
 
     T(dataout/clusters/cluster.c:clusters_init)
 printf("clusters_init\n");
-//printf("~server/dataout/cluster: confirmation of cluster initialization \n");
 
     if (_initialized) {
         printf("clusters_init: already initialized\n");

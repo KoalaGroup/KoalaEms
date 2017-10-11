@@ -4,7 +4,7 @@
  * created 07.Nov.2002 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: frdb_multi.c,v 1.5 2011/04/06 20:30:32 wuestner Exp $";
+    "$ZEL: frdb_multi.c,v 1.6 2015/04/06 21:33:33 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -105,7 +105,7 @@ plerrcode proc_FRDB_multi_read(ems_u32* p)
 plerrcode test_proc_FRDB_multi_read(ems_u32* p)
 {
     if (p[0]!=2) return plErr_ArgNum;
-    if (!valid_module(p[1], modul_fastbus, 0)) return plErr_BadModTyp;
+    if (!valid_module(p[1], modul_fastbus)) return plErr_BadModTyp;
     wirbrauchen=p[2];
     return plOK;
 }

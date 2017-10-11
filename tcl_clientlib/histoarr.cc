@@ -11,12 +11,11 @@
 #include <cfloat>
 #include <cerrno>
 #include "findstring.hxx"
-#include "compat.h"
 #include "tcl_cxx.hxx"
 #include <versions.hxx>
 
-VERSION("Nov 16 2004", __FILE__, __DATE__, __TIME__,
-"$ZEL: histoarr.cc,v 1.9 2010/02/03 00:15:51 wuestner Exp $")
+VERSION("2014-07-10", __FILE__, __DATE__, __TIME__,
+"$ZEL: histoarr.cc,v 1.10 2014/07/10 18:22:24 wuestner Exp $")
 #define XVERSION
 
 /*****************************************************************************/

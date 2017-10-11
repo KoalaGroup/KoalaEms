@@ -2,7 +2,7 @@
  * procs/fastbus/general/deadbeef.c
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: deadbeef.c,v 1.8 2011/04/06 20:30:31 wuestner Exp $";
+    "$ZEL: deadbeef.c,v 1.9 2015/04/06 21:33:31 wuestner Exp $";
 
 #include <sconf.h>
 #include <stdlib.h>
@@ -89,7 +89,7 @@ plerrcode proc_DeadBeef(ems_u32* p)
 plerrcode test_proc_DeadBeef(ems_u32* p)
 {
     if (p[0]!=3) return(plErr_ArgNum);
-    if (!valid_module(p[1], modul_fastbus, 0)) return plErr_ArgRange;
+    if (!valid_module(p[1], modul_fastbus)) return plErr_ArgRange;
     wirbrauchen=2+p[3];
     return plOK;
 }
@@ -145,7 +145,7 @@ plerrcode test_proc_RandBeef(ems_u32* p)
 {
     struct timeval tv;
     if (p[0]!=3) return(plErr_ArgNum);
-    if (!valid_module(p[1], modul_fastbus, 0)) return plErr_ArgRange;
+    if (!valid_module(p[1], modul_fastbus)) return plErr_ArgRange;
     gettimeofday(&tv, 0);
     srandom((unsigned int)tv.tv_usec);
     wirbrauchen=2+p[3];

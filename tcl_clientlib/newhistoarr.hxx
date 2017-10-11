@@ -1,19 +1,24 @@
 /*
  * tcl_clientlib/newhistoarr.hxx
  * 
- * $ZEL: newhistoarr.hxx,v 1.7 2004/11/18 12:35:53 wuestner Exp $
+ * $ZEL: newhistoarr.hxx,v 1.8 2014/07/14 15:13:26 wuestner Exp $
  * 
  * created 19.02.96
- * changed 31.10.96
  */
 
 #ifndef _histoarr_hxx_
 #define _histoarr_hxx_
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <tcl.h>
 #include "pairarr.hxx"
+
+using namespace std;
 
 /*****************************************************************************/
 
@@ -38,15 +43,15 @@ class E_histoarray {
   public:
     E_histoarray(Tcl_Interp*, C_histoarrays*, int, Tcl_Obj* const[]);
     ~E_histoarray();
-    STRING tclprocname() const;
-    STRING origtclprocname() const {return origprocname;}
-    STRING name() const {return dispname;}
+    string tclprocname() const;
+    string origtclprocname() const {return origprocname;}
+    string name() const {return dispname;}
   protected:
     Tcl_Interp* interp;
     C_histoarrays* harrs;
     Tcl_Command tclcommand;
-    STRING origprocname;
-    STRING dispname;
+    string origprocname;
+    string dispname;
     struct callback {
         void(*proc)(E_histoarray*, ClientData);
         ClientData data;

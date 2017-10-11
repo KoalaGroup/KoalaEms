@@ -5,8 +5,6 @@
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
-//#define _SOCKADDR_LEN
 #include <cerrno>
 #include <cstdlib>
 #include <cstring>
@@ -26,12 +24,12 @@
 #include <debuglevel.hxx>
 #include <xdrstring.h>
 
-VERSION("May 10 2001", __FILE__, __DATE__, __TIME__,
-"$ZEL: clusterreader.cc,v 1.19 2010/09/04 21:16:54 wuestner Exp $")
+VERSION("2014-07-14", __FILE__, __DATE__, __TIME__,
+"$ZEL: clusterreader.cc,v 1.21 2014/07/14 16:18:17 wuestner Exp $")
 #define XVERSION
 
 ///////////////////////////////////////////////////////////////////////////////
-Clusterreader::Clusterreader(const STRING& pathname, int literally)
+Clusterreader::Clusterreader(const string& pathname, int literally)
 :iopath_(pathname, C_iopath::iodir_input, literally), maxmem_(0), veds(0),
   statist_(this), save_header_(0)
 {
@@ -114,7 +112,7 @@ if (debuglevel::debug_level)
 int vedidx=ved_info.vedid2vedidx(cluster->get_ved_id());
 if (vedidx<0) // ved not found
   {
-  OSTRINGSTREAM st;
+  ostringstream st;
   st<<"Panik in C_clusterreader::read_cluster: idx of ved "
     <<cluster->get_ved_id()<<" not found."<<endl;
   cluster->dump(st, 100);
@@ -171,7 +169,7 @@ void Clusterreader::got_text(CLUSTERcontainer* cluster)
     C_inbuf ib(cluster->get_data(), cluster->datasize());
 
     int flags, fragment_id, count;
-    STRING str;
+    string str;
 
     ib>>flags>>fragment_id>>count;
     if (!count) {
@@ -184,18 +182,18 @@ void Clusterreader::got_text(CLUSTERcontainer* cluster)
         cerr<<"got_text: no key in first line: "<<str<<endl;
         return;
     }
-    STRING name=str.substr(5, STRING::npos);
+    string name=str.substr(5, string::npos);
     if (name=="configuration") {
-        STRING str2;
+        string str2;
         ib>>str2;
         if (str2.substr(0, 5)!="name ") {
             cerr<<"got_text: no name in second line: "<<str2<<endl;
             return;
         }
         name+="_";
-        name+=str2.substr(5, STRING::npos);
+        name+=str2.substr(5, string::npos);
     }
-    f_info.name=strdup((char*)name.c_str());
+    f_info.name=strdup(name.c_str());
     make_file(f_info);
     if (f_info.path<0) {
         f_info.clear();
@@ -230,7 +228,7 @@ void Clusterreader::got_file(CLUSTERcontainer* cluster)
     int ctime, mtime, perm, size;
     int rsize;
     struct utimbuf ubuf;
-    STRING name;
+    string name;
 
     ib>>flags>>fragment_id>>name;
     ib>>ctime>>mtime>>perm>>size;
@@ -322,19 +320,13 @@ for (i=0; i<numveds; i++)
     cerr<<"event "<<next_evnum<<" lost."<<endl;
     veds[i].purge_events(next_evnum);
     next_evnum=ev+1;
-    return (int*)0;
+    return 0;
     }
 int* event=new int[size];
 event[0]=size-1;
-//event[1]=next_evnum;
-event[1]=0x12345678;
+event[1]=next_evnum;
 event[2]=trigger;
 event[3]=sevs;
-//printf("the size of int is %d\n",sizeof(int));
-			for(int k=0;k<10;k++)
-			{
-		//	printf("event[ %d ] is 0x%08x \n",k, event[k]);	
-			}
 int idx=4;
 for (i=0; i<numveds; i++) idx+=veds[i].get_subevent(next_evnum, event+idx);
 statist_.events_extracted++;
@@ -348,17 +340,17 @@ int* Clusterreader::get_next_event()
     int i;
     if (numveds==0) {
         read_cluster();
-        return (int*)0;
+        return 0;
     }
     for (i=0; i<numveds; i++) {
         int ev=veds[i].test_event(next_evnum);
         if (ev<0) { // event ist noch nicht da, kommt aber spaeter
             read_cluster();
-            return (int*)0;
+            return 0;
         } else if (ev>0) { // event ist nicht mehr da, ev ist firstevent
             cerr<<"events lost: jump from "<<next_evnum-1<<" to "<<ev<<endl;
             next_evnum=ev;
-            return (int*)0;
+            return 0;
         }
         // ev==0: event ist verfuegbar
     }
@@ -370,56 +362,45 @@ int* Clusterreader::get_best_event(int lowdelay)
 int i;
 if (numveds==0)
   {
-//printf("In get_bes_event(): numveds ==0!\n");
   // Zahl der VEDs=0 oder noch nicht bekannt
-  return (int*)0;
+  return 0;
   }
 
 // Nummer des juengsten kompletten Events bestimmen; ==> min_last
 unsigned int min_last=veds[0].last_seen_event();
 for (i=1; i<numveds; i++)
   {
-//printf("In get_bes_event(): i=1;i<numveds!\n");
   unsigned int l=veds[i].last_seen_event();
   if (l<min_last) min_last=l;
   }
 // alle Cluster loeschen, die das juengste Event nicht enthalten
-if (lowdelay) {for (i=1; i<numveds; i++) veds[i].purge_events(min_last);
-//printf("In get_bes_event(): if(lowdelay)!\n");
-}
+if (lowdelay) {for (i=1; i<numveds; i++) veds[i].purge_events(min_last);}
 
 // Nummer des aeltesten kompletten Events bestimmen; ==> bottomevent
 unsigned int bottomevent=veds[0].bottomevent();
-//printf("In get_bes_event(): bottomevent = veds[0].bottomevent()!\n");
 for (i=1; i<numveds; i++)
   {
   unsigned int l=veds[i].bottomevent();
-//printf("In get_bes_event(): i=1,i<numveds!\n");
   if (l==0)
     {
-    return (int*)0;
+    return 0;
     }
   if (l>bottomevent) bottomevent=l;
   }
 
 // next_evnum korrigieren
 if (bottomevent>next_evnum) next_evnum=bottomevent;
-//printf("In get_bes_event(): if (bottomevent>next_evnum)!\n");
-//}
 
 if (next_evnum>min_last)
   {
   // keine brauchbaren Events mehr vorhanden
-  return (int*)0;
+  return 0;
   }
 
 // Event extrahieren
-//printf("In get_bes_event(): before event = get_event(next evnum)!\n");
 int* event=get_event(next_evnum);
-//printf("In get_bes_event(): after event = get_event(next evnum)!\n");
 if (event==0)
   {
-//printf("In get_bes_event(): event = 0!\n");
   // sollte nie auftreten, nur Sicherheitsueberpruefung
   cerr<<"get_best_event: next_evnum="<<next_evnum<<", min_last="<<min_last
       <<", bottomevent="<<bottomevent<<endl;
@@ -437,13 +418,12 @@ if (event==0)
     if (l==0)
       {
       read_cluster();
-      return (int*)0;
+      return 0;
       }
     if (l>bottomevent) bottomevent=l;
     }
   cerr<<"min_last="<<min_last<<", bottomevent="<<bottomevent<<endl;
   }
-//printf("In get_bes_event(): return event\n");
 return event;
 }
 ///////////////////////////////////////////////////////////////////////////////
@@ -451,16 +431,13 @@ void Clusterreader::read_cluster()
 {
 while ((maxmem_!=0) && (memory::used_mem>maxmem_))
   {
-//printf("In Clusterreader::read_cluster(),  while((maxmem!=0)\n");
   purge_cluster();
   }
 //cerr<<"vor read cluster"<<endl;
 CLUSTERcontainer* cluster=0;
-//printf("In Clusterreader::read_cluster(),  cluster = 0;\n");
 // try
 //   {
   cluster=(this->*reader)();
-//printf("In Clusterreader::read_cluster(),  cluster=(this->*reader)();\n");
 //   }
 // catch (C_status_error* e)
 //   {
@@ -471,14 +448,13 @@ CLUSTERcontainer* cluster=0;
 //cerr<<"nach read cluster"<<endl;
 if (cluster==0) return;
 statist_.print(0);
-//printf("In Clusterreader::read_cluster(),  stattist_.print(0)\n");
 switch (cluster->typ())
   {
-  case clusterty_events: got_events(cluster); printf("the cluster type is events\n");break;
-  case clusterty_ved_info: got_ved_info(cluster); printf("the cluster type is get_ved_info\n");break;
-  case clusterty_text: got_text(cluster); printf("the cluster type is got_text\n");break;
-  case clusterty_file: got_file(cluster); printf("the cluster type is got_file\n");break;
-  case clusterty_no_more_data: got_no_more_data(cluster); printf("the cluster type is got_no_more_data\n");break;
+  case clusterty_events: got_events(cluster); break;
+  case clusterty_ved_info: got_ved_info(cluster); break;
+  case clusterty_text: got_text(cluster); break;
+  case clusterty_file: got_file(cluster); break;
+  case clusterty_no_more_data: got_no_more_data(cluster); break;
   default:
     cerr<<"Warning!: got clustertype "<<cluster->typ()<<endl;
     break;
@@ -511,7 +487,7 @@ catch (C_status_error* e)
     default: cerr<<"tapereader: "<<(*e)<<endl;
     }
   delete e;
-  return (CLUSTERcontainer*)0;
+  return 0;
   }
 if (da<0)
   {
@@ -529,7 +505,7 @@ else
   if (da&3)
     {
     delete[] d;
-    OSTRINGSTREAM st;
+    ostringstream st;
     st<<"read cluster: recordsize="<<da<<ends;
     throw new C_program_error(st);
     }
@@ -541,7 +517,7 @@ else
   else // unbekannt
     {
     delete[] d;
-    OSTRINGSTREAM st;
+    ostringstream st;
     st<<"read cluster: byteorder="<<hex<<d[1]<<dec<<ends;
     throw new C_program_error(st);
     }
@@ -550,7 +526,7 @@ else
   if (size!=d[0]+1)
     {
     delete[] d;
-    OSTRINGSTREAM st;
+    ostringstream st;
     st<<"read cluster: recordsize="<<size<<"; clustersize="<<d[0]+1<<ends;
     throw new C_program_error(st);
     }
@@ -590,10 +566,6 @@ if (kopf[1]==0x12345678) // host ordering
   {
   wenden=0;
   size=kopf[0]+1;
-	//		for(int i=0;i<4;i++)
-	//		{
-	//		printf("buf->head[ %d ] is 0x%08x \n",i, kopf[i]);	
-	//		}
   }
 else if (kopf[1]==0x78563412) // verkehrt
   {
@@ -602,15 +574,14 @@ else if (kopf[1]==0x78563412) // verkehrt
   }
 else // unbekannt
   {
-  OSTRINGSTREAM st;
+  ostringstream st;
   st<<"read cluster: byteorder="<<hex<<kopf[1]<<dec<<ends;
   throw new C_program_error(st);
   }
 d=new int[size];
-//printf("the d= new int[size] is %d, and size is %d \n",d,size);
 if (d==0)
   {
-  OSTRINGSTREAM st;
+  ostringstream st;
   st<<"read cluster:  alloc "<<size<<" words for new cluster"<<ends;
   throw new C_unix_error(errno, st);
   }
@@ -627,10 +598,6 @@ catch(C_error*)
   throw;
   }
 if (wenden) for (int i=0; i<size; i++) d[i]=swap_int(d[i]);
-		//	for(int i=0;i<10;i++)
-		//	{
-		//	printf("cluster[ %d ] is 0x%08x \n",i, d[i]);	
-		//	}
 CLUSTERcontainer* cluster=new CLUSTERcontainer(d, size, num_cached_clusters);
 return cluster;
 }
@@ -753,7 +720,7 @@ int VEDslot::eventinfo(unsigned int ev, int& size, int& sevs, int& trigger)
     if (bottomevent_>ev)
         return -1;
     while ((bottom->next_data<bottom->get_top()) &&
-            ((unsigned int)bottom->next_data[1]<ev)) {
+            (reinterpret_cast<unsigned int&>(bottom->next_data[1])<ev)) {
         bottom->next_data+=bottom->next_data[0]+1;
     }
     if (bottom->next_data>=bottom->get_top()) {
@@ -762,7 +729,7 @@ int VEDslot::eventinfo(unsigned int ev, int& size, int& sevs, int& trigger)
         return -1;
     }
 
-    if ((unsigned int)bottom->next_data[1]!=ev)
+    if (reinterpret_cast<unsigned int&>(bottom->next_data[1])!=ev)
         return -1;
 
     size+=bottom->next_data[0]-3;
@@ -774,11 +741,11 @@ int VEDslot::eventinfo(unsigned int ev, int& size, int& sevs, int& trigger)
 int VEDslot::get_subevent(unsigned int ev, int* event)
 {
 // vor get_subevent muss eventinfo aufgerufen werden
-if ((unsigned int)bottom->next_data[1]!=ev)
+if (reinterpret_cast<unsigned int&>(bottom->next_data[1])!=ev)
   {
   throw new C_program_error("mismatch in VEDslot::get_subevent");
   }
-bcopy((char*)(bottom->next_data+4), (char*)event, (bottom->next_data[0]-3)*4);
+bcopy(bottom->next_data+4, event, (bottom->next_data[0]-3)*4);
 return bottom->next_data[0]-3;
 }
 ///////////////////////////////////////////////////////////////////////////////
@@ -821,8 +788,8 @@ if (!immer && !after_seconds && !after_clusters) return;
 if (!reader->numveds) return;
 struct timeval jetzt;
 gettimeofday(&jetzt, 0);
-float zeit=float(jetzt.tv_sec-letzt.tv_sec)+
-    (float)(jetzt.tv_usec-letzt.tv_usec)/1000000.;
+float zeit=static_cast<float>(jetzt.tv_sec-letzt.tv_sec)+
+    static_cast<float>(jetzt.tv_usec-letzt.tv_usec)/1000000.;
 int ok=immer;
 if (!ok && after_seconds) ok=zeit>=after_seconds;
 if (!ok && after_clusters) ok=clusters_read>=last_clusters_read+after_clusters;
@@ -837,7 +804,8 @@ for (int i=0; i<reader->numveds; i++)
 cerr<<events_extracted<<" events of "<<max<<" extracted";
 if (max>0)
   {
-  cerr<<" ("<<(float)events_extracted/(float)max*100.<<"%)";
+  cerr<<" ("<<static_cast<float>(events_extracted)/static_cast<float>(max)*100.
+        <<"%)";
   }
 if (zeit>0)
   {

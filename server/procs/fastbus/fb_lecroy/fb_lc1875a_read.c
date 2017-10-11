@@ -3,7 +3,7 @@
  * created 28.12.94 MiZi/PeWue/MaWo
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: fb_lc1875a_read.c,v 1.24 2011/04/06 20:30:31 wuestner Exp $";
+    "$ZEL: fb_lc1875a_read.c,v 1.25 2015/04/06 21:33:30 wuestner Exp $";
 
 #include <config.h>
 #include <debug.h>
@@ -623,7 +623,7 @@ plerrcode test_proc_fb_lc1875a_readout_p3(ems_u32* p)
     for (i=memberlist[0]; i>0; i--) {
         ml_entry* module;
 
-        if (!valid_module(i, modul_fastbus, 0)) continue;
+        if (!valid_module(i, modul_fastbus)) continue;
         module=ModulEnt(i);
 
         if (module->modultype!=LC_TDC_1875A) continue;
@@ -952,8 +952,6 @@ outptr:
 plerrcode proc_fb_lc1875a_readout(ems_u32* p)
   /* readout of fastbus lecroy tdc1875a */
 {
-#define MAX_WT_CON  100                 /* wait for conversion: max. timeout  */
-
     int pat;                            /* IS module pattern                  */
     ems_u32 sds_pat;                    /* sparse data scan module pattern    */
     int n_words;                 /* number of read out words from all modules */
@@ -1012,8 +1010,6 @@ T(proc_fb_lc1875a_readout)
     *ptr= n_words;                      /* number of read out data words      */
 
     return(plOK);
-
-#undef MAX_WT_CON
 }
 /******************************************************************************/
 plerrcode test_proc_fb_lc1875a_readout(ems_u32* p)

@@ -3,7 +3,7 @@
  * created 06.Sep.2002 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: vme_verify.c,v 1.20 2011/08/13 20:22:28 wuestner Exp $";
+    "$ZEL: vme_verify.c,v 1.21 2015/04/06 21:33:34 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -134,16 +134,11 @@ struct vme_info vme_types[]={
         {.configrom={0x9, 0x8000, 0x0040e6, 0x311}},
         16
     },
-    {mesytec_madc32, "madc32", "Peak Sensing ADC",
+    {CAEN_V792, "V792", "qdc",
         id_configrom,
-        {.configrom={0x0, 0x8000, 0xd, 0xd}},
+        {.configrom={0x9, 0x8000, 0x0040e6, 0x318}},
         16
     },
- //   {CAEN_V792, "V792", "qdc",
- //       id_configrom,
- //       {.configrom={0x9, 0x8000, 0x0040e6, 0x318}},
- //       16
- //   },
     {CAEN_V792, "V792", "qdc", /* geographical addresses */
         id_configrom,
         {.configrom={0x2f, 0x8000, 0x0040e6, 0x318}},
@@ -174,6 +169,11 @@ struct vme_info vme_types[]={
         {.faf5={0x09, 0xfa, 0x2, 0x37}},
         16
     },
+    {CAEN_V1495, "V1495", "general purpose vme board",
+        id_configrom,
+        {.configrom={0x9, 0x8100, 0x0040e6, 0x05d7}},
+        16
+    },
     {SIS_3300, "SIS3300", "8 channel 100 MHz flash ADC",
         id_sis,
         {.sis={0x09, 0x4, 0x3300}},
@@ -197,6 +197,11 @@ struct vme_info vme_types[]={
     {SIS_3801, "SIS3801", "multiscaler/counter",
         id_sis,
         {.sis={0x09, 0x4, 0x3801}},
+        16
+    },
+    {SIS_3820, "SIS3820", "scaler/counter",
+        id_sis,
+        {.sis={0x09, 0x4, 0x3820}},
         16
     },
     {0, 0, 0, id_stop} 
@@ -229,12 +234,12 @@ verify_faf5(struct vme_dev* dev, ems_u32 addr, struct vme_info* info,
             info->name, addr);
     if (read_ident_faf5(dev, ident->am, addr+ident->offs, v)<0) {
         printf("verify_faf5 %s: read failed\n", info->name);
-        return plErr_HWTestFailed;
+        return plErr_Verify;
     }
 
     if (v[0]!=0xfaf5) {
         printf("verify_faf5 %s: magic=0x%04x\n", info->name, v[0]);
-        return plErr_HWTestFailed;
+        return plErr_Verify;
     }
     ver=(v[2]>>12)&0xf;
     ser=v[2]&0xfff;
@@ -244,12 +249,12 @@ verify_faf5(struct vme_dev* dev, ems_u32 addr, struct vme_info* info,
     if (man!=ident->manu_code) {
         printf("verify_faf5 %s: manufacturer=0x%x (0x%x expected)\n",
             info->name, man, ident->manu_code);
-        return plErr_HWTestFailed;
+        return plErr_Verify;
     }
     if (mod!=ident->type_code) {
         printf("verify_faf5 %s: type=0x%x (0x%x expected)\n",
             info->name, mod, ident->type_code);
-        return plErr_HWTestFailed;
+        return plErr_Verify;
     }
     if (verbose) {
         printf("found %s at 0x%x; version %d, serial %d\n",
@@ -275,14 +280,12 @@ read_ident_configrom1(struct vme_dev* dev, int am, ems_u32 addr, ems_u32* ident_
     ems_u32 off[10]={
             0x26, 0x2a, 0x2e, 0x32, 0x36, 0x3a, 0x3e, 0x4e, 0xf02, 0xf06};
     ems_u16 val;
-  //  printf("vme_verify: read_ident_configrom1()!\n");
+
     if ((am&0x30) && (addr&0xff000000)) return -1; /* addr too large for A24 */
-  //  printf("vme_verify: read_ident_configrom1(), doesn't return -1\n");
+
     for (i=0; i<10; i++) {
         res=dev->read(dev, addr+off[i], am, (ems_u32*)&val, 2, 2, 0);
-//printf("vme_verify: read_ident_configrom1(): check res value!\n");
         if (res!=2) return -1;
-//printf("vme_verify: read_ident_configrom1(): res=2!\n");
         ident[i]=val&0xff;
     }
     ident_32[oui_ind]   = (ident[0]<<16)|(ident[1]<<8)|ident[2];
@@ -290,7 +293,7 @@ read_ident_configrom1(struct vme_dev* dev, int am, ems_u32 addr, ems_u32* ident_
     ident_32[board_ind] = (ident[4]<<16)|(ident[5]<<8)|ident[6];
     ident_32[rev_ind]   = ident[7];
     ident_32[ser_ind]   = (ident[8]<<8)|ident[9];
-//printf("vme_verify: read_ident_configrom1(): return 0!\n");
+
     return 0;
 }
 /*****************************************************************************/
@@ -303,9 +306,9 @@ read_ident_configrom2(struct vme_dev* dev, int am, ems_u32 addr, ems_u32* ident_
     ems_u32 off[13]={
             0x24, 0x28, 0x2c, 0x30, 0x34, 0x38, 0x3c, 0x40, 0x44, 0x048, 0x4c, 0x80, 0x84};
     ems_u16 val;
-//printf("vme_verify: read_ident_configrom2()!\n");
+
     if ((am&0x30) && (addr&0xff000000)) return -1; /* addr too large for A24 */
-//printf("vme_verify: read_ident_configrom2(), return -1!\n");
+
     for (i=0; i<13; i++) {
         res=dev->read(dev, addr+off[i], am, (ems_u32*)&val, 2, 2, 0);
         if (res!=2) return -1;
@@ -360,50 +363,38 @@ print_ident_configrom(struct vme_dev* dev, int am, ems_u32 addr,
 static plerrcode
 verify_configrom(struct vme_dev* dev, ems_u32 addr, struct vme_info* info,
         int verbose)
-{ printf("verify_configrom!\n");
+{
     ems_u32 ident_32[last_ind];
     struct ident_configrom* ident=&info->idd.configrom;
     if (verbose) {
         printf("verify_configrom: checking %s addr=0x%08x\n", info->name, addr);
     }
-printf("verify_configrom1!\n");
     if (read_ident_configrom1(dev, ident->am, addr+ident->offs, ident_32)<0) {
-printf("verify_configrom2!\n");
       if(read_ident_configrom2(dev, ident->am, addr+ident->offs, ident_32)<0) {
-printf("verify_configrom3!\n");
         if (verbose) {
             printf("read_ident_configrom failed (am=0x%x)\n", ident->am);
         }
-     printf("HW test Failed!\n");
-        return plErr_HWTestFailed;
+        return plErr_Verify;
       }
     }
-  printf("vme_verify: verify_configrom(): ident->oui is %oxd\n",ident->oui);
-  printf("vme_verify: verify_configrom(): ident_32[oui_ind] is %oxd\n",ident_32[oui_ind]);
-printf("vme_verify: verify_configrom(): ident_32[ver_ind] is %oxd\n",ident_32[ver_ind]);
-printf("vme_verify: verify_configrom(): ident_32[board_ind] is %oxd\n",ident_32[board_ind]);
-printf("vme_verify: verify_configrom(): ident_32[rev_ind] is %oxd\n",ident_32[rev_ind]);
     if (ident_32[oui_ind]!=ident->oui) {
       if (verbose) {
         printf("oui mismatch\n");
         print_ident_configrom(dev, ident->am, addr, ident_32, 0);
       }
-printf("vme_verify: verify_configrom(): oui mismatch, so HW test Failed!\n");
-      return plErr_HWTestFailed;
+      return plErr_Verify;
     }
     if (ident_32[board_ind] != ident->board) {
       if (verbose) {
 	printf("board mismatch\n");
 	print_ident_configrom(dev, ident->am, addr, ident_32, 0);
       }
-printf("HWTest Failed2!\n");
-      return plErr_HWTestFailed;
+      return plErr_Verify;
     }
     if (verbose) {
         printf("found %s at 0x%x; revision %d version %d, serial %d\n",
             info->name, addr, ident_32[rev_ind], ident_32[ver_ind], ident_32[ser_ind]);
     }
-printf("HWTest successful!\n");
     return plOK;
 }
 /*****************************************************************************/
@@ -430,14 +421,14 @@ verify_sis(struct vme_dev* dev, ems_u32 addr, struct vme_info* info,
         printf("verify_sis: checking %s addr=0x%08x\n", info->name, addr);
     if (read_ident_sis(dev, 0x9, addr+4, &v)<0) {
         printf("verify_sis %s: read failed\n", info->name);
-        return plErr_HWTestFailed;
+        return plErr_Verify;
     }
     /* ver=(v>>12)&0xf; */
     board=(v>>16)&0xffff;
 
     if (board!=ident->ident) {
         printf("verify_sis(%s 0x%08x): found 0x%08x\n", info->name, addr, v);
-        return plErr_HWTestFailed;
+        return plErr_Verify;
     }
     return plOK;
 }
@@ -456,49 +447,31 @@ static plerrcode
 verify_vme(struct vme_dev* dev, ems_u32 addr, struct vme_info* info,
         int verbose)
 {
-/*
- * return:
- *     0: not verified but not fatal
- *    -1: fatal error (crate offline ...)
- *     1: verified
- */
     if (!dev->generic.online) {
         printf("verify_vme: crate offline\n");
-        return plErr_HWTestFailed;
+        return plErr_Offline;
     }
-printf("verify_vme\n");
     switch (info->id_type) {
         case id_none:
             printf("verify_vme: id_none\n");
-            return plErr_HWTestFailed;
+            return plErr_Verify;
         case id_faf5:
             return verify_faf5(dev, addr, info, verbose);
         case id_configrom:
-printf("verify_vme: id_configrom\n");
             return verify_configrom(dev, addr, info, verbose);
         case id_sis:
             return verify_sis(dev, addr, info, verbose);
         default:
             printf("verify_vme: id_type %d unknown\n", info->id_type);
-            return plErr_HWTestFailed;
+            return plErr_Program;
     }
 }
 /*****************************************************************************/
-#if 0
-plerrcode verify_vme_id(struct vme_dev* dev, ems_u32 addr, ems_u32 modultype)
-{
-    struct vme_info* info=find_vme_info(modultype);
-    if (!info) return plErr_Program;
-
-    return verify_vme(dev, addr, info);
-}
-#else
 plerrcode verify_vme_id(struct vme_dev* dev, ems_u32 addr, ems_u32 modultype,
         int verbose)
 {
-printf("verify_vme_id\n");
     struct vme_info* info=vme_types;
-    plerrcode pres;
+    plerrcode pres=plErr_Program;
     int n=0;
 
     do {
@@ -510,9 +483,8 @@ printf("verify_vme_id\n");
 	}
         info++;
     } while (info->ems_type);
-    return n?plErr_HWTestFailed:plErr_Program;
+    return pres;
 }
-#endif
 /*****************************************************************************/
 plerrcode verify_vme_module(ml_entry* module, int verbose)
 {
@@ -528,29 +500,18 @@ plerrcode test_proc_vme(int* list, ems_u32* module_types)
     int i, res;
     plerrcode pres;
     if (!list) return plErr_NoISModulList;
-printf("test_proc_vme: OK1\n");
-
     for (i=list[0]; i>0; i--) {
         ml_entry* module=&modullist->entry[list[i]];
         int j;
-printf("modullist i is: %d\n",i);
-printf("test_proc_vme: OK2\n");
 
         if (module->modulclass!=modul_vme) {
             printf("test_proc_vme[%d]: not vme\n", i);
             return plErr_BadModTyp;
         }
         res=-1;
-printf("test_proc_vme: OK3! res = %d\n", res);
-
         for (j=0; module_types[j] && res; j++) {
-printf("j is :%d\n", j);
-printf("module->modultype is %d\n",module->modultype);
-printf("module_type[j] is %d\n",module_types[j]);
             if (module->modultype==module_types[j]) res=0;
-printf("res is : %d\n", res);
         }
-printf("test_proc_vme: OK4, res is : %d\n", res);
         if (res) {
             printf("test_proc_vme[%d]: type in modullist is %08x\n",
                     i, module->modultype);
@@ -561,17 +522,10 @@ printf("test_proc_vme: OK4, res is : %d\n", res);
             printf("\n");
             return plErr_BadModTyp;
         }
-printf("test_proc_vme: OK5\n");
         pres=verify_vme_module(module, 1);
-printf("test_proc_vme: OK6\n");
-printf("test_proc_vme: pres=%d\n",pres);
-
         if (pres!=plOK)
-//printf("test_proc_vme: OK7\n");
             return pres;
-//printf("test_proc_vme: OK72\n");
     }
-//printf("test_proc_vme: OK8\n");
     return plOK;
 }
 /*****************************************************************************/

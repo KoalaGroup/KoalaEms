@@ -1,5 +1,5 @@
 # procs/unixvme/Makefile.in
-# $ZEL: Makefile.in,v 1.5 2002/11/06 15:37:52 wuestner Exp $
+# $ZEL: Makefile.in,v 1.6 2015/04/06 21:33:33 wuestner Exp $
 
 CONF = ../../conf
 
@@ -9,7 +9,7 @@ VPATH = @srcdir@
 include $(CONF)/rules.make
 include $(CONF)/config.make
 
-cfiles = vme_primitiv.c vme_simple.c vme_verify.c vme_cratescan.c
+cfiles = vme_primitiv.c vme_simple.c vme_verify.c vme_cratescan.c vme_irq.c
 ofiles = $(cfiles:.c=.o)
 depfiles = $(cfiles)
 

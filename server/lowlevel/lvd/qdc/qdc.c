@@ -3,7 +3,7 @@
  * created 2006-Feb-07 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: qdc.c,v 1.41 2012/09/12 15:03:15 wuestner Exp $";
+    "$ZEL: qdc.c,v 1.42 2013/09/24 14:08:03 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -2554,6 +2554,7 @@ lvd_qdc_acard_init(struct lvd_dev* dev, struct lvd_acard* acard)
 
     lvd_qdc_cr_set(acard, 0);
 
+#if 0
     switch (acard->mtype) {
     case ZEL_LVD_SQDC:
         info->base_clk=12.5;
@@ -2571,6 +2572,29 @@ lvd_qdc_acard_init(struct lvd_dev* dev, struct lvd_acard* acard)
         printf("lvd_qdc_acard_init: unknown QDC type 0x%x\n", acard->mtype);
         return -1;
     }
+#else
+    switch (LVD_HWtyp(acard->id)) {
+    case LVD_CARDID_SQDC:
+        info->base_clk=12.5;
+        info->adc_clk=1000./80.;
+        break;
+    case LVD_CARDID_FQDC:
+        info->base_clk=12.5;
+        info->adc_clk=1000./160.;
+        break;
+    case LVD_CARDID_VFQDC_200:
+        info->base_clk=12.5;
+        info->adc_clk=1000./200.;
+        break;
+    case LVD_CARDID_VFQDC:
+        info->base_clk=12.5;
+        info->adc_clk=1000./240.;
+        break;
+    default:
+        printf("lvd_qdc_acard_init: unknown QDC type 0x%x\n", acard->mtype);
+        return -1;
+    }
+#endif
 
     acard->clear_card=lvd_clear_qdc;
     acard->start_card=lvd_start_qdc;

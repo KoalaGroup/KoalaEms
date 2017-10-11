@@ -1,11 +1,15 @@
 /*
- * ved_errors.cc
+ * proclib/ved_errors.cc
  * 
  * created: 1994-Aug-18 PW
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <string.h>
 #include <requesttypes.h>
 #include <errorcodes.h>
@@ -13,11 +17,13 @@
 #include "ved_errors.hxx"
 #include <versions.hxx>
 
-VERSION("2007-03-31", __FILE__, __DATE__, __TIME__,
-"$ZEL: ved_errors.cc,v 2.13 2007/04/05 18:39:50 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: ved_errors.cc,v 2.14 2014/07/14 15:11:54 wuestner Exp $")
 #define XVERSION
 
 // Auswertung einer Fehlermeldung in einer Confirmation.
+
+using namespace std;
 
 /*****************************************************************************/
 
@@ -85,7 +91,7 @@ C_other_Error::~C_other_Error()
 
 /*****************************************************************************/
 
-C_ved_error::C_ved_error(const C_VED* ved, EMSerrcode error, OSTRINGSTREAM& ss)
+C_ved_error::C_ved_error(const C_VED* ved, EMSerrcode error, ostringstream& ss)
 {
 errdat=new C_error_data;
 errdat->init_str=ss.str();
@@ -96,7 +102,7 @@ if (ved) errdat->vedname=ved->name();
 
 /*****************************************************************************/
 
-C_ved_error::C_ved_error(const C_VED* ved, EMSerrcode error, STRING s)
+C_ved_error::C_ved_error(const C_VED* ved, EMSerrcode error, string s)
 {
 errdat=new C_error_data;
 errdat->init_str=s;
@@ -132,7 +138,7 @@ if (ved) errdat->vedname=ved->name();
 
 /*****************************************************************************/
 
-C_ved_error::C_ved_error(const C_VED* ved, C_confirmation* confi, OSTRINGSTREAM& ss)
+C_ved_error::C_ved_error(const C_VED* ved, C_confirmation* confi, ostringstream& ss)
 {
 errdat=new C_error_data;
 errdat->init_str=ss.str();
@@ -145,7 +151,7 @@ if (ved) errdat->vedname=ved->name();
 
 /*****************************************************************************/
 
-// C_ved_error::C_ved_error(C_VED* ved, const C_confirmation* confi, OSTRINGSTREAM& ss)
+// C_ved_error::C_ved_error(C_VED* ved, const C_confirmation* confi, ostringstream& ss)
 // {
 // errdat=new C_error_data;
 // char* s=ss.str();
@@ -159,7 +165,7 @@ if (ved) errdat->vedname=ved->name();
 
 /*****************************************************************************/
 
-C_ved_error::C_ved_error(const C_VED* ved, C_confirmation* confi, STRING s)
+C_ved_error::C_ved_error(const C_VED* ved, C_confirmation* confi, string s)
 {
 errdat=new C_error_data;
 errdat->init_str=s;
@@ -172,7 +178,7 @@ if (ved) errdat->vedname=ved->name();
 
 /*****************************************************************************/
 
-// C_ved_error::C_ved_error(C_VED* ved, const C_confirmation* confi, STRING s)
+// C_ved_error::C_ved_error(C_VED* ved, const C_confirmation* confi, string s)
 // {
 // errdat=new C_error_data;
 // errdat->init_str=s;
@@ -184,7 +190,7 @@ if (ved) errdat->vedname=ved->name();
 
 /*****************************************************************************/
 
-C_ved_error::C_ved_error(const C_VED* ved, int error, OSTRINGSTREAM& ss)
+C_ved_error::C_ved_error(const C_VED* ved, int error, ostringstream& ss)
 {
 errdat=new C_error_data;
 errdat->init_str=ss.str();
@@ -195,7 +201,7 @@ if (ved) errdat->vedname=ved->name();
 
 /*****************************************************************************/
 
-C_ved_error::C_ved_error(const C_VED* ved, int error, STRING s)
+C_ved_error::C_ved_error(const C_VED* ved, int error, string s)
 {
 errdat=new C_error_data;
 errdat->init_str=s;
@@ -216,7 +222,7 @@ if (ved) errdat->vedname=ved->name();
 
 /*****************************************************************************/
 
-C_ved_error::C_ved_error(const C_VED* ved, OSTRINGSTREAM& ss)
+C_ved_error::C_ved_error(const C_VED* ved, ostringstream& ss)
 {
 errdat=new C_error_data;
 errdat->init_str=ss.str();
@@ -226,7 +232,7 @@ if (ved) errdat->vedname=ved->name();
 
 /*****************************************************************************/
 
-C_ved_error::C_ved_error(const C_VED* ved, STRING s)
+C_ved_error::C_ved_error(const C_VED* ved, string s)
 {
 errdat=new C_error_data;
 errdat->init_str=s;
@@ -236,18 +242,18 @@ if (ved) errdat->vedname=ved->name();
 
 /*****************************************************************************/
 
-STRING C_ved_error::vedname() const
+string C_ved_error::vedname() const
 {
 return errdat->vedname;
 }
 
 /*****************************************************************************/
 
-STRING C_ved_error::errstr() const
+string C_ved_error::errstr() const
 {
 if (errdat->error_str=="")
   {
-  STRINGSTREAM ss;
+  stringstream ss;
 
   switch (errdat->typ)
     {
@@ -289,7 +295,7 @@ return(errdat->error_str);
 
 /*****************************************************************************/
 
-static void printvorspann(STRINGSTREAM &s, int level)
+static void printvorspann(stringstream &s, int level)
 {
 int i;
 s << "  ";
@@ -298,7 +304,7 @@ for (i=0; i<level; i++) s << "--";
 
 /*****************************************************************************/
 static void
-printplerror(STRINGSTREAM &s, ems_u32* buf, unsigned int errlen, unsigned int level)
+printplerror(stringstream &s, ems_u32* buf, unsigned int errlen, unsigned int level)
 {
     int procno, err, pos;
 
@@ -340,7 +346,7 @@ printplerror(STRINGSTREAM &s, ems_u32* buf, unsigned int errlen, unsigned int le
     }
 }
 /*****************************************************************************/
-void C_ved_error::printerror(STRINGSTREAM& s, int typ, ems_u32* buf, int size) const
+void C_ved_error::printerror(stringstream& s, int typ, ems_u32* buf, int size) const
 {
 s << endl << R_errstr((errcode)buf[0]) << endl;
 switch(buf[0])
@@ -414,12 +420,12 @@ C_outbuf& C_ved_error::bufout(C_outbuf& ob) const
 {
 ob << e_ved;
 throw new C_program_error("C_ved_error::bufout");
-NORETURN(ob);
+return ob;
 }
 
 /*****************************************************************************/
 
-STRING C_ved_error::message(void) const
+string C_ved_error::message(void) const
 {
 return("ved_error");
 }

@@ -1,3 +1,6 @@
+# $ZEL: scaler_correct_setup.tcl,v 1.6 2014/08/19 20:20:50 wuestner Exp $
+# copyright 1998-2011
+#   P. Wuestner; Zentralinstitut fuer Elektronik; Forschungszentrum Juelich
 #
 # Diese Prozedur vervollstaendigt die Variablen, die von einem Konfigfile
 # gelesen wurden. Als Ergebnis sind alle Setupvariablen vorhanden und
@@ -78,5 +81,8 @@ proc correct_setup {} {
 
   if {[info exists global_setup(display_repeat)] == 0} {
     set global_setup(display_repeat) 10}
+
+  if {[info exists global_setup(use_isid)] == 0} {
+    set global_setup(use_isid) 0}
 
 }

@@ -10,8 +10,8 @@
 #include <cstring>
 #include "versions.hxx"
 
-VERSION("2009-Feb-25", __FILE__, __DATE__, __TIME__,
-"$ZEL: events.cc,v 1.7 2010/09/04 21:18:49 wuestner Exp $")
+VERSION("2014-07-14", __FILE__, __DATE__, __TIME__,
+"$ZEL: events.cc,v 1.9 2014/07/14 16:18:17 wuestner Exp $")
 #define XVERSION
 
 /*****************************************************************************/
@@ -49,8 +49,8 @@ return(m.f(event, m.arg));
 }
 
 /*****************************************************************************/
-
-C_eventp& setcopy_(C_eventp& event, int x)
+static C_eventp&
+setcopy_(C_eventp& event, int x)
 {
 event.setcopy(x);
 return(event);
@@ -62,8 +62,8 @@ return C_event_manipi(&setcopy_, x);
 }
 
 /*****************************************************************************/
-
-C_eventp& setignore_(C_eventp& event, int x)
+static C_eventp&
+setignore_(C_eventp& event, int x)
 {
 event.setignore(x);
 return(event);
@@ -103,7 +103,7 @@ void C_eventp::write_usr(FILE* f)
 {
 int res;
 
-if ((res=fwrite((char*)event, 4, event[0]+1, f))!=event[0]+1)
+if ((res=fwrite(event, 4, event[0]+1, f))!=event[0]+1)
   {
   if (res==0)
     if (errno==0)
@@ -120,7 +120,6 @@ if ((res=fwrite((char*)event, 4, event[0]+1, f))!=event[0]+1)
 C_eventp& C_eventp::operator <<(const C_subeventp& p)
 {
 throw new C_program_error("C_eventp::operator <<: illegal");
-NORETURN((C_eventp&)p);
 }
 
 /*****************************************************************************/
@@ -178,7 +177,7 @@ return(event[1]);
 int C_eventp::evnr(int nr)
 {
 throw new C_program_error("C_eventp::evnr(int): illegal");
-NORETURN(0);
+return 0;
 }
 
 /*****************************************************************************/
@@ -194,7 +193,7 @@ return(event[2]);
 int C_eventp::trignr(int)
 {
 throw new C_program_error("C_eventp::trignr(int): illegal");
-NORETURN(0);
+return 0;
 }
 
 /*****************************************************************************/
@@ -287,7 +286,7 @@ to_ignore[num_ignore++]=x;
 /*****************************************************************************/
 void C_eventp::store(const int* event_)
 {
-    event=(int*)event_;
+    event=const_cast<int*>(event_);
     size_=event_[0]+1;
     valid_=1;
     idx=0;

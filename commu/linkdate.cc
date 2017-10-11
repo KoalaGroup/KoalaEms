@@ -6,13 +6,19 @@
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <linkdate.hxx>
 #include <versions.hxx>
 
-VERSION("Jan 18 1996", __FILE__, __DATE__, __TIME__,
-"$ZEL: linkdate.cc,v 2.5 2004/11/26 15:14:34 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: linkdate.cc,v 2.6 2014/07/14 15:12:20 wuestner Exp $")
 #define XVERSION
+
+using namespace std;
 
 /*****************************************************************************/
 

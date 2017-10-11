@@ -2,7 +2,7 @@
 #\
 exec emswish $0 $*
 
-# $ZEL: scaler,v 1.6 2006/08/13 17:32:02 wuestner Exp $
+# $ZEL: scaler,v 1.7 2011/11/26 01:56:27 wuestner Exp $
 # copyright 1998, 2005
 #   P. Wuestner; Zentralinstitut fuer Elektronik; Forschungszentrum Juelich
 #
@@ -33,6 +33,12 @@ if {$global_verbose} printargs
 if [info exists namedarg(help)] {
   printhelp
   exit
+}
+
+if [info exists namedarg(port)] {
+  set global_xh_requested 1
+} else {
+  set global_xh_requested 0
 }
 
 bind Entry <Delete> {

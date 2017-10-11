@@ -31,7 +31,12 @@ static const char* cvsid __attribute__((unused))=
 #include <dmalloc.h>
 #endif
 
+#define IRQDEBUG 0
+
 RCS_REGISTER(cvsid, "lowlevel/unixvme/sis3100")
+
+#define HV_3100 1
+#define HV_3104 2
 
 /*****************************************************************************/
 #if 0
@@ -1164,8 +1169,133 @@ sis3100_write_controller(struct vme_dev* dev, int domain, ems_u32 addr,
         printf("sis3100_write_controller(%d, 0x%x, 0x%x): %s\n",
             domain, addr, val, strerror(errno));
     } else if (reg.error) {
-        printf("sis3100_read_controller(%d, 0x%x, 0x%x): 0x%x\n",
+        printf("sis3100_write_controller(%d, 0x%x, 0x%x): 0x%x\n",
             domain, addr, val, reg.error);
+        res=-1;
+    }
+    return res;
+}
+#endif
+/*****************************************************************************/
+/*
+ * sis3100_front_rw writes and reads the front IO register of the VME
+ * controller.
+ * Access to the IOs of the PCI card is not (yet) implemented. Because the
+ * "Optical Control/Status Register" can only be written as a whole help of
+ * the driver is necessary.
+ * The procedure writes the (allowed bits of) the register and reads it back.
+ * Writing a 0 has no effect, only the read is carried out.
+ * If 'latched' is set the latch IO register is used.
+ */
+#ifdef SIS3100_MMAPPED
+#error mapped access of SIS3100 not yet implemented
+#else
+static int
+sis3100_front_io(struct vme_dev* dev, int domain, ems_u32 latched,
+    ems_u32* val)
+{
+    struct vme_sis_info *info=(struct vme_sis_info*)dev->info;
+    struct sis1100_ctrl_reg reg;
+    int res=0;
+
+    switch (domain) {
+    case 0: /* sis1100 register */
+        /* not implemented (yet) */
+        printf("sis3100_front_io: illegal domain %d\n", domain);
+        return -1;
+    case 1: /* sis3100 register */
+        if (latched) {
+            reg.offset=0x84;
+            switch (info->ident.remote.hw_version) {
+            case HV_3100:
+                reg.val=*val&0x7f000000;
+                break;
+            case HV_3104:
+                reg.val=*val&0x0f000000;
+                break;
+            default:
+                printf("sis3100_front_io: unknown controller type %d\n",
+                        info->ident.remote.hw_version);
+                return -1;
+            }
+        } else {
+            /* write of the 'unlatched' register is unrestricted for both
+               controller types */
+            reg.offset=0x80;
+            reg.val=*val;
+        }
+        if (reg.val) { /* no action if value is 0 */
+            res=ioctl(info->p_vme, SIS1100_CTRL_WRITE, &reg);
+            if (res || reg.error)
+                break;
+        }
+        res=ioctl(info->p_ctrl, SIS1100_CTRL_READ, &reg);
+        break;
+    default:
+        printf("sis3100_front_read: illegal domain %d\n", domain);
+        return -1;
+    }
+
+    if (res) {
+        printf("sis3100_front_io(%d, %d, 0x%x): %s\n",
+            domain, latched, *val, strerror(errno));
+    } else if (reg.error) {
+        printf("sis3100_front_io(%d, %d, 0x%x): 0x%x\n",
+            domain, latched, *val, reg.error);
+        res=-1;
+    } else {
+        *val=reg.val;
+    }
+    return res;
+}
+#endif
+/*****************************************************************************/
+/*
+ * sis3100_front_setup writes and reads the front IO level control register
+ * of the SIS3104 VME controller.
+ * Access to the IOs of the PCI card is not implemented (there is nothing to
+ * set up).
+ * The procedure writes the (allowed bits of) the register and reads it back.
+ * Writing a 0 has no effect, only the read is carried out.
+ */
+#ifdef SIS3100_MMAPPED
+#error mapped access of SIS3100 not yet implemented
+#else
+static int
+sis3100_front_setup(struct vme_dev* dev, int domain, ems_u32 *val)
+{
+    struct vme_sis_info *info=(struct vme_sis_info*)dev->info;
+    struct sis1100_ctrl_reg reg;
+    int res=0;
+
+    switch (domain) {
+    case 0: /* sis1100 register */
+        printf("sis3100_front_setup: illegal domain %d\n", domain);
+        return -1;
+    case 1: /* sis3100 register */
+        if (info->ident.remote.hw_version!=HV_3104) {
+            printf("sis3100_front_setup: controller is not a SIS3104\n");
+            return -1;
+        }
+        reg.offset=0x88;
+        reg.val=*val;
+        if (reg.val) { /* no action if value is 0 */
+            res=ioctl(info->p_vme, SIS1100_CTRL_WRITE, &reg);
+            if (res || reg.error)
+                break;
+        }
+        res=ioctl(info->p_ctrl, SIS1100_CTRL_READ, &reg);
+        break;
+    default:
+        printf("sis3100_front_setup: illegal domain %d\n", domain);
+        return -1;
+    }
+    if (res) {
+        printf("sis3100_front_setup(%d, 0x%x): %s\n",
+            domain, *val, strerror(errno));
+    } else if (reg.error) {
+        printf("sis3100_front_setup(%d, 0x%x): 0x%x\n",
+            domain, *val, reg.error);
         res=-1;
     }
     return res;
@@ -1198,7 +1328,7 @@ sis3100_irq_ack(struct vme_dev* dev, ems_u32 level, ems_u32* vector,
     if (ioctl(info->p_ctrl, SIS1100_CTRL_READ, &reg)<0)
         goto error;
     *error=reg.val;
-//printf("sis3100_irq_ack:ioctl");
+
     reg.offset=0xa0; /* tc_dal */
     if (ioctl(info->p_ctrl, SIS1100_CTRL_WRITE, &reg)<0)
         goto error;
@@ -1315,29 +1445,39 @@ static int
 sis3100_check_ident(struct vme_dev* dev)
 {
     struct vme_sis_info* info=(struct vme_sis_info*)dev->info;
-    struct sis1100_ident ident;
 
-    if (ioctl(info->p_ctrl, SIS1100_IDENT, &ident)<0) {
+    if (ioctl(info->p_ctrl, SIS1100_IDENT, &info->ident)<0) {
         printf("sis3100_check_ident: fcntl(p_ctrl, IDENT): %s\n",
                 strerror(errno));
         dev->generic.online=0;
         return -1;
     }
     printf("vme_init_sis3100 local ident:\n");
-    printf("  hw_type   =%d\n", ident.local.hw_type);
-    printf("  hw_version=%d\n", ident.local.hw_version);
-    printf("  fw_type   =%d\n", ident.local.fw_type);
-    printf("  fw_version=%d\n", ident.local.fw_version);
-    if (ident.remote_ok) {
+    printf("  hw_type   =%d\n", info->ident.local.hw_type);
+    printf("  hw_version=%d\n", info->ident.local.hw_version);
+    printf("  fw_type   =%d\n", info->ident.local.fw_type);
+    printf("  fw_version=%d\n", info->ident.local.fw_version);
+    if (info->ident.remote_ok) {
         printf("vme_init_sis3100 remote ident:\n");
-        printf("  hw_type   =%d\n", ident.remote.hw_type);
-        printf("  hw_version=%d\n", ident.remote.hw_version);
-        printf("  fw_type   =%d\n", ident.remote.fw_type);
-        printf("  fw_version=%d\n", ident.remote.fw_version);
+        printf("  hw_type   =%d\n", info->ident.remote.hw_type);
+        printf("  hw_version=%d\n", info->ident.remote.hw_version);
+        printf("  fw_type   =%d\n", info->ident.remote.fw_type);
+        printf("  fw_version=%d\n", info->ident.remote.fw_version);
+        switch (info->ident.remote.hw_version) {
+        case 1:
+            printf("    controller is SIS3100\n");
+            break;
+        case 2:
+            printf("    controller is SIS3104\n");
+            break;
+        default:
+            printf("    controller type is unknown\n");
+            break;
+        }
     }
 
-    if (ident.remote_online) {
-        if (ident.remote.hw_type==sis1100_hw_vme) {
+    if (info->ident.remote_online) {
+        if (info->ident.remote.hw_type==sis1100_hw_vme) {
             dev->generic.online=1;
         } else {
             printf("vme_init_sis3100: Wrong hardware connected!\n");
@@ -1511,7 +1651,7 @@ vme_acknowledge_irq(struct vme_dev* dev, ems_u32 mask, ems_u32 vector)
     struct vme_sis_info* info=(struct vme_sis_info*)dev->info;
     struct sis1100_irq_ack ack;
 
-#if 1
+#if 0
     printf("vme_acknowledge_irq(%s) mask=0x%x vector 0x%x\n",
                 dev->pathname, mask, vector);
 #endif
@@ -1557,26 +1697,34 @@ sis3100_vmeirq(struct vme_dev* dev, struct sis1100_irq_get2* get)
 {
     struct vme_sis_info* info=(struct vme_sis_info*)dev->info;
     ems_u32 irqs;
-#if 0
+
+#if IRQDEBUG
+    static int irqnum=0;
+    irqnum++;
+    if (irqnum>40) {
+        printf("NOTAUS\n");
+        exit(0);
+    }
+#endif
+
+#if IRQDEBUG
     printf("sis3100_vmeirq(%s): got irqs 0x%08x level=%d vector 0x%x\n",
                 dev->pathname, get->irqs, get->level, get->vector);
 #endif
     /* loop over non-VME interrupts */
     irqs=get->irqs&SIS3100_EXT_IRQS;
-    printf("get->irqs is:0x%08x\n",get->irqs);
-    printf("SIS3100_EXT_IRQS is:0x%08x\n",SIS3100_EXT_IRQS);
+#if IRQDEBUG
     printf("non-VME irqs: 0x%08x\n", irqs);
-
+#endif
 
     if (irqs) {
-     printf("printf if irqs is true");
         struct vme_irq_callback_3100* cb=info->irq_callbacks;
         int irq_handled=0;
         while (irqs && cb) {
             if (cb->mask&irqs) {
                 struct vmeirq_callbackdata vme_data;
-#if 1
-                printf("found callback, mask 0x%08x\n", cb->mask);
+#if IRQDEBUG
+                printf("found callback %p, mask 0x%08x\n", cb->callback, cb->mask);
 #endif
                 vme_data.mask=cb->mask&irqs;
                 vme_data.level=0;
@@ -1605,15 +1753,13 @@ sis3100_vmeirq(struct vme_dev* dev, struct sis1100_irq_get2* get)
 
     /* deliver the highest level VME interrupt */
     irqs=get->irqs&SIS3100_VME_IRQS;
-    printf("get->irqs is:0x%08x\n",get->irqs);
-    printf("SIS3100_VME_IRQS is:0x%08x\n",SIS3100_VME_IRQS);
+#if IRQDEBUG
     printf("    VME irqs: 0x%08x\n", irqs);
-
+#endif
     if (irqs) {
         ems_u32 irqbit=1<<get->level;
-        printf("irqbit is:0x%08x\n",irqbit);
-        printf("get->level is:0x%08x\n",get->level);
-        //int irq_handled=0;
+        int irq_handled=0;
+        int inum=0;
         if (!(irqbit&irqs)) {
             static int maxcount=20;
             complain("VME: IRQ logic confused: no LEVEL %d in bits 0x%x",
@@ -1626,11 +1772,16 @@ sis3100_vmeirq(struct vme_dev* dev, struct sis1100_irq_get2* get)
             }
         } else {
             struct vme_irq_callback_3100* cb=info->irq_callbacks;
-            /*printf("sis3100_vmeirq: irqs=0x%x, vector=0x%x eventcnt=%d\n",
-                irqs, get->vector, eventcnt);*/
-            while (irqs && cb) {
+#if 0
+            printf("sis3100_vmeirq: irqs=0x%x, vector=0x%x eventcnt=%d\n",
+                irqs, get->vector, eventcnt);
+#endif
+            while (irqs && cb && !inum) {
                 if (cb->mask&irqs && cb->vector==get->vector) {
-                    /*printf("found callback, mask 0x%08x\n", cb->mask);*/
+#if IRQDEBUG
+                    printf("found callback %p, mask 0x%08x\n", cb->callback, cb->mask);
+#endif
+                    inum++;
                     if (cb->callback) {
                         struct vmeirq_callbackdata vme_data;
                         vme_data.mask=cb->mask&irqs;
@@ -1641,13 +1792,21 @@ sis3100_vmeirq(struct vme_dev* dev, struct sis1100_irq_get2* get)
                         cb->callback(dev, &vme_data, cb->data);
                         irqs&=~irqbit;
                     }
-                    //irq_handled=1;
+                    irq_handled=1;
                 }
                 cb=cb->next;
             }
+            /* Wir muessen hier darauf vertrauen, dass cb->callback()
+               die Interruptquelle deaktiviert. Passiert das nicht, wird
+               sis3100_irq vom Scheduler immer wieder aufgerufen und wir
+               enden in einer Endlosschleife (das Murmeltier gruesst).
+               Wenn der Interrupt von einer Triggerprozedur installiert
+               wurde muss die Quelle normalerweise von einer aufgerufenen
+               Readout-Prozedur deaktiviert werden.
+            */
         }
         /* will we get the other VME IRQs with the next select? */
-        /*
+#if 1
         if (!irq_handled) {
             struct sis1100_irq_ctl ctl;
             printf("sis3100_vmeirq: IRQs 0x%x not handled; disabled\n", irqs);
@@ -1656,7 +1815,7 @@ sis3100_vmeirq(struct vme_dev* dev, struct sis1100_irq_get2* get)
             if (ioctl(info->p_ctrl, SIS1100_IRQ_CTL, &ctl))
                 printf("SIS1100_IRQ_CTL: %s\n", strerror(errno));
         }
-        */
+#endif
     }
 }
 /*****************************************************************************/
@@ -1685,7 +1844,7 @@ sis3100_irq(int p, enum select_types selected, union callbackdata data)
         }
         return;
     }
-#if 0
+#if IRQDEBUG
     printf("sis3100_irq: irqs=0x%x, level=%u vector=0x%x sec=%u nsec=%u\n",
         get.irqs, get.level, get.vector, get.irq_sec, get.irq_nsec);
 #endif
@@ -1832,6 +1991,8 @@ vme_init_sis3100(struct vme_dev* dev)
     dev->irq_ack=sis3100_irq_ack;
     dev->mindmalen=vme_mindmalen;
     dev->minpipelen=vme_minpipelen;
+    dev->front_io=sis3100_front_io;
+    dev->front_setup=sis3100_front_setup;
 
     info->current_datasize=-1;
 

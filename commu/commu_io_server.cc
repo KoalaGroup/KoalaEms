@@ -16,9 +16,11 @@
 #include <ems_errors.hxx>
 #include "versions.hxx"
 
-VERSION("2009-Aug-21", __FILE__, __DATE__, __TIME__,
-"$ZEL: commu_io_server.cc,v 2.24 2009/08/21 22:02:28 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: commu_io_server.cc,v 2.25 2014/07/14 15:12:19 wuestner Exp $")
 #define XVERSION
+
+using namespace std;
 
 /*****************************************************************************/
 
@@ -632,7 +634,7 @@ switch (status())
 void C_io_server::proceed_Open(C_message* message)
 {
 int res, error, i, count;
-OSTRINGSTREAM ss;
+ostringstream ss;
 
 TR(C_io_server::proceed_Open)
 res=0; error=0;
@@ -678,7 +680,7 @@ else
 void C_io_server::proceed_Initiate(C_message* message)
 {
 int res, i, count;
-OSTRINGSTREAM ss;
+ostringstream ss;
 msgheader* header;
 ems_u32* body;
 

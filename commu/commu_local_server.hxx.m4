@@ -1,22 +1,27 @@
 /*
  * commu_local_server.hxx.m4
  * 
- * $ZEL: commu_local_server.hxx.m4,v 2.14 2004/11/18 19:31:17 wuestner Exp $
+ * $ZEL: commu_local_server.hxx.m4,v 2.15 2014/07/14 15:12:19 wuestner Exp $
  * 
  * created 30.07.94 PW
- * 14.06.1998 PW: adapted for STD_STRICT_ANSI
+ * 
  */
 
 #ifndef _commu_local_server_hxx_
 #define _commu_local_server_hxx_
 
 #include "config.h"
-#include "cxxcompat.hxx"
-
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <commu_station.hxx>
 #include <commu_server.hxx>
 #include <errorcodes.h>
 #include <outbuf.hxx>
+
+using namespace std;
 
 /*****************************************************************************/
 

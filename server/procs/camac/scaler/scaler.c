@@ -7,7 +7,7 @@
  * 
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: scaler.c,v 1.15 2012/09/10 22:46:28 wuestner Exp $";
+    "$ZEL: scaler.c,v 1.18 2015/04/06 21:33:28 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -102,7 +102,7 @@ Why should it be a problem if the modules are in different crates?
     {
         struct camac_dev* dev=0;
         for (n=1; n<=num; n++) {
-            if (!valid_module(n, modul_camac, 0)) {
+            if (!valid_module(n, modul_camac)) {
                 printf("procs/camac/scaler: no camac module (idx %d)\n", n);
                 return plErr_ArgRange;
             }
@@ -848,7 +848,7 @@ plerrcode test_proc_Scaler4434_update_read(ems_u32* p)
     if ((res=var_attrib(p[1], &vsize))!=plOK) return(res);
     if (!memberlist)
         return plErr_NoISModulList;
-    if (!valid_module(p[2], modul_camac, 0)) return(plErr_ArgRange);
+    if (!valid_module(p[2], modul_camac)) return(plErr_ArgRange);
     if (ModulEnt(p[2])->modultype!=LC_SCALER_4434) return(plErr_BadModTyp);
     /* unsinnig: NUMCHAN_4434=32
     if (p[3]&(0xffffffff<<NUMCHAN_4434)) return plErr_ArgRange;
@@ -931,7 +931,7 @@ plerrcode test_proc_Scaler4434_update_read_n(ems_u32* p)
     if ((res=var_attrib(p[1], &vsize))!=plOK) return(res);
     if (!memberlist)
         return plErr_NoISModulList;
-    if (!valid_module(p[2], modul_camac, 0)) return(plErr_ArgRange);
+    if (!valid_module(p[2], modul_camac)) return(plErr_ArgRange);
     if (ModulEnt(p[2])->modultype!=LC_SCALER_4434) return(plErr_BadModTyp);
     if ((p[3]<1) || (p[3]>32)) return(plErr_ArgRange);
     return plOK;
@@ -986,6 +986,7 @@ plerrcode proc_Scaler2551_update_read(ems_u32* p)
     dev=m->address.camac.dev;
 
     for (k=0; k<NUMCHAN_2551; k++) {
+        /* read and clear the channel */
         camadr_t addr=dev->CAMACaddr(slot, k, 2);
         dev->CAMACread(dev, &addr, &val);
         val&=0xffffff;
@@ -1019,7 +1020,7 @@ plerrcode test_proc_Scaler2551_update_read(ems_u32* p)
     if ((res=var_attrib(p[1], &vsize))!=plOK) return res;
     if (!memberlist)
         return plErr_NoISModulList;
-    if (!valid_module(p[2], modul_camac, 0)) return plErr_ArgRange;
+    if (!valid_module(p[2], modul_camac)) return plErr_ArgRange;
     if (ModulEnt(p[2])->modultype!=LC_SCALER_2551) return plErr_BadModTyp;
     if (p[3]&(0xffffffff<<NUMCHAN_2551)) return plErr_ArgRange;
     return plOK;
@@ -1041,6 +1042,96 @@ procprop* prop_proc_Scaler2551_update_read()
 
 char name_proc_Scaler2551_update_read[]="Scaler2551_update_read";
 int ver_proc_Scaler2551_update_read=1;
+
+/*****************************************************************************/
+/*
+ * Scaler2251_update_read_noclear
+ * similar to Scaler2551_update_read, but:
+ *   the hardware is not cleared after readout
+ *   no overflow will be detected
+ *   the channel value is copied verbatim to arr[k].lower
+ *   arr[k].upper is unused
+ * this procedure is usefull if an external clear is used
+ * Alle Kanaele werden ausgelesen, aber nur die in der Maske uebertragen
+ * [0] : Anzahl der Argumente (3)
+ * [1] : Variablenindex
+ * [2] : Stationsnummer
+ * [3] : Maske fuer zu uebertragende Kanaele
+ */
+plerrcode proc_Scaler2551_update_read_noclear(ems_u32* p)
+{
+    int n, k;
+    struct camac_dev* dev;
+    ml_entry* m;
+    ems_u32 val, *help;
+    struct int64* arr;
+    int numchan, slot;
+    unsigned int mask;
+
+    arr=(struct int64*)var_list[p[1]].var.ptr;
+    for (n=1; n<p[2]; n++) {
+        switch (ModulEnt(n)->modultype) {
+        case LC_SCALER_4434: arr+=NUMCHAN_4434; break;
+        case LC_SCALER_2551: arr+=NUMCHAN_2551; break;
+        }
+    }
+
+    m=ModulEnt(p[2]);
+    slot=CAMACslot_e(m);
+    dev=m->address.camac.dev;
+
+    for (k=0; k<NUMCHAN_2551; k++) {
+        /* read, but do not clear the channel */
+        camadr_t addr=dev->CAMACaddr(slot, k, 1);
+        dev->CAMACread(dev, &addr, &val);
+        val&=0xffffff;
+        arr[k].lower=val;
+    }
+    numchan=0;
+    help=outptr++;
+    for (k=0, mask=p[3]; mask>0; k++, mask>>=1) {
+        if (mask&1) {
+            numchan++;
+            *outptr++=arr[k].upper;
+            *outptr++=arr[k].lower;
+        }
+    }
+    *help=numchan;
+
+    return(plOK);
+}
+
+plerrcode test_proc_Scaler2551_update_read_noclear(ems_u32* p)
+{
+    unsigned int vsize;
+    plerrcode res;
+
+    if (p[0]!=3) return plErr_ArgNum;
+    if ((res=var_attrib(p[1], &vsize))!=plOK) return res;
+    if (!memberlist)
+        return plErr_NoISModulList;
+    if (!valid_module(p[2], modul_camac)) return plErr_ArgRange;
+    if (ModulEnt(p[2])->modultype!=LC_SCALER_2551) return plErr_BadModTyp;
+    if (p[3]&(0xffffffff<<NUMCHAN_2551)) return plErr_ArgRange;
+    return plOK;
+}
+
+#ifdef PROCPROPS
+static procprop Scaler2551_update_read_noclear_prop={
+    1,
+    -1,
+    "int var, int pattern",
+    "update of scaler 2551 and read some channels"
+};
+
+procprop* prop_proc_Scaler2551_update_read_noclear()
+{
+    return &Scaler2551_update_read_noclear_prop;
+}
+#endif
+
+char name_proc_Scaler2551_update_read_noclear[]="Scaler2551_update_read_noclear";
+int ver_proc_Scaler2551_update_read_noclear=1;
 
 /*****************************************************************************/
 /*
@@ -1166,7 +1257,7 @@ plerrcode test_proc_Scaler4434_read(ems_u32* p)
     if ((res=var_attrib(p[1], &vsize))!=plOK) return(res);
     if (!memberlist)
         return plErr_NoISModulList;
-    if (!valid_module(p[2], modul_camac, 0)) return(plErr_ArgRange);
+    if (!valid_module(p[2], modul_camac)) return(plErr_ArgRange);
     if (ModulEnt(p[2])->modultype!=LC_SCALER_4434) return(plErr_BadModTyp);
     return plOK;
 }

@@ -5,7 +5,7 @@
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
 #include <errno.h>
 #include <libgen.h>
 #include <stdio.h>
@@ -17,10 +17,11 @@
 #include "make_file.hxx"
 #include <versions.hxx>
 
-VERSION("Feb 10 2004", __FILE__, __DATE__, __TIME__,
-"$ZEL: make_file.cc,v 1.4 2004/11/26 14:40:19 wuestner Exp $")
+VERSION("2014-07-14", __FILE__, __DATE__, __TIME__,
+"$ZEL: make_file.cc,v 1.5 2014/07/14 16:18:17 wuestner Exp $")
 #define XVERSION
 
+using namespace std;
 
 void
 make_file(fileinfo& info)

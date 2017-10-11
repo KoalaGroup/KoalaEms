@@ -1,6 +1,6 @@
 /*
  * objects/domain/dom_ml.h
- * $ZEL: dom_ml.h,v 1.13 2011/08/13 20:12:05 wuestner Exp $
+ * $ZEL: dom_ml.h,v 1.14 2015/04/06 21:35:02 wuestner Exp $
  * created 15.01.93
  */
 
@@ -19,6 +19,13 @@ typedef struct {
 } ml_entry;
 #endif
 
+/*
+ * property_data is accessible via [GS]etModuleParams and can be used to
+ * set some properties for readout procedures or similar
+ * private_data is not accessible from outside, it can be used internally
+ * for some module status (event counters, word counters ...)
+ */
+
 typedef struct ml_entry {
     int modultype;
     Modulclass modulclass;
@@ -31,7 +38,7 @@ typedef struct ml_entry {
         struct {
             struct vme_dev* dev;
             unsigned int crate;
-            /*ems_u64*/ ems_u32 addr;
+            ems_u32 addr;
         } vme;
         struct {
             struct fastbus_dev* dev;
@@ -48,24 +55,24 @@ typedef struct ml_entry {
             unsigned int bus;
             ems_u32 id;
         } can;
+        struct { /* for modules like sis3316 with ethernet connection */
+            struct ip_dev* dev;
+            char *address; /* host:port or [numerical_v6_host]:port */
+            char *protocol; /* udp or tcp */
+        } ip;
         struct {
             int length;
             int* data;
         } generic; /* future? */
-#ifdef DEFAULT_MODULE_CLASS
-        struct {
-            int addr;
-        } unspec; /* backward compatibility */
-#endif
     } address;
-    int property_length;
     ems_u32* property_data;
-    ems_u32* private_data;
+    void* private_data;
+    int property_length; /* size of property_data in words */
+    int private_length;  /* size of private_data in bytes (!) */
 } ml_entry;
 
 typedef struct {
     int modnum;
-    /*int old_style;*/ /* 1: only modul_unspec is used */
     ml_entry entry[1];
 } Modlist;
 
@@ -78,7 +85,7 @@ extern Modlist *modullist;
 
 errcode dom_ml_init(void);
 errcode dom_ml_done(void);
-int valid_module(unsigned int idx, Modulclass class, int accept_unspec);
+int valid_module(unsigned int idx, Modulclass class);
 
 plerrcode dump_modent(ml_entry *entry, int verbose);
 plerrcode dump_modulelist(void);

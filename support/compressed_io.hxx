@@ -1,7 +1,7 @@
 /*
  * ems/support/compressed_io.hxx
  *
- * $ZEL: compressed_io.hxx,v 1.5 2010/02/02 23:47:33 wuestner Exp $
+ * $ZEL: compressed_io.hxx,v 1.6 2014/07/14 15:09:53 wuestner Exp $
  *
  * created 2004-11-24 PW
  */
@@ -10,8 +10,14 @@
 #define _compressed_io_hxx_
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <cstdio>
+
+using namespace std;
 
 class compressed_io {
   public:

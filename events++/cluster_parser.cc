@@ -8,21 +8,19 @@
 #include "cxxcompat.hxx"
 
 #include <errno.h>
+#include <unistd.h>
+#include <string.h>
+#include "swap_int.h"
 #include "compressed_io.hxx"
 #include "cluster_data.hxx"
 #include <versions.hxx>
 
-VERSION("2006-May-02", __FILE__, __DATE__, __TIME__,
-"$ZEL: cluster_parser.cc,v 1.2 2006/05/03 11:53:06 wuestner Exp $")
+VERSION("2014-07-07", __FILE__, __DATE__, __TIME__,
+"$ZEL: cluster_parser.cc,v 1.3 2014/07/07 21:00:30 wuestner Exp $")
 #define XVERSION
 
-#define swap_int(a) ( ((a) << 24) | \
-                      (((a) << 8) & 0x00ff0000) | \
-                      (((a) >> 8) & 0x0000ff00) | \
-        ((unsigned int)(a) >>24) )
-
 //---------------------------------------------------------------------------//
-int
+static int
 xread(int p, char* b, int num)
 {
     int da=0, rest=num, res;
@@ -50,14 +48,14 @@ xread(int p, char* b, int num)
  *  0: no more data
  * >0: size of record (in words)
  */
-int
+static int
 read_record(int p, ems_u32** buf)
 {
     ems_u32 head[2], *b;
     ems_u32 size;
     int wenden;
 
-    switch (xread(p, (char*)head, 8)) {
+    switch (xread(p, reinterpret_cast<char*>(head), 8)) {
     case -1: // error
         cerr<<"read header: "<<strerror(errno)<<endl;
         return -1;
@@ -94,7 +92,7 @@ read_record(int p, ems_u32** buf)
 
     b[0]=head[0];
     b[1]=head[1];
-    switch (xread(p, (char*)(b+2), (size-1)*4)) {
+    switch (xread(p, reinterpret_cast<char*>(b+2), (size-1)*4)) {
     case -1: // error
         cerr<<"read body: "<<strerror(errno)<<endl;
         return -1;
@@ -119,6 +117,10 @@ read_record(int p, ems_u32** buf)
 static int
 parse_event(const ems_event* event)
 {
+#if 0
+
+this seems to be nonsense
+
     static ems_u32 ev_no=0;
 //     if (event->event_nr!=ev_no+1) {
 //         cerr<<"jump from "<<ev_no<<" to "<<event->event_nr<<endl;
@@ -128,6 +130,7 @@ parse_event(const ems_event* event)
     if (!(ev_no&ev_no-1)) {
         event->dump(1);
     }
+#endif
 
     return 0;
 }

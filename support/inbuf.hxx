@@ -1,19 +1,25 @@
 /*
- * inbuf.hxx
+ * support/inbuf.hxx
  * 
  * created 04.02.95 PW
- * 16.03.1998 PW: adapted for <string>
- * 31.Jul.2002 PW: ++ -- += -= overloaded
+ * 
+ * $ZEL: inbuf.hxx,v 2.20 2014/07/14 15:09:53 wuestner Exp $
  */
 
 #ifndef _inbuf_hxx_
 #define _inbuf_hxx_
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <sys/time.h>
 
 #include "buf.hxx"
+
+using namespace std;
 
 /*****************************************************************************/
 
@@ -26,7 +32,7 @@ class C_inbuf: public C_buf
     C_inbuf(const int*);
     C_inbuf(const unsigned int*);
     C_inbuf(int);
-    C_inbuf(const STRING&); // filename
+    C_inbuf(const string&); // filename
     C_inbuf(const C_buf&);
     virtual ~C_inbuf();
   private:
@@ -50,7 +56,7 @@ class C_inbuf: public C_buf
     C_inbuf& operator>>(short&);
     C_inbuf& operator>>(unsigned short&);
     C_inbuf& operator>>(char&);
-    C_inbuf& operator>>(STRING&);
+    C_inbuf& operator>>(string&);
     C_inbuf& operator>>(struct timeval&);
     C_inbuf& operator>>(inbuf_manip);
     C_inbuf& operator ++();

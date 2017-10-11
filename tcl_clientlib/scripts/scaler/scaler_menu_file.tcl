@@ -1,3 +1,6 @@
+# $ZEL: scaler_menu_file.tcl,v 1.4 2011/11/27 00:12:01 wuestner Exp $
+# copyright 1998-2011
+#   P. Wuestner; Zentralinstitut fuer Elektronik; Forschungszentrum Juelich
 #
 # Diese Prozedur erzeugt das Filemenu im Hauptmenu
 #

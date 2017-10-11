@@ -5,6 +5,7 @@
  */
 
 #include "config.h"
+#include <cstring>
 #include "cxxcompat.hxx"
 #include <errno.h>
 #include <fcntl.h>
@@ -18,7 +19,7 @@
 #include "versions.hxx"
 
 VERSION("Jul 14 1998", __FILE__, __DATE__, __TIME__,
-"$ZEL: clusterscan.cc,v 1.5 2004/11/26 14:40:14 wuestner Exp $")
+"$ZEL: clusterscan.cc,v 1.6 2014/07/14 16:18:17 wuestner Exp $")
 #define XVERSION
 
 typedef enum {clusterty_events=0, clusterty_text,

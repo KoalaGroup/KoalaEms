@@ -3,7 +3,7 @@
  * created 25.Jan.2001 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: sis3800_shadow.c,v 1.18 2012/10/25 00:32:01 wuestner Exp $";
+    "$ZEL: sis3800_shadow.c,v 1.19 2015/04/06 21:33:37 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -90,7 +90,7 @@ for (i=2; i<=p[0]; i++)
   {
   ml_entry* module;
 
-  if (!valid_module(p[i], modul_vme, 0)) return plErr_ArgRange;
+  if (!valid_module(p[i], modul_vme)) return plErr_ArgRange;
   module=ModulEnt(p[i]);
   if (module->modultype!=SIS_3800) return plErr_BadModTyp;
   }
@@ -275,7 +275,7 @@ plerrcode test_proc_sis3800ShadowUpdate(ems_u32* p)
     for (i=0; i<p[2]; i++) {
         ml_entry* module;
 
-        if (!valid_module(p[i+3], modul_vme, 0))
+        if (!valid_module(p[i+3], modul_vme))
             return plErr_ArgRange;
         module=ModulEnt(p[i+3]);
         if (module->modultype!=SIS_3800)

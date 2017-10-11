@@ -1,11 +1,15 @@
 /*
- * mkpath.cc
+ * support/mkpath.cc
  * 
  * created ??? PW
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <string.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -17,9 +21,11 @@
 
 #include "versions.hxx"
 
-VERSION("Mar 27 2003", __FILE__, __DATE__, __TIME__,
-"$ZEL: mkpath.cc,v 2.5 2010/02/02 23:48:25 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: mkpath.cc,v 2.6 2014/07/14 15:09:53 wuestner Exp $")
 #define XVERSION
+
+using namespace std;
 
 /*****************************************************************************/
 static int

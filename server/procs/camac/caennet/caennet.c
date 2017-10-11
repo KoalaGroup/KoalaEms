@@ -5,7 +5,7 @@
  * 02.Aug.2001 PW: multicrate support
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: caennet.c,v 1.12 2011/04/06 20:30:30 wuestner Exp $";
+    "$ZEL: caennet.c,v 1.13 2015/04/06 21:33:24 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -126,7 +126,7 @@ plerrcode proc_CAENnetRead(ems_u32* p)
 
 static plerrcode test_CAENparams(ems_u32* p)
 {
-    if (!valid_module(p[1], modul_camac, 0)) return(plErr_ArgRange);
+    if (!valid_module(p[1], modul_camac)) return(plErr_ArgRange);
     if (ModulEnt(p[2])->modultype!=CAENNET_SLOW) return(plErr_BadModTyp);
     return plOK;
 }

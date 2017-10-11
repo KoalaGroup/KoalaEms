@@ -1,22 +1,27 @@
 /*
- * proc_dataio.hxx
+ * proclib/proc_dataio.hxx
  * 
  * created: 10.06.97 PW
- * 12.06.1998 PW: adapted for STD_STRICT_ANSI
- * 04.May.2001 PW: additional arguments added for dataout
+ * 
+ * $ZEL: proc_dataio.hxx,v 2.6 2014/07/14 15:11:53 wuestner Exp $
  */
 
 #ifndef _proc_dataio_hxx_
 #define _proc_dataio_hxx_
 
 #include "config.h"
-#include "cxxcompat.hxx"
-
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <outbuf.hxx>
 #include "proc_iotype.hxx"
 #include "proc_ioaddr.hxx"
 
 class C_confirmation;
+
+using namespace std;
 
 /*****************************************************************************/
 

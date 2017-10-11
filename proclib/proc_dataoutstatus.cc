@@ -1,11 +1,15 @@
 /*
  * proc_dataoutstatus.cc
  * created: 12.06.97
- * 22.03.1999 PW: device eliminated
+ * 
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <errno.h>
 #include <stdlib.h>
 #include <objecttypes.h>
@@ -14,9 +18,11 @@
 #include <errors.hxx>
 #include <versions.hxx>
 
-VERSION("Mar 03 1999", __FILE__, __DATE__, __TIME__,
-"$ZEL: proc_dataoutstatus.cc,v 2.9 2004/11/26 14:44:27 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: proc_dataoutstatus.cc,v 2.10 2014/07/14 15:11:53 wuestner Exp $")
 #define XVERSION
+
+using namespace std;
 
 /*****************************************************************************/
 

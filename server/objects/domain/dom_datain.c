@@ -3,7 +3,7 @@
  * created before 02.02.94
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: dom_datain.c,v 1.21 2011/08/18 22:32:04 wuestner Exp $";
+    "$ZEL: dom_datain.c,v 1.23 2015/04/06 21:35:00 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -275,6 +275,9 @@ datain[index].bufinfosize=qlen;
 datain[index].bufinfo=malloc(qlen*sizeof(int));
 for (i=0; i<qlen; i++) datain[index].bufinfo[i]=q[i];
 datain[index].addrinfosize=rlen;
+#if 0
+printf("downloaddatain: addrinfosize=%d\n", datain[index].addrinfosize);
+#endif
 datain[index].addrinfo=malloc(rlen*sizeof(int));
 for (i=0; i<rlen; i++) datain[index].bufinfo[i]=r[i];
 if ((res=datain_pre_init(index, qlen, q))!=OK)
@@ -291,34 +294,46 @@ else
 errcode uploaddatain(ems_u32* p, unsigned int len)
 {
     ems_u32 *help=0;
-    int i, usenew;
+    int i;
     unsigned int index;
 
     T(uploaddatain)
 
     if (len<1)
-        return(Err_ArgNum);
+        return Err_ArgNum;
 
     index=p[0];
     if (index>=MAX_DATAIN)
         return(Err_ArgRange);
-    if (datain[index].bufftyp==-1) return(Err_NoDomain);
-    usenew=(datain[index].bufinfosize>0 || datain[index].addrinfosize>0);
-    if (usenew) {
-        *outptr++=-1;
-        *outptr++=datain[index].bufinfosize;
-    }
+    if (datain[index].bufftyp==-1)
+        return Err_NoDomain;
+
+/*
+ *     We assume that no old client still exists.
+ *     Therefore we will use the new protocol (with exlicit argument counters)
+ *     The implementation of the new protocol was badly broken before
+ *     2014-09-07, uploaddatain could never work (but it is normally not
+ *     needed).
+ */
+
+    /* marker for new protocol */
+    *outptr++=-1;
+
+    /* info about the used buffer */
     *outptr++=datain[index].bufftyp;
-    if (usenew) {
-        for (i=0; i<datain[index].bufinfosize; i++)
-            *outptr++=datain[index].bufinfo[i];
-    }
-    if (usenew) help=outptr++;
+    *outptr++=datain[index].bufinfosize;
+    for (i=0; i<datain[index].bufinfosize; i++)
+        *outptr++=datain[index].bufinfo[i];
+
+    /* info about the used address */
     *outptr++=datain[index].addrtyp;
+    help=outptr++; /* placeholder for number of args */
+
     switch(datain[index].addrtyp) {
 #ifdef OSK
     case Addr_Raw:
         *outptr++=(int)(datain[index].addr.addr);
+        /* break missing here? */
 #endif
     case Addr_Modul:
         outptr=outstring(outptr, datain[index].addr.modulname);
@@ -353,11 +368,12 @@ errcode uploaddatain(ems_u32* p, unsigned int len)
     default:
         return(Err_Program);
     }
-    if (usenew) {
-        for (i=0; i<datain[index].addrinfosize; i++)
-            *outptr++=datain[index].addrinfo[i];
-        *help=outptr-help-1;
-    }
+
+    /* additional address info (if any) */
+    for (i=0; i<datain[index].addrinfosize; i++)
+        *outptr++=datain[index].addrinfo[i];
+
+    *help=outptr-help-1;
 
     return OK;
 }

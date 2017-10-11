@@ -1,4 +1,4 @@
-dnl $Id: configure.in,v 1.30 2010/09/10 21:50:27 wuestner Exp $
+dnl $Id: configure.in,v 1.32 2014/07/10 10:31:16 wuestner Exp $
 dnl Process this file with autoconf to produce a configure script.
 dnl $ems/tcl_clientlib
 AC_INIT(emstcl.cc)
@@ -24,7 +24,8 @@ dnl Set compilation flags
 CXX_ANSI=0
 if test "$GXX" = yes ; then
     CXXFLAGS="-D__STD_STRICT_ANSI -ansi"
-    CXXFLAGS="$CXXFLAGS -Wall -Woverloaded-virtual"
+    CXXFLAGS="$CXXFLAGS -Werror -Wall -Woverloaded-virtual"
+    CXXFLAGS="$CXXFLAGS -Wmissing-declarations"
     if test "$enable_debug" = yes ; then
         CXXFLAGS="$CXXFLAGS -g"
     else
@@ -244,14 +245,14 @@ ltcl=/usr/local/tcl
 EMS_SEARCH([tcl], [tcl includes],
 	[tcl.h], [TCL],
 	[. include include/generic],
-	[$tcl_default_inc $ltcl $ltcl/include $ltcl/include/generic])
+	[/usr/include $tcl_default_inc $ltcl $ltcl/include $ltcl/include/generic])
 AC_SUBST(TCL)
 
 ltk=/usr/local/tcl
 EMS_SEARCH([tk], [tk includes],
 	[tk.h], [TK],
 	[. include include/generic],
-	[$tcl_default_inc $ltk $ltk/include $ltk/include/generic])
+	[/usr/include $tcl_default_inc $ltk $ltk/include $ltk/include/generic])
 AC_SUBST(TK)
 
 dnl if test "$enable_dynamic" = yes ; then

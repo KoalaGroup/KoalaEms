@@ -1,4 +1,4 @@
-#$Id: output.tcl,v 1.3 2006/03/17 21:21:57 wuestner Exp $
+#$Id: output.tcl,v 1.4 2011/11/27 00:16:13 wuestner Exp $
 #
 # global vars in this file:
 #
@@ -27,6 +27,14 @@ proc init_output {title} {
   set global_output(title) $title
   create_output
   wm withdraw $global_output(win)
+}
+
+proc map_output {} {
+    global global_output
+    if {![winfo exists $global_output(win)]} {
+        create_output
+    }
+    wm deiconify $global_output(win)
 }
 
 proc create_output {} {

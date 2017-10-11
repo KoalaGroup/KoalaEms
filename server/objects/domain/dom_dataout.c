@@ -3,7 +3,7 @@
  * created before 30.05.94
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: dom_dataout.c,v 1.35 2011/08/16 19:19:50 wuestner Exp $";
+    "$ZEL: dom_dataout.c,v 1.36 2015/04/06 21:35:00 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -98,6 +98,41 @@ errcode dom_dataout_done()
     return OK;
 }
 /*****************************************************************************/
+static void
+downloaddataout_dump(ems_u32* p, unsigned int len)
+{
+    ems_u32 *q;
+    int i;
+
+    printf("downloaddataout_dump: p=%p len=%u\n", p, len);
+    for (i=0; i<len; i++) {
+        printf("%08x  ", p[i]);
+    }
+    printf("\n");
+
+    if (p[2]==-1) {
+        printf("new version\n");
+        printf("index=%d\n", p[0]);
+        printf("io type=%d\n", p[1]);
+        printf("selector=%d\n", p[2]);
+        printf("# io args=%d\n", p[3]);
+        for (i=0; i<p[3]; i++) {
+            printf("%08x  ", p[4+i]);
+        }
+        printf("\n");
+
+        q=p+4+p[3];
+        printf("addr type=%d\n", q[0]);
+        printf("# addr args=%d\n", q[1]);
+        for (i=0; i<q[1]; i++) {
+            printf("%08x  ", q[2+i]);
+        }
+        printf("\n");
+    } else {
+        printf("old version\n");
+    }
+}
+/*****************************************************************************/
 /* downloaddataout (bisher)
  *  <Index> <InOutTyp> <Buffersize> <Prioritaet> <Addresstype> <Address>
  *
@@ -106,9 +141,16 @@ errcode dom_dataout_done()
  *  InOutArgs: Num {arg}
  *  AdressArgs: Num <weiter wie gehabt>
  *
+ * (is the following for InOutArgs really correct?)
  * InOutArgs[0]: 0: don't write filemarks to tape if -o:nofilemark is also given
  *               1: write filemarks
  * InOutArgs[1]: triggermask; ignore cluster unless InOutArgs[1]&cluster.triggers!=0
+ *
+ * AddressArgs for Addr_Tape:
+ * AddressArgs[0]: density
+ *
+ * AddressArgs for Addr_File:
+ * AddressArgs[0]: reopen a new file every X seconds
  *
  */
 
@@ -126,6 +168,7 @@ static errcode downloaddataout(ems_u32* p, unsigned int len)
         for (i=0; i<len; i++) printf("%d%s", p[i], i+1<len?", ":"");
         printf(")\n");}
     )
+    downloaddataout_dump(p, len);
 
 #ifdef DATAOUT_SIMPLE
     return Err_ObjDef;
@@ -133,7 +176,7 @@ static errcode downloaddataout(ems_u32* p, unsigned int len)
 #ifdef DATAOUT_MULTI
     if ((unsigned int)len<5)
         return Err_ArgNum;
-    if (p[2]==-1) {
+    if (p[2]==-1) { /* newer protocol version */
         q=p+4;
         qlen=p[3];
         if (len<qlen+6) {
@@ -152,7 +195,7 @@ static errcode downloaddataout(ems_u32* p, unsigned int len)
         } else {
             slen=0;
         }
-    } else {
+    } else { /* older protocol version */
         q=p+2;
         qlen=2;
         r=p+5;

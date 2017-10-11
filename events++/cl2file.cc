@@ -23,8 +23,8 @@
 #include "swap_int.h"
 #include <xdrstring.h>
 
-VERSION("May 26 2002", __FILE__, __DATE__, __TIME__,
-"$ZEL: cl2file.cc,v 1.3 2005/02/11 15:44:52 wuestner Exp $")
+VERSION("2014-07-07", __FILE__, __DATE__, __TIME__,
+"$ZEL: cl2file.cc,v 1.5 2014/07/07 20:14:04 wuestner Exp $")
 #define XVERSION
 
 C_readargs* args;
@@ -65,12 +65,14 @@ class Cluster {
 };
 
 /*****************************************************************************/
-void printheader(ostream& os)
+static void
+printheader(ostream& os)
 {
 os<<"Reads EMS cluster file(s) and dumps header records."<<endl<<endl;
 }
 /*****************************************************************************/
-void printstreams(ostream& os)
+static void
+printstreams(ostream& os)
 {
 os<<endl;
 os<<"input may be: "<<endl;
@@ -82,7 +84,8 @@ os<<"  :<name> for unix socket (passive);"<<endl;
 os<<"  @:<name> for unix socket (active);"<<endl;
 }
 /*****************************************************************************/
-int readargs()
+static int
+readargs(void)
 {
 args->helpinset(3, printheader);
 args->helpinset(5, printstreams);
@@ -106,7 +109,8 @@ recsize=args->getintopt("recsize")/sizeof(unsigned int);
 return(0);
 }
 /*****************************************************************************/
-int makedir(int nr)
+static int
+makedir(int nr)
 {
     sprintf(dir_name, "%s/%03d", args->getstringopt("outdir"), nr);
     if (mkdir(dir_name, 0750)<0) {
@@ -116,7 +120,8 @@ int makedir(int nr)
     return 0;
 }
 /*****************************************************************************/
-FILE* make_file(char* filename)
+static FILE*
+make_file(char* filename)
 {
     FILE* f;
     int p, count=0, errnum;
@@ -187,7 +192,7 @@ Cluster::Cluster(C_iopath* path, int recsize)
                 for (int i=2; i<size_; i++) data_[i]=swap_int(data_[i]);
             }
         }
-        typ=(clustertypes)data_[2];
+        typ=static_cast<clustertypes>(data_[2]);
         valid_=true;
         return;
     } catch (C_status_error* e) {
@@ -304,7 +309,7 @@ void Cluster::decode_text() const
     
     len=xdrstrclen(ptr);
     line1=new char[len+1];
-    ptr=(unsigned int*)extractstring(line1, ptr);
+    ptr=reinterpret_cast<unsigned int*>(extractstring(line1, ptr));
     if (strncmp(line1, "Key: ", 5)) {
         cout<<"text cluster without key"<<endl;
         strcpy(filename, "noname");
@@ -323,7 +328,7 @@ void Cluster::decode_text() const
     } else if (strcmp(p0, "configuration")==0) {
         len=xdrstrclen(ptr);
         line2=new char[len+1];
-        ptr=(unsigned int*)extractstring(line2, ptr);
+        ptr=reinterpret_cast<unsigned int*>(extractstring(line2, ptr));
         if (strncmp(line2, "name ", 5)) {
             cout<<"text cluster configuration without name"<<endl;
             strcpy(filename, "configuration_noname");
@@ -344,7 +349,7 @@ void Cluster::decode_text() const
     for (int l=0; l<lines; l++) {
         len=xdrstrclen(ptr);
         char* str=new char[len+1];
-        ptr=(unsigned int*)extractstring(str, ptr);
+        ptr=reinterpret_cast<unsigned int*>(extractstring(str, ptr));
         fprintf(f, "%s\n", str);
         delete[] str;
     }
@@ -359,9 +364,8 @@ void Cluster::decode_text() const
 /*****************************************************************************/
 void Cluster::decode_file() const
 {
-    unsigned int* ptr;
-    ptr+=decode_options(data_+3, 1);
-    ptr+=decode_flags(data_+3, 1);
+    decode_options(data_+3, 1);
+    decode_flags(data_+3, 1);
     cout<<"cluster file not yet decoded."<<endl;
 
     g_outfiles++;
@@ -414,11 +418,13 @@ void Cluster::decode()
         clusters=outfiles=0;
         break;
     case clusterty_events: break;
+    case clusterty_async_data: break;
     // no default
     }
 }
 /*****************************************************************************/
-void do_scan(C_iopath* inpath)
+static void
+do_scan(C_iopath* inpath)
 {
     bool filemark;
     Cluster* cluster;

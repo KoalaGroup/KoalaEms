@@ -4,7 +4,11 @@
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include "emstcl_ved.hxx"
 #include <cerrno>
 #include <errors.hxx>
@@ -12,13 +16,15 @@
 #include "tcl_cxx.hxx"
 #include <versions.hxx>
 
-VERSION("2009-Feb-25", __FILE__, __DATE__, __TIME__,
-"$ZEL: emstcl_confir.cc,v 1.12 2010/02/03 00:15:50 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: emstcl_confir.cc,v 1.13 2014/07/14 15:13:25 wuestner Exp $")
 #define XVERSION
 
 const E_confirmation** E_confirmation::econfirmations=0;
 int E_confirmation::num_econfirmations=0;
 int E_confirmation::max_econfirmations=0;
+
+using namespace std;
 
 /*****************************************************************************/
 
@@ -26,16 +32,16 @@ E_confirmation::E_confirmation(Tcl_Interp* interp, E_ved* ved,
     const C_confirmation& conf)
 :deleted(0), interp(interp), ved(ved) 
 {
-OSTRINGSTREAM st;
+ostringstream st;
 st << "conf_" << conf.header()->ved << "_" << conf.header()->transid;
-STRING rootname=st.str();
+string rootname=st.str();
 int idx=0;
 Tcl_CmdInfo info;
 origprocname=rootname;
 while (Tcl_GetCommandInfo(interp, (char*)origprocname.c_str(), &info)!=0)
   {
   idx++;
-  OSTRINGSTREAM ss;
+  ostringstream ss;
   ss << rootname << '#' << idx;
   origprocname=ss.str();
   }
@@ -65,9 +71,9 @@ delete (E_confirmation*)clientdata;
 
 /*****************************************************************************/
 
-STRING E_confirmation::tclprocname() const
+string E_confirmation::tclprocname() const
 {
-STRING s;
+string s;
 s=Tcl_GetCommandName(interp, tclcommand);
 return s;
 }
@@ -142,7 +148,7 @@ return res;
 
 /*****************************************************************************/
 
-STRING E_confirmation::new_E_confirmation(Tcl_Interp* interp, E_ved* ved,
+string E_confirmation::new_E_confirmation(Tcl_Interp* interp, E_ved* ved,
     const C_confirmation& conf)
 {
 E_confirmation* econf=new E_confirmation(interp, ved, conf);
@@ -192,9 +198,9 @@ switch (findstring(interp, argv[2], names))
   default: res=TCL_ERROR; break;
   }
 if (res!=TCL_OK) return TCL_ERROR;
-OSTRINGSTREAM ss;
+ostringstream ss;
 if (confback.callformer(ved, ss, confirmation)!=TCL_OK) return TCL_ERROR;
-STRING s=ss.str();
+string s=ss.str();
 Tcl_SetObjResult(interp, Tcl_NewStringObj(s.c_str(), -1));
 return TCL_OK;
 }
@@ -216,7 +222,7 @@ const char* names[]={
   "xid",
   "body",
   0};
-OSTRINGSTREAM ss;
+ostringstream ss;
 int res=TCL_OK;
 switch (findstring(interp, argv[2], names))
   {
@@ -262,7 +268,7 @@ switch (findstring(interp, argv[2], names))
   }
 if (res==TCL_OK)
   {
-  STRING s=ss.str();
+  string s=ss.str();
   //cerr<<"E_confirmation::e_get: result is "<<s<<endl;
   Tcl_SetObjResult(interp, Tcl_NewStringObj(s.c_str(), -1));
   }

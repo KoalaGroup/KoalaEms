@@ -1,24 +1,20 @@
 /*
- * proc_ved.hxx
+ * proclib/proc_ved.hxx
  * 
  * created: 15.08.94 PW
- * 25.03.1998 PW: adapded for <string>
- * 12.06.1998 PW: adapted for STD_STRICT_ANSI
- * 17.03.1999 PW: lam_add_param and trig_add_param as inline
- * 22.03.1999 PW: int arg=0 added to GetDataoutStatus
- * 19.06.1999 PW: obsolete procedures deleted
- * 21.06.1999 PW: type of GetReadoutStatus changed from int to InvocStatus
- * 22.Jan.2001 PW: multicrate support (UploadModullist)
- * 09.May.2001 PW: default_header in C_VED::WriteDataout
  *
- * $ZEL: proc_ved.hxx,v 2.27 2007/10/23 11:18:24 wuestner Exp $
+ * $ZEL: proc_ved.hxx,v 2.28 2014/07/14 15:11:54 wuestner Exp $
  */
 
 #ifndef _proc_ved_hxx_
 #define _proc_ved_hxx_
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <sys/time.h>
 #include "smartptr_t.hxx"
 #include "proc_modes.hxx"
@@ -40,6 +36,8 @@
 
 class C_instr_system;
 
+using namespace std;
+
 /*****************************************************************************/
 
 class C_add_trans;
@@ -53,11 +51,11 @@ class C_VED : public nocopy {
     typedef int VED_prior;
     static const VED_prior DEF_prior, NO_prior, CC_prior, CCM_prior, SER_prior,
          EB_prior;
-    C_VED(const STRING& name, VED_prior prior=NO_prior);
+    C_VED(const string& name, VED_prior prior=NO_prior);
     virtual ~C_VED();
 
   private:
-    STRING ved_name;
+    string ved_name;
     ems_u32 ved;
     T_smartptr<C_namelist> namelist;
     T_smartptr<C_namelist> namelist_dom;
@@ -86,7 +84,7 @@ class C_VED : public nocopy {
     void make_triglist(void);
 
   public:
-    STRING name() const {return ved_name;}
+    string name() const {return ved_name;}
     int  ved_id() const {return ved;}
     C_instr_system* is0() const {return is0_;}
     void ResetVED();
@@ -110,7 +108,7 @@ class C_VED : public nocopy {
     void ResumeReadout();
     InvocStatus GetReadoutStatus(ems_u32* eventcount);
     C_readoutstatus* GetReadoutStatus(int naux, const int* aux, int useaux=1);
-    STRING GetReadoutParams();
+    string GetReadoutParams();
     void UploadDataoutAddr(int idx, C_add_trans& addr);
     int  SetUnsol(int);
     void create_is(int idx, int id); // asynchroner Modus
@@ -127,7 +125,7 @@ class C_VED : public nocopy {
     int last_xid() const {return last_xid_;}
     int procnum(const char*, Capabtyp);
     int numprocs(Capabtyp);
-    STRING procname(int, Capabtyp);
+    string procname(int, Capabtyp);
     char version_separator(Capabtyp);
     char version_separator(char, Capabtyp);
     C_confirmation* GetProcProperties(int, int, ems_u32*);

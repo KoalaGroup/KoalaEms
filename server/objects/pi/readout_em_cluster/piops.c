@@ -3,7 +3,7 @@
  * created: 23.03.97 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: piops.c,v 1.13 2011/04/06 20:30:29 wuestner Exp $";
+    "$ZEL: piops.c,v 1.14 2014/09/10 15:25:53 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -24,6 +24,9 @@ static const char* cvsid __attribute__((unused))=
 #include "../../notifystatus.h"
 #include "../../../dataout/dataout.h"
 #include "../../domain/dom_datain.h"
+#ifdef DI_MQTT
+#include "di_mqtt.h"
+#endif
 
 #define set_max(a, b) ((a)=(a)<(b)?(b):(a))
 
@@ -54,7 +57,9 @@ void fatal_readout_error()
 errcode pi_readout_init()
 {
     T(readout_em_cluster/piops.c:pi_readout_init)
-
+#ifdef DI_MQTT
+    init_mqtt();
+#endif
     owner=0;
     return OK;
 }
@@ -62,7 +67,9 @@ errcode pi_readout_init()
 errcode pi_readout_done()
 {
     T(readout_em_cluster/piops.c:pi_readout_done)
-
+#ifdef DI_MQTT
+    cleanup_mqtt();
+#endif
     if (owner)
         free(owner);
     return OK;
@@ -149,7 +156,10 @@ static errcode startreadout(ems_u32* p, unsigned int num)
     printf("%s startreadout; readout_active=%d\n", nowstr(), readout_active);
     if (readout_active)
         return Err_PIActive;
+#ifdef DI_CLUSTER
+    /* without DI_CLUSTER we will never have any ved_info */
     ved_info_sent=0;
+#endif
     if ((res=start_dataout())!=OK)
         return res;
 
@@ -159,19 +169,34 @@ static errcode startreadout(ems_u32* p, unsigned int num)
             if (res!=OK) {
                 printf("readout_em_cluster/piops::startreadout():\n"
                         "  cannot initialise datain %d\n", i);
-                for (j=0; j<i; j++)
-                    datain_cl[j].procs.reset(j);
-                for (j=0; j<MAX_DATAOUT; j++)
-                    dataout_cl[j].procs.reset(j);
-                return res;
+                break;
             }
         }
     }
 
-    readout_active=Invoc_active;
-    notifystatus(status_action_start, Object_pi, 2, obj);
-    D(D_REQ, printf("startreadout in piops.c: OK\n");)
-    return OK;
+    if (res==0) {
+        readout_active=Invoc_active;
+        notifystatus(status_action_start, Object_pi, 2, obj);
+        D(D_REQ, printf("startreadout in piops.c: OK\n");)
+        return OK;
+    } else {
+        /* cleanup after error */
+        for (j=0; j<i; j++) {
+            if (datain[j].bufftyp!=-1) {
+                if (datain_cl[j].procs.reset(j))
+                    datain_cl[j].procs.reset(j);
+            }
+        }
+
+        for (j=0; j<MAX_DATAOUT; j++) {
+            if (dataout[j].bufftyp!=-1) {
+                if (dataout_cl[j].procs.reset(j))
+                    dataout_cl[j].procs.reset(j);
+            }
+        }
+    }
+
+    return res;
 }
 /*****************************************************************************/
 static errcode resetreadout(ems_u32* p, unsigned int num)
@@ -270,7 +295,8 @@ if (readout_active!=Invoc_active)
   }
 for (i=0; i<MAX_DATAIN; i++)
   {
-  if ((datain[i].bufftyp!=-1) && datain_cl[i].status!=Invoc_alldone) return;
+  if ((datain[i].bufftyp==InOut_Cluster) && datain_cl[i].status!=Invoc_alldone)
+    return;
   }
 notifystatus(status_action_finish, Object_pi, 2, id);
 readout_active=Invoc_alldone;

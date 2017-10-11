@@ -2,7 +2,7 @@
  * normsock.c
  * 
  * created: 2011-08-23 PW
- * $ZEL: normsock.c,v 1.2 2012/03/12 14:14:42 wuestner Exp $
+ * $ZEL: normsock.c,v 1.3 2013/10/30 18:21:28 wuestner Exp $
  */
 #define _GNU_SOURCE
 #include <stdio.h>
@@ -190,7 +190,7 @@ connect_socket(const char *host, const char *service,
         }
 
         if (connect(sock, a->ai_addr, a->ai_addrlen)<0) {
-            printf("connect to [%s]:%s: %s\n",
+            LOG(1, "connect to [%s]:%s: %s\n",
                     host, service, strerror(errno));
             close(sock);
             continue;
@@ -406,8 +406,8 @@ parse_name(const char *name, char **host, char **service)
         }
     }
 
-    printf("host   : >%s<\n", *host);
-    printf("service: >%s<\n", *service);
+    dLOG("host   : >%s<\n", *host);
+    dLOG("service: >%s<\n", *service);
     return 0;
 }
 /******************************************************************************/
@@ -482,8 +482,9 @@ alloc_data(void)
 /*
  * sock_read reads some data (nonblocking) from the socket.
  * It returns
- *   -1 in case of fatal error
- *    0 if no fatal error occured
+ *   -2 in case of fatal error
+ *   -1 if the socket was closed "at the right point"
+ *    0 if no error occured and no data are available
  *    1 if a block of data is complete
  * If the result is 1 (data complete) it is necessary to extract the data
  * from the sockdescr before the next call to sock_read!
@@ -499,7 +500,7 @@ sock_read(struct sockdescr *sock)
         sock->idx=0;
         sock->ddescr=alloc_data();
         if (!sock->ddescr)
-            return -1;
+            return -2;
     }
 
     ddescr=sock->ddescr;
@@ -510,15 +511,16 @@ sock_read(struct sockdescr *sock)
         res=read(sock->p, ddescr->opaque+sock->idx, 4-sock->idx);
         if (res<=0) {
             if (res==0) {
-                errno=EPIPE;
-                res=-1;
+                /* socket closed (or broken)
+                   at this point this is not an error */
+                return -1;
             }
             if (errno==EINTR || errno==EAGAIN)
                 return 0;
             if (loglevel<-1 || errno!=EPIPE)
                 LOG_("read head from %s:%s: %s\n",
                         sock->host, sock->service, strerror(errno));
-            return -1;
+            return -2;
         }
         dLOG("got %lld bytes\n", (long long)res);
         sock->idx+=res;
@@ -531,7 +533,7 @@ sock_read(struct sockdescr *sock)
             dLOG("opaque size is %d\n", ddescr->size);
             if (ddescr->size & ~MAXSIZE) {
                 eLOG("size %d is too large\n", ddescr->size);
-                return -1;
+                return -2;
             }
             if (!ddescr->size) { /* empty block ignored */
                 sock->idx=0;
@@ -560,7 +562,7 @@ sock_read(struct sockdescr *sock)
                     ddescr->size,
                     sock->host, sock->service,
                     strerror(errno));
-            return -1;
+            return -2;
         }
         ddescr->opaque=opaque;
         ddescr->space=ddescr->size;
@@ -571,24 +573,26 @@ sock_read(struct sockdescr *sock)
     res=read(sock->p, ddescr->opaque+sock->idx, ddescr->size-sock->idx);
     if (res<=0) {
         if (res==0) {
+            /* length word valid, but no data
+               socket close (or broken) at the wrong point, fatal error */
             errno=EPIPE;
-            res=-1;
         }
         if (errno==EINTR || errno==EAGAIN)
             return 0;
         if (loglevel<-1 || errno!=EPIPE)
             LOG_("read data from %s:%s: %s\n",
                     sock->host, sock->service, strerror(errno));
-        return -1;
+        return -2;
     }
+
     sock->idx+=res;
     if (sock->idx==ddescr->size) { /* data complete */
         dLOG("received from %s:%s: %d bytes\n",
             sock->host, sock->service, ddescr->size);
-        res=1;
+        return 1;
+    } else {
+        return 0;
     }
-
-    return res;
 }
 /******************************************************************************/
 /*

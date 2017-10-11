@@ -1,14 +1,14 @@
-/******************************************************************************
-*                                                                             *
-* proc_dataio.cc                                                              *
-*                                                                             *
-* created: 10.06.97                                                           *
-* last changed: 28.10.97                                                      *
-*                                                                             *
-* PW                                                                          *
-*                                                                             *
-******************************************************************************/
+/*
+ * proclib/proc_dataio.cc
+ * 
+ * created: 10.06.97
+ */
 
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <errno.h>
 #include <stdlib.h>
 #include <proc_readoutstatus.hxx>
@@ -17,9 +17,11 @@
 #include <errors.hxx>
 #include <versions.hxx>
 
-VERSION("Oct 28 1997", __FILE__, __DATE__, __TIME__,
-"$ZEL: proc_readoutstatus.cc,v 2.6 2004/11/26 14:44:33 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: proc_readoutstatus.cc,v 2.7 2014/07/14 15:11:54 wuestner Exp $")
 #define XVERSION
+
+using namespace std;
 
 /*****************************************************************************/
 C_readoutstatus::C_readoutstatus(C_inbuf& ib, int useaux)
@@ -46,7 +48,7 @@ if (ib)
       break;
     default:
       {
-      OSTRINGSTREAM ss;
+      ostringstream ss;
       ss << "C_readoutstatus: unknown timecode "<<timecode;
       throw new C_program_error(ss);
       }

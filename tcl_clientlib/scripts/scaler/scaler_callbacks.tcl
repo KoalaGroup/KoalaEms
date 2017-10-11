@@ -1,4 +1,4 @@
-# $zel: scaler_callbacks.tcl,v 1.2 1998/09/30 11:21:18 wuestner Exp $
+# $ZEL: scaler_callbacks.tcl,v 1.4 2011/11/27 00:08:43 wuestner Exp $
 # copyright 1998
 #   P. Wuestner; Zentralinstitut fuer Elektronik; Forschungszentrum Juelich
 #

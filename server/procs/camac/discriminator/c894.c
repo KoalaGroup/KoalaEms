@@ -3,7 +3,7 @@
  * created 2007-04-04 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: c894.c,v 1.8 2011/04/06 20:30:30 wuestner Exp $";
+    "$ZEL: c894.c,v 1.9 2015/04/06 21:33:25 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -109,7 +109,7 @@ plerrcode test_proc_C894init(ems_u32* p)
 
     if (p[0]!=1)
         return plErr_ArgNum;
-    if (!valid_module(p[1], modul_camac, 0))
+    if (!valid_module(p[1], modul_camac))
         return plErr_ArgRange;
     module=ModulEnt(p[1]);
     if (module->modultype!=CAEN_DISC_C894)
@@ -161,7 +161,7 @@ plerrcode test_proc_C894threshold(ems_u32* p)
 
     if (p[0]!=3)
         return plErr_ArgNum;
-    if (!valid_module(p[1], modul_camac, 0))
+    if (!valid_module(p[1], modul_camac))
         return plErr_ArgRange;
     if (ip[2]>15 && ip[2]<-1)
         return plErr_ArgRange;
@@ -201,7 +201,7 @@ plerrcode test_proc_C894enable(ems_u32* p)
 
     if (p[0]!=2)
         return plErr_ArgNum;
-    if (!valid_module(p[1], modul_camac, 0))
+    if (!valid_module(p[1], modul_camac))
         return plErr_ArgRange;
     module=ModulEnt(p[1]);
     if (module->modultype!=CAEN_DISC_C894)
@@ -250,7 +250,7 @@ plerrcode test_proc_C894pulsewidth(ems_u32* p)
 
     if (p[0]!=3)
         return plErr_ArgNum;
-    if (!valid_module(p[1], modul_camac, 0))
+    if (!valid_module(p[1], modul_camac))
         return plErr_ArgRange;
     if (p[2]&~3)
         return plErr_ArgRange;
@@ -291,7 +291,7 @@ plerrcode test_proc_C894majthr(ems_u32* p)
 
     if (p[0]!=2)
         return plErr_ArgNum;
-    if (!valid_module(p[1], modul_camac, 0))
+    if (!valid_module(p[1], modul_camac))
         return plErr_ArgRange;
     module=ModulEnt(p[1]);
     if (module->modultype!=CAEN_DISC_C894)
@@ -332,7 +332,7 @@ plerrcode test_proc_C894majlev(ems_u32* p)
 
     if (p[0]!=2)
         return plErr_ArgNum;
-    if (!valid_module(p[1], modul_camac, 0))
+    if (!valid_module(p[1], modul_camac))
         return plErr_ArgRange;
     module=ModulEnt(p[1]);
     if (module->modultype!=CAEN_DISC_C894)
@@ -375,7 +375,7 @@ plerrcode test_proc_C894testpulse(ems_u32* p)
 
     if (p[0]!=1)
         return plErr_ArgNum;
-    if (!valid_module(p[1], modul_camac, 0))
+    if (!valid_module(p[1], modul_camac))
         return plErr_ArgRange;
     module=ModulEnt(p[1]);
     if (module->modultype!=CAEN_DISC_C894)

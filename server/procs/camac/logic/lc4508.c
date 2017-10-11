@@ -4,7 +4,7 @@
  *
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: lc4508.c,v 1.7 2012/09/10 22:45:16 wuestner Exp $";
+    "$ZEL: lc4508.c,v 1.8 2015/04/06 21:33:28 wuestner Exp $";
 
 #include <errorcodes.h>
 
@@ -106,7 +106,7 @@ plerrcode test_proc_lc4508_read(ems_u32* p)
 
     if (p[0]!=2)
         return plErr_ArgNum;
-    if (!valid_module(p[1], modul_camac, 0))
+    if (!valid_module(p[1], modul_camac))
         return plErr_ArgRange;
     module=ModulEnt(p[1]);
     if (module->modultype!=LC_PLU_4508)
@@ -241,7 +241,7 @@ plerrcode test_proc_lc4508_load_mem(ems_u32* p)
 
     if (p[0]!=258)
         return plErr_ArgNum;
-    if (!valid_module(p[1], modul_camac, 0))
+    if (!valid_module(p[1], modul_camac))
         return plErr_ArgRange;
     module=ModulEnt(p[1]);
     if (module->modultype!=LC_PLU_4508)
@@ -346,7 +346,7 @@ plerrcode test_proc_lc4508_load_var(ems_u32* p)
 
     if (p[0]<=3)
         return plErr_ArgNum;
-    if (!valid_module(p[1], modul_camac, 0))
+    if (!valid_module(p[1], modul_camac))
         return plErr_ArgRange;
     module=ModulEnt(p[1]);
     if (module->modultype!=LC_PLU_4508)
@@ -401,7 +401,7 @@ plerrcode test_proc_lc4508_read_mem(ems_u32* p)
 
     if (p[0]!=2)
         return plErr_ArgNum;
-    if (!valid_module(p[1], modul_camac, 0))
+    if (!valid_module(p[1], modul_camac))
         return plErr_ArgRange;
     module=ModulEnt(p[1]);
     if (module->modultype!=LC_PLU_4508)

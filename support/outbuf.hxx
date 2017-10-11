@@ -1,18 +1,25 @@
 /*
- * outbuf.hxx
+ * support/outbuf.hxx
  * 
  * created 09.11.94 PW
  * 
- * $ZEL: outbuf.hxx,v 2.18 2007/04/09 23:54:02 wuestner Exp $
+ * $ZEL: outbuf.hxx,v 2.19 2014/07/14 15:09:53 wuestner Exp $
  */
 
 #ifndef _outbuf_hxx_
 #define _outbuf_hxx_
 
 #include "config.h"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <sys/time.h>
 
 #include "buf.hxx"
+
+using namespace std;
 
 /*****************************************************************************/
 
@@ -73,9 +80,9 @@ class C_outbuf: public C_buf
     //C_outbuf& operator<<(double);
     C_outbuf& operator<<(char);
     C_outbuf& operator<<(const char*);
-    C_outbuf& operator<<(const STRING&);
-    C_outbuf& operator<<(STRINGSTREAM&);
-    C_outbuf& operator<<(OSTRINGSTREAM&);
+    C_outbuf& operator<<(const string&);
+    C_outbuf& operator<<(stringstream&);
+    C_outbuf& operator<<(ostringstream&);
     C_outbuf& operator<<(struct timeval);
     C_outbuf& operator<<(outbuf_manip);
     void do_space(int&);

@@ -5,7 +5,11 @@
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <stdlib.h>
 #include <msg.h>
 #include <clientcomm.h>
@@ -23,12 +27,14 @@
 #define DEFPORT 4096
 #endif
 
-VERSION("2009-Feb-25", __FILE__, __DATE__, __TIME__,
-"$ZEL: proc_communicator.cc,v 2.10 2010/06/20 22:40:23 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: proc_communicator.cc,v 2.11 2014/07/14 15:11:53 wuestner Exp $")
 #define XVERSION
 
 int C_communicator::counter=0;
 C_communicator communication;
+
+using namespace std;
 
 /*****************************************************************************/
 
@@ -104,9 +110,9 @@ default:
     if (emshost) {
         if (emsport) {
             char dummy[1024];
-            ISTRINGSTREAM s(emsport);
+            istringstream s(emsport);
             if (!(s >> port) || (s >> dummy)) {
-                OSTRINGSTREAM s;
+                ostringstream s;
                 s << "Can't init communication: "
                     << "cannot convert environment variable EMSPORT \""
                     << emsport << "\".";
@@ -124,11 +130,11 @@ default:
 }
 /*****************************************************************************/
 
-void C_communicator::init(const STRING& socket_)
+void C_communicator::init(const string& socket_)
 {
 if (Clientcomm_init(socket_.c_str())!=0)
   {
-  OSTRINGSTREAM s;
+  ostringstream s;
   s << "Can't init communication via unix-socket \"" << socket_
       << "\"";
   throw new C_ems_error(EMS_errno, s);
@@ -141,11 +147,11 @@ path_=path();
 
 /*****************************************************************************/
 
-void C_communicator::init(const STRING& host_, int port_)
+void C_communicator::init(const string& host_, int port_)
 {
 if (Clientcomm_init_e(host_.c_str(), port_)!=0)
   {
-  OSTRINGSTREAM s;
+  ostringstream s;
   s << "Can't init communication via host \"" << host_ << "\", port " << port_;
   throw new C_ems_error(EMS_errno, s);
   }

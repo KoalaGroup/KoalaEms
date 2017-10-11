@@ -2,20 +2,25 @@
  * commu_ls_req.cc.m4
  * 
  * created 08.11.94 PW
- * 14.06.1998 PW: adapted for STD_STRICT_ANSI
+ * 
  */
 
 #include "config.h"
-#include <cxxcompat.hxx>
-
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <commu_local_server.hxx>
 #include <outbuf.hxx>
 #include <commu_client.hxx>
 #include "versions.hxx"
 
-VERSION("Jun 14 1998", __FILE__, __DATE__, __TIME__,
-"$ZEL: commu_ls_req.cc.m4,v 2.12 2004/11/26 15:14:24 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: commu_ls_req.cc.m4,v 2.14 2014/07/14 15:12:19 wuestner Exp $")
 #define XVERSION
+
+using namespace std;
 
 /*****************************************************************************/
 
@@ -34,14 +39,20 @@ dnl };
 void C_local_server::do_message_ems(C_message* message)
 {
 ems_u32* body;
+#if 0
 int req, size, x;
+#else
+int size, x;
+#endif
 errcode res;
 msgheader* header;
 
 TR(C_local_server::do_message_ems)
 body=message->body;
 header=&message->header;
+#if 0
 req=header->type.reqtype;
+#endif
 size=header->size;
 client_id=header->client;
 if ((client=clientlist.get(client_id))==0)

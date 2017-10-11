@@ -9,7 +9,7 @@
  * response.c: before 1995-02-01
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: camac_basic.c,v 1.10 2011/04/06 20:30:29 wuestner Exp $";
+    "$ZEL: camac_basic.c,v 1.11 2015/04/06 21:33:22 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -168,7 +168,7 @@ plerrcode test_proc_CFSA(ems_u32* p)
         return plErr_BadHWAddr;
     if (anz!=((f>>3)==2?4:3))
         return plErr_ArgNum;
-    if (!valid_module(n, modul_camac, 1))
+    if (!valid_module(n, modul_camac))
         return plErr_ArgRange;
     wirbrauchen=((f>>3)?0:1);
     return plOK;
@@ -228,7 +228,7 @@ plerrcode test_proc_CFUBC(ems_u32* p)
         return plErr_BadHWAddr;
     if (anz!=((f>>3)==2?4+len:4))
         return plErr_ArgNum;
-    if (!valid_module(n, modul_camac, 1))
+    if (!valid_module(n, modul_camac))
         return plErr_ArgRange;
     wirbrauchen=((f>>3)?0:len);
     return plOK;
@@ -309,7 +309,7 @@ plerrcode test_proc_nAFslot(ems_u32* p)
 {
     if (p[0]!=1)
         return(plErr_ArgNum);
-    if (!valid_module(p[1], modul_camac, 1))
+    if (!valid_module(p[1], modul_camac))
         return plErr_ArgRange;
     wirbrauchen=1;
     return plOK;
@@ -407,7 +407,7 @@ plerrcode test_proc_nAFread(ems_u32* p)
 {
     if (p[0]!=3)
         return plErr_ArgNum;
-    if (!valid_module(p[1], modul_camac, 1))
+    if (!valid_module(p[1], modul_camac))
         return plErr_ArgRange;
     wirbrauchen=1;
     return plOK;
@@ -449,7 +449,7 @@ plerrcode test_proc_nAFreadQX(ems_u32* p)
 {
     if (p[0]!=3)
         return plErr_ArgNum;
-    if (!valid_module(p[1], modul_camac, 1))
+    if (!valid_module(p[1], modul_camac))
         return plErr_ArgRange;
     wirbrauchen=1;
     return plOK;
@@ -482,7 +482,7 @@ plerrcode test_proc_nAFread_untilQ(ems_u32* p)
 {
     if (p[0]!=4)
         return plErr_ArgNum;
-    if (!valid_module(p[1], modul_camac, 1))
+    if (!valid_module(p[1], modul_camac))
         return plErr_ArgRange;
     wirbrauchen=1;
     return plOK;
@@ -544,7 +544,7 @@ plerrcode test_proc_nAFwrite(ems_u32* p)
 {
     if (p[0]!=4)
         return plErr_ArgNum;
-    if (!valid_module(p[1], modul_camac, 1))
+    if (!valid_module(p[1], modul_camac))
         return plErr_ArgRange;
     wirbrauchen=0;
     return plOK;
@@ -579,7 +579,7 @@ plerrcode test_proc_nAFwrite_untilQ(ems_u32* p)
 {
     if (p[0]!=5)
         return plErr_ArgNum;
-    if (!valid_module(p[1], modul_camac, 1))
+    if (!valid_module(p[1], modul_camac))
         return plErr_ArgRange;
     wirbrauchen=1;
     return plOK;
@@ -681,7 +681,7 @@ plerrcode test_proc_nAFwrite_q(ems_u32* p)
 {
     if (p[0]!=4)
         return plErr_ArgNum;
-    if (!valid_module(p[1], modul_camac, 1))
+    if (!valid_module(p[1], modul_camac))
         return plErr_ArgRange;
     wirbrauchen=1;
     return plOK;
@@ -778,7 +778,7 @@ plerrcode test_proc_nAFcntl(ems_u32* p)
 {
     if (p[0]!=3)
         return(plErr_ArgNum);
-    if (!valid_module(p[1], modul_camac, 1))
+    if (!valid_module(p[1], modul_camac))
         return plErr_ArgRange;
     wirbrauchen=0;
     return plOK;
@@ -811,7 +811,7 @@ plerrcode test_proc_nAFcntl_untilQ(ems_u32* p)
 {
     if (p[0]!=4)
         return plErr_ArgNum;
-    if (!valid_module(p[1], modul_camac, 1))
+    if (!valid_module(p[1], modul_camac))
         return plErr_ArgRange;
     wirbrauchen=1;
     return plOK;
@@ -874,7 +874,7 @@ plerrcode test_proc_nAFcntl_q(ems_u32* p)
 {
     if (p[0]!=3)
         return plErr_ArgNum;
-    if (!valid_module(p[1], modul_camac, 1))
+    if (!valid_module(p[1], modul_camac))
         return plErr_ArgRange;
     wirbrauchen=1;
     return plOK;
@@ -932,7 +932,7 @@ plerrcode test_proc_qx(ems_u32* p)
 {
     if (p[0]!=1)
         return plErr_ArgNum;
-    if (!valid_module(p[1], modul_camac, 1))
+    if (!valid_module(p[1], modul_camac))
         return plErr_ArgRange;
     wirbrauchen=1;
     return plOK;
@@ -1032,7 +1032,7 @@ plerrcode test_proc_nAFblread(ems_u32* p)
 {
     if (p[0]!=4)
         return(plErr_ArgNum);
-    if (!valid_module(p[1], modul_camac, 1))
+    if (!valid_module(p[1], modul_camac))
         return plErr_ArgRange;
     wirbrauchen=p[4];
     return plOK;
@@ -1131,7 +1131,7 @@ plerrcode test_proc_nAFreadQstop(ems_u32* p)
 {
     if (p[0]!=4)
         return(plErr_ArgNum);
-    if (!valid_module(p[1], modul_camac, 1))
+    if (!valid_module(p[1], modul_camac))
         return plErr_ArgRange;
     wirbrauchen=p[4]+1;
     return plOK;
@@ -1164,7 +1164,7 @@ plerrcode test_proc_nAFreadQstop1(ems_u32* p)
 {
     if (p[0]!=4)
         return(plErr_ArgNum);
-    if (!valid_module(p[1], modul_camac, 1))
+    if (!valid_module(p[1], modul_camac))
         return plErr_ArgRange;
     wirbrauchen=p[4]+1;
     return plOK;
@@ -1229,7 +1229,7 @@ plerrcode test_proc_nAFreadAddrScan(ems_u32* p)
 {
     if (p[0]!=4)
         return(plErr_ArgNum);
-    if (!valid_module(p[1], modul_camac, 1))
+    if (!valid_module(p[1], modul_camac))
         return plErr_ArgRange;
     wirbrauchen=p[4];
     return plOK;

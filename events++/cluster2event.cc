@@ -6,7 +6,6 @@
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
 #include <errno.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -21,14 +20,14 @@
 #include "swap_int.h"
 #include <debuglevel.hxx>
 
-VERSION("May 10 2001", __FILE__, __DATE__, __TIME__,
-"$ZEL: cluster2event.cc,v 1.14 2004/11/26 14:40:11 wuestner Exp $")
+VERSION("2014-07-14", __FILE__, __DATE__, __TIME__,
+"$ZEL: cluster2event.cc,v 1.16 2014/07/14 16:18:17 wuestner Exp $")
 #define XVERSION
 
 /*****************************************************************************/
 
 C_readargs* args;
-STRING infile, outfile;
+string infile, outfile;
 int ilit, olit;
 int swap_out, irecsize, orecsize, async, maxmem, evnum, maxev,
     statclust, statsec, loop, lowdelay, save_files;
@@ -70,15 +69,15 @@ int swap_out, irecsize, orecsize, async, maxmem, evnum, maxev,
  */
 
 /*****************************************************************************/
-
-void printheader(ostream& os)
+static void
+printheader(ostream& os)
 {
 os<<"Converts EMS cluster format into EMS legacy format."<<endl<<endl;
 }
 
 /*****************************************************************************/
-
-void printstreams(ostream& os)
+static void
+printstreams(ostream& os)
 {
 os<<endl;
 os<<"input and output may be: "<<endl;
@@ -91,12 +90,10 @@ os<<"  @:<name> for unix sockets (active);"<<endl;
 }
 
 /*****************************************************************************/
-
-int readargs()
+static int
+readargs(void)
 {
 args->helpinset(3, printheader);
-//Documents                       online.sh  Templates
-
 args->helpinset(5, printstreams);
 
 args->addoption("infile", 0, "-", "input file", "input");
@@ -189,7 +186,8 @@ if (swap_out)
 //.............................................................................
 void C_sender::send(void)
 {
-int dort=writer_.write_noblock((char*)event_+index_, size_-index_);
+int dort=writer_.write_noblock(reinterpret_cast<char*>(event_)+index_,
+        size_-index_);
 index_+=dort;
 if (index_==size_)
   {
@@ -198,7 +196,9 @@ if (index_==size_)
   }
 }
 /*****************************************************************************/
-void got_events(C_cluster* cluster)
+#if 0
+static void
+got_events(C_cluster* cluster)
 {
 static int count=5;
 if (count-->=0)
@@ -207,8 +207,11 @@ if (count-->=0)
   cluster->dump(cerr, 40);
   }
 }
+#endif
 /*****************************************************************************/
-void got_ved_info(C_cluster* cluster)
+#if 0
+static void
+got_ved_info(C_cluster* cluster)
 {
 cerr<<(*cluster)<<endl;
 //cluster->dump(cerr, 20);
@@ -228,20 +231,28 @@ if (debuglevel::verbose_level)
   cerr<<")"<<endl;
   }
 }
+#endif
 /*****************************************************************************/
-void got_text(C_cluster* cluster)
+#if 0
+static void
+got_text(C_cluster* cluster)
 {
 cerr<<(*cluster)<<endl;
 cluster->dump(cerr, 20);
 }
+#endif
 /*****************************************************************************/
-void got_no_more_data(C_cluster* cluster)
+#if 0
+static void
+got_no_more_data(C_cluster* cluster)
 {
 cerr<<(*cluster)<<endl;
 cluster->dump(cerr, 20);
 }
+#endif
 /*****************************************************************************/
-void write_event(int* event, C_iopath& writer)
+static void
+write_event(int* event, C_iopath& writer)
 {
 int size=event[0]+1;
 if (swap_out)
@@ -252,7 +263,8 @@ if (swap_out)
 writer.write(event, size*sizeof(int), 0);
 }
 /*****************************************************************************/
-void do_convert_complete(Clusterreader& reader, C_iopath& writer)
+static void
+do_convert_complete(Clusterreader& reader, C_iopath& writer)
 {
 if (debuglevel::trace_level) cerr<<"do_convert_complete called"<<endl;
 writer.wbuffersize(orecsize);
@@ -295,7 +307,8 @@ writer.flush_buffer();
 cerr<<count<<" events processed"<<endl;
 }
 /*****************************************************************************/
-int do_convert_async(Clusterreader& reader, C_iopath& writer)
+static int
+do_convert_async(Clusterreader& reader, C_iopath& writer)
 {
 if (debuglevel::trace_level) cerr<<"do_convert_async called"<<endl;
 int ok=1;
@@ -309,7 +322,9 @@ if (debuglevel::debug_level)
     case C_iopath::iotype_file: cerr<<"file"; break;
     case C_iopath::iotype_socket: cerr<<"socket"; break;
     case C_iopath::iotype_fifo: cerr<<"fifo"; break;
-    default: cerr<<"unknown ("<<(int)reader.iopath().typ()<<")"; break;
+    default:
+        cerr<<"unknown ("<<static_cast<int>(reader.iopath().typ())<<")";
+        break;
     }
   cerr<<endl;
   cerr<<"output is ";
@@ -320,7 +335,7 @@ if (debuglevel::debug_level)
     case C_iopath::iotype_file: cerr<<"file"; break;
     case C_iopath::iotype_socket: cerr<<"socket"; break;
     case C_iopath::iotype_fifo: cerr<<"fifo"; break;
-    default: cerr<<"unknown ("<<(int)writer.typ()<<")"; break;
+    default: cerr<<"unknown ("<<static_cast<int>(writer.typ())<<")"; break;
     }
   cerr<<endl;
   }
@@ -354,12 +369,10 @@ switch (writer.typ())
     break;
   }
 if (!ok) return -1;
-//printf("In do_convert_asynchron(): type check\n");
 writer.noblock();
-//printf("In do_convert_asynchron(): checkpoint_1;\n");
+
 C_sender sender(writer);
 
-//printf("In do_convert_asynchron(): checkpoint_2;\n");
 int rpath, wpath, numpath;
 rpath=reader.iopath().path();
 wpath=writer.path();
@@ -368,13 +381,11 @@ numpath=(rpath>wpath?rpath:wpath)+1;
 int ccount=0, ecount=0, weiter=1;
 while (weiter)
   {
-
   fd_set readfds, writefds, exceptfds;
   int res;
   FD_ZERO(&readfds);
   FD_ZERO(&writefds);
   FD_ZERO(&exceptfds);
-
   if (reader.input_status()==Clusterreader::input_ok)
     {
     FD_SET(rpath, &readfds);
@@ -385,9 +396,7 @@ while (weiter)
   FD_SET(wpath, &writefds);
   FD_SET(wpath, &exceptfds);
   struct timeval tv={300, 0};
-
   res=select(numpath, &readfds, &writefds, &exceptfds, &tv);
-//	cout<<"The result of select() function is "<<res<<", point_4"<<endl;
   if (res<0)
     {
     cerr<<"select: res="<<res<<"; errno="<<strerror(errno)<<endl;
@@ -404,16 +413,12 @@ while (weiter)
     if (FD_ISSET(wpath, &writefds))
       {
       if (sender.pending())
-        {sender.send();
-//printf("if(sender.pending():checkpoint_7;\n");
-		}
+        sender.send();
       else
         {
-//printf("else: checkpoint_8;\n");
         int* event=reader.get_best_event(lowdelay);
         if (event)
           {
-//printf("if(event), checkpoint_9;\n");
           ecount++;
           if (ecount%10000==0)
             {
@@ -421,21 +426,16 @@ while (weiter)
                 <<memory::used_mem<<endl;
             }
           sender.event(event);
-//printf("if(event),sender, checkpoint_9_1;\n");
           sender.send();
-//printf("if(event), send(), checkpoint_9_2;\n");
           }
         else
           {
-
           switch (reader.input_status())
             {
-//printf("if(event) else: checkpoint_10;\n");
             case Clusterreader::input_ok:
               //cerr<<"input ok but no events"<<endl;
               reader.read_cluster(); // blocking read
               ccount++;
-//printf("case Clusterreader::input_ok: checkpoint_11;\n");
               break;
             case Clusterreader::input_exhausted:
               cerr<<"input exhausted"<<endl;
@@ -446,7 +446,8 @@ while (weiter)
               weiter=0;
               break;
             default:
-              cerr<<"unknown input status "<<(int)reader.input_status()<<endl;
+              cerr<<"unknown input status "
+                    <<static_cast<int>(reader.input_status())<<endl;
               weiter=0;
               break;
             }
@@ -474,7 +475,8 @@ try
   reader=new Clusterreader(infile, ilit);
   if (reader->input_status()!=Clusterreader::input_ok)
     {
-    cerr<<"reader->input_status()="<<(int)reader->input_status()<<endl;
+    cerr<<"reader->input_status()="
+            <<static_cast<int>(reader->input_status())<<endl;
     delete reader;
     return 1;
     }

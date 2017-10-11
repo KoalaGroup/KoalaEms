@@ -1,3 +1,6 @@
+# $ZEL: scaler_xh_setup.tcl,v 1.3 2011/11/27 00:15:31 wuestner Exp $
+# copyright 1998-2011
+#   P. Wuestner; Zentralinstitut fuer Elektronik; Forschungszentrum Juelich
 #
 # global vars in this file:
 #

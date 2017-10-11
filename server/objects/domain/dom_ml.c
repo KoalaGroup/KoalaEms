@@ -4,7 +4,7 @@
  * 22.Jan.2001 PW: multicrate support
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: dom_ml.c,v 1.36 2011/08/13 20:11:41 wuestner Exp $";
+    "$ZEL: dom_ml.c,v 1.37 2015/04/06 21:35:01 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -15,6 +15,7 @@ static const char* cvsid __attribute__((unused))=
 #include <modultypes.h>
 #include <errorcodes.h>
 #include <rcs_ids.h>
+#include <xdrstring.h>
 #include "dom_ml.h"
 #include "dommlobj.h"
 #ifdef TEST_ML
@@ -52,12 +53,27 @@ static void
 free_modullist(void)
 {
     int i;
-
-    if (!modullist) return;
+/*
+ *     if an error occures during creation of the modullist we have to delete
+ *     an incomplete modullist. Thus we require require than all data fields
+ *     used here are either valid or have an safe default value (==NULL
+ *     for pointers)
+ */
+    if (!modullist)
+        return;
     for (i=0; i<modullist->modnum; i++) {
-        if (modullist->entry[i].modulclass==modul_generic)
+
+        switch (modullist->entry[i].modulclass) {
+        case modul_generic:
             if (modullist->entry[i].address.generic.data)
                 free(modullist->entry[i].address.generic.data);
+            break;
+        case modul_ip:
+            free(modullist->entry[i].address.ip.address);
+            free(modullist->entry[i].address.ip.protocol);
+            break;
+        }
+
         if (modullist->entry[i].property_data)
             free(modullist->entry[i].property_data);
         if (modullist->entry[i].private_data)
@@ -81,24 +97,23 @@ downloadmodullist2(ems_u32* p, unsigned int num)
 {
     ems_u32* ptr;
     int i;
-    size_t size;
     errcode res;
 
     T(downloadmodullist2)
     D(D_REQ, printf("DownloadDomain: Modullist, new style\n");)
     D(D_REQ, printf("  %d Eintraege:\n", p[1]);)
     D(D_REQ, {int i; for (i=0; i<num; i++) printf("%d, ", p[i]); printf("\n");})
-    size=p[1]*sizeof(ml_entry)+2*sizeof(int);
-    if ((modullist=(Modlist*)malloc(size))==0) {
+
+/*
+ *  we do not know how the compiler will align the members of Modlist
+ *  therefore we allocate space for p[1]+1 ml_entry structs
+ *  the first entry has enough space for the modnum
+ *  and we use calloc in order to initialize all elements with a save walue
+ */
+    if ((modullist=(Modlist*)calloc(p[1]+1, sizeof(ml_entry)))==0) {
         return(Err_NoMem);
     }
     modullist->modnum=p[1];
-    for (i=0; i<p[1]; i++) {
-        modullist->entry[i].modulclass=modul_none;
-        modullist->entry[i].property_length=0;
-        modullist->entry[i].property_data=0;
-        modullist->entry[i].private_data=0;
-    }
 
     ptr=p+2;
     for (i=0; i<p[1]; i++) {
@@ -150,9 +165,7 @@ downloadmodullist2(ems_u32* p, unsigned int num)
             if (res!=OK) {
                 printf("downloadmodullist2: modul #%d: CAMAC Crate %d is not valid\n",
                         i, modullist->entry[i].address.camac.crate);
-                free(modullist);
-                modullist=0;
-                return res;
+                goto error;
             }
             break;
         case modul_fastbus:
@@ -165,9 +178,7 @@ downloadmodullist2(ems_u32* p, unsigned int num)
             if (res!=OK) {
                 printf("downloadmodullist2: modul #%d: FASTBUS Crate %d is not valid\n",
                         i, modullist->entry[i].address.fastbus.crate);
-                free(modullist);
-                modullist=0;
-                return res;
+                goto error;
             }
             break;
         case modul_vme:
@@ -180,9 +191,7 @@ downloadmodullist2(ems_u32* p, unsigned int num)
             if (res!=OK) {
                 printf("downloadmodullist2: modul #%d: VME Crate %d is not valid\n",
                         i, modullist->entry[i].address.vme.crate);
-                free(modullist);
-                modullist=0;
-                return res;
+                goto error;
             }
             break;
         case modul_lvd:
@@ -195,9 +204,7 @@ downloadmodullist2(ems_u32* p, unsigned int num)
             if (res!=OK) {
                 printf("downloadmodullist2: modul #%d: LVD Crate %d is not valid\n",
                         i, modullist->entry[i].address.lvd.crate);
-                free(modullist);
-                modullist=0;
-                return res;
+                goto error;
             }
             printf("Modullist: LVD module 0x%x addr 0x%x crate %d idx %d\n",
                 modullist->entry[i].modultype,
@@ -216,9 +223,34 @@ downloadmodullist2(ems_u32* p, unsigned int num)
             if (res!=OK) {
                 printf("downloadmodullist2: modul #%d: CANbus %d is not valid\n",
                         i, modullist->entry[i].address.can.bus);
-                free(modullist);
-                modullist=0;
-                return res;
+                goto error;
+            }
+            break;
+        case modul_ip:
+            /*
+             * module_ip is for modules like SIS3316 with direct IP (ethernet)
+             * connection
+             * arguments are:
+             *      string address (addr:port)
+             *      string protocol (udp or tcp)
+            */
+            if (ptr+1>p+num || ptr+xdrstrlen(ptr)>p+num) {
+                res=Err_ArgNum;
+                goto error;
+            }
+            ptr=xdrstrcdup(&modullist->entry[i].address.ip.address, ptr);
+            if (!ptr) {
+                res=Err_NoMem;
+                goto error;
+            }
+            if (ptr+1>p+num || ptr+xdrstrlen(ptr)>p+num) {
+                res=Err_ArgNum;
+                goto error;
+            }
+            ptr=xdrstrcdup(&modullist->entry[i].address.ip.protocol, ptr);
+            if (!ptr) {
+                res=Err_NoMem;
+                goto error;
             }
             break;
         default:
@@ -307,6 +339,7 @@ downloadmodullist(ems_u32* p, unsigned int num)
         res=downloadmodullist2(p, num);
     else
 #ifdef DEFAULT_MODULE_CLASS
+#error default_module_class no longer allowed
         res=downloadmodullist1(p, num);
 #else
         res=Err_IllDomain;
@@ -415,6 +448,10 @@ uploadmodullist(ems_u32* p, unsigned int num)
             *outptr++=modullist->entry[i].address.lvd.crate;
             *outptr++=modullist->entry[i].address.lvd.mod;
             break;
+        case modul_ip:
+            outptr=outstring(outptr, modullist->entry[i].address.ip.address);
+            outptr=outstring(outptr, modullist->entry[i].address.ip.protocol);
+            break;
         }
     }
     return OK;
@@ -479,13 +516,19 @@ dump_modent(ml_entry *entry, int verbose)
     case modul_can:
         printf(" [%d %d]", entry->address.can.bus, entry->address.can.id);
         break;
+    case modul_ip:
+        printf(" [%s %s]",
+            entry->address.ip.address, entry->address.ip.protocol);
+        break;
     }
 
     if (verbose) {
         int i;
-        printf(" priv. data: %p, %d prop. data", entry->private_data,
-                entry->property_length);
-        if (entry->property_length) {
+        printf(" priv. data: %p, size: %d bytes\n", entry->private_data,
+                entry->private_length);
+        printf(" %d word%s of properties", entry->property_length,
+                entry->property_length==1?"":"s");
+        if (entry->property_length && entry->property_data) {
             printf(":");
             for (i=0; i<entry->property_length; i++)
                 printf(" %08x", entry->property_data[i]);
@@ -536,7 +579,7 @@ dump_memberlist(void)
 }
 /*****************************************************************************/
 int
-valid_module(unsigned idx, Modulclass accepted_class, int accept_unspec)
+valid_module(unsigned idx, Modulclass accepted_class)
 {
     Modulclass class;
 
@@ -550,7 +593,7 @@ valid_module(unsigned idx, Modulclass accepted_class, int accept_unspec)
     if (idx>=modullist->modnum)
         return 0;
     class=modullist->entry[idx].modulclass;
-    if (!(class==accepted_class || (accept_unspec && class==modul_unspec)))
+    if (class!=accepted_class)
             return 0;
     return 1;
 }

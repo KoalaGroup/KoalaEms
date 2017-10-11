@@ -1,7 +1,7 @@
 /*
  * tcl_clientlib/histowin.hxx
  * 
- * $ZEL: histowin.hxx,v 1.10 2010/09/10 23:18:58 wuestner Exp $
+ * $ZEL: histowin.hxx,v 1.12 2014/07/16 16:54:28 wuestner Exp $
  * 
  * created 19.02.96
  */
@@ -10,9 +10,30 @@
 #define _histowin_hxx_
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <tk.h>
 #include "newhistoarr.hxx"
+
+/*
+ * special solution for different definitions of Tk_ConfigSpec
+ * 
+ * the definition of member argvName changed for tk8.5 to tk8.6
+ * in tk8.5 it is nonconstant, therefore it can not be initialised
+ * in tk8.6 it is constant (CONST86), therefore it has to be initialised
+ * the value is never modified, so a const_cast is safe. 
+ */
+#ifndef CONST86
+#define NCC86(v) const_cast<char*>(v) // NCC: Non Constant Character
+#define CONST86
+#else
+#define NCC86(v) v
+#endif
+
+using namespace std;
 
 /*****************************************************************************/
 
@@ -26,8 +47,8 @@ class E_histowin {
     E_histowin(Tcl_Interp*, ClientData, int, Tcl_Obj* const[]);
     ~E_histowin();
 
-    STRING tclprocname() const;
-    STRING origtclprocname() const {return winpath;}
+    string tclprocname() const;
+    string origtclprocname() const {return winpath;}
 
     struct arrentry {
         E_histoarray* arr;
@@ -61,8 +82,6 @@ class E_histowin {
 
     static Tk_ConfigSpec config_specs[];
     static Tk_ConfigSpec arrconfig_specs[];
-    static const char *config_specnames[];
-    static const char *arrconfig_specnames[];
     static const char* plotstyles[];
     static int intranges[2];
     static Tk_CustomOption configstyleoption;
@@ -70,7 +89,7 @@ class E_histowin {
 
     Tcl_Interp* interp;
     Tcl_Command tclcommand;
-    STRING winpath;
+    string winpath;
     Tk_Window window;
     Window xwindow;
     Display* xdisplay;
@@ -94,7 +113,7 @@ class E_histowin {
     // neu zu zeichnende Flaeche fuer HW_expose
     int r_x0, r_x1, r_y0, r_y1;
     // nur zum debuggen
-    STRING zeit(double);
+    string zeit(double);
     double anfang;
     // dargestellter Bereich
     double dy0, dy1;
@@ -118,22 +137,22 @@ class E_histowin {
     C_histoarrays* arrays;
     arrentry** arrlist;
     int arrnum;
-    STRING xscalecommand;
-    STRING yscalecommand;
-    STRING crosscommand;
-    STRING scrollcommand;
+    string xscalecommand;
+    string yscalecommand;
+    string crosscommand;
+    string scrollcommand;
 
     static void eventhandler(ClientData, XEvent*);
     static void datacallback(E_histoarray*, ClientData);
     static void rangecallback(E_histoarray*, ClientData);
     static void deletecallback(E_histoarray*, ClientData);
     static int styleoption_parse(ClientData, Tcl_Interp*, Tk_Window,
-        const char*, char*, int);
-    static char* styleoption_print(ClientData, Tk_Window, char*, int,
+        CONST84 char*, char*, int);
+    static CONST86 char* styleoption_print(ClientData, Tk_Window, char*, int,
         Tcl_FreeProc**);
-    static int intoption_parse(ClientData, Tcl_Interp*, Tk_Window, const char*,
-        char*, int);
-    static char* intoption_print(ClientData, Tk_Window, char*, int,
+    static int intoption_parse(ClientData, Tcl_Interp*, Tk_Window,
+        CONST84 char*, char*, int);
+    static CONST86 char* intoption_print(ClientData, Tk_Window, char*, int,
         Tcl_FreeProc**);
 
     void initscaling();

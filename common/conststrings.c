@@ -3,7 +3,7 @@
  * created before 22.03.95
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: conststrings.c,v 2.12 2013/01/17 22:37:47 wuestner Exp $";
+    "$ZEL: conststrings.c,v 2.13 2014/09/05 18:02:33 wuestner Exp $";
 
 #include <stdio.h>
 #include <errno.h>
@@ -188,6 +188,12 @@ const char* InOutTyp_str(InOutTyp nr)
 switch (nr)
   {
   case InOut_Ringbuffer: return("Ringbuffer"); break;
+  case InOut_Stream: return("Stream"); break;
+  case InOut_Cluster: return("Cluster"); break;
+  case InOut_Filebuffer: return("Filebuffer"); break;
+  case InOut_Selected_Events: return("Selected_Events"); break;
+  case InOut_Opaque: return("Opaque"); break;
+  case InOut_MQTT: return("MQTT"); break;
   default:
     sprintf(errorstr, "unknown InOutTyp (%d)", nr);
     return(errorstr);

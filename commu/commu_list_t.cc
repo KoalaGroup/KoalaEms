@@ -2,26 +2,31 @@
  * commu_list_t.cc
  * 
  * created 28.07.94 PW
- * 14.06.1998 PW: adapted for STD_STRICT_ANSI
- * 15.06.1998 PW: rewritten
+ * 
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <stdlib.h>
 #include <debug.hxx>
 #include "commu_list_t.hxx"
 #include "versions.hxx"
 
 #ifndef XVERSION
-VERSION("Mar 26 1998", __FILE__, __DATE__, __TIME__,
-"$ZEL: commu_list_t.cc,v 2.8 2004/11/26 15:14:20 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: commu_list_t.cc,v 2.9 2014/07/14 15:12:19 wuestner Exp $")
 #define XVERSION
 #endif
 
+using namespace std;
+
 /*****************************************************************************/
 template<class T>
-C_list<T>::C_list(int size, STRING name)
+C_list<T>::C_list(int size, string name)
 :name_(name), growsize(size), listsize(size), firstfree(0)
 {
 TR(C_list::C_list)

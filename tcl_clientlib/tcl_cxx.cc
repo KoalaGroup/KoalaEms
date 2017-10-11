@@ -7,7 +7,11 @@
 #include "config.h"
 #include <unistd.h>
 #include <stdlib.h>
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <tcl.h>
 #include <errors.hxx>
 #include <ems_errors.hxx>
@@ -16,9 +20,11 @@
 #include "tcl_cxx.hxx"
 #include <versions.hxx>
 
-VERSION("Nov 16 2004", __FILE__, __DATE__, __TIME__,
-"$ZEL: tcl_cxx.cc,v 1.5 2006/02/16 20:57:15 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: tcl_cxx.cc,v 1.7 2014/07/14 15:13:26 wuestner Exp $")
 #define XVERSION
+
+using namespace std;
 
 /*****************************************************************************/
 void set_error_code(Tcl_Interp* interp, const C_error* e)
@@ -31,9 +37,9 @@ void set_error_code(Tcl_Interp* interp, const C_error* e)
     } else if (et==C_ems_error::e_ems) {
         C_ems_error* ee=(C_ems_error*)e;
         EMSerrcode error=ee->code();
-        OSTRINGSTREAM ss;
+        ostringstream ss;
         ss<<(int)error;
-        STRING s=ss.str();
+        string s=ss.str();
         Tcl_SetErrorCode(interp, "EMS", (char*)s.c_str(), (char*)0);
         {}
         // z.B. code 61 (Can't open VED "393": Connection refused)
@@ -57,17 +63,17 @@ void set_error_code(Tcl_Interp* interp, const C_error* e)
                 Tcl_ListObjAppendElement(interp, errorObjPtr, StringObj);
             }
             {
-                OSTRINGSTREAM ss;
+                ostringstream ss;
                 ss<<(int)error;
-                STRING s=ss.str();
+                string s=ss.str();
                 Tcl_Obj* StringObj=Tcl_NewStringObj((char*)s.c_str(), s.length());
                 Tcl_ListObjAppendElement(interp, errorObjPtr, StringObj);
             }
             const C_confirmation* conf=&ee->errconf();
             for (int i=1; i<conf->size(); i++) {
-                OSTRINGSTREAM ss;
+                ostringstream ss;
                 ss<<conf->buffer(i);
-                STRING s=ss.str();
+                string s=ss.str();
                 Tcl_Obj* StringObj=Tcl_NewStringObj((char*)s.c_str(), s.length());
                 Tcl_ListObjAppendElement(interp, errorObjPtr, StringObj);
             }
@@ -89,33 +95,33 @@ void set_error_code(Tcl_Interp* interp, const C_error* e)
 /*****************************************************************************/
 void Tcl_SetResult_Err(Tcl_Interp* interp, const C_error* e)
 {
-    OSTRINGSTREAM s;
+    ostringstream s;
     s<<(*e);
-    STRING st=s.str();
+    string st=s.str();
     Tcl_SetResult(interp, (char*)st.c_str(), TCL_VOLATILE);
     set_error_code(interp, e);
 }
 
-void Tcl_SetResult_Stream(Tcl_Interp* interp, OSTRINGSTREAM& s,
+void Tcl_SetResult_Stream(Tcl_Interp* interp, ostringstream& s,
         const C_error* e)
 {
-    STRING st=s.str();
+    string st=s.str();
     Tcl_SetObjResult(interp,
         Tcl_NewStringObj((char*)st.c_str(), st.length()));
     //Tcl_SetResult(interp, (char*)st.c_str(), TCL_VOLATILE);
     set_error_code(interp, e);
 }
 
-void Tcl_SetResult_Stream(Tcl_Interp* interp, OSTRINGSTREAM& s)
+void Tcl_SetResult_Stream(Tcl_Interp* interp, ostringstream& s)
 {
-    STRING st=s.str();
+    string st=s.str();
     Tcl_SetObjResult(interp,
         Tcl_NewStringObj((char*)st.c_str(), st.length()));
     //Tcl_SetResult(interp, (char*)st.c_str(), TCL_VOLATILE);
 }
 
-
-void Tcl_SetResult_String(Tcl_Interp* interp, const STRING& s,
+#if 0
+void Tcl_SetResult_String(Tcl_Interp* interp, const string& s,
         const C_error* e)
 {
     Tcl_SetObjResult(interp,
@@ -123,17 +129,18 @@ void Tcl_SetResult_String(Tcl_Interp* interp, const STRING& s,
     //Tcl_SetResult(interp, (char*)s.c_str(), TCL_VOLATILE);
     set_error_code(interp, e);
 }
+#endif
 
-void Tcl_SetResult_String(Tcl_Interp* interp, const STRING& s)
+void Tcl_SetResult_String(Tcl_Interp* interp, const string& s)
 {
     Tcl_SetObjResult(interp,
         Tcl_NewStringObj((char*)s.c_str(), s.length()));
     //Tcl_SetResult(interp, (char*)s.c_str(), TCL_VOLATILE);
 }
 
-void Tcl_AppendElement_Stream(Tcl_Interp* interp, OSTRINGSTREAM& s)
+void Tcl_AppendElement_Stream(Tcl_Interp* interp, ostringstream& s)
 {
-    STRING st=s.str();
+    string st=s.str();
     Tcl_AppendElement(interp, st.c_str());
 }
 /*****************************************************************************/

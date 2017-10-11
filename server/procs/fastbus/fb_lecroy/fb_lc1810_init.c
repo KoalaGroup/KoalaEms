@@ -3,7 +3,7 @@
  * created 29.12.94 MiZi/PeWue/MaWo
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: fb_lc1810_init.c,v 1.14 2011/04/06 20:30:31 wuestner Exp $";
+    "$ZEL: fb_lc1810_init.c,v 1.15 2015/04/06 21:33:29 wuestner Exp $";
 
 #include <config.h>
 #include <debug.h>
@@ -174,7 +174,7 @@ plerrcode test_proc_fb_lc1810_setup(ems_u32* p)
         return(plErr_ArgNum);
     }
 
-    if (!valid_module(p[1], modul_fastbus, 0)) return plErr_ArgRange;
+    if (!valid_module(p[1], modul_fastbus)) return plErr_ArgRange;
     module=ModulEnt(p[1]);
     pa=module->address.fastbus.pa;
 

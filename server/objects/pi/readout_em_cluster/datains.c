@@ -3,7 +3,7 @@
  * created      23.03.97
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: datains.c,v 1.12 2011/10/17 23:11:41 wuestner Exp $";
+    "$ZEL: datains.c,v 1.14 2015/04/21 16:11:07 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -14,9 +14,18 @@ static const char* cvsid __attribute__((unused))=
 #include <objecttypes.h>
 #include <rcs_ids.h>
 #include "datains.h"
+#ifdef DI_CLUSTER
 #include "di_cluster.h"
+#endif
+#ifdef DI_STREAM
 #include "di_stream.h"
+#endif
+#ifdef DI_OPAQUE
 #include "di_opaque.h"
+#endif
+#ifdef DI_MQTT
+#include "di_mqtt.h"
+#endif
 #include "../readout.h"
 #include "../../domain/dom_datain.h"
 
@@ -29,13 +38,15 @@ Datain_cl datain_cl[MAX_DATAIN];
 errcode datain_pre_init(int idx, int qlen, ems_u32* q)
 {
 errcode res;
+#if 0
 printf("datain_pre_init(idx=%d, qlen=%d, q=%p)\n", idx, qlen, q);
+#endif
 memset(datain_cl+idx, 0, sizeof(struct Datain_cl));
 /*datain_cl[idx].private=0;*/
 switch (datain[idx].bufftyp)
   {
+#ifdef DI_RINGBUFFER
   case InOut_Ringbuffer:
-#if 0
     switch (datain[idx].addrtyp)
       {
       case Addr_Raw:
@@ -61,10 +72,8 @@ switch (datain[idx].bufftyp)
       default: return Err_AddrTypNotImpl;
       }
     break;
-#else
-    res=Err_BufTypNotImpl;
-#endif
-#if 0
+#endif /* DI_RINGBUFFER */
+#ifdef DI_STREAM
   case InOut_Stream:
     switch (datain[idx].addrtyp)
       {
@@ -85,7 +94,8 @@ switch (datain[idx].bufftyp)
       default: res=Err_AddrTypNotImpl;
       }
     break;
-#endif
+#endif /* DI_STREAM */
+#ifdef DI_CLUSTER
   case InOut_Cluster:
     switch (datain[idx].addrtyp)
       {
@@ -108,6 +118,8 @@ switch (datain[idx].bufftyp)
       default: res=Err_AddrTypNotImpl;
       }
     break;
+#endif /* DI_CLUSTER */
+#ifdef DI_OPAQUE
   case InOut_Opaque:
     switch (datain[idx].addrtyp)
       {
@@ -131,6 +143,18 @@ switch (datain[idx].bufftyp)
       default: res=Err_AddrTypNotImpl;
       }
     break;
+#endif /* DI_OPAQUE */
+#ifdef DI_MQTT
+  case InOut_MQTT:
+    switch (datain[idx].addrtyp)
+      {
+      case Addr_Socket:
+        res=di_mqtt_init(idx, qlen, q);
+        break;
+      default: res=Err_AddrTypNotImpl;
+      }
+    break;
+#endif /* DI_MQTT */
   default: res=Err_BufTypNotImpl;
   }
 return res;
@@ -160,11 +184,15 @@ for (i=0; i<MAX_DATAIN; i++)
 void outputbuffer_freed(void)
 {
 int i;
+
+#ifdef DI_CLUSTER
+/* without DI_CLUSTER we will never have any ved_info */
 if (!ved_info_sent)
   {
   /*printf("outputbuffer_freed(): vedinfo noch nicht gesendet\n");*/
   return;
   }
+#endif
 for (i=0; i<MAX_DATAIN; i++)
   {
   if ((datain[i].bufftyp!=-1) 

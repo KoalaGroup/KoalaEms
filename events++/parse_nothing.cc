@@ -9,25 +9,23 @@
 
 #include <errno.h>
 #include <math.h>
+#include <unistd.h>
+#include <string.h>
 #include "compressed_io.hxx"
 #include "cluster_data.hxx"
+#include "swap_int.h"
 #include <versions.hxx>
 
-VERSION("2006-Dec-11", __FILE__, __DATE__, __TIME__,
-"$ZEL: parse_nothing.cc,v 1.2 2006/12/12 19:12:52 wuestner Exp $")
+VERSION("2014-07-07", __FILE__, __DATE__, __TIME__,
+"$ZEL: parse_nothing.cc,v 1.3 2014/07/14 16:18:17 wuestner Exp $")
 #define XVERSION
-
-#define swap_int(a) ( ((a) << 24) | \
-                      (((a) << 8) & 0x00ff0000) | \
-                      (((a) >> 8) & 0x0000ff00) | \
-        ((unsigned int)(a) >>24) )
 
 ems_event* event;
 int jumps=0;
 int jump_dist=0;
 
 //---------------------------------------------------------------------------//
-int
+static int
 xread(int p, char* b, int num)
 {
     int da=0, rest=num, res;
@@ -59,14 +57,14 @@ xread(int p, char* b, int num)
  * record data
  * it has to be freed using delete[]
  */
-int
+static int
 read_record(int p, ems_u32** buf)
 {
     ems_u32 head[2], *b;
     ems_u32 size;
     int wenden;
 
-    switch (xread(p, (char*)head, 8)) {
+    switch (xread(p, reinterpret_cast<char*>(head), 8)) {
     case -1: // error
         cerr<<"read header: "<<strerror(errno)<<endl;
         return -1;
@@ -101,7 +99,7 @@ read_record(int p, ems_u32** buf)
 
     b[0]=head[0];
     b[1]=head[1];
-    switch (xread(p, (char*)(b+2), (size-1)*4)) {
+    switch (xread(p, reinterpret_cast<char*>(b+2), (size-1)*4)) {
     case -1: // error
         cerr<<"read body: "<<strerror(errno)<<endl;
         return -1;

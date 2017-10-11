@@ -9,8 +9,8 @@
 #include <histotcl.hxx>
 #include <versions.hxx>
 
-VERSION("Nov 16 2004", __FILE__, __DATE__, __TIME__,
-"$ZEL: histoAppInit.cc,v 1.4 2004/11/26 23:03:49 wuestner Exp $")
+VERSION("2014-07-10", __FILE__, __DATE__, __TIME__,
+"$ZEL: histoAppInit.cc,v 1.5 2014/07/10 18:22:24 wuestner Exp $")
 #define XVERSION
 
 /*
@@ -32,7 +32,8 @@ VERSION("Nov 16 2004", __FILE__, __DATE__, __TIME__,
  *----------------------------------------------------------------------
  */
 
-int Histo_AppInit(Tcl_Interp* interp)
+static int
+Histo_AppInit(Tcl_Interp* interp)
 {
 if (Tcl_Init(interp) == TCL_ERROR) return TCL_ERROR;
 if (Tk_Init(interp) == TCL_ERROR) return TCL_ERROR;

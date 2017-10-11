@@ -3,7 +3,7 @@
  * 
  * created 26.10.94 PW
  * 
- * $ZEL: readargs.hxx,v 2.20 2010/06/20 22:45:17 wuestner Exp $
+ * $ZEL: readargs.hxx,v 2.21 2012/08/28 15:13:50 wuestner Exp $
  */
 
 #ifndef _readargs_hxx_
@@ -107,6 +107,24 @@ class C_readargs
     int numhelpinsets;
     insetfunc* helpinsets;
   };
+
+/*
+helpinsets:
+  helpinset() requires two arguments: int and void(*insetfunc)(std::ostream&)
+  The int specifies the position in the help output:
+    0: before any other output
+    1: just after the headline containing the program name
+    2: between the list of options with '-' and the positional options
+    3: after the positional options
+    4: between the description of the options with '-' and positional options
+    5: after the description of positional options
+    6: after the headline for default and actual values
+    7: between the values of the options with '-' and positional options
+    8: the very last output
+  The insetfunc is called at this position and should produce formatted output
+  on the given ostream.
+
+*/
 
 #endif
 

@@ -60,7 +60,7 @@ proc autostart_exec {} {
       if {[string index $line 0]!="#"} {
         regsub {%port} $line $global_setup(port) line
         regsub {%host} $line [exec hostname] line
-        if [catch {set pid [eval "exec $line >&/dev/console </dev/null &"]} mist] {
+        if [catch {set pid [eval "exec $line >&/dev/null </dev/null &"]} mist] {
           bgerror $mist
         } else {
           foreach id $pid {lappend global_exec $id}

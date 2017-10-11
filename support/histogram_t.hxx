@@ -8,7 +8,7 @@
 #define _histogram_t_hxx_
 
 #include "config.h"
-#include "cxxcompat.hxx"
+//#include "cxxcompat.hxx"
 #include "outbuf.hxx"
 #include "inbuf.hxx"
 #include "typinfo.hxx"

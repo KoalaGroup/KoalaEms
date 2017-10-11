@@ -10,7 +10,7 @@
 #define _buf_hxx_
 
 #include "config.h"
-#include "cxxcompat.hxx"
+//#include "cxxcompat.hxx"
 #include "iopathes.hxx"
 #include "nocopy.hxx"
 

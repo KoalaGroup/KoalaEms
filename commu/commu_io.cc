@@ -5,8 +5,11 @@
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
-
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <cerrno>
 #include <cstdlib>
 #include <unistd.h>
@@ -16,9 +19,11 @@
 #include <fcntl.h>
 #include "versions.hxx"
 
-VERSION("2009-Feb-25", __FILE__, __DATE__, __TIME__,
-"$ZEL: commu_io.cc,v 2.13 2009/08/21 21:50:51 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: commu_io.cc,v 2.14 2014/07/14 15:12:19 wuestner Exp $")
 #define XVERSION
+
+using namespace std;
 
 /*****************************************************************************/
 

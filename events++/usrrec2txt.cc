@@ -22,7 +22,7 @@
 #include <versions.hxx>
 
 VERSION("Aug 14 1998", __FILE__, __DATE__, __TIME__,
-"$ZEL: usrrec2txt.cc,v 1.5 2005/02/11 15:45:19 wuestner Exp $")
+"$ZEL: usrrec2txt.cc,v 1.6 2014/07/14 16:18:17 wuestner Exp $")
 #define XVERSION
 
 C_readargs* args;
@@ -54,9 +54,11 @@ return(0);
 
 int write_main(C_inbuf& in, ofstream& fo)
 {
+#if 0
 int val, val1, val2;
 char s[81];
 int i;
+#endif
 /*
 fi.read((char*)&val, 4);   // rec_subtype
 val1=val&0xffff;           // record number
@@ -92,6 +94,7 @@ return(0);
 
 int convert()
 {
+#if 0
 struct
   {
   int size;
@@ -102,6 +105,7 @@ struct
   } header;
 
 int res;
+#endif
 
 /*
 ifstream fi(infile);
@@ -163,7 +167,7 @@ return(0);
 }
 
 /*****************************************************************************/
-
+int
 main(int argc, char* argv[])
 {
 args=new C_readargs(argc, argv);

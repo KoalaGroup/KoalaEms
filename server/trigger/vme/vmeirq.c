@@ -3,7 +3,7 @@
  * created: 2005-12-14 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: vmeirq.c,v 1.6 2011/04/06 20:30:36 wuestner Exp $";
+    "$ZEL: vmeirq.c,v 1.7 2015/04/21 16:44:35 wuestner Exp $";
 
 #include <stdio.h>
 
@@ -22,6 +22,8 @@ static const char* cvsid __attribute__((unused))=
 #include "../../lowlevel/unixvme/vme.h"
 #include "../../objects/pi/readout.h"
 #include "dev/pci/sis1100_var.h"
+
+#define DEBUG_TRIGG_VMEIRQ 0
 
 struct vmeirq_private {
     int trigger;
@@ -61,6 +63,11 @@ trig_vmeirq_callback(struct vme_dev *dev,
     trinfo->trigger=priv->trigger;
     trinfo->time=vme_data->time;
     trinfo->time_valid=1;
+
+#if DEBUG_TRIGG_VMEIRQ
+    printf("trig_vmeirq_callback: calling cb_proc %p\n", trinfo->cb_proc);
+#endif
+
     trinfo->cb_proc(trinfo->cb_data);
 }
 /*****************************************************************************/
@@ -86,6 +93,9 @@ insert_trig_vmeirq(struct triggerinfo* trinfo)
 {
     struct trigprocinfo* tinfo=(struct trigprocinfo*)trinfo->tinfo;
     struct vmeirq_private* priv=(struct vmeirq_private*)tinfo->private;
+
+printf("insert_trig_vmeirq: callback=%p\n", trig_vmeirq_callback);
+
     if (priv->dev->register_vmeirq(priv->dev, priv->mask, priv->vector,
             trig_vmeirq_callback, trinfo)<0)
         return Err_System;
@@ -136,7 +146,7 @@ init_trig_vmeirq(ems_u32* p, struct triggerinfo* trinfo)
         *outptr++=MAX_TRIGGER-1;
         return plErr_ArgRange;
     }
-    if (!valid_module(p[2], modul_vme, 0)) {
+    if (!valid_module(p[2], modul_vme)) {
         *outptr++=2;
         return plErr_ArgRange;
     }

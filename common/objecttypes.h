@@ -3,7 +3,7 @@
  * created before 03.05.93
  */
 
-/* $ZEL: objecttypes.h,v 2.22 2011/08/18 22:33:54 wuestner Exp $ */
+/* $ZEL: objecttypes.h,v 2.25 2015/04/24 20:55:39 wuestner Exp $ */
 
 #ifndef _objecttypes_h_
 #define _objecttypes_h_
@@ -27,10 +27,10 @@ typedef enum
 
 typedef enum{
   Invoc_error= -3,
-  Invoc_alldone,
-  Invoc_stopped,
-  Invoc_notactive,
-  Invoc_active
+  Invoc_alldone,   /* -2 */
+  Invoc_stopped,   /* -1 */
+  Invoc_notactive, /*  0 */
+  Invoc_active     /*  1 */
 }InvocStatus;
 
 /*****************************************************************************/
@@ -42,7 +42,7 @@ typedef enum
 
 typedef enum {
     InOut_Ringbuffer, InOut_Stream, InOut_Cluster, InOut_Filebuffer,
-    InOut_Selected_Events, InOut_Opaque
+    InOut_Selected_Events, InOut_Opaque, InOut_MQTT
 } InOutTyp;
 
 typedef enum
@@ -73,10 +73,14 @@ typedef enum{
   Do_disabled
 }DoSwitch;
 
+/*
+ * modul_unspec must not be used any longer,
+ * therefore remaned to modul_unspec_
+ */
 enum Modulclass {
-    modul_none, modul_unspec, modul_generic, modul_camac,
+    modul_none, modul_unspec_, modul_generic, modul_camac,
     modul_fastbus, modul_vme, modul_lvd, modul_perf, modul_can, modul_caenet,
-    modul_sync, modul_pcihl, modul_invalid
+    modul_sync, modul_pcihl, modul_ip, modul_invalid
 };
 typedef enum Modulclass Modulclass;
 

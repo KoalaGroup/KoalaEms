@@ -2,11 +2,15 @@
  * commu_local_server_a.cc
  * 
  * created 07.12.94 PW
- * 14.06.1998 PW: adapted for STD_STRICT_ANSI
+ * 
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <commu_local_server_a.hxx>
 #include <objecttypes.h>
 #include <xdrstring.h>
@@ -14,8 +18,8 @@
 #include <commu_log.hxx>
 #include "versions.hxx"
 
-VERSION("2009-Aug-21", __FILE__, __DATE__, __TIME__,
-"$ZEL: commu_local_server_a.cc,v 2.16 2009/08/21 22:02:28 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: commu_local_server_a.cc,v 2.17 2014/07/14 15:12:19 wuestner Exp $")
 #define XVERSION
 
 extern C_log elog, nlog, dlog;
@@ -26,6 +30,8 @@ extern int allowautoexit;
 #ifdef COSYLOG
 extern C_cosylogger* lgg_col;
 #endif
+
+using namespace std;
 
 /*****************************************************************************/
 

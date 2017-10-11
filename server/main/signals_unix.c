@@ -2,7 +2,7 @@
  * main/signals_unix.c
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: signals_unix.c,v 1.14 2011/04/06 20:30:28 wuestner Exp $";
+    "$ZEL: signals_unix.c,v 1.15 2014/09/10 15:28:59 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -161,7 +161,7 @@ int install_signalhandler(signalproc hand, union SigHdlArg arg, char* name)
     }
     handler[i]=hand;
     clientdata[i]=arg;
-    names[i]=name;
+    names[i]=strdup(name);
 printf("signalhandler with sig %d installed\n", sig);
     return sig;
 }
@@ -183,7 +183,7 @@ int install_signalhandler_sig(signalproc hand, int sig, union SigHdlArg arg,
     }
     handler[i]=hand;
     clientdata[i]=arg;
-    names[i]=name;
+    names[i]=strdup(name);
 printf("signalhandler for sig %d installed\n", sig);
     return sig;
 }
@@ -196,6 +196,8 @@ static int removehandler(int idx)
     return(-1);
   }
   handler[idx]=(signalproc)0;
+  free(names[idx]);
+  names[idx]=0;
   return(0);
 }
 /*****************************************************************************/

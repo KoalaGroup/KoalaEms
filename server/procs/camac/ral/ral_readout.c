@@ -3,7 +3,7 @@
  * 02.Aug.2001 PW: multicrate support
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: ral_readout.c,v 1.7 2011/04/06 20:30:30 wuestner Exp $";
+    "$ZEL: ral_readout.c,v 1.8 2015/04/06 21:33:28 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -131,7 +131,7 @@ test_proc_RALreadout(ems_u32* p)
 {
 	if (p[0] != 1)
 		return(plErr_ArgNum);
-	if (!valid_module(p[1], modul_camac, 0))
+	if (!valid_module(p[1], modul_camac))
 		return (plErr_BadHWAddr);
 	return(plOK);
 }

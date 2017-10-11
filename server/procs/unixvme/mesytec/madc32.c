@@ -35,7 +35,7 @@ extern ems_u32* outptr;
 extern int wirbrauchen;
 extern int *memberlist;
 
-RCS_REGISTER(cvsid, "procs/unixvme/caen")
+RCS_REGISTER(cvsid, "procs/unixvme/mesytec")
 
 /*
  * madc 32-channel ADC

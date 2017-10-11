@@ -3,7 +3,7 @@
  * created 24.Jan.2001 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: sis3600.c,v 1.11 2011/04/06 20:30:35 wuestner Exp $";
+    "$ZEL: sis3600.c,v 1.12 2015/04/06 21:33:37 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -84,7 +84,7 @@ for (i=1; i<=p[0]; i++)
   {
   ml_entry* module;
 
-  if (!valid_module(p[i], modul_vme, 0)) return plErr_ArgRange;
+  if (!valid_module(p[i], modul_vme)) return plErr_ArgRange;
   module=ModulEnt(p[i]);
   if (module->modultype!=SIS_3600) return plErr_BadModTyp;
   }
@@ -137,7 +137,7 @@ for (i=1; i<=p[0]; i++)
   {
   ml_entry* module;
 
-  if (!valid_module(p[i], modul_vme, 0)) return plErr_ArgRange;
+  if (!valid_module(p[i], modul_vme)) return plErr_ArgRange;
   module=ModulEnt(p[i]);
   if (module->modultype!=SIS_3600) return plErr_BadModTyp;
   }
@@ -173,7 +173,7 @@ for (i=1; i<=p[0]; i++)
   {
   ml_entry* module;
 
-  if (!valid_module(p[i], modul_vme, 0)) return plErr_ArgRange;
+  if (!valid_module(p[i], modul_vme)) return plErr_ArgRange;
   module=ModulEnt(p[i]);
   if (module->modultype!=SIS_3600) return plErr_BadModTyp;
   }
@@ -233,7 +233,7 @@ plerrcode test_proc_sis3600wait(ems_u32* p)
     plerrcode res;
 
     if (p[0]!=3) return plErr_ArgNum;
-    if (!valid_module(p[1], modul_vme, 0)) return plErr_ArgRange;
+    if (!valid_module(p[1], modul_vme)) return plErr_ArgRange;
     module=ModulEnt(p[1]);
     if (module->modultype!=SIS_3600) return plErr_BadModTyp;
     if ((res=verify_vme_module(module, 1))!=plOK) return res;
@@ -278,7 +278,7 @@ plerrcode test_proc_sis3600initwait(ems_u32* p)
 
     if (p[0]!=1)
         return plErr_ArgNum;
-    if (!valid_module(p[1], modul_vme, 0))
+    if (!valid_module(p[1], modul_vme))
         return plErr_ArgRange;
     module=ModulEnt(p[1]);
     if (module->modultype!=SIS_3600)

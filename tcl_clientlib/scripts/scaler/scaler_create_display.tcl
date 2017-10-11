@@ -1,4 +1,4 @@
-# $ZEL: scaler_create_display.tcl,v 1.5 2006/08/13 17:32:05 wuestner Exp $
+# $ZEL: scaler_create_display.tcl,v 1.7 2011/11/26 23:57:30 wuestner Exp $
 # copyright 1998
 #   P. Wuestner; Zentralinstitut fuer Elektronik; Forschungszentrum Juelich
 #
@@ -93,6 +93,27 @@ proc add_chan {chan frame row} {
 
 #-----------------------------------------------------------------------------#
 
+proc scaler_win_scale_canvas {} {
+    global global_dispwin
+
+    set sframe $global_dispwin(sframe)
+    set width [winfo reqwidth $sframe]
+    set height [winfo reqheight $sframe]
+
+    $global_dispwin(cv) configure -scrollregion "0 0 $width $height"
+    set screenheight [winfo screenheight .]
+    set screenwidth [winfo screenwidth .]
+    if {$height>$screenheight-100} {
+        set height [expr $screenheight-100]
+    }
+    if {$width>$screenwidth-100} {
+        set width [expr $screenwidth-100]
+    }
+    $global_dispwin(cv) configure -width $width -height $height
+}
+
+#-----------------------------------------------------------------------------#
+
 proc create_display {} {
   global global_setup global_dispwin global_num_channels
   global global_setup_pane global_setup_vis
@@ -130,9 +151,17 @@ proc create_display {} {
 # Scaler
   if [winfo exists $f.sc] {destroy $f.sc}
   frame $f.sc
+  set global_dispwin(cv) [canvas $f.sc.cv]
+  scrollbar $f.sc.v -orient vertical -width 10 -command "$f.sc.cv yview"
+  scrollbar $f.sc.h -orient horizontal -width 10 -command "$f.sc.cv xview"
+  $f.sc.cv configure -xscrollcommand "$f.sc.h set"
+  $f.sc.cv configure -yscrollcommand "$f.sc.v set"
+
+  set sframe [frame $f.sc.cv.sc]
+  set global_dispwin(sframe) $sframe
   for {set pane 0} {$pane<$global_setup(num_panes)} {incr pane} {
-    frame $f.sc.p$pane -relief ridge -borderwidth 2
-    set frame [frame $f.sc.p$pane.p]
+    frame $sframe.p$pane -relief ridge -borderwidth 2
+    set frame [frame $sframe.p$pane.p]
     add_header $frame
     set row 0
     for {set chan 0} {$chan<$global_num_channels} {incr chan} {
@@ -141,11 +170,19 @@ proc create_display {} {
         add_chan $chan $frame $row
       }
     }
-    pack $f.sc.p$pane -side left -fill y
+    pack $sframe.p$pane -side left -fill y
     pack $frame -side top
   }
-  
-  pack $f.sc -side bottom
+
+  $f.sc.cv create window 0 0 -window $sframe -anchor nw
+  grid $f.sc.cv -sticky nsew
+  grid $f.sc.v -row 0 -column 1 -sticky ns
+  grid $f.sc.h -sticky ew
+  grid columnconfigure $f.sc 0 -weight 1
+  grid rowconfigure $f.sc 0 -weight 1
+  pack $f.sc -side bottom -expand 1 -fill both
+  update idletasks
+  scaler_win_scale_canvas
 }
 
 #-----------------------------------------------------------------------------#

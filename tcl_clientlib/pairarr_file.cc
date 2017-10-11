@@ -5,7 +5,11 @@
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <assert.h>
 #include <unistd.h>
 #include <cstdio>
@@ -17,14 +21,15 @@
 #include <cstring>
 #include <tcl.h>
 #include "pairarr_file.hxx"
-#include "compat.h"
 #include <errors.hxx>
 #include "tcl_cxx.hxx"
 #include <versions.hxx>
 
-VERSION("2009-Feb-25", __FILE__, __DATE__, __TIME__,
-"$ZEL: pairarr_file.cc,v 1.19 2010/02/03 00:15:51 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: pairarr_file.cc,v 1.21 2014/07/14 15:13:26 wuestner Exp $")
 #define XVERSION
+
+using namespace std;
 
 /*****************************************************************************/
 /*
@@ -57,7 +62,7 @@ C_pairarr_file::C_pairarr_file(const char* name)
     assert(name!=0);
 #else
     if (name==0) {
-        OSTRINGSTREAM st;
+        ostringstream st;
         st << "Filename must be specified.";
         errormessage=st.str();
         return;
@@ -67,14 +72,14 @@ C_pairarr_file::C_pairarr_file(const char* name)
     filename=name;
     path=open(filename.c_str(), O_RDWR|O_CREAT, 0640);
     if (path<0) {
-        OSTRINGSTREAM st;
+        ostringstream st;
         st << "open " << filename << " " << strerror(errno);
         errormessage=st.str();
         return;
     }
 #ifdef __osf__
     if (lockf(path, F_TLOCK, 0)<0) {
-        OSTRINGSTREAM st;
+        ostringstream st;
         st << "lock " << filename << " " << strerror(errno);
         errormessage=st.str();
         close(path);
@@ -84,7 +89,7 @@ C_pairarr_file::C_pairarr_file(const char* name)
 
     struct stat status;
     if (fstat(path, &status)<0) {
-        OSTRINGSTREAM st;
+        ostringstream st;
         st << "fstat " << filename << " " << strerror(errno);
         errormessage=st.str();
         close(path);
@@ -99,7 +104,7 @@ C_pairarr_file::C_pairarr_file(const char* name)
             size=(size/sizeof(vt_pair))*sizeof(vt_pair);
             cerr << "truncating to " << size << endl;
             if (ftruncate(path, size/(sizeof(vt_pair)))<0) {
-                OSTRINGSTREAM st;
+                ostringstream st;
                 st << "ftruncate " << filename << " " << strerror(errno);
                 errormessage=st.str();
                 close(path);
@@ -108,7 +113,7 @@ C_pairarr_file::C_pairarr_file(const char* name)
         }
 
         if (lseek(path, 0, SEEK_SET)<0) {
-            OSTRINGSTREAM st;
+            ostringstream st;
             st << "lseek to start of " << filename << " " << strerror(errno);
             errormessage=st.str();
             close(path);
@@ -117,7 +122,7 @@ C_pairarr_file::C_pairarr_file(const char* name)
 
         if (read(path, (char*)&first_pair->pair, sizeof(vt_pair))
                 !=sizeof(vt_pair)) {
-            OSTRINGSTREAM st;
+            ostringstream st;
             st << "read first pair of " << filename << " " << strerror(errno);
             errormessage=st.str();
             close(path);
@@ -126,7 +131,7 @@ C_pairarr_file::C_pairarr_file(const char* name)
         first_pair->idx=0;
 
         if (lseek(path, -sizeof(vt_pair), SEEK_END)<0) {
-            OSTRINGSTREAM st;
+            ostringstream st;
             st << "lseek to end of " << filename << " " << strerror(errno);
             errormessage=st.str();
             close(path);
@@ -134,7 +139,7 @@ C_pairarr_file::C_pairarr_file(const char* name)
         }
         if (read(path, (char*)&last_pair->pair, sizeof(vt_pair))
                 !=sizeof(vt_pair)) {
-            OSTRINGSTREAM st;
+            ostringstream st;
             st << "read last pair of " << filename << " " << strerror(errno);
             errormessage=st.str();
             close(path);
@@ -213,18 +218,7 @@ return fsspace;
 
 void C_pairarr_file::testfilesize()
 {
-off_t asize;
-#ifdef __osf__
-off_t space;
-space=getfsspace();
-#endif
-asize=arrsize*sizeof(vt_pair);
-
-#ifdef __osf__
-if ((arrsize>10*minhistory) || (space<100*asize)) truncate();
-#else
 if (arrsize>10*minhistory) truncate();
-#endif
 return;
 }
 
@@ -234,7 +228,7 @@ void C_pairarr_file::truncate()
     if ((minhistory<=0) || (minhistory*2>arrsize))
         return;
 
-    STRING newname=filename+"_new";
+    string newname=filename+"_new";
 
     int lostpairs=last_pair->idx+1-minhistory;
 

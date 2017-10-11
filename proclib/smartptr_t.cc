@@ -1,11 +1,15 @@
 /*
- * smartptr_t.cc
+ * proclib/smartptr_t.cc
  * 
  * created: 12.06.1998
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <stdlib.h>
 #include "smartptr_t.hxx"
 #include "proc_namelist.hxx"
@@ -15,10 +19,12 @@
 #include <versions.hxx>
 
 #ifndef XVERSION
-VERSION("Jun 12 1998", __FILE__, __DATE__, __TIME__,
-"$ZEL: smartptr_t.cc,v 1.8 2004/11/26 14:44:36 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: smartptr_t.cc,v 1.9 2014/07/14 15:11:54 wuestner Exp $")
 #define XVERSION
 #endif
+
+using namespace std;
 
 /*****************************************************************************/
 
@@ -27,7 +33,7 @@ T* T_smartptr<T>::operator ->()
 {
 if (p==0)
   {
-  OSTRINGSTREAM os;
+  ostringstream os;
   os<<"smartptr("<<name<<")operator->; p="<<(void*)p;
   throw new C_ptr_error(os);
   }
@@ -41,7 +47,7 @@ T_smartptr<T>::operator T*(void)
 {
 if (p==0)
   {
-  OSTRINGSTREAM os;
+  ostringstream os;
   os<<"smartptr("<<name<<")cast to *; p="<<(void*)p<<endl;
   //xx=*(int*)0;
   throw new C_ptr_error(os);
@@ -56,7 +62,7 @@ T& T_smartptr<T>::operator *(void)
 {
 if (p==0)
   {
-  OSTRINGSTREAM os;
+  ostringstream os;
   os<<"smartptr("<<name<<")operator*; p="<<(void*)p<<endl;
   throw new C_ptr_error(os);
   }

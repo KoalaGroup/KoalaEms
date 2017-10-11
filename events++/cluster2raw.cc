@@ -1,5 +1,5 @@
 /*
- * ems/events++/parse_lvd.cc
+ * ems/events++/cluster2raw.cc
  * 
  * created 2006-Jun-21 PW
  */
@@ -9,23 +9,21 @@
 
 #include <errno.h>
 #include <math.h>
+#include <unistd.h>
+#include <string.h>
 #include "compressed_io.hxx"
 #include "cluster_data.hxx"
+#include "swap_int.h"
 #include <versions.hxx>
 
-VERSION("2006-Jun-21", __FILE__, __DATE__, __TIME__,
-"$ZEL: cluster2raw.cc,v 1.3 2006/06/22 21:41:05 wuestner Exp $")
+VERSION("2014-07-07", __FILE__, __DATE__, __TIME__,
+"$ZEL: cluster2raw.cc,v 1.4 2014/07/07 21:28:18 wuestner Exp $")
 #define XVERSION
-
-#define swap_int(a) ( ((a) << 24) | \
-                      (((a) << 8) & 0x00ff0000) | \
-                      (((a) >> 8) & 0x0000ff00) | \
-        ((unsigned int)(a) >>24) )
 
 int modules[16];
 
 //---------------------------------------------------------------------------//
-int
+static int
 xread(int p, char* b, int num)
 {
     int da=0, rest=num, res;
@@ -53,14 +51,14 @@ xread(int p, char* b, int num)
  *  0: no more data
  * >0: size of record (in words)
  */
-int
+static int
 read_record(int p, ems_u32** buf)
 {
     ems_u32 head[2], *b;
     ems_u32 size;
     int wenden;
 
-    switch (xread(p, (char*)head, 8)) {
+    switch (xread(p, reinterpret_cast<char*>(head), 8)) {
     case -1: // error
         cout<<"read header: "<<strerror(errno)<<endl;
         return -1;
@@ -95,7 +93,7 @@ read_record(int p, ems_u32** buf)
 
     b[0]=head[0];
     b[1]=head[1];
-    switch (xread(p, (char*)(b+2), (size-1)*4)) {
+    switch (xread(p, reinterpret_cast<char*>(b+2), (size-1)*4)) {
     case -1: // error
         cout<<"read body: "<<strerror(errno)<<endl;
         return -1;

@@ -3,7 +3,7 @@
  * 
  * 2008-Aug-10 PW
  * 
- * $ZEL: clusterdump.c,v 1.4 2010/09/04 21:25:59 wuestner Exp $
+ * $ZEL: clusterdump.c,v 1.5 2013/10/28 15:51:02 wuestner Exp $
  */
 
 #define _GNU_SOURCE
@@ -537,14 +537,14 @@ decode_run_nr(FILE *po, struct subevent *sev, struct subevent_queue *queue)
         res=-1;
     }
 
-    return 0;
+    return res;
 }
 /******************************************************************************/
 static int
 decode_LC_4434(FILE *po, struct subevent *sev, struct subevent_queue *queue)
 {
     u_int32_t *d=sev->data;
-    u_int64_t low, high, date;
+    u_int64_t low=0, high, date;
     int res=0, channels, i;
 
     channels=*d;
@@ -738,7 +738,7 @@ static int
 decode_LC_1881M(FILE *po, struct subevent *sev, struct subevent_queue *queue)
 {
     u_int32_t *d=sev->data;
-    int wordcount, geo, chans, words, buffer, buf, channel, date;
+    int wordcount, geo, chans, words, buffer, channel, date;
     int i, res=0;
 
     fprintf(po, "               geo buf chan  adc\n");
@@ -776,7 +776,7 @@ decode_LC_1881M(FILE *po, struct subevent *sev, struct subevent_queue *queue)
             }
             chans=words-1;
         } else {
-            buf=(*d>>24)&0x3;
+            buffer=(*d>>24)&0x3;
             channel=(*d>>17)&0x3f;
             date=*d&0x3fff;
             fprintf(po, " %2d  %d   %2d %4d\n", geo, buffer, channel, date);
@@ -793,7 +793,7 @@ static int
 decode_LC_1877(FILE *po, struct subevent *sev, struct subevent_queue *queue)
 {
     u_int32_t *d=sev->data;
-    int wordcount, geo, chans, words, buffer, buf, channel, edge, date;
+    int wordcount, geo, chans, words, buffer, channel, edge, date;
     int i, res=0;
 
     fprintf(po, "               geo buf chan  adc\n");
@@ -827,7 +827,7 @@ decode_LC_1877(FILE *po, struct subevent *sev, struct subevent_queue *queue)
                     geo, buffer, words);
             chans=words-1;
         } else {
-            buf=(*d>>24)&0x3;
+            buffer=(*d>>24)&0x3;
             channel=(*d>>17)&0x7f;
             edge=!!(*d&0x10000);
             date=*d&0xffff;
@@ -1104,10 +1104,10 @@ for (i=0; i<n; i++)
     data+=2; /* skip IS_ID and size */
 
     while (size>=3) {
-        u_int32_t head, timestamp, evno;
+        u_int32_t head/*, timestamp*/, evno;
         int evsize;
         head=data[0];
-        timestamp=data[1];
+        /*timestamp=data[1];*/
         evno=data[2];
         evsize=(head&0xffff)/4;
 

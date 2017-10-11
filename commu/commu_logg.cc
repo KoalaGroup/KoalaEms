@@ -5,17 +5,22 @@
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
-
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <cstring>
 #include <sys/time.h>
 #include "commu_logg.hxx"
 #include <compat.h>
 #include "versions.hxx"
 
-VERSION("2009-Feb-25", __FILE__, __DATE__, __TIME__,
-"$ZEL: commu_logg.cc,v 2.15 2009/08/21 21:50:51 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: commu_logg.cc,v 2.16 2014/07/14 15:12:19 wuestner Exp $")
 #define XVERSION
+
+using namespace std;
 
 /*****************************************************************************/
 
@@ -37,7 +42,7 @@ delete[] name;
 void C_logger::lstring_t(int prior, const char *s)
 {
 char ss[1024];
-OSTRINGSTREAM st;
+ostringstream st;
 
 struct timeval tp;
 gettimeofday(&tp, 0);
@@ -49,10 +54,10 @@ put(prior, st.str());
 
 /*****************************************************************************/
 
-void C_logger::lstring_t(int prior, const STRING &s)
+void C_logger::lstring_t(int prior, const string &s)
 {
 char ss[1024];
-OSTRINGSTREAM st;
+ostringstream st;
 
 struct timeval tp;
 gettimeofday(&tp, 0);
@@ -71,7 +76,7 @@ put(prior, s);
 
 /*****************************************************************************/
 
-void C_logger::lstring(int prior, const STRING& s)
+void C_logger::lstring(int prior, const string& s)
 {
 put(prior, s.c_str());
 }

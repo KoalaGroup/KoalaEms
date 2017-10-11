@@ -10,8 +10,8 @@
 #include <events.hxx>
 #include <versions.hxx>
 
-VERSION("Dec 08 1997", __FILE__, __DATE__, __TIME__,
-"$ZEL: subevents.cc,v 1.4 2004/11/26 14:40:20 wuestner Exp $")
+VERSION("2014-07-09", __FILE__, __DATE__, __TIME__,
+"$ZEL: subevents.cc,v 1.5 2014/07/09 16:52:57 wuestner Exp $")
 #define XVERSION
 
 /*****************************************************************************/
@@ -29,7 +29,7 @@ C_subeventp::~C_subeventp()
 
 void C_subeventp::store(const int* subevent_)
 {
-subevent=(int*)subevent_;
+subevent=const_cast<int*>(subevent_);
 size_=subevent[1]+2;
 valid=1;
 }

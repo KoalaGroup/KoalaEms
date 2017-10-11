@@ -12,6 +12,7 @@
 ******************************************************************************/
 
 #include "config.h"
+#include <cstring>
 #include "cxxcompat.hxx"
 #include <readargs.hxx>
 #include <errno.h>
@@ -21,7 +22,7 @@
 #include <versions.hxx>
 
 VERSION("Aug 14 1998", __FILE__, __DATE__, __TIME__,
-"$ZEL: evmerge.cc,v 1.6 2005/02/11 15:45:06 wuestner Exp $")
+"$ZEL: evmerge.cc,v 1.7 2014/07/14 16:18:17 wuestner Exp $")
 #define XVERSION
 
 C_readargs* args;
@@ -286,7 +287,7 @@ return 0;
 }
 
 /*****************************************************************************/
-
+int
 main(int argc, char* argv[])
 {
 args=new C_readargs(argc, argv);

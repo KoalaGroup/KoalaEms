@@ -2,12 +2,15 @@
  * findstring.cc
  * 
  * created: 24.01.96 PW
- * 16.07.1999 PW: interface changed
- * 2010.06.20 PW: sort function rewritten to avoid Tcl_LsortObjCmd
+ * 
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <string.h>
 #include <tcl.h>
 #include "findstring.hxx"
@@ -15,9 +18,11 @@
 #include "tcl_cxx.hxx"
 #include <versions.hxx>
 
-VERSION("2010.06.20", __FILE__, __DATE__, __TIME__,
-"$ZEL: findstring.cc,v 1.13 2010/06/20 22:17:41 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: findstring.cc,v 1.14 2014/07/14 15:13:25 wuestner Exp $")
 #define XVERSION
+
+using namespace std;
 
 /*****************************************************************************/
 /*
@@ -68,7 +73,7 @@ int findstring(Tcl_Interp* interp, const char* given,
  */
     Tcl_ResetResult(interp);
     if (num>1) {
-        OSTRINGSTREAM st;
+        ostringstream st;
         st<<"ambigious arg "<<given<<"; possible args are: ";
         for (int i=0; i<anum; i++) {
             if (strncmp(given, arr[i], n)==0)
@@ -76,7 +81,7 @@ int findstring(Tcl_Interp* interp, const char* given,
         }
         Tcl_SetResult_Stream(interp, st);
     } else { // num==0
-        OSTRINGSTREAM st;
+        ostringstream st;
         st<<"unknown arg "<<given<<"; possible args are: ";
         for (int i=0; i<anum; i++)
             st<<' '<<arr[i];

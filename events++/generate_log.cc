@@ -12,6 +12,7 @@
 #include <sys/ioctl.h>
 #include <sys/mtio.h>
 #include <unistd.h>
+#include <string.h>
 #include <readargs.hxx>
 #include <events.hxx>
 #include "compat.h"
@@ -21,7 +22,7 @@
 #include "versions.hxx"
 
 VERSION("2006-Sep-22", __FILE__, __DATE__, __TIME__,
-"$ZEL: generate_log.cc,v 1.2 2006/12/11 13:17:11 wuestner Exp $")
+"$ZEL: generate_log.cc,v 1.3 2012/08/28 15:23:35 wuestner Exp $")
 #define XVERSION
 
 C_readargs* args;
@@ -398,6 +399,7 @@ scan_file(const char* infile)
             cerr<<"cannot open infile \""<<infile<<"\""<<endl;
             return;
         }
+        inpath->fadvise_sequential(true);
 
         eventnum=0;
         headernum=0;

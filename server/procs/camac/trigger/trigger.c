@@ -5,7 +5,7 @@
  * 02.Aug.2001 PW: multicrate support
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: trigger.c,v 1.9 2011/04/06 20:30:30 wuestner Exp $";
+    "$ZEL: trigger.c,v 1.10 2015/04/06 21:33:29 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -43,7 +43,7 @@ plerrcode proc_ResetTrigger(ems_u32* p)
 plerrcode test_proc_ResetTrigger(ems_u32* p)
 {
     if (p[0]!=1) return(plErr_ArgNum);
-    if (!valid_module(p[1], modul_camac, 0)) return plErr_BadModTyp;
+    if (!valid_module(p[1], modul_camac)) return plErr_BadModTyp;
     if (ModulEnt(p[1])->modultype!=GSI_TRIGGER) return plErr_BadModTyp;
     return plOK;
 }

@@ -1,4 +1,4 @@
-# $ZEL: scaler_decoder.tcl,v 1.9 2006/09/15 17:35:08 wuestner Exp $
+# $ZEL: scaler_decoder.tcl,v 1.11 2011/11/26 23:58:47 wuestner Exp $
 # copyright 1998 2006
 #   P. Wuestner; Zentralinstitut fuer Elektronik; Forschungszentrum Juelich
 #
@@ -35,7 +35,8 @@ proc got_ScalerU32 {idx offs num jetzt rest} {
   global scaler_cont_last
 
   if {[llength $list]<$num} {
-    output "got_ScalerU32: need $num words for $num channels but got only [llength $list]"
+    output "got_ScalerU32: need $num words for $num channels but got only \
+[llength $list]"
     output "got: idx=$idx; offs=$offs list=$list"
     return -1
   }
@@ -52,6 +53,25 @@ proc got_ScalerU32 {idx offs num jetzt rest} {
 }
 
 # num has to be a multiple of 32!
+# remark:
+# in an older version (ikplab01:/usr/local/ems/lib.old/... there was a
+# modification:
+# if $mod<4 the term "expr [lindex $list $i]*4294967296.0" was removed.
+# This was necessary only because the server code did not handle the
+# overflows correctly. (it assumes an overflow if the scaler value was 
+# smaller than the last one. But the lowest six bit are not reliable
+# and have to be ignored for this test.
+#
+# 2nd remark:
+# the 1st remark ist wrong.
+# At WASA the fifth scaler is resetted for every spill. This
+# makes the overflow detection impossible (each reset will be seen
+# as an overflow).
+# The problem should be solved at server level but we can have a dirty
+# workaround here:
+# Because of the resets a real overflow is unlikely to occur, we can 
+# just ignore the upper 32 bit of the value (whitch are wrong).
+
 proc got_sis3800ShadowUpdate {idx offs num jetzt rest} {
     upvar $rest list
     global global_timestamp
@@ -60,16 +80,20 @@ proc got_sis3800ShadowUpdate {idx offs num jetzt rest} {
     global scaler_cont
     global scaler_cont_last
 
+    set wasa_exception_modules {4}
+
     set modules [expr $num/32]
     set expected_length [expr 1+$modules*(64+1)]
 
     if {[llength $list]<$expected_length} {
-        output "got_sis3800ShadowUpdate: need $expected_length words for $num channels but got only [llength $list]"
+        output "got_sis3800ShadowUpdate: need $expected_length words for \
+$num channels but got only [llength $list]"
         output "got: idx=$idx; offs=$offs list=$list"
         return -1
     }
     if {$modules!=[lindex $list 0]} {
-        output "got_sis3800ShadowUpdate: $num modules expected but got [lindex $list 0]"
+        output "got_sis3800ShadowUpdate: $num modules expected but got \
+[lindex $list 0]"
         output "got: idx=$idx; offs=$offs list=$list"
         return -1
     }
@@ -77,12 +101,15 @@ proc got_sis3800ShadowUpdate {idx offs num jetzt rest} {
     for {set mod 0} {$mod<$modules} {incr mod} {
         set list [lrange $list 1 end] ;# skip channel number
         for {set i 0} {$i<64} {incr i 2} {
-# if {[lindex $list [expr $i+1]]>0} {
-#     puts "i=$i [lindex $list $i] [lindex $list [expr $i+1]]"
-# }
             set scaler_cont_last($offs) $scaler_cont($offs)
-            set scaler_cont($offs) [format {%.0f} [expr [lindex $list $i]*4294967296.0\
-                +[lindex $list [expr $i+1]]]]
+            if {[lsearch -exact -integer $wasa_exception_modules $mod]>=0} {
+                set scaler_cont($offs) [format {%.0f} \
+                    [lindex $list [expr $i+1]]]
+            } else {
+                set scaler_cont($offs) [format {%.0f} \
+                    [expr [lindex $list $i]*4294967296.0\
+                    +[lindex $list [expr $i+1]]]]
+            }
             set scaler_time_last($offs) $scaler_time($offs)
             set scaler_time($offs) $global_timestamp
             incr offs
@@ -104,7 +131,8 @@ proc got_Scaler2551 {idx offs num jetzt rest} {
 
 
   if {[llength $list]<[expr $num*2+1]} {
-    output "got_Scaler2551: need [expr $num*2+1] words for $num channels but got only [llength $list]"
+    output "got_Scaler2551: need [expr $num*2+1] words for $num channels \
+but got only [llength $list]"
     output "got: idx=$idx; offs=$offs list=$list"
     return -1
   }
@@ -137,7 +165,8 @@ proc got_Scaler4434 {idx offs num jetzt rest} {
   global scaler_cont_last
 
   if {[llength $list]<[expr $num+1]} {
-    output "got_Scaler4434: need [expr $num+1] words for $num channels but got only [llength $list]"
+    output "got_Scaler4434: need [expr $num+1] words for $num channels but \
+got only [llength $list]"
     output "got : idx=$idx; offs=$offs list=$list"
     return -1
   }
@@ -169,7 +198,8 @@ proc got_Scaler4434_u {idx offs num jetzt rest} {
   global scaler_cont_last
 
   if {[llength $list]<[expr $num*2+1]} {
-    output "got_Scaler4434_u: need [expr $num*2+1] words for $num channels but got only [llength $list]"
+    output "got_Scaler4434_u: need [expr $num*2+1] words for $num channels \
+but got only [llength $list]"
     output "got : idx=$idx; offs=$offs list=$list"
     return -1
   }
@@ -220,7 +250,8 @@ proc got_Evrate {idx offs num jetzt rest} {
   set scaler_time($offs) $ro_status(time)
 
   if {"$ro_status_last(status)"!="$ro_status(status)"} {
-    if {("$ro_status_last(status)"=="running") || ("$ro_status_last(status)"=="stopped")} {
+    if {("$ro_status_last(status)"=="running") \
+        || ("$ro_status_last(status)"=="stopped")} {
       auto_print_scaler
     }
   }

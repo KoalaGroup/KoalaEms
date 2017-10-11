@@ -1,15 +1,18 @@
 /*
- * caplib.cc
+ * proclib/caplib.cc
  * 
  * created: 16.08.94 PW
- * 25.03.1998 PW: adapded for <string>
- * 12.06.1998 PW: adapted for STD_STRICT_ANSI
+ * 
  */
 
 #define _BSD_SOURCE
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <cerrno>
 #include <stdlib.h>
 #include <cstring>
@@ -17,9 +20,11 @@
 #include <errors.hxx>
 #include <versions.hxx>
 
-VERSION("2008-Nov-15", __FILE__, __DATE__, __TIME__,
-"$ZEL: caplib.cc,v 2.12 2010/02/02 23:57:54 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: caplib.cc,v 2.13 2014/07/14 15:11:53 wuestner Exp $")
 #define XVERSION
+
+using namespace std;
 
 /*****************************************************************************/
 
@@ -66,7 +71,7 @@ if ((spos=rindex(name, separator))!=0)
 
   sidx=spos-name;
   if (sidx==0) return(-1);               // Name beginnt mit Separator
-  ISTRINGSTREAM s(spos+1);
+  istringstream s(spos+1);
   if (s >> ver)
     {
     char *dummy, c;
@@ -122,7 +127,7 @@ return(-1);
 
 /*****************************************************************************/
 
-STRING C_capability_list::get(int proc) const
+string C_capability_list::get(int proc) const
 {
 int i;
 i=0;
@@ -130,7 +135,7 @@ while ((i<entries) && (caplist[i].index!=proc)) i++;
 
 if (caplist[i].index!=proc)
   {
-  OSTRINGSTREAM ss;
+  ostringstream ss;
   ss << "No procedure with index " << proc;
 // #ifdef NO_ANSI_CXX
 //   char* s=ss.str();
@@ -143,8 +148,8 @@ if (caplist[i].index!=proc)
   throw e;
   }
 
-OSTRINGSTREAM ss;
-STRING st;
+ostringstream ss;
+string st;
 ss << caplist[i].name << separator << caplist[i].version;
 st=ss.str();
 return st;

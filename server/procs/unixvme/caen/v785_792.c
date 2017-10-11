@@ -3,7 +3,7 @@
  * created 30.Sep.2002 p.kulessa
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: v785_792.c,v 1.8 2011/04/06 20:30:35 wuestner Exp $";
+    "$ZEL: v785_792.c,v 1.9 2015/04/06 21:33:35 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -635,7 +635,6 @@ plerrcode proc_v792read_all(ems_u32* p)
                 *outptr++=data;
             } else {
                 break;
-            //   continue;
             }
         }
         *help=outptr-help-1;
@@ -689,19 +688,11 @@ plerrcode proc_v792read_one(ems_u32* p)
         /* read until code==4 (trailer) */
         do {
             res=dev->read_a32d32(dev, addr, &data);
-
             if (res!=4) {
                 *help=outptr-help-1;
                 return plErr_System;
             }
-            if ((data&0x7000000)!=0x6000000&&(data&0X7000000)!=0X0000022) {/* valid word */
-               { // printf("v792read_one: valid word is coming\n");          
-// if((data&0X7000000)!=0X0000001&&(data&0X7000000)!=0X0000022)                   
-                 *outptr++=data;}
-            } else {
-                continue;
-            }
-  //          *outptr++=data;
+            *outptr++=data;
         } while ((data&0x7000000)!=0x4000000);
         *help=outptr-help-1;
 
@@ -723,8 +714,8 @@ plerrcode test_proc_v792read_one(ems_u32* p)
 
     if (p[0])
         return plErr_ArgNum;
-  //  if ((res=test_proc_vme(memberlist, mtypes))!=plOK)
-  //      return res;
+    if ((res=test_proc_vme(memberlist, mtypes))!=plOK)
+        return res;
 
     wirbrauchen=memberlist[0]*34*32;
 
@@ -1012,7 +1003,7 @@ plerrcode test_proc_v792writethreshold2(ems_u32* p)
     if (p[0]!=33)
         return plErr_ArgNum;
 
-    if (!valid_module(p[1], modul_vme, 0))
+    if (!valid_module(p[1], modul_vme))
         return plErr_ArgRange;
     module=ModulEnt(p[1]);
     if ((pres=test_proc_vmemodule(module, mtypes))!=plOK)

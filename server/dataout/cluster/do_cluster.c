@@ -3,7 +3,7 @@
  * created 10.04.97 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: do_cluster.c,v 1.14 2011/08/13 20:07:34 wuestner Exp $";
+    "$ZEL: do_cluster.c,v 1.15 2015/04/21 16:05:45 wuestner Exp $";
 
 #include <errno.h>
 #include <stdio.h>
@@ -152,6 +152,20 @@ void do_cluster_write(int path, enum select_types selected, union callbackdata d
     }
     if (selected & select_write) {
         if (dat->active_cluster==0) { /* noch kein Cluster in Arbeit */
+    /*
+     * At this point we should give a file dataout the chance to
+     * switch to a new file.
+     * This is not a good idea if our events consists of subevents
+     * from different servers (and are saved in different clusters),
+     * but if we have a single data source only this is a good idea.
+     *
+     * This seems to be useless because cluster_file writes directly,
+     * not using do_cluster_write
+     */
+            if (dataout[do_idx].bufftyp==InOut_Filebuffer) {
+                if (do_cluster_file_check_reopen(do_idx)!=OK)
+                    do_cluster_write_error(do_idx, 0);
+            }
             if ((dat->active_cluster=dataout_cl[do_idx].advertised_cluster)==0) {
                 /* printf("do_cluster_write: kein cluster (--> suspend)\n"); */
                 sched_select_task_set(dataout_cl[do_idx].seltask,
@@ -200,6 +214,7 @@ void do_cluster_write(int path, enum select_types selected, union callbackdata d
             if (!--help->numcostumers) {
                 clusters_recycle(help);
             }
+
             while (dat->active_cluster && (dat->active_cluster->costumers[do_idx]==0)) {
                 dat->active_cluster=dat->active_cluster->next;
             }

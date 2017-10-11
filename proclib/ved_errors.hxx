@@ -1,22 +1,28 @@
 /*
- * ved_errors.hxx
+ * proclib/ved_errors.hxx
  * 
  * created: 19.08.94 PW  
- * 25.03.1998 PW: adapded for <string>
- * 12.06.1998 PW: adapted for STD_STRICT_ANSI
+ * 
+ * $ZEL: ved_errors.hxx,v 2.11 2014/07/14 15:11:54 wuestner Exp $
  */
 
 #ifndef _ved_errors_hxx_
 #define _ved_errors_hxx_
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <errors.hxx>
 #include "proc_conf.hxx"
 #include <ems_err.h>
 #include "proc_ved.hxx"
 #include <errorcodes.h>
 #include <requesttypes.h>
+
+using namespace std;
 
 /*****************************************************************************/
 
@@ -26,20 +32,20 @@ class C_ved_error: public C_error
     C_ved_error(const C_ved_error&);
     C_ved_error(const C_VED*, C_confirmation*);
     C_ved_error(const C_VED*, const C_confirmation*);
-    C_ved_error(const C_VED*, C_confirmation*, OSTRINGSTREAM&);
-    C_ved_error(const C_VED*, const C_confirmation*, OSTRINGSTREAM&);
-    C_ved_error(const C_VED*, C_confirmation*, STRING);
-    C_ved_error(const C_VED*, const C_confirmation*, STRING);
+    C_ved_error(const C_VED*, C_confirmation*, ostringstream&);
+    C_ved_error(const C_VED*, const C_confirmation*, ostringstream&);
+    C_ved_error(const C_VED*, C_confirmation*, string);
+    C_ved_error(const C_VED*, const C_confirmation*, string);
     C_ved_error(const C_VED*, int);
     C_ved_error(const C_VED*, EMSerrcode);
     C_ved_error(const C_VED*, errcode);
-    C_ved_error(const C_VED*, OSTRINGSTREAM&);
-    C_ved_error(const C_VED*, STRING);
-    C_ved_error(const C_VED*, int, OSTRINGSTREAM&);
-    C_ved_error(const C_VED*, int, STRING);
-    C_ved_error(const C_VED*, EMSerrcode, OSTRINGSTREAM&);
-    C_ved_error(const C_VED*, EMSerrcode, STRING);
-    C_ved_error(const C_VED*, errcode, OSTRINGSTREAM&);
+    C_ved_error(const C_VED*, ostringstream&);
+    C_ved_error(const C_VED*, string);
+    C_ved_error(const C_VED*, int, ostringstream&);
+    C_ved_error(const C_VED*, int, string);
+    C_ved_error(const C_VED*, EMSerrcode, ostringstream&);
+    C_ved_error(const C_VED*, EMSerrcode, string);
+    C_ved_error(const C_VED*, errcode, ostringstream&);
 //    C_ved_error(C_VED* ved, const char* s);
     virtual ~C_ved_error();
 
@@ -56,7 +62,7 @@ class C_ved_error: public C_error
       } errorcode;
 
   protected:
-    void printerror(STRINGSTREAM& s, int typ, ems_u32* buf, int size) const;
+    void printerror(stringstream& s, int typ, ems_u32* buf, int size) const;
     class C_error_data
       {
       friend class C_ved_error;
@@ -69,18 +75,18 @@ class C_ved_error: public C_error
         int refcount;
         C_ved_error::errtypes typ;
         C_ved_error::errorcode code;
-        STRING init_str;
-        STRING error_str;
-        STRING vedname;
+        string init_str;
+        string error_str;
+        string vedname;
         C_confirmation conf;
       };
     C_error_data* errdat;
-    STRING errstr() const;
+    string errstr() const;
 
   public:
     const C_confirmation& errconf() const {return(errdat->conf);}
     //C_VED* vedptr() const {return(errdat->ved);}
-    STRING vedname() const;
+    string vedname() const;
     errtypes errtype() const {return(errdat->typ);}
     errorcode error() const {return(errdat->code);}
 
@@ -88,7 +94,7 @@ class C_ved_error: public C_error
     virtual int type() const {return(e_ved);}
     virtual ostream& print(ostream&) const;
     virtual C_outbuf& bufout(C_outbuf&) const;
-    virtual STRING message() const;
+    virtual string message() const;
   };
 
 class C_exec_Error: public C_ved_error

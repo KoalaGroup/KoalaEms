@@ -1,21 +1,26 @@
 /*
- * strlist.cc
+ * support/strlist.cc
  * 
  * created 21.01.95 PW
- * 05.06.1998 PW: adapted for STD_STRICT_ANSI
+ * 
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
-
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <string.h>
 #include "stringlist.hxx"
 
 #include "versions.hxx"
 
-VERSION("Jun 06 1998", __FILE__, __DATE__, __TIME__,
-"$ZEL: stringlist.cc,v 2.7 2004/11/26 14:45:40 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: stringlist.cc,v 2.8 2014/07/14 15:09:53 wuestner Exp $")
 #define XVERSION
+
+using namespace std;
 
 /*****************************************************************************/
 

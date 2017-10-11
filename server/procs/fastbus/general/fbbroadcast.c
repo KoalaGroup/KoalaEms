@@ -4,7 +4,7 @@
  * 22.May.2002 PW rewritten for multiple crates
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: fbbroadcast.c,v 1.6 2011/04/06 20:30:32 wuestner Exp $";
+    "$ZEL: fbbroadcast.c,v 1.7 2015/04/06 21:33:32 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -50,7 +50,7 @@ plerrcode proc_FRCM(ems_u32* p)
 plerrcode test_proc_FRCM(ems_u32* p)
 {
         if (p[0]!=2) return plErr_ArgNum;
-        if (!valid_module(p[1], modul_fastbus, 0)) return plErr_ArgRange;
+        if (!valid_module(p[1], modul_fastbus)) return plErr_ArgRange;
         wirbrauchen=2;
         return plOK;
 }
@@ -94,7 +94,7 @@ plerrcode proc_FRDM(ems_u32* p)
 plerrcode test_proc_FRDM(ems_u32* p)
 {
         if (p[0]!=2) return plErr_ArgNum;
-        if (!valid_module(p[1], modul_fastbus, 0)) return plErr_ArgRange;
+        if (!valid_module(p[1], modul_fastbus)) return plErr_ArgRange;
         wirbrauchen=2;
         return plOK;
 }
@@ -135,7 +135,7 @@ plerrcode proc_FWCM(ems_u32* p)
 plerrcode test_proc_FWCM(ems_u32* p)
 {
         if (p[0]!=3) return plErr_ArgNum;
-        if (!valid_module(p[1], modul_fastbus, 0)) return plErr_ArgRange;
+        if (!valid_module(p[1], modul_fastbus)) return plErr_ArgRange;
         wirbrauchen=1;
         return plOK;
 }
@@ -170,7 +170,7 @@ plerrcode proc_FWDM(ems_u32* p)
 plerrcode test_proc_FWDM(ems_u32* p)
 {
         if (p[0]!=3) return plErr_ArgNum;
-        if (!valid_module(p[1], modul_fastbus, 0)) return plErr_ArgRange;
+        if (!valid_module(p[1], modul_fastbus)) return plErr_ArgRange;
         wirbrauchen=1;
         return plOK;
 }

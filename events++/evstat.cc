@@ -22,7 +22,7 @@
 #include <versions.hxx>
 
 VERSION("Aug 14 1998", __FILE__, __DATE__, __TIME__,
-"$ZEL: evstat.cc,v 1.6 2005/02/11 15:45:07 wuestner Exp $")
+"$ZEL: evstat.cc,v 1.7 2014/07/14 16:18:17 wuestner Exp $")
 #define XVERSION
 
 class statistic
@@ -376,7 +376,7 @@ delete evin;
 }
 
 /*****************************************************************************/
-
+int
 main(int argc, char* argv[])
 {
 args=new C_readargs(argc, argv);

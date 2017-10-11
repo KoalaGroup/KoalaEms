@@ -1,7 +1,7 @@
 /*
  * commu_sock.hxx
  * 
- * $ZEL: commu_sock.hxx,v 2.10 2004/11/18 19:31:33 wuestner Exp $
+ * $ZEL: commu_sock.hxx,v 2.11 2014/07/14 15:12:19 wuestner Exp $
  * 
  * created before 30.07.93 PW
  */
@@ -10,7 +10,11 @@
 #define _commu_sock_hxx_
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <sys/types.h>
 #include <un.h>
 #include <string.h>
@@ -19,6 +23,8 @@
 #include <socket_prot.h> /* sys/socket.h, aber geschuetzt (wegen ultrix4.4) */
 #include <debug.hxx>
 #include <compat.h>
+
+using namespace std;
 
 /*****************************************************************************/
 class C_socket;
@@ -58,7 +64,7 @@ class C_unix_socket: public C_socket
     virtual ~C_unix_socket();
     virtual int far() {return(0);}
     virtual int bind();
-    void setname(const STRING&);
+    void setname(const string&);
     //void setname(const char*);
     virtual C_socket* accept();
     virtual void connect();
@@ -79,7 +85,7 @@ class C_tcp_socket: public C_socket
     virtual int far() {return(1);};
     virtual int bind();
     //void setname(const char*, int);
-    void setname(const STRING&, int);
+    void setname(const string&, int);
     virtual C_socket* accept();
     virtual void connect();
     virtual void connected();

@@ -1,6 +1,6 @@
 /*
  * clientcomm.c
- * $ZEL: clientcomm.c,v 2.27 2010/09/04 21:27:52 wuestner Exp $
+ * $ZEL: clientcomm.c,v 2.28 2014/07/14 15:06:46 wuestner Exp $
  *
  * created before: 16.08.94
  * 14.05.1998 PW: EMSE_Unknown changed to EMSE_CommuTimeout
@@ -37,7 +37,7 @@
 #endif
 #include "compat.h"
 
-/* $ZEL: clientcomm.c,v 2.27 2010/09/04 21:27:52 wuestner Exp $ */
+/* $ZEL: clientcomm.c,v 2.28 2014/07/14 15:06:46 wuestner Exp $ */
 
 static int testpath= -1;
 static struct timeval deftimeout_={20, 0};
@@ -626,7 +626,9 @@ return(comm_start());
 
 int Clientcomm_init_e(const char* hostname, int port)
 {
+#ifdef DECNET
 int i;
+#endif
 
 init_environment(&tests);
 if ((hostname==0) || (hostname[0]==0))
@@ -634,8 +636,8 @@ if ((hostname==0) || (hostname[0]==0))
   EMS_errno=EMSE_HostUnknown;
   return(-1);
   }
-i=strlen(hostname)-1;
 #ifdef DECNET
+i=strlen(hostname)-1;
 if (hostname[i]==':')
   {
   while ((i>=0) && (hostname[i]==':')) {hostname[i]=0; i--;}

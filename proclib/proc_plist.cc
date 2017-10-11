@@ -1,15 +1,19 @@
 /*
- * proc_plist.cc
+ * proclib/proc_plist.cc
  * 
  * created: 18.08.94 PW
- * 12.06.1998 PW: adapted for STD_STRICT_ANSI
- * 24.02.1999 PW: add_par(float) and add_par(double) added
+ * 
  */
 
 #include <cerrno>
 #include <stdarg.h>
 #include <cstdlib>
 #include <cstring>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <ved_errors.hxx>
 #include "proc_plist.hxx"
 #include <proc_ved.hxx>
@@ -19,8 +23,8 @@
 #include <versions.hxx>
 #include "proc_is.hxx"
 
-VERSION("2008-Nov-15", __FILE__, __DATE__, __TIME__,
-"$ZEL: proc_plist.cc,v 2.18 2009/02/05 19:42:05 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: proc_plist.cc,v 2.19 2014/07/14 15:11:54 wuestner Exp $")
 #define XVERSION
 
 #undef PROCDEBUG
@@ -30,6 +34,8 @@ VERSION("2008-Nov-15", __FILE__, __DATE__, __TIME__,
 # define PD(x)
 #endif
 
+using namespace std;
+
 /*****************************************************************************/
 
 C_proclist::C_proclist(const char* text, C_VED* ved, C_instr_system* is,
@@ -37,7 +43,7 @@ C_proclist::C_proclist(const char* text, C_VED* ved, C_instr_system* is,
 :ved(ved), is(is), caplist(caplist), listsize(100), list_idx(1), proc_num_(0)
 {
 // {
-// OSTRINGSTREAM ss;
+// ostringstream ss;
 // ss<<"VED "<<ved->name();
 // if (is)
 //   ss<<" IS "<<is->is_idx();
@@ -61,16 +67,16 @@ delete[] list;
 }
 
 /*****************************************************************************/
-STRING C_proclist::name() const
+string C_proclist::name() const
 {
-OSTRINGSTREAM ss;
+ostringstream ss;
 ss<<"VED "<<ved->name();
 if (is)
   ss<<" IS >"<<is->name()<<"<";
 else
   ss<<" IS0";
 ss<<" ("<<(void*)this<<")"<<ends;
-STRING st=ss.str();
+string st=ss.str();
 return st;
 }
 /*****************************************************************************/
@@ -319,7 +325,7 @@ listend();
 PD(printlist(cerr);)
 if ((xid=DoCommand(ved->ved, is, list_idx, list))==-1)
   {
-  OSTRINGSTREAM s;
+  ostringstream s;
   s << "Can't send command" << ends;
   throw new C_ved_error(ved, EMS_errno, s);
   }

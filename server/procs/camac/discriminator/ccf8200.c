@@ -3,7 +3,7 @@
  * created 2007-08-25 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: ccf8200.c,v 1.4 2011/04/06 20:30:30 wuestner Exp $";
+    "$ZEL: ccf8200.c,v 1.5 2015/04/06 21:33:26 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -141,7 +141,7 @@ plerrcode test_proc_CCF8200init(ems_u32* p)
 
     if (p[0]!=1)
         return plErr_ArgNum;
-    if (!valid_module(p[1], modul_camac, 0))
+    if (!valid_module(p[1], modul_camac))
         return plErr_ArgRange;
     module=ModulEnt(p[1]);
     if (module->modultype!=ORTEC_DISC_CCF8200)
@@ -193,7 +193,7 @@ plerrcode test_proc_CCF8200threshold(ems_u32* p)
 
     if (p[0]!=3)
         return plErr_ArgNum;
-    if (!valid_module(p[1], modul_camac, 0))
+    if (!valid_module(p[1], modul_camac))
         return plErr_ArgRange;
     if (ip[2]>7 && ip[2]<-1)
         return plErr_ArgRange;
@@ -233,7 +233,7 @@ plerrcode test_proc_CCF8200inhibit(ems_u32* p)
 
     if (p[0]!=2)
         return plErr_ArgNum;
-    if (!valid_module(p[1], modul_camac, 0))
+    if (!valid_module(p[1], modul_camac))
         return plErr_ArgRange;
     module=ModulEnt(p[1]);
     if (module->modultype!=ORTEC_DISC_CCF8200)
@@ -273,7 +273,7 @@ plerrcode test_proc_CCF8200pulsewidth(ems_u32* p)
 
     if (p[0]!=3)
         return plErr_ArgNum;
-    if (!valid_module(p[1], modul_camac, 0))
+    if (!valid_module(p[1], modul_camac))
         return plErr_ArgRange;
     if (p[2]>1)
         return plErr_ArgRange;
@@ -318,7 +318,7 @@ plerrcode test_proc_CCF8200testpulse(ems_u32* p)
 
     if (p[0]!=1)
         return plErr_ArgNum;
-    if (!valid_module(p[1], modul_camac, 0))
+    if (!valid_module(p[1], modul_camac))
         return plErr_ArgRange;
     module=ModulEnt(p[1]);
     if (module->modultype!=ORTEC_DISC_CCF8200)

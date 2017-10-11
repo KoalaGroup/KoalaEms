@@ -1,21 +1,26 @@
 /*
  * commu_io_client.hxx
  * 
- * $ZEL: commu_io_client.hxx,v 2.9 2004/11/18 19:31:13 wuestner Exp $
+ * $ZEL: commu_io_client.hxx,v 2.10 2014/07/14 15:12:19 wuestner Exp $
  * 
  * created 29.07.94
- * 26.03.1998 PW: adapded for <string>
- * 14.06.1998 PW: adapted for STD_STRICT_ANSI
+ * 
  */
 
 #ifndef _commu_io_client_hxx_
 #define _commu_io_client_hxx_
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include "commu_station.hxx"
 #include "commu_client.hxx"
 #include <ems_err.h>
+
+using namespace std;
 
 /*****************************************************************************/
 
@@ -25,12 +30,12 @@ class C_io_client: public C_io_station, public C_client
     C_io_client(C_socket*);
     virtual ~C_io_client() {}
   private:
-    STRING hostname;
+    string hostname;
     int inetaddr;
     int pid, ppid;
-    STRING user;
+    string user;
     int uid, gid;
-    STRING experiment;
+    string experiment;
     int bigendian;
 
     virtual void proceed_message_internal(C_message*);

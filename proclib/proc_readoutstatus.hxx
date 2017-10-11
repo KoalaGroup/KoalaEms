@@ -2,20 +2,24 @@
  * proc_readoutstatus.hxx
  * 
  * created: 10.06.97 PW
- * 12.06.1998 PW: adapted for STD_STRICT_ANSI
  *
- * $ZEL: proc_readoutstatus.hxx,v 2.6 2006/09/02 14:10:12 wuestner Exp $
+ * $ZEL: proc_readoutstatus.hxx,v 2.7 2014/07/14 15:11:54 wuestner Exp $
  */
 
 #ifndef _proc_readoutstatus_hxx_
 #define _proc_readoutstatus_hxx_
 
 #include "config.h"
-#include "cxxcompat.hxx"
-
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <sys/time.h>
 #include <objecttypes.h>
 #include <inbuf.hxx>
+
+using namespace std;
 
 /*****************************************************************************/
 

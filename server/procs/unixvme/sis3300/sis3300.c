@@ -3,7 +3,7 @@
  * created 2005-Sep-05 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: sis3300.c,v 1.8 2011/04/06 20:30:35 wuestner Exp $";
+    "$ZEL: sis3300.c,v 1.10 2015/04/06 21:33:35 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -24,7 +24,7 @@ extern ems_u32* outptr;
 extern int wirbrauchen;
 extern int *memberlist;
 
-RCS_REGISTER(cvsid, "procs/unixvme/sis3100")
+RCS_REGISTER(cvsid, "procs/unixvme/sis3300")
 
 /*
  * SIS3300 100 MHz FADC
@@ -181,7 +181,7 @@ plerrcode test_proc_sis3300stat(ems_u32* p)
 
     if (p[0]!=1)
         return plErr_ArgNum;
-    if (!valid_module(p[1], modul_vme, 0))
+    if (!valid_module(p[1], modul_vme))
         return plErr_ArgRange;
     module=ModulEnt(p[1]);
     if (module->modultype!=SIS_3300)
@@ -236,7 +236,7 @@ plerrcode test_proc_sis3300init_single(ems_u32* p)
 
     if (p[0]!=3)
         return plErr_ArgNum;
-    if (!valid_module(p[1], modul_vme, 0))
+    if (!valid_module(p[1], modul_vme))
         return plErr_ArgRange;
     module=ModulEnt(p[1]);
     if (module->modultype!=SIS_3300)
@@ -289,7 +289,7 @@ plerrcode test_proc_sis3300sample(ems_u32* p)
 
     if (p[0]!=3)
         return plErr_ArgNum;
-    if (!valid_module(p[1], modul_vme, 0))
+    if (!valid_module(p[1], modul_vme))
         return plErr_ArgRange;
     module=ModulEnt(p[1]);
     if (module->modultype!=SIS_3300)
@@ -369,7 +369,7 @@ plerrcode test_proc_sis3300read_single(ems_u32* p)
 
     if (p[0]!=4)
         return plErr_ArgNum;
-    if (!valid_module(p[1], modul_vme, 0)) {
+    if (!valid_module(p[1], modul_vme)) {
         *outptr++=1;
         return plErr_ArgRange;
     }
@@ -440,7 +440,7 @@ plerrcode test_proc_sis3300start_single(ems_u32* p)
 
     if (p[0]!=4)
         return plErr_ArgNum;
-    if (!valid_module(p[1], modul_vme, 0))
+    if (!valid_module(p[1], modul_vme))
         return plErr_ArgRange;
     module=ModulEnt(p[1]);
     if (module->modultype!=SIS_3300)
@@ -496,7 +496,7 @@ plerrcode test_proc_sis3300stop_single(ems_u32* p)
 
     if (p[0]!=1)
         return plErr_ArgNum;
-    if (!valid_module(p[1], modul_vme, 0))
+    if (!valid_module(p[1], modul_vme))
         return plErr_ArgRange;
     module=ModulEnt(p[1]);
     if (module->modultype!=SIS_3300)
@@ -543,7 +543,7 @@ plerrcode test_proc_sis3300reg(ems_u32* p)
 
     if ((p[0]!=2) && (p[0]!=3))
         return plErr_ArgNum;
-    if (!valid_module(p[1], modul_vme, 0))
+    if (!valid_module(p[1], modul_vme))
         return plErr_ArgRange;
     module=ModulEnt(p[1]);
     if (module->modultype!=SIS_3300)
@@ -600,7 +600,7 @@ plerrcode test_proc_sis3300fill_mem(ems_u32* p)
 
     if (p[0]!=4)
         return plErr_ArgNum;
-    if (!valid_module(p[1], modul_vme, 0)) {
+    if (!valid_module(p[1], modul_vme)) {
         *outptr++=1;
         return plErr_ArgRange;
     }

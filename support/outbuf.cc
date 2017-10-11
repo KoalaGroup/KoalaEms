@@ -1,11 +1,16 @@
 /*
- * outbuf.cc
+ * support/outbuf.cc
  * 
  * created 09.11.94 PW
  * 
  */
 
 #include "config.h"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <errno.h>
 #include <cstring>
 #include "errors.hxx"
@@ -13,9 +18,11 @@
 #include <xdrstring.h>
 #include "versions.hxx"
 
-VERSION("2008-Nov-15", __FILE__, __DATE__, __TIME__,
-"$ZEL: outbuf.cc,v 2.25 2009/02/09 21:55:41 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: outbuf.cc,v 2.26 2014/07/14 15:09:53 wuestner Exp $")
 #define XVERSION
+
+using namespace std;
 
 /*****************************************************************************/
 
@@ -168,7 +175,7 @@ return(*this);
 
 /*****************************************************************************/
 
-C_outbuf& C_outbuf::operator<<(const STRING& v)
+C_outbuf& C_outbuf::operator<<(const string& v)
 {
 int num;
 
@@ -182,9 +189,9 @@ return(*this);
 
 /*****************************************************************************/
 
-C_outbuf& C_outbuf::operator<<(OSTRINGSTREAM& v)
+C_outbuf& C_outbuf::operator<<(ostringstream& v)
 {
-STRING st=v.str();
+string st=v.str();
 const char* s=st.c_str();
 int num=strxdrlen(s);
 if (idx+num>bsize) grow(idx+num-1);

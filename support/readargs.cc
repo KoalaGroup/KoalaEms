@@ -20,7 +20,7 @@
 #include "readargs.hxx"
 
 VERSION("2008-Nov-15", __FILE__, __DATE__, __TIME__,
-"$ZEL: readargs.cc,v 2.32 2010/06/20 22:46:18 wuestner Exp $")
+"$ZEL: readargs.cc,v 2.33 2013/07/30 12:30:38 wuestner Exp $")
 #define XVERSION
 
 using namespace std;
@@ -695,12 +695,12 @@ C_readargs::getintopt(const char* name, unsigned int idx) const
 
     if ((opt_=findentry(name))==0) {
         cerr<<"C_readargs::getintopt: \""<<name<<"\" not found."<<endl;
-        return false;
+        return 0;
     }
 
     if ((opt=dynamic_cast<C_intoption*>(opt_))==0) {
         cerr<<"C_readargs::getintopt: \""<<name<<"\" is not integer."<<endl;
-        return false;
+        return 0;
     }
 
     if ((idx==0) && opt->isdefault()) {
@@ -710,7 +710,7 @@ C_readargs::getintopt(const char* name, unsigned int idx) const
     } else {
         cerr<<"C_readargs::getintopt: \""<<name<<"\": no value for index "
             << idx << endl;
-        return false;
+        return 0;
     }
 }
 /*****************************************************************************/
@@ -722,12 +722,12 @@ C_readargs::getu64opt(const char* name, unsigned int idx) const
 
     if ((opt_=findentry(name))==0) {
         cerr<<"C_readargs::getu64opt: \""<<name<<"\" not found."<<endl;
-        return false;
+        return 0;
     }
 
     if ((opt=dynamic_cast<C_u64option*>(opt_))==0) {
         cerr<<"C_readargs::getu64opt: \""<<name<<"\" is not u64."<<endl;
-        return false;
+        return 0;
     }
 
     if ((idx==0) && opt->isdefault()) {
@@ -737,7 +737,7 @@ C_readargs::getu64opt(const char* name, unsigned int idx) const
     } else {
         cerr<<"C_readargs::getu64opt: \""<<name<<"\": no value for index "
             << idx << endl;
-        return false;
+        return 0;
     }
 }
 /*****************************************************************************/
@@ -749,12 +749,12 @@ C_readargs::getrealopt(const char* name, unsigned int idx) const
 
     if ((opt_=findentry(name))==0) {
         cerr<<"C_readargs::getrealopt: \""<<name<<"\" not found."<<endl;
-        return false;
+        return 0;
     }
 
     if ((opt=dynamic_cast<C_realoption*>(opt_))==0) {
         cerr<<"C_readargs::getrealopt: \""<<name<<"\" is not real."<<endl;
-        return false;
+        return 0;
     }
 
     if ((idx==0) && opt->isdefault()) {
@@ -764,7 +764,7 @@ C_readargs::getrealopt(const char* name, unsigned int idx) const
     } else {
         cerr<<"C_readargs::getrealopt: \""<<name<<"\": no value for index "
             << idx << endl;
-        return false;
+        return 0;
     }
 }
 /*****************************************************************************/
@@ -776,12 +776,12 @@ C_readargs::getcharopt(const char* name, unsigned int idx) const
 
     if ((opt_=findentry(name))==0) {
         cerr<<"C_readargs::getcharopt: \""<<name<<"\" not found."<<endl;
-        return false;
+        return '\0';
     }
 
     if ((opt=dynamic_cast<C_charoption*>(opt_))==0) {
         cerr<<"C_readargs::getcharopt: \""<<name<<"\" is not character."<<endl;
-        return false;
+        return '\0';
     }
 
     if ((idx==0) && opt->isdefault()) {
@@ -791,7 +791,7 @@ C_readargs::getcharopt(const char* name, unsigned int idx) const
     } else {
         cerr<<"C_readargs::getcharopt: \""<<name<<"\": no value for index "
             << idx << endl;
-        return false;
+        return '\0';
     }
 }
 /*****************************************************************************/
@@ -803,12 +803,12 @@ C_readargs::getstringopt(const char* name, unsigned int idx) const
 
     if ((opt_=findentry(name))==0) {
         cerr<<"C_readargs::getstringopt: \""<<name<<"\" not found."<<endl;
-        return false;
+        return 0;
     }
 
     if ((opt=dynamic_cast<C_stringoption*>(opt_))==0) {
         cerr<<"C_readargs::getstringopt: \""<<name<<"\" is not string."<<endl;
-        return false;
+        return 0;
     }
 
     if ((idx==0) && opt->isdefault()) {
@@ -818,7 +818,7 @@ C_readargs::getstringopt(const char* name, unsigned int idx) const
     } else {
         cerr<<"C_readargs::getstringopt: \""<<name<<"\": no value for index "
             << idx << endl;
-        return false;
+        return 0;
     }
 }
 /*****************************************************************************/

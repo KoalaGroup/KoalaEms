@@ -1,7 +1,7 @@
 /*
  * pairarr_file.hxx
  *
- * $ZEL: pairarr_file.hxx,v 1.5 2004/11/18 12:35:55 wuestner Exp $
+ * $ZEL: pairarr_file.hxx,v 1.6 2014/07/14 15:13:26 wuestner Exp $
  *
  * created 14.09.96 PW
  */
@@ -10,14 +10,17 @@
 #define _pairarr_file_hxx_
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <sys/param.h>
 #include <sys/types.h>
-#ifdef __osf__
-#include <sys/mount.h>
-#endif
 #include <sys/time.h>
 #include "pairarr.hxx"
+
+using namespace std;
 
 /*****************************************************************************/
 
@@ -32,7 +35,7 @@ class C_pairarr_file: public C_pairarr {
         int idx;
     } cached_pair;
   protected:
-    STRING filename;
+    string filename;
     int path;
     static const int cache_size, cache_head;
     int cached_num;

@@ -576,7 +576,7 @@ startreadout(ems_u32* p, unsigned int num)
 
     perfspect_reset();
     perfspect_set_state(perfspect_state_setup);
-    printf("the Max_TRIGGER00 is: %d\n",MAX_TRIGGER);
+
     /* Listen einsammeln und nach Prioritaet sortieren */
     for (trig=0; trig<MAX_TRIGGER; trig++) {
         int is, max_prior=0;
@@ -591,19 +591,17 @@ startreadout(ems_u32* p, unsigned int num)
                 int tmp_prior;
                 cnt++;
                 tmp_prior=readoutlist->priority;
-        printf("the Max_TRIGGER0 is: %d\n",MAX_TRIGGER);
-         max_prior=(tmp_prior>max_prior?tmp_prior:max_prior);
-   
-         }
+                max_prior=(tmp_prior>max_prior?tmp_prior:max_prior);
+            }
         }
         D(D_TRIG,printf("%d Listen fuer Trigger %d gefunden\n", cnt, trig);)
-	  /*printf("the Max_TRIGGER0 is: %d\n",MAX_TRIGGER);*/
+
         /* allocate memory for readoutinfo */
         if (readoutinfo[trig])
             free(readoutinfo[trig]);
         readoutinfo[trig]=ptr=(isreadoutinfo*)calloc(cnt, sizeof(isreadoutinfo));
         readoutcnt[trig]=cnt;
-	/* printf("the Max_TRIGGER1 is: %d\n",MAX_TRIGGER);*/
+
         restlen=event_max;
 
         /* Listen einsammeln, dabei naechsthoechste Prioritaet bestimmen */
@@ -632,16 +630,13 @@ startreadout(ems_u32* p, unsigned int num)
                         perfspect_set_trigg_is(trig, is);
                         res=test_proclist(readoutlist->list, readoutlist->length,
                                 &limit);
-			  printf("the Max_TRIGGER2 is: %d\n",MAX_TRIGGER);
-                       if ((!res)&&(limit>restlen)) {
+                        if ((!res)&&(limit>restlen)) {
                             printf("startreadout: limit=%d > restlen=%d\n",
                                     limit, restlen);
                             res=Err_BufOverfl;
                         }
-		       printf("the Max_TRIGGER30 is: %d\n",MAX_TRIGGER);
                         if (res) {
-printf("the Max_TRIGGER3 is: %d\n",MAX_TRIGGER);
-			  *help++=is;
+                            *help++=is;
                             *help=trig;
                             perfspect_set_state(perfspect_state_invalid);
                             return(res);
@@ -651,11 +646,9 @@ printf("the Max_TRIGGER3 is: %d\n",MAX_TRIGGER);
                         if (limit>0)
                             restlen-=limit;
                         cnt--;
-			printf("the Max_TRIGGER40 is: %d\n",MAX_TRIGGER);
                     } else {
                         if ((pri<max_prior) && (pri>second_prior))
                             second_prior=pri;
-printf("the Max_TRIGGER4 is: %d\n",MAX_TRIGGER);
                     }
                 }
             }
@@ -668,46 +661,36 @@ printf("the Max_TRIGGER4 is: %d\n",MAX_TRIGGER);
     if (perfspect_realloc_arrays()!=plOK)
         return Err_NoMem;
 #endif
- printf("the Max_TRIGGER50 is: %d\n",MAX_TRIGGER);
+
 #ifdef DELAYED_READ
     reset_delayed_read();
 #endif
- printf("the Max_TRIGGER5 is: %d\n",MAX_TRIGGER);
+
     if ((res=init_trigger(&trigger, trigdata->proc, trigdata->param))!=OK) {
         perfspect_set_state(perfspect_state_invalid);
         return res;
     }
-    printf("the Max_TRIGGER51 is: %d\n",MAX_TRIGGER);
- trigger.cb_proc=doreadout;
+    trigger.cb_proc=doreadout;
     trigger.cb_data=0;
- printf("the Max_TRIGGER52 is: %d\n",MAX_TRIGGER);
- printf("*********************************************\n");
- printf("the res=start_dataout() is: %d\n",res=start_dataout());
- printf("*********************************************\n");
+
     if ((res=start_dataout())!=OK) {
- printf("the Max_TRIGGER520 is: %d\n",MAX_TRIGGER);
         perfspect_set_state(perfspect_state_invalid);
         return res;
     }
- printf("the Max_TRIGGER53 is: %d\n",MAX_TRIGGER);
+
     suspensions=0;
     /* insert_readout_task() ist beim Trigger definiert */
     if ((res=insert_trigger_task(&trigger))!=OK) {
-      printf("*****insert_trigger_task(&trigger)*****\n");
         perfspect_set_state(perfspect_state_invalid);
         return res;
     }
- printf("the Max_TRIGGER54 is: %d\n",MAX_TRIGGER);
+
     if (!buffer_free) {
- printf("the Max_TRIGGER55 is: %d\n",MAX_TRIGGER);
         schau_nach_speicher();
-printf("the Max_TRIGGER56 is: %d\n",MAX_TRIGGER);
         if (!buffer_free) {
 /* readouttask muss von Bufferverwaltung wieder aktiviert werden */
-	  printf("****buffer is not free\n");
             suspend_trigger_task(&trigger);
             suspensions++;
-	    printf("******suspension******\n");
 /* schau_nach_speicher wird nur einmal ausgefuehrt; alles andere ist
    Sache der Bufferverwaltung */
         }
@@ -715,18 +698,13 @@ printf("the Max_TRIGGER56 is: %d\n",MAX_TRIGGER);
         printf("startreadout: buffer_free=%d\n", buffer_free);
         panic();
     }
-printf("the Max_TRIGGER57 is: %d\n",MAX_TRIGGER);
     readout_active=Invoc_active;
-printf("the Max_TRIGGER58 is: %d\n",MAX_TRIGGER);
     {
         ems_u32 obj[]={Invocation_readout, 0};
         notifystatus(status_action_start, Object_pi, 2, obj);
     }
- printf("the Max_TRIGGER59 is: %d\n",MAX_TRIGGER);
     D(D_REQ, printf("READOUT!!\n");)
-      printf("********READOUT?******\n");
     perfspect_set_state(perfspect_state_ready);
-    printf("****perfspect_set_state(ready)******\n");
     return(OK);
 }
 

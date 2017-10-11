@@ -3,7 +3,7 @@
  * created before 07.09.93
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: tovariable.c,v 1.17 2012/09/10 22:42:47 wuestner Exp $";
+    "$ZEL: tovariable.c,v 1.18 2015/04/06 21:33:23 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -45,7 +45,7 @@ if (*p!=4) return(plErr_ArgNum);
 if (*++p>MAX_VAR) return(plErr_IllVar);
 if (!var_list[*p].len) return(plErr_NoVar);
 if (var_list[*p].len!=1) return(plErr_IllVarSize);
-if (!valid_module(*++p, modul_camac, 1)) return plErr_ArgRange;
+if (!valid_module(*++p, modul_camac)) return plErr_ArgRange;
 wirbrauchen=0;
 return(plOK);
 }
@@ -82,7 +82,7 @@ plerrcode proc_nAFwriteIntVar(ems_u32* p)
 plerrcode test_proc_nAFwriteIntVar(ems_u32* p)
 {
 if (*p!=4) return(plErr_ArgNum);
-if (!valid_module(p[1], modul_camac, 1)) return plErr_ArgRange;
+if (!valid_module(p[1], modul_camac)) return plErr_ArgRange;
 p+=4;
 if (*p>MAX_VAR) return(plErr_IllVar);
 if (!var_list[*p].len) return(plErr_NoVar);
@@ -137,7 +137,7 @@ plerrcode test_proc_nAFblreadVar(ems_u32* p)
         return plErr_NoVar;
     if (var_list[p[1]].len<p[5])
         return plErr_IllVarSize;
-    if (!valid_module(p[2], modul_camac, 1))
+    if (!valid_module(p[2], modul_camac))
         return plErr_ArgRange;
     wirbrauchen=0;
     return plOK;
@@ -180,7 +180,7 @@ if (*p!=5) return(plErr_ArgNum);
 if (*++p>MAX_VAR) return(plErr_IllVar);
 if (!var_list[*p].len) return(plErr_NoVar);
 if ((var_list[*p].len!=p[4])||(p[4]<2)) return(plErr_IllVarSize);
-if (!valid_module(*++p, modul_camac, 1)) return plErr_ArgRange;
+if (!valid_module(*++p, modul_camac)) return plErr_ArgRange;
 wirbrauchen=0;
 return(plOK);
 }

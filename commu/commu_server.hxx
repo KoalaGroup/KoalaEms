@@ -1,23 +1,27 @@
 /*
  * commu_server.hxx
  *
- * $ZEL: commu_server.hxx,v 2.14 2004/11/18 19:31:31 wuestner Exp $
+ * $ZEL: commu_server.hxx,v 2.15 2014/07/14 15:12:19 wuestner Exp $
  *
  * created 29.07.94
- * 26.03.1998 PW: adapded for <string>
- * 14.06.1998 PW: adapted for STD_STRICT_ANSI
+ * 
  */
 
 #ifndef _commu_server_hxx_
 #define _commu_server_hxx_
 
 #include "config.h"
-#include "cxxcompat.hxx"
-
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include "commu_station.hxx"
 #include "commu_list_t.hxx"
 #include "commu_message.hxx"
 #include "commu_cdb.hxx"
+
+using namespace std;
 
 /*****************************************************************************/
 
@@ -53,17 +57,17 @@ ostream& operator <<(ostream&, const C_server&);
 class C_serverlist: public C_list<C_server>
   {
   public:
-    C_serverlist(int, STRING);
+    C_serverlist(int, string);
     virtual ~C_serverlist();
   protected:
     int last_id;
   public:
     C_server* get(int) const;
     C_server* get(char*) const;
-    C_server* get(const STRING&) const;
+    C_server* get(const string&) const;
     C_io_server* findsock(int) const;
     void free(char*);
-    void free(const STRING&);
+    void free(const string&);
     void readfield(fd_set*, int&) const;
     void writefield(fd_set*, int&) const;
     void exceptfield(fd_set*, int&) const;
@@ -90,7 +94,7 @@ ostream& operator <<(ostream&, const C_server_info&);
 class C_server_infos: public C_list<C_server_info>
   {
   public:
-    C_server_infos(int s, STRING n):C_list<C_server_info>(s, n) {}
+    C_server_infos(int s, string n):C_list<C_server_info>(s, n) {}
     virtual ~C_server_infos() {}
   protected:
     int last_local_id;

@@ -3,7 +3,7 @@
  * created 18.Sep.2003 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: sis4100.c,v 1.6 2011/04/06 20:30:35 wuestner Exp $";
+    "$ZEL: sis4100.c,v 1.7 2015/04/06 21:33:39 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -112,7 +112,7 @@ plerrcode test_proc_sis4100_reset(ems_u32* p)
     ml_entry* module;
 
     if (p[0]!=1) return plErr_ArgNum;
-    if (!valid_module(p[1], modul_vme, 0)) return plErr_ArgRange;
+    if (!valid_module(p[1], modul_vme)) return plErr_ArgRange;
     module=ModulEnt(p[1]);
     if ((module->modultype!=SIS_4100) &&
         (module->modultype!=STR_340))
@@ -148,7 +148,7 @@ plerrcode test_proc_sis4100_writereg(ems_u32* p)
     ml_entry* module;
 
     if (p[0]!=3) return plErr_ArgNum;
-    if (!valid_module(p[1], modul_vme, 0)) return plErr_ArgRange;
+    if (!valid_module(p[1], modul_vme)) return plErr_ArgRange;
     module=ModulEnt(p[1]);
     if ((module->modultype!=SIS_4100) &&
         (module->modultype!=STR_340))
@@ -186,7 +186,7 @@ plerrcode test_proc_sis4100_readreg(ems_u32* p)
     ml_entry* module;
 
     if (p[0]!=2) return plErr_ArgNum;
-    if (!valid_module(p[1], modul_vme, 0)) return plErr_ArgRange;
+    if (!valid_module(p[1], modul_vme)) return plErr_ArgRange;
     module=ModulEnt(p[1]);
     if ((module->modultype!=SIS_4100) &&
         (module->modultype!=STR_340))
@@ -223,7 +223,7 @@ plerrcode test_proc_sis4100_seq_status(ems_u32* p)
     ml_entry* module;
 
     if (p[0]!=1) return plErr_ArgNum;
-    if (!valid_module(p[1], modul_vme, 0)) return plErr_ArgRange;
+    if (!valid_module(p[1], modul_vme)) return plErr_ArgRange;
     module=ModulEnt(p[1]);
     if ((module->modultype!=SIS_4100) &&
         (module->modultype!=STR_340))
@@ -260,7 +260,7 @@ plerrcode test_proc_sis4100_seq_enable(ems_u32* p)
     ml_entry* module;
 
     if (p[0]!=2) return plErr_ArgNum;
-    if (!valid_module(p[1], modul_vme, 0)) return plErr_ArgRange;
+    if (!valid_module(p[1], modul_vme)) return plErr_ArgRange;
     module=ModulEnt(p[1]);
     if ((module->modultype!=SIS_4100) &&
         (module->modultype!=STR_340))
@@ -296,7 +296,7 @@ plerrcode test_proc_sis4100_seq_write(ems_u32* p)
     ml_entry* module;
 
     if (p[0]!=3) return plErr_ArgNum;
-    if (!valid_module(p[1], modul_vme, 0)) return plErr_ArgRange;
+    if (!valid_module(p[1], modul_vme)) return plErr_ArgRange;
     module=ModulEnt(p[1]);
     if ((module->modultype!=SIS_4100) &&
         (module->modultype!=STR_340))
@@ -360,7 +360,7 @@ plerrcode test_proc_sis4100_seq_read(ems_u32* p)
     ml_entry* module;
 
     if (p[0]!=1) return plErr_ArgNum;
-    if (!valid_module(p[1], modul_vme, 0)) return plErr_ArgRange;
+    if (!valid_module(p[1], modul_vme)) return plErr_ArgRange;
     module=ModulEnt(p[1]);
     if ((module->modultype!=SIS_4100) &&
         (module->modultype!=STR_340))
@@ -395,7 +395,7 @@ plerrcode test_proc_sis4100_seq_out(ems_u32* p)
     ml_entry* module;
 
     if (p[0]!=2) return plErr_ArgNum;
-    if (!valid_module(p[1], modul_vme, 0)) return plErr_ArgRange;
+    if (!valid_module(p[1], modul_vme)) return plErr_ArgRange;
     module=ModulEnt(p[1]);
     if ((module->modultype!=SIS_4100) &&
         (module->modultype!=STR_340))
@@ -435,7 +435,7 @@ plerrcode test_proc_sis4100_seq_cmd(ems_u32* p)
     ml_entry* module;
 
     if (p[0]!=2) return plErr_ArgNum;
-    if (!valid_module(p[1], modul_vme, 0)) return plErr_ArgRange;
+    if (!valid_module(p[1], modul_vme)) return plErr_ArgRange;
     module=ModulEnt(p[1]);
     if ((module->modultype!=SIS_4100) &&
         (module->modultype!=STR_340))
@@ -470,7 +470,7 @@ plerrcode test_proc_sis4100_vme_out(ems_u32* p)
     ml_entry* module;
 
     if (p[0]!=2) return plErr_ArgNum;
-    if (!valid_module(p[1], modul_vme, 0)) return plErr_ArgRange;
+    if (!valid_module(p[1], modul_vme)) return plErr_ArgRange;
     module=ModulEnt(p[1]);
     if ((module->modultype!=SIS_4100) &&
         (module->modultype!=STR_340))

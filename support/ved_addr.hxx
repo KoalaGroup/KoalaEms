@@ -2,18 +2,24 @@
  * ved_adr.hxx
  * 
  * created 21.01.95 PW
- * 16.03.1998 PW: adapted for <string>
- * 05.06.1998 PW: adapted for STD_STRICT_ANSI
+ * 
+ * $ZEL: ved_addr.hxx,v 2.7 2014/07/14 15:09:53 wuestner Exp $
  */
 
 #ifndef _ved_adr_hxx_
 #define _ved_adr_hxx_
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include "stringlist.hxx"
 #include "outbuf.hxx"
 #include "inbuf.hxx"
+
+using namespace std;
 
 /*****************************************************************************/
 
@@ -49,17 +55,17 @@ class C_VED_addr
 class C_VED_addr_builtin: public C_VED_addr
   {
   public:
-    C_VED_addr_builtin(const STRING&);
+    C_VED_addr_builtin(const string&);
     C_VED_addr_builtin(const C_VED_addr_builtin&);
     C_VED_addr_builtin(C_inbuf&);
     virtual ~C_VED_addr_builtin();
   protected:
-    STRING name_;
+    string name_;
     virtual ostream& print(ostream&) const;
   public:
     //virtual types type() const {return(builtin);}
     //const char* name() const {return(name_);}
-    const STRING& name() const {return(name_);}
+    const string& name() const {return(name_);}
     C_VED_addr_builtin& operator =(const C_VED_addr_builtin&);
     virtual void out_ved_addr(C_outbuf&) const;
     virtual int outsize() const;
@@ -71,17 +77,17 @@ class C_VED_addr_builtin: public C_VED_addr
 class C_VED_addr_unix: public C_VED_addr
   {
   public:
-    C_VED_addr_unix(const STRING&);
+    C_VED_addr_unix(const string&);
     C_VED_addr_unix(const C_VED_addr_unix&);
     C_VED_addr_unix(C_inbuf&);
     virtual ~C_VED_addr_unix();
   protected:
-    STRING sockname_;
+    string sockname_;
     virtual ostream& print(ostream&) const;
   public:
     //virtual types type() const {return(local);}
     //const char* sockname() const {return(sockname_);}
-    const STRING& sockname() const {return(sockname_);}
+    const string& sockname() const {return(sockname_);}
     C_VED_addr_unix& operator =(const C_VED_addr_unix&);
     virtual void out_ved_addr(C_outbuf&) const;
     virtual int outsize() const;
@@ -93,18 +99,18 @@ class C_VED_addr_unix: public C_VED_addr
 class C_VED_addr_inet: public C_VED_addr
   {
   public:
-    C_VED_addr_inet(const STRING&, unsigned short);
+    C_VED_addr_inet(const string&, unsigned short);
     C_VED_addr_inet(const C_VED_addr_inet&);
     C_VED_addr_inet(C_inbuf&);
     virtual ~C_VED_addr_inet();
   protected:
-    STRING hostname_;
+    string hostname_;
     unsigned short port_;
     virtual ostream& print(ostream&) const;
   public:
     //virtual types type() const {return(inet);}
     //const char* hostname() const {return(hostname_);}
-    const STRING& hostname() const {return(hostname_);}
+    const string& hostname() const {return(hostname_);}
     unsigned short port() const {return(port_);}
     C_VED_addr_inet& operator =(const C_VED_addr_inet&);
     virtual void out_ved_addr(C_outbuf&) const;
@@ -117,7 +123,7 @@ class C_VED_addr_inet: public C_VED_addr
 class C_VED_addr_inet_path: public C_VED_addr_inet
   {
   public:
-    C_VED_addr_inet_path(const STRING&, unsigned short, C_strlist*);
+    C_VED_addr_inet_path(const string&, unsigned short, C_strlist*);
     C_VED_addr_inet_path(const C_VED_addr_inet_path&);
     C_VED_addr_inet_path(C_inbuf&);
     virtual ~C_VED_addr_inet_path();

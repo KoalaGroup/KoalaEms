@@ -2,19 +2,25 @@
  * commu_list.cc
  * 
  * created 28.07.94 PW
- * 14.06.1998 PW: adapted for STD_STRICT_ANSI
- * 15.06.1998 PW: rewritten
+ * 
+ * 
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <stdlib.h>
 #include "commu_list_t.hxx"
 #include "versions.hxx"
 
-VERSION("Jun 15 1998", __FILE__, __DATE__, __TIME__,
-"$ZEL: commu_list.cc,v 2.16 2004/11/26 15:14:19 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: commu_list.cc,v 2.17 2014/07/14 15:12:19 wuestner Exp $")
 #define XVERSION
+
+using namespace std;
 
 /*****************************************************************************/
 ostream& C_int::print(ostream& os) const
@@ -41,7 +47,7 @@ ostream& operator <<(ostream& os, const C_intpair& rhs)
 return rhs.print(os);
 }
 /*****************************************************************************/
-C_ints::C_ints(int size, STRING name)
+C_ints::C_ints(int size, string name)
 :C_list<C_int>(size, name)
 {}
 /*****************************************************************************/

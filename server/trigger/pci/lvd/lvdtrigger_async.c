@@ -3,7 +3,7 @@
  * created 25.Jun.2005 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: lvdtrigger_async.c,v 1.18 2011/04/06 20:30:36 wuestner Exp $";
+    "$ZEL: lvdtrigger_async.c,v 1.19 2015/04/21 16:42:10 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -280,7 +280,7 @@ init_trig_pcilvd_async(ems_u32* p, struct triggerinfo* trinfo)
 
     pp=p+2;
     for (i=0; i<priv->numbranches; i++) {
-        if (!valid_module(pp[0], modul_lvd, 0)) {
+        if (!valid_module(pp[0], modul_lvd)) {
             *outptr++=i;
             free(priv->data);
             free(priv);

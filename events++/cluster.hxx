@@ -8,8 +8,10 @@
 #define _cluster_hxx_
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
 #include <clusterformat.h>
+
+using namespace std;
 
 class C_cluster
   {
@@ -27,7 +29,7 @@ class C_cluster
     void initialise();
     void destroy();
   public:
-    clustertypes typ() const {return (clustertypes)ClTYPE(d);} 
+    clustertypes typ() const {return static_cast<clustertypes>(ClTYPE(d));} 
     int* get_all() const {return d;}
     int* get_top() const {return d+size_;}// first word above clusterdata
     int* get_opts() const {return d+3;}

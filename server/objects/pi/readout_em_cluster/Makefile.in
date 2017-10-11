@@ -1,5 +1,5 @@
 #objects/pi/readout_em_cluster/Makefile.in
-#$ZEL: Makefile.in,v 1.6 2011/08/16 19:19:51 wuestner Exp $
+#$ZEL: Makefile.in,v 1.7 2014/09/10 15:24:54 wuestner Exp $
 
 CONF = ../../../conf
 
@@ -9,8 +9,18 @@ VPATH = @srcdir@
 include $(CONF)/rules.make
 include $(CONF)/config.make
 
-#cfiles = datains.c piops.c di_cluster.c di_stream.c di_opaque.c
-cfiles = datains.c piops.c di_cluster.c di_opaque.c
+DITYPES = $(shell echo $(datain)|tr '[:lower:]' '[:upper:]')
+DIFLAGS=$(foreach typ,$(DITYPES),-DDI_$(typ))
+CFLAGS += $(DIFLAGS)
+export DIFLAGS
+
+ifneq (,$(findstring mqtt,$(datain)))
+CPPFLAGS:=$(CPPFLAGS) -I/usr/local/mosquitto/include
+endif
+
+#cfiles = datains.c piops.c di_cluster.c di_stream.c di_opaque.c di_mqtt.c
+cfiles := datains.c piops.c $(foreach typ,$(datain),di_$(typ).c)
+
 ofiles = $(cfiles:.c=.o)
 depfiles = $(cfiles)
 

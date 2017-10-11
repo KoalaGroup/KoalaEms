@@ -1,19 +1,25 @@
 /*
- * ems_errors.cc
+ * support/ems_errors.cc
  * 
  * created 07.07.95 PW
- * 16.03.1998 PW: adapded for <string>
- * 05.06.1998 PW: adapted for STD_STRICT_ANSI
+ * 
  */
 
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include "ems_errors.hxx"
 #include <conststrings.h>
 
 #include <versions.hxx>
 
-VERSION("Mar 16 1998", __FILE__, __DATE__, __TIME__,
-"$ZEL: ems_errors.cc,v 2.9 2006/11/27 10:33:35 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: ems_errors.cc,v 2.10 2014/07/14 15:09:53 wuestner Exp $")
 #define XVERSION
+
+using namespace std;
 
 /*****************************************************************************/
 
@@ -36,13 +42,13 @@ C_ems_error::C_ems_error(EMSerrcode code, const char* message)
 
 /*****************************************************************************/
 
-C_ems_error::C_ems_error(EMSerrcode code, const STRING& msg)
+C_ems_error::C_ems_error(EMSerrcode code, const string& msg)
 :emscode(code), message_(msg)
 {}
 
 /*****************************************************************************/
 
-C_ems_error::C_ems_error(EMSerrcode code, OSTRINGSTREAM& s)
+C_ems_error::C_ems_error(EMSerrcode code, ostringstream& s)
 :emscode(code)
 {
 message_=s.str();
@@ -72,7 +78,7 @@ return(ob);
 
 /*****************************************************************************/
 
-STRING C_ems_error::message(void) const
+string C_ems_error::message(void) const
 {
 return(message_);
 }
@@ -81,7 +87,7 @@ return(message_);
 
 C_error* C_ems_error::create(C_inbuf& inbuf)
 {
-STRING s;
+string s;
 EMSerrcode code;
 code=static_cast<EMSerrcode>(inbuf.getint());
 inbuf >> s;

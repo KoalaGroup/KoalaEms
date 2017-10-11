@@ -1,16 +1,24 @@
 /*
- * errors.hxx
+ * support/errors.hxx
  * 
  * created 27.01.95 PW
+ *
+ * $ZEL: errors.hxx,v 2.21 2014/07/14 15:09:53 wuestner Exp $
  */
 
 #ifndef _errors_hxx_
 #define _errors_hxx_
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include "outbuf.hxx"
 #include "inbuf.hxx"
+
+using namespace std;
 
 /*****************************************************************************/
 
@@ -64,7 +72,7 @@ class C_error
     virtual int type() const {return(e_unknown);}
     virtual ostream& print(ostream&) const=0;
     virtual C_outbuf& bufout(C_outbuf&) const;
-    virtual STRING message() const=0;
+    virtual string message() const=0;
   private:
     static int instance_counter;
     int deleted;
@@ -77,38 +85,38 @@ class C_unix_error: public C_error
   {
   public:
     C_unix_error(int, const char*);
-    C_unix_error(int, const STRING&);
-    C_unix_error(int, OSTRINGSTREAM&);
+    C_unix_error(int, const string&);
+    C_unix_error(int, ostringstream&);
     C_unix_error(C_inbuf&);
     virtual ~C_unix_error();
   protected:
     int error_;
-    STRING message_;
+    string message_;
   public:
     static C_error* create(C_inbuf&);
     virtual int type() const {return(e_system);}
     virtual ostream& print(ostream&) const;
     virtual C_outbuf& bufout(C_outbuf&) const;
     int error() const {return(error_);}
-    virtual STRING message() const;
+    virtual string message() const;
   };
 
 class C_program_error: public C_error
   {
   public:
     C_program_error(const char*);
-    C_program_error(const STRING&);
-    C_program_error(OSTRINGSTREAM&);
+    C_program_error(const string&);
+    C_program_error(ostringstream&);
     C_program_error(C_inbuf&);
     virtual ~C_program_error();
   protected:
-    STRING message_;
+    string message_;
   public:
     static C_error* create(C_inbuf&);
     virtual int type() const {return(e_program);}
     virtual ostream& print(ostream&) const;
     virtual C_outbuf& bufout(C_outbuf&) const;
-    virtual STRING message() const;
+    virtual string message() const;
   };
 
 class C_none_error: public C_error
@@ -122,7 +130,7 @@ class C_none_error: public C_error
     virtual int type() const {return(e_none);}
     virtual ostream& print(ostream&) const;
     virtual C_outbuf& bufout(C_outbuf&) const;
-    virtual STRING message() const;
+    virtual string message() const;
   };
 
 class C_status_error: public C_error
@@ -140,7 +148,7 @@ class C_status_error: public C_error
     virtual ostream& print(ostream&) const;
     virtual C_outbuf& bufout(C_outbuf&) const;
     int code() const {return(code_);}
-    virtual STRING message() const;
+    virtual string message() const;
   };
 
 #endif

@@ -1,7 +1,7 @@
 /*
  * tcl_clientlib/emstcl_is.hxx
  * 
- * $ZEL: emstcl_is.hxx,v 1.10 2010/02/03 00:15:51 wuestner Exp $
+ * $ZEL: emstcl_is.hxx,v 1.11 2014/07/14 15:13:25 wuestner Exp $
  * 
  * created 06.09.95
  */
@@ -10,10 +10,16 @@
 #define _emstcl_is_cc_
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <tcl.h>
 #include <proc_is.hxx>
 #include "emstcl_ved.hxx"
+
+using namespace std;
 
 /*****************************************************************************/
 
@@ -33,14 +39,14 @@ class E_is: public C_instr_system {
   protected:
     E_ved* eved;
     Tcl_Interp* interp;
-    STRING origprocname;
+    string origprocname;
 
     //static int Ems_IsCommand(ClientData, Tcl_Interp*, int, const char*[]);
     //static void Ems_IsDelete(ClientData);
-    STRING ccomm;
-    STRING dcomm;
+    string ccomm;
+    string dcomm;
     int destroy;
-    void deletecommand(STRING&);
+    void deletecommand(string&);
     int e_close(int, const char*[]);
     int e_closecommand(int, const char*[]);
     int e_delete(int, const char*[]);

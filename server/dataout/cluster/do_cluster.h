@@ -2,7 +2,7 @@
  * dataout/cluster/do_cluster.h
  * created      04.04.97
  * 
- * $ZEL: do_cluster.h,v 1.15 2011/04/12 16:21:40 wuestner Exp $
+ * $ZEL: do_cluster.h,v 1.16 2015/04/21 16:05:45 wuestner Exp $
  */
 
 #ifndef _do_cluster_h_
@@ -82,6 +82,7 @@ void clusters_link(struct Cluster* cluster);
 errcode do_cluster_sock_init(int do_idx);
 errcode do_cluster_tape_init(int do_idx);
 errcode do_cluster_file_init(int do_idx);
+errcode do_cluster_file_check_reopen(int do_idx);
 errcode do_cluster_autosock_init(int do_idx);
 errcode do_dummy_init(int do_idx);
 void do_cluster_write(int path, enum select_types selected, union callbackdata data);

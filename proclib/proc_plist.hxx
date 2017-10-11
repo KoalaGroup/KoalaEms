@@ -1,18 +1,21 @@
 /*
- * proc_plist.hxx
+ * proclib/proc_plist.hxx
  * 
  * created: 05.09.95 PW
- * 12.06.1998 PW: adapted for STD_STRICT_ANSI
- * 24.02.1999 PW: add_par(float) and add_par(double) added
- * 16.03.1999 PW: is added to arguments for C_proclist::C_proclist
+ * 
+ * $ZEL: proc_plist.hxx,v 2.14 2014/07/14 15:11:54 wuestner Exp $
+ * 
  */
 
 #ifndef _proc_plist_hxx_
 #define _proc_plist_hxx_
 
 #include "config.h"
-#include "cxxcompat.hxx"
-
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <ems_err.h>
 #include "caplib.hxx"
 #include <outbuf.hxx>
@@ -20,6 +23,8 @@
 #include "smartptr_t.hxx"
 
 class C_VED;
+
+using namespace std;
 
 /*****************************************************************************/
 class C_instr_system;
@@ -36,7 +41,7 @@ class C_proclist
   private:
     C_VED* ved;
     C_instr_system* is;
-    STRING pl_name;
+    string pl_name;
     T_smartptr<C_capability_list>& caplist;
     ems_u32* list;
     int listsize;
@@ -47,7 +52,7 @@ class C_proclist
     void growlist(int);
 
   public:
-    STRING name() const;
+    string name() const;
     exec_mode execmode;
     void clear();
     void printlist(ostream&);

@@ -3,7 +3,7 @@ dnl                                                                           *
 dnl modultypes.inc                                                            *
 dnl  R. Nellen                                               03.03.1993       *
 dnl                                                                           *
-dnl $ZEL: modultypes.inc,v 2.50 2013/07/04 07:27:49 wuestner Exp $
+dnl $ZEL: modultypes.inc,v 2.52 2015/09/05 00:17:11 wuestner Exp $
 dnl                                                                           *
 dnl ***************************************************************************
 dnl
@@ -144,6 +144,7 @@ module(VPG517            ,0x26f02474)
 module(SIS_3100          ,0x26a31000)
 module(SIS_3300          ,0x21a33000)
 module(SIS_3301          ,0x21a33010)
+module(SIS_3316          ,0x21a33160)
 module(SIS_3400          ,0x23a34000)
 module(SIS_3400clock     ,0x23a3400c)
 module(SIS_3600          ,0x29a36000)
@@ -194,9 +195,10 @@ module(CAEN_V1290        ,0x23912900)
 module(ZEL_SYNC_VME      ,0x2AB00010)
 module(INFN_TRIGCONTR    ,0x26e02475)
 module(CAEN_V1495        ,0x28914950)
-
 module(mesytec_madc32    ,0x21f10032)
-
+module(mesytec_mtdc32    ,0x23f10032)
+module(vme_mcst          ,0x2ffffff0)
+module(vme_cblt          ,0x2ffffff1)
 
 dnl ZEL LVD
 

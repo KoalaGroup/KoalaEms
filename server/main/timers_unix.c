@@ -2,7 +2,7 @@
  * main/timers_unix.c
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: timers_unix.c,v 1.7 2011/04/06 20:30:28 wuestner Exp $";
+    "$ZEL: timers_unix.c,v 1.8 2014/09/10 15:28:59 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -10,6 +10,7 @@ static const char* cvsid __attribute__((unused))=
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
+#include <string.h>
 #include <rcs_ids.h>
 #include "signals.h"
 #include "timers.h"
@@ -64,6 +65,7 @@ clean_queue(void) /* nicht von sighandler aufrufen, nicht unterbrechen! */
     struct timerentry *help;
     help=rmqueue;
     rmqueue=rmqueue->next;
+    free(help->name);
     free(help);
   }
   lastrm= &rmqueue;
@@ -149,7 +151,7 @@ install_timer(int timeout, int periodic, void(*proc)(union callbackdata),
     this->proc=proc;
     this->arg=arg;
     this->periodic=periodic;
-    this->name=name;
+    this->name=strdup(name);
     *resc=this;
     insert_queue(this);
 
@@ -195,6 +197,7 @@ remove_timer(timeoutresc* resc)
         struct timerentry *help;
         help= *q;
         *q=(*q)->next;
+        free(help->name);
         free(help);
         res=0;
     } else {

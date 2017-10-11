@@ -5,7 +5,7 @@
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
+//#include "cxxcompat.hxx"
 #include <tcl.h>
 #ifdef USE_TK
 #include <tk.h>
@@ -16,8 +16,8 @@
 #include "tcl_cxx.hxx"
 #include "versions.hxx"
 
-VERSION("Nov 16 2004", __FILE__, __DATE__, __TIME__,
-"$ZEL: emsAppInit.cc,v 1.12 2004/11/26 23:03:40 wuestner Exp $")
+VERSION("2014-07-10", __FILE__, __DATE__, __TIME__,
+"$ZEL: emsAppInit.cc,v 1.14 2014/07/14 15:13:25 wuestner Exp $")
 #define XVERSION
 
 /*
@@ -40,7 +40,8 @@ VERSION("Nov 16 2004", __FILE__, __DATE__, __TIME__,
  */
 
 extern "C" {
-int Ems_AppInit(Tcl_Interp* interp)
+static int
+Ems_AppInit(Tcl_Interp* interp)
 {
     if (Tcl_Init(interp) == TCL_ERROR)
         return TCL_ERROR;

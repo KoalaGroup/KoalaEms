@@ -2,11 +2,15 @@
  * commu_io_client.cc      
  *                        
  * created 29.07.94
- * 11.09.1998 PW: regulaer changed to policies
+ * 
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <sys/types.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -22,9 +26,11 @@
 #include "commu_io_client.hxx"
 #include "versions.hxx"
 
-VERSION("2009-Aug-21", __FILE__, __DATE__, __TIME__,
-"$ZEL: commu_io_client.cc,v 2.18 2009/08/21 22:02:28 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: commu_io_client.cc,v 2.19 2014/07/14 15:12:19 wuestner Exp $")
 #define XVERSION
+
+using namespace std;
 
 /*****************************************************************************/
 
@@ -450,7 +456,7 @@ void C_io_client::proceed_ident(C_message* message)
             inbuf >> hostname >> inetaddr >> pid >> ppid >> user >> uid >> gid
                     >> experiment >> pol >> bigendian >> def_unsol;
             policies=(en_policies)pol;
-            OSTRINGSTREAM ss;
+            ostringstream ss;
             ss << (far?hostname.c_str():"local") << '_' << pid << ends;
             setname(ss.str());
             if (far)

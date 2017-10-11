@@ -28,11 +28,11 @@ TCL_LIB           := @TCLLIB@
 TK_INCLUDE        := @TK@
 TK_LIB            := @TKLIB@
 #X11_INCLUDE       := @x_includes@
-X11_LIB           := -L@x_libraries@ -lX11
+X11_LIB           := -lX11
 EXTRALIBS         := @EXTRALIBS@ -lm
 
 CXX := @CXX@
-CXXFLAGS    := @CXXFLAGS@
+CXXFLAGS    := @CXXFLAGS@ -std=c++11
 LDFLAGS     :=
 LDOFLAGS    := @LDOFLAGS@
 SHLIBSUFFIX := @SHLIBSUFFIX@
@@ -50,7 +50,7 @@ EMSMAINSRC := emsAppInit.cc
 EMSMAINOBJS := $(EMSMAINSRC:.cc=.o)
 EMSMAINWOBJS := $(EMSMAINSRC:.cc=_w.o)
 EMSSRC	:= emstcl.cc emstcl_ved.cc emstcl_confir.cc emstcl_vedcomm.cc  \
-    emstcl_is.cc emstcl_iscomm.cc emstcl_formatter.cc ems_xdr.cc
+    emstcl_is.cc emstcl_iscomm.cc emstcl_formatter.cc ems_xdr.cc emstcl_int.cc
 EMSOBJS := $(EMSSRC:.cc=.o)
 FONTSRC	:= tkfont.cc
 FONTOBJS := $(FONTSRC:.cc=.o)
@@ -104,7 +104,7 @@ emswish: $(EMSMAINWOBJS) $(EMSLDEPS)
 	$(CXX) $(LDFLAGS) -o $@ $(EMSMAINWOBJS) $(EMSL) $(TK_LIB)  \
 	$(TCL_LIB) $(X11_LIB) $(EXTRALIBS)
 
-histowish: $(HISTOMAINOBJS) $(HISTOL)
+histowish: $(HISTOMAINOBJS) $(HISTOL) $(LIBS)
 	$(CXX) $(LDFLAGS) -o $@ $(HISTOMAINOBJS) $(HISTOL) $(EMSL) $(TK_LIB)  \
 	$(TCL_LIB) -lm $(X11_LIB) $(EXTRALIBS)
 

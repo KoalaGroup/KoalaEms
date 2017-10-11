@@ -5,7 +5,7 @@
  * check of valid data by Data Ready bit of Status Register
  ************************************************************************/
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: v1290.c,v 1.7 2011/04/06 20:30:35 wuestner Exp $";
+    "$ZEL: v1290.c,v 1.8 2015/04/06 21:33:34 wuestner Exp $";
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -279,7 +279,7 @@ plerrcode proc_v1290SetWindow(ems_u32 *p) {
 
 plerrcode test_proc_v1290SetWindow(ems_u32 *p) {
   if(p[0] < 3) return(plErr_ArgNum);
-  if (!valid_module(p[1], modul_vme, 0)) return plErr_ArgRange;
+  if (!valid_module(p[1], modul_vme)) return plErr_ArgRange;
   if(ModulEnt(p[1])->modultype != CAEN_V1290) return(plErr_BadModTyp);
   if(p[2] < 1 || p[2] > 4095) return plErr_ArgRange;
   if(p[0] > 3) {
@@ -315,7 +315,7 @@ plerrcode proc_v1290CheckHandshake(ems_u32 *p) {
 }
 
 plerrcode test_proc_v1290CheckHandshake(ems_u32 *p) {
-  if (!valid_module(p[1], modul_vme, 0)) return plErr_ArgRange;
+  if (!valid_module(p[1], modul_vme)) return plErr_ArgRange;
   if(ModulEnt(p[1])->modultype != CAEN_V1290) return(plErr_BadModTyp);  
   wirbrauchen = 1;
   return(plOK); 
@@ -347,7 +347,7 @@ plerrcode proc_v1290SetVHRedge(ems_u32 *p ) {
 
 plerrcode test_proc_v1290SetVHRedge(ems_u32 *p ) {
   if(p[0] < 1) return(plErr_ArgNum);
-  if (!valid_module(p[1], modul_vme, 0)) return plErr_ArgRange;
+  if (!valid_module(p[1], modul_vme)) return plErr_ArgRange;
   if(ModulEnt(p[1])->modultype != CAEN_V1290) return(plErr_BadModTyp);
   if(p[0]>1 && (p[2] > V1290_BOTH_EDGE || p[2] == V1290_PAIR_EDGE))  return plErr_ArgRange;
   wirbrauchen = 1;
@@ -378,7 +378,7 @@ plerrcode proc_v1290LoadCfg(ems_u32 *p ) {
 
 plerrcode test_proc_v1290LoadCfg(ems_u32 *p ) {
   if(p[0] < 1) return(plErr_ArgNum);
-  if (!valid_module(p[1], modul_vme, 0)) return plErr_ArgRange;
+  if (!valid_module(p[1], modul_vme)) return plErr_ArgRange;
   if(ModulEnt(p[1])->modultype != CAEN_V1290) return(plErr_BadModTyp);
   wirbrauchen = 1;
   return(plOK); 
@@ -419,7 +419,7 @@ plerrcode proc_v1290EnableChipHeader(ems_u32 *p) {
 }
 plerrcode test_proc_v1290EnableChipHeader(ems_u32 *p ) {
   if(p[0] < 1) return(plErr_ArgNum);
-  if (!valid_module(p[1], modul_vme, 0)) return plErr_ArgRange;
+  if (!valid_module(p[1], modul_vme)) return plErr_ArgRange;
   if(ModulEnt(p[1])->modultype != CAEN_V1290) return(plErr_BadModTyp);
   return  (plOK); 
 }
@@ -468,7 +468,7 @@ plerrcode proc_v1290EnableChan(ems_u32 *p) {
 plerrcode test_proc_v1290EnableChan(ems_u32 *p ) {
   
   if(p[0] != 3 ) return plErr_ArgNum;
-  if (!valid_module(p[1], modul_vme, 0)) return plErr_ArgRange;
+  if (!valid_module(p[1], modul_vme)) return plErr_ArgRange;
   if(ModulEnt(p[1])->modultype != CAEN_V1290) return(plErr_BadModTyp);
   if(p[1] > 31) return plErr_ArgRange;
   return  (plOK); 
@@ -504,7 +504,7 @@ plerrcode test_proc_v1290EnableChan(ems_u32 *p ) {
 
 /*  plerrcode test_proc_SetTDCOutV1290(ems_u32 *p ) {  */
 /*    if(p[0] < 1) return(plErr_ArgNum);  */
-/*    if (!valid_module(p[1], modul_vme, 0)) return plErr_ArgRange;  */
+/*    if (!valid_module(p[1], modul_vme)) return plErr_ArgRange;  */
 /*    if(ModulEnt(p[1])->modultype != CAEN_V1290) return(plErr_BadModTyp);  */
 /*    wirbrauchen = 1;  */
 /*    return(plOK);   */

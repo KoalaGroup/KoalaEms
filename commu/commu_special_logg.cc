@@ -9,11 +9,13 @@
 #include <commu_local_server_l.hxx>
 #include "versions.hxx"
 
-VERSION("Feb 05 1995", __FILE__, __DATE__, __TIME__,
-"$ZEL: commu_special_logg.cc,v 2.6 2004/11/26 15:14:29 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: commu_special_logg.cc,v 2.7 2014/07/14 15:12:20 wuestner Exp $")
 #define XVERSION
 
 extern C_serverlist serverlist;
+
+using namespace std;
 
 /*****************************************************************************/
 
@@ -47,7 +49,7 @@ return;
 
 /*****************************************************************************/
 
-void C_speciallogger::put(int prior, const STRING& s)
+void C_speciallogger::put(int prior, const string& s)
 {
     int i, count, ident;
     C_local_server_l* server;

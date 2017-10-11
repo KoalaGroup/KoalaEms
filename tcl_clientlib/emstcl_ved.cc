@@ -2,13 +2,15 @@
  * emstcl_ved.cc
  * 
  * created 06.09.95
- * 13.01.1999 PW: set_error_code added
- * 16.07.1999 PW: for changed findstring adapted
- * 07.Jan.2001 PW: formers.add in E_ved::E_ved fixed
+ * 
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include "emstcl_ved.hxx"
 #include "emstcl_is.hxx"
 #include <cstdlib>
@@ -20,11 +22,13 @@
 #include "tcl_cxx.hxx"
 #include <versions.hxx>
 
-VERSION("Nov 16 2004", __FILE__, __DATE__, __TIME__,
-"$ZEL: emstcl_ved.cc,v 1.25 2010/06/20 23:30:06 wuestner Exp $")
+VERSION("2014-07011", __FILE__, __DATE__, __TIME__,
+"$ZEL: emstcl_ved.cc,v 1.26 2014/07/14 15:13:25 wuestner Exp $")
 #define XVERSION
 
 E_veds eveds;
+
+using namespace std;
 
 /*****************************************************************************/
 E_ved::formerent::formerent(void)
@@ -132,14 +136,14 @@ eveds.remove(this);
 /*****************************************************************************/
 void E_ved::create_tcl_proc()
 {
-    STRING rootname=STRING("ved_")+name();
-    STRING newname=rootname;
+    string rootname=string("ved_")+name();
+    string newname=rootname;
     int idx=0;
     Tcl_CmdInfo info;
 
     while (Tcl_GetCommandInfo(interp, (char*)newname.c_str(), &info)!=0) {
         idx++;
-        OSTRINGSTREAM ss;
+        ostringstream ss;
         ss << rootname << '#' << idx;
         newname=ss.str();
     }
@@ -178,14 +182,14 @@ if (ccomm.length()!=0)
   {
   string::size_type x;
 #ifdef NO_ANSI_CXX
-  while ((x=ccomm.index(STRING("%n")))>=0)
+  while ((x=ccomm.index(string("%n")))>=0)
       ccomm=ccomm(0, x)+name()+ccomm(x+2, ccomm.length()-x-2);
 #else
   while ((x=ccomm.find("%n"))!=string::npos)
       ccomm=ccomm.substr(0, x)+name()+ccomm.substr(x+2, string::npos);
 #endif
 #ifdef NO_ANSI_CXX
-  while ((x=ccomm.index(STRING("%c")))>=0)
+  while ((x=ccomm.index(string("%c")))>=0)
       ccomm=ccomm(0, x)+tclprocname()+ccomm(x+2, ccomm.length()-x-2);
 #else
   while ((x=ccomm.find("%c"))!=string::npos)
@@ -198,9 +202,9 @@ if (ccomm.length()!=0)
 
 /*****************************************************************************/
 
-STRING E_ved::tclprocname() const
+string E_ved::tclprocname() const
 {
-STRING s;
+string s;
 s=Tcl_GetCommandName(interp, tclcommand);
 return s;
 }
@@ -357,12 +361,12 @@ if (err_command)
 
 /*****************************************************************************/
 
-void E_ved::confbackentry::set_formargs(int idx, const STRING& arg)
+void E_ved::confbackentry::set_formargs(int idx, const string& arg)
 {
 if (numformargs<=idx)
   {
   int i;
-  STRING* help=new STRING[idx+1];
+  string* help=new string[idx+1];
   for (i=0; i<numformargs; i++) help[i]=formargs[i];
   for (i=numformargs; i<idx; i++) help[i]="";
   delete[] formargs;
@@ -374,10 +378,10 @@ formargs[idx]=arg;
 
 /*****************************************************************************/
 
-static STRING* newstring(int n)
+static string* newstring(int n)
 {
-STRING* xxx;
-xxx=new STRING[n];
+string* xxx;
+xxx=new string[n];
 return xxx;
 }
 
@@ -468,7 +472,7 @@ if (pipe_idx!=0) // former angegeben;
   entry->former_default=def_form==entry->form;
   entry->former_implicit=0;
   entry->numformargs=pipe_idx-colon_idx+2;
-//  entry->formargs=new STRING[entry->numformargs];
+//  entry->formargs=new string[entry->numformargs];
   entry->formargs=newstring(entry->numformargs);
   for (i=0; i<entry->numformargs; i++) entry->formargs[i]=argv[colon_idx+2+i];
   ok_idx=pipe_idx+1;
@@ -545,7 +549,7 @@ else
   entry->former_implicit=0;
   entry->numformargs=argc-pipe-2;
 
-  //entry->formargs=new STRING[entry->numformargs];
+  //entry->formargs=new string[entry->numformargs];
   // Bug in g++, deshalb etwas umstaendlich
   entry->formargs=newstring(entry->numformargs);
   for (int i=0; i<entry->numformargs; i++)
@@ -563,7 +567,7 @@ return TCL_ERROR;
 
 /*****************************************************************************/
 
-int E_ved::confbackbox::callformer(E_ved* ved, OSTRINGSTREAM& ss,
+int E_ved::confbackbox::callformer(E_ved* ved, ostringstream& ss,
     const C_confirmation* conf)
 {
 int err=(ved->*(entry->form))(ss, conf, !entry->former_default,

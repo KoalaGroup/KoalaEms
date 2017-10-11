@@ -5,7 +5,8 @@
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <sstream>
+#include <string>
 #include <cerrno>
 #include <cstring>
 #include <sys/types.h>
@@ -18,13 +19,15 @@
 #include "compat.h"
 #include <versions.hxx>
 
-VERSION("2009-Feb-25", __FILE__, __DATE__, __TIME__,
-"$ZEL: evoutput.cc,v 1.9 2010/09/04 21:19:49 wuestner Exp $")
+VERSION("2014-07-14", __FILE__, __DATE__, __TIME__,
+"$ZEL: evoutput.cc,v 1.11 2014/07/14 16:18:17 wuestner Exp $")
 #define XVERSION
+
+using namespace std;
 
 /*****************************************************************************/
 
-C_evoutput::C_evoutput(const STRING& name, int maxevent)
+C_evoutput::C_evoutput(const string& name, int maxevent)
 :C_evput(name, maxevent), swap_(0), buffer(0)
 {}
 
@@ -53,7 +56,7 @@ return(sw);
 
 /*****************************************************************************/
 
-C_evpoutput::C_evpoutput(const STRING& name, int maxevent)
+C_evpoutput::C_evpoutput(const string& name, int maxevent)
 :C_evoutput(name, maxevent)
 {
 if (name=="-")
@@ -63,7 +66,7 @@ else
   path=open(name.c_str(), O_WRONLY|O_CREAT|O_TRUNC, 0640);
   if (path==-1)
     {
-    STRING msg("open tape \"");
+    string msg("open tape \"");
     msg+=name;
     msg+="\" for output";
     throw new C_unix_error(errno, msg);
@@ -80,10 +83,10 @@ if (strcmp(name, "-")==0)
   path=1;
 else
   {
-  path=open((char*)name, O_WRONLY|O_CREAT|O_TRUNC, 0640);
+  path=open(name, O_WRONLY|O_CREAT|O_TRUNC, 0640);
   if (path==-1)
     {
-    STRING msg("open file \"");
+    string msg("open file \"");
     msg+=name;
     msg+="\" for output";
     throw new C_unix_error(errno, msg);
@@ -110,7 +113,7 @@ close(path);
 int C_evpoutput::xsend(const int* buf, int len)
 {
 int dort, restlen;
-char *bufptr;
+const char *bufptr;
 
 if (trace)
   {
@@ -119,15 +122,16 @@ if (trace)
   cerr << dec << endl;
   }
 restlen=len*sizeof(int);
-bufptr=(char*)buf;
+bufptr=reinterpret_cast<const char*>(buf);
 while (restlen)
   {
   if (trace)
     {
-    cerr << "write("<<path<<", "<<(void*)bufptr<<", {"<<hex;
+    cerr << "write("<<path<<", "<<reinterpret_cast<const void*>(bufptr)
+            <<", {"<<hex;
     for (int i=0; i<restlen/4; i++)
       {
-      cerr << ((int*)bufptr)[i];
+      cerr << (reinterpret_cast<const int*>(bufptr))[i];
       if (i+1<restlen/4) cerr << ", ";
       }
     cerr <<dec<< "}, "<<restlen<<")" << endl;
@@ -175,13 +179,13 @@ return(*this);
 
 /*****************************************************************************/
 
-C_evtoutput::C_evtoutput(const STRING& name, int maxevent)
+C_evtoutput::C_evtoutput(const string& name, int maxevent)
 :C_evoutput(name, maxevent)
 {
 path=open(name.c_str(), O_WRONLY|O_CREAT, 0640);
 if (path==-1)
   {
-  STRING msg("open tape \"");
+  string msg("open tape \"");
   msg+=name;
   msg+="\" for output";
   throw new C_unix_error(errno, msg);
@@ -195,10 +199,10 @@ idx=0;
 C_evtoutput::C_evtoutput(const char* name, int maxevent)
 :C_evoutput(name, maxevent)
 {
-path=open((char*)name, O_WRONLY|O_CREAT, 0640);
+path=open(name, O_WRONLY|O_CREAT, 0640);
 if (path==-1)
   {
-  STRING msg("open tape \"");
+  string msg("open tape \"");
   msg+=name;
   msg+="\" for output";
   throw new C_unix_error(errno, msg);
@@ -232,7 +236,7 @@ int C_evtoutput::writerecord(const int* buf, int len)
 int res;
 
 if (trace) cerr << "trace in C_evtoutput noch nicht implementiert" << endl;
-res=write(path, (char*)buf, len);
+res=write(path, buf, len);
 if (res==-1)
   {
   throw new C_unix_error(errno, "C_evtoutput::writerecord");
@@ -286,7 +290,7 @@ C_evfoutput::C_evfoutput(int path, int maxevent)
 file=fdopen(path, "w");
 if (file==0)
   {
-  OSTRINGSTREAM st;
+  ostringstream st;
   st<<"fdopen("<<path<<")"<<ends;
   throw new C_unix_error(errno, st);
   }
@@ -304,7 +308,7 @@ else
   file=fopen(name, "w");
   if (file==0)
     {
-    STRING msg("open file \"");
+    string msg("open file \"");
     msg+=name;
     msg+="\" for output";
     throw new C_unix_error(errno, msg);
@@ -314,7 +318,7 @@ else
 
 /*****************************************************************************/
 
-C_evfoutput::C_evfoutput(const STRING& name, int maxevent)
+C_evfoutput::C_evfoutput(const string& name, int maxevent)
 :C_evoutput(name, maxevent)
 {
 if (name=="-")
@@ -324,7 +328,7 @@ else
   file=fopen(name.c_str(), "w");
   if (file==0)
     {
-    STRING msg("open file \"");
+    string msg("open file \"");
     msg+=name;
     msg+="\" for output";
     throw new C_unix_error(errno, msg);

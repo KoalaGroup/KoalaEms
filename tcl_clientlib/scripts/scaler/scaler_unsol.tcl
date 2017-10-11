@@ -1,4 +1,4 @@
-# $Id: scaler_unsol.tcl,v 1.2 2006/08/13 17:32:09 wuestner Exp $
+# $ZEL: scaler_unsol.tcl,v 1.4 2014/08/19 20:20:50 wuestner Exp $
 # copyright 1998
 #   P. Wuestner; Zentralinstitut fuer Elektronik; Forschungszentrum Juelich
 #
@@ -12,6 +12,7 @@ proc ems_unsol_bye {} {
   global global_after global_running
 
   output "ems_bye received from commu"
+  update idletasks
   if {$global_running(outer_loop)} {
     foreach i [array names global_after] {
       after cancel $global_after($i)

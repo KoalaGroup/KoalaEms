@@ -19,8 +19,6 @@
 #include <sys/time.h>
 #include <signal.h>
 #include <fcntl.h>
-//#include <iostream>
-//using namespace std;
 
 typedef unsigned int ems_u32;
 
@@ -205,11 +203,9 @@ do_read(int pin, struct input_event_buffer* buf)
             return -1; /* error, don't try again */
         }
         buf->position+=res;
-
         if (buf->position<HEADERSIZE) return 0; /* try later */
 
         if (old) {
-
             switch (swaptype) {
             case swaptype_check:
                 n=(buf->head[0]&0xffff0000)?
@@ -224,7 +220,6 @@ do_read(int pin, struct input_event_buffer* buf)
                 break;
             }
         } else {
-
             switch (buf->head[1]) {
             case 0x12345678: n=buf->head[0]; break;
             case 0x78563412: n=SWAP_32(buf->head[0]); break;
@@ -235,7 +230,6 @@ do_read(int pin, struct input_event_buffer* buf)
         }
 
         n=(n+1)*sizeof(ems_u32);
-
         if ((buf->event_buffer=create_event_buffer(n))==0) {
             return -1;
         }
@@ -248,8 +242,6 @@ do_read(int pin, struct input_event_buffer* buf)
     /* header is complete, read the data */
     res=read(pin, buf->event_buffer->data+buf->position,
     buf->event_buffer->size-buf->position);
-
-
     if (res<0) {
         if ((errno==EINTR)||(errno==EWOULDBLOCK)) return 0; /* try later */
         if (!quiet) printf("read data: %s\n", strerror(errno));
@@ -409,7 +401,6 @@ accept_outsock(int outsock_l)
             printf("malloc %d sock_struct*: %s\n", max_socks+10, strerror(errno));
             close(sock->p);
             free(sock);
-
             return;
         }
         for (i=0; i<num_socks; i++) help[i]=socks[i];
@@ -417,7 +408,6 @@ accept_outsock(int outsock_l)
         socks=help;
     }
     socks[num_socks++]=sock;
-
 }
 /******************************************************************************/
 static void
@@ -453,11 +443,8 @@ main_loop(int insock_l, int outsock_l)
         insock=0;
     else
         insock=-1;
-	
-int count=0;
 
     while(1) {
-
         int nfds, idx, need_data, res;
         struct timeval to, *timeout;
 
@@ -469,7 +456,6 @@ int count=0;
             FD_SET(insock_l, &readfds);
             nfds=insock_l;
         }
-
         FD_SET(outsock_l, &readfds);
         if (outsock_l>nfds) nfds=outsock_l;
 
@@ -505,7 +491,6 @@ int count=0;
         }
 
         res=select(nfds+1, &readfds, &writefds, 0, timeout);
-
         if (res<0) {
             if (errno==EINTR) continue;
             printf("select: %s\n", strerror(errno));
@@ -575,17 +560,13 @@ int count=0;
                             socks[idx]->position=0;
                             ibs.event_buffer->number_of_users++;
                         }
-
                     }
                     if (!ibs.event_buffer->number_of_users)
                             printf("new event_buffer unused!\n");
                     clear_new_event(&ibs);
                 }
-
             }
         }
-
-	if((++count%1000) == 0) printf("The loop number is %d\n", count);	
     }
 }
 /******************************************************************************/

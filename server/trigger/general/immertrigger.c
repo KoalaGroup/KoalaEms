@@ -3,7 +3,7 @@
  * created before 15.04.93
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: immertrigger.c,v 1.12 2011/04/06 20:30:36 wuestner Exp $";
+    "$ZEL: immertrigger.c,v 1.13 2013/12/06 20:24:50 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -50,6 +50,12 @@ static void
 reset_trig_immer(struct triggerinfo* trinfo)
 {}
 /*****************************************************************************/
+/*
+ * p[0] number of arguments
+ * p[1] trigger id
+ * [p[2] period/.01s]
+ */
+
 plerrcode
 init_trig_immer(ems_u32* p, struct triggerinfo* trinfo)
 {

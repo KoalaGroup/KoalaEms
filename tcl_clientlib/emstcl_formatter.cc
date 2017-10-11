@@ -1,10 +1,14 @@
 /*
  * emstcl_formatter.cc
  * created 29.11.96
- * 22.Jan.2001 PW: multicrate support (f_modullist)
+ * 
  */
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <stdlib.h>
 #include "emstcl_ved.hxx"
 #include "emstcl_is.hxx"
@@ -15,22 +19,24 @@
 #include "tcl_cxx.hxx"
 #include <versions.hxx>
 
-VERSION("2009-Feb-25", __FILE__, __DATE__, __TIME__,
-"$ZEL: emstcl_formatter.cc,v 1.22 2010/02/03 00:15:50 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: emstcl_formatter.cc,v 1.23 2014/07/14 15:13:25 wuestner Exp $")
 #define XVERSION
+
+using namespace std;
 
 /*****************************************************************************/
 
-int E_ved::f_void(OSTRINGSTREAM& ss, const C_confirmation* conf, int needtest,
-    int numargs, const STRING* args)
+int E_ved::f_void(ostringstream& ss, const C_confirmation* conf, int needtest,
+    int numargs, const string* args)
 {
 return TCL_OK;
 }
 
 /*****************************************************************************/
 
-int E_ved::f_dummy(OSTRINGSTREAM& ss, const C_confirmation* conf, int needtest,
-    int numars, const STRING* args)
+int E_ved::f_dummy(ostringstream& ss, const C_confirmation* conf, int needtest,
+    int numars, const string* args)
 {
 int num=conf->size();
 //int* buf=conf->buffer();
@@ -40,8 +46,8 @@ return TCL_OK;
 
 /*****************************************************************************/
 
-int E_ved::f_confirmation(OSTRINGSTREAM& ss, const C_confirmation* conf, int needtest,
-    int numars, const STRING* args)
+int E_ved::f_confirmation(ostringstream& ss, const C_confirmation* conf, int needtest,
+    int numars, const string* args)
 {
 ss << E_confirmation::new_E_confirmation(interp, this, *conf);
 return TCL_OK;
@@ -49,8 +55,8 @@ return TCL_OK;
 
 /*****************************************************************************/
 
-// int E_ved::f_printconf(OSTRINGSTREAM& ss, const C_confirmation* conf,
-//     int needtest, int numargs, const STRING* args)
+// int E_ved::f_printconf(ostringstream& ss, const C_confirmation* conf,
+//     int needtest, int numargs, const string* args)
 // {
 // if ((conf->size()>=1) && (conf->buffer(0)!=0))
 //   {
@@ -71,8 +77,8 @@ return TCL_OK;
 // }
 
 /*****************************************************************************/
-int E_ved::f_printconf_raw(OSTRINGSTREAM& ss, const C_confirmation* conf,
-    int needtest, int numargs, const STRING* args)
+int E_ved::f_printconf_raw(ostringstream& ss, const C_confirmation* conf,
+    int needtest, int numargs, const string* args)
 {
 int max;
 if (numargs>0)
@@ -104,15 +110,15 @@ ss << '}';
 return TCL_OK;
 }
 /*****************************************************************************/
-int E_ved::f_printconf_tabular(OSTRINGSTREAM& ss, const C_confirmation* conf,
-    int needtest, int numargs, const STRING* args)
+int E_ved::f_printconf_tabular(ostringstream& ss, const C_confirmation* conf,
+    int needtest, int numargs, const string* args)
 {
 ss << (*conf);
 return TCL_OK;
 }
 /*****************************************************************************/
-int E_ved::f_printconf_text(OSTRINGSTREAM& ss, const C_confirmation* conf,
-    int needtest, int numargs, const STRING* args)
+int E_ved::f_printconf_text(ostringstream& ss, const C_confirmation* conf,
+    int needtest, int numargs, const string* args)
 {
 ss<</*name()<<": "<<*/Req_str(conf->header()->type.reqtype)<<": ";
 if (conf->buffer(0))
@@ -127,8 +133,8 @@ return TCL_OK;
 }
 /*****************************************************************************/
 
-int E_ved::f_command(OSTRINGSTREAM& ss, const C_confirmation* conf, int needtest,
-    int numargs, const STRING* args)
+int E_ved::f_command(ostringstream& ss, const C_confirmation* conf, int needtest,
+    int numargs, const string* args)
 {
 int num=conf->size();
 unsigned int* buf=(unsigned int*)(conf->buffer());
@@ -138,8 +144,8 @@ return TCL_OK;
 
 /*****************************************************************************/
 
-int E_ved::f_readvar(OSTRINGSTREAM& ss, const C_confirmation* conf,
-    int needtest, int numargs, const STRING* args)
+int E_ved::f_readvar(ostringstream& ss, const C_confirmation* conf,
+    int needtest, int numargs, const string* args)
 {
 ems_i32* buf=conf->buffer();
 int size=buf[1];
@@ -177,8 +183,8 @@ return TCL_OK;
 
 /*****************************************************************************/
 
-int E_ved::f_integer(OSTRINGSTREAM& ss, const C_confirmation* conf,
-    int needtest, int numargs, const STRING* args)
+int E_ved::f_integer(ostringstream& ss, const C_confirmation* conf,
+    int needtest, int numargs, const string* args)
 {
 if (conf->size()<2)
   {
@@ -191,8 +197,8 @@ return TCL_OK;
 
 /*****************************************************************************/
 
-int E_ved::f_integerlist(OSTRINGSTREAM& ss, const C_confirmation* conf,
-    int needtest, int numargs, const STRING* args)
+int E_ved::f_integerlist(ostringstream& ss, const C_confirmation* conf,
+    int needtest, int numargs, const string* args)
 {
 C_inbuf ib(conf->buffer(), conf->size());
 ib++; // errorcode ueberspringen
@@ -207,8 +213,8 @@ return TCL_OK;
 
 /*****************************************************************************/
 
-int E_ved::f_rawintegerlist(OSTRINGSTREAM& ss, const C_confirmation* conf,
-    int needtest, int numargs, const STRING* args)
+int E_ved::f_rawintegerlist(ostringstream& ss, const C_confirmation* conf,
+    int needtest, int numargs, const string* args)
 {
 C_inbuf ib(conf->buffer(), conf->size());
 ib++; // errorcode ueberspringen
@@ -229,8 +235,8 @@ return TCL_OK;
 }
 
 /*****************************************************************************/
-int E_ved::f_intfmt(OSTRINGSTREAM& ss, const C_confirmation* conf,
-    int needtest, int numargs, const STRING* args)
+int E_ved::f_intfmt(ostringstream& ss, const C_confirmation* conf,
+    int needtest, int numargs, const string* args)
 {
     C_inbuf ib(conf->buffer(), conf->size());
     const char* format="0x%08x";
@@ -265,15 +271,15 @@ int E_ved::f_intfmt(OSTRINGSTREAM& ss, const C_confirmation* conf,
 }
 /*****************************************************************************/
 
-int E_ved::f_stringlist(OSTRINGSTREAM& ss, const C_confirmation* conf,
-    int needtest, int numargs, const STRING* args)
+int E_ved::f_stringlist(ostringstream& ss, const C_confirmation* conf,
+    int needtest, int numargs, const string* args)
 {
 C_inbuf ib(conf->buffer(), conf->size());
 ib++; // errorcode ueberspringen
 int num=ib.getint();
 for (int i=0; i<num; i++)
   {
-  STRING st;
+  string st;
   ib >> st;
   ss << '{' << st << '}';
   if (i+1<num) ss << ' ';
@@ -283,12 +289,12 @@ return TCL_OK;
 
 /*****************************************************************************/
 
-int E_ved::f_string(OSTRINGSTREAM& ss, const C_confirmation* conf,
-    int needtest, int numargs, const STRING* args)
+int E_ved::f_string(ostringstream& ss, const C_confirmation* conf,
+    int needtest, int numargs, const string* args)
 {
 C_inbuf ib(conf->buffer(), conf->size());
 ib++; // errorcode ueberspringen
-STRING st;
+string st;
 ib >> st;
 ss << st;
 return TCL_OK;
@@ -296,8 +302,8 @@ return TCL_OK;
 
 /*****************************************************************************/
 
-int E_ved::f_identify(OSTRINGSTREAM& ss, const C_confirmation* conf, int needtest,
-    int numargs, const STRING* args)
+int E_ved::f_identify(ostringstream& ss, const C_confirmation* conf, int needtest,
+    int numargs, const string* args)
 {
 C_inbuf ib(conf->buffer(), conf->size());
 ib++; // errorcode ueberspringen
@@ -306,7 +312,7 @@ for (int i=0; i<3; i++) // ver_ved, ver_req, ver_unsol
 int num=ib.getint();
 for (int j=0; j<num; j++)
   {
-  STRING s;
+  string s;
   ib >> s;
   ss << '{' << s << '}';
   if (j+1<num) ss << ' ';
@@ -315,8 +321,8 @@ return TCL_OK;
 }
 
 /*****************************************************************************/
-int E_ved::f_domevent(OSTRINGSTREAM& ss, const C_confirmation* conf,
-    int needtest, int numargs, const STRING* args)
+int E_ved::f_domevent(ostringstream& ss, const C_confirmation* conf,
+    int needtest, int numargs, const string* args)
 {
     int num=-1;
     if (numargs>0) {
@@ -354,8 +360,8 @@ int E_ved::f_domevent(OSTRINGSTREAM& ss, const C_confirmation* conf,
 }
 /*****************************************************************************/
 
-int E_ved::f_readoutstatus(OSTRINGSTREAM& ss, const C_confirmation* conf,
-    int needtest, int numargs, const STRING* args)
+int E_ved::f_readoutstatus(ostringstream& ss, const C_confirmation* conf,
+    int needtest, int numargs, const string* args)
 {
 C_inbuf ib(conf->buffer(), conf->size());
 C_readoutstatus* rostatus=new C_readoutstatus(ib, 1);
@@ -409,8 +415,8 @@ return TCL_OK;
 
 /*****************************************************************************/
 
-int E_ved::f_ioaddr(OSTRINGSTREAM& ss, const C_confirmation* conf,
-    int needtest, int numargs, const STRING* args)
+int E_ved::f_ioaddr(ostringstream& ss, const C_confirmation* conf,
+    int needtest, int numargs, const string* args)
 {
 if (numargs!=1)
   {
@@ -435,7 +441,7 @@ return res;
 
 /*****************************************************************************/
 
-int E_ved::ff_ioaddr(OSTRINGSTREAM& ss, const C_data_io* addr)
+int E_ved::ff_ioaddr(ostringstream& ss, const C_data_io* addr)
 {
 // output:
 //   iotyp buffersize prior addresstype {address}
@@ -445,8 +451,8 @@ return TCL_OK;
 
 /*****************************************************************************/
 
-int E_ved::f_dostatus(OSTRINGSTREAM& ss, const C_confirmation* conf,
-    int needtest, int numargs, const STRING* args)
+int E_ved::f_dostatus(ostringstream& ss, const C_confirmation* conf,
+    int needtest, int numargs, const string* args)
 {
 if (numargs!=0)
   {
@@ -459,8 +465,8 @@ return TCL_OK;
 
 /*****************************************************************************/
 
-int E_ved::f_modullist(OSTRINGSTREAM& ss, const C_confirmation* conf,
-    int needtest, int numargs, const STRING* args)
+int E_ved::f_modullist(ostringstream& ss, const C_confirmation* conf,
+    int needtest, int numargs, const string* args)
 {
 int version;
 if (numargs>0)
@@ -479,7 +485,7 @@ return TCL_OK;
 
 /*****************************************************************************/
 void
-E_ved::ff_modullist(OSTRINGSTREAM& ss, const C_modullist* mlist, int version)
+E_ved::ff_modullist(ostringstream& ss, const C_modullist* mlist, int version)
 {
     int n=mlist->size();
     if (version) {
@@ -527,8 +533,8 @@ E_ved::ff_modullist(OSTRINGSTREAM& ss, const C_modullist* mlist, int version)
 }
 /*****************************************************************************/
 
-int E_ved::f_lamstatus(OSTRINGSTREAM& ss, const C_confirmation* conf,
-    int needtest, int numargs, const STRING* args)
+int E_ved::f_lamstatus(ostringstream& ss, const C_confirmation* conf,
+    int needtest, int numargs, const string* args)
 {
     int i, num;
 
@@ -550,8 +556,8 @@ int E_ved::f_lamstatus(OSTRINGSTREAM& ss, const C_confirmation* conf,
 }
 /*****************************************************************************/
 
-int E_ved::f_isstatus(OSTRINGSTREAM& ss, const C_confirmation* conf,
-    int needtest, int numargs, const STRING* args)
+int E_ved::f_isstatus(ostringstream& ss, const C_confirmation* conf,
+    int needtest, int numargs, const string* args)
 {
 C_isstatus* status=new C_isstatus(conf);
 ff_isstatus(ss, status);
@@ -561,7 +567,7 @@ return TCL_OK;
 
 /*****************************************************************************/
 
-void E_ved::ff_isstatus(OSTRINGSTREAM& ss, const C_isstatus* status)
+void E_ved::ff_isstatus(ostringstream& ss, const C_isstatus* status)
 {
 ss << status->id() << ' ' << status->enabled() << ' ' << status->members()
     << " {";
@@ -575,8 +581,8 @@ ss << '}';
 
 /*****************************************************************************/
 
-int E_ved::f_readoutlist(OSTRINGSTREAM& ss, const C_confirmation* conf,
-    int needtest, int numargs, const STRING* args)
+int E_ved::f_readoutlist(ostringstream& ss, const C_confirmation* conf,
+    int needtest, int numargs, const string* args)
 {
 // (1): priority (2): number of procedures
 //ss << conf->buffer(1) << ' ' << conf->buffer(2) << " {";
@@ -600,8 +606,8 @@ return TCL_OK;
 
 /*****************************************************************************/
 
-int E_ved::f_createis(OSTRINGSTREAM& ss, const C_confirmation* conf,
-    int needtest, int numargs, const STRING* args)
+int E_ved::f_createis(ostringstream& ss, const C_confirmation* conf,
+    int needtest, int numargs, const string* args)
 {
 if (numargs!=2)
   {
@@ -621,7 +627,7 @@ if (args[0]=="open")
   for (int i=0; !found && (i<num); i++) if ((int)ib.getint()==idx) found=1;
   if (!found)
     {
-    OSTRINGSTREAM ss;
+    ostringstream ss;
     ss << "is " << idx << "does not exist";
     Tcl_SetResult_Stream(interp, ss);
     return TCL_ERROR;
@@ -633,7 +639,7 @@ else if (args[0]=="create")
   }
 else
   {
-  OSTRINGSTREAM ss;
+  ostringstream ss;
   ss << "unknown arg " << '"' << args[0] << '"'
       << "; possible args are open and create";
   Tcl_SetResult_Stream(interp, ss);
@@ -648,8 +654,8 @@ return TCL_OK;
 
 /*****************************************************************************/
 int
-E_ved::f_lamupload(OSTRINGSTREAM& ss, const C_confirmation* conf,
-    int needtest, int numargs, const STRING* args)
+E_ved::f_lamupload(ostringstream& ss, const C_confirmation* conf,
+    int needtest, int numargs, const string* args)
 {
     C_inbuf ib(conf->buffer(), conf->size());
     ib++; // skip errorcode
@@ -673,8 +679,8 @@ E_ved::f_lamupload(OSTRINGSTREAM& ss, const C_confirmation* conf,
 }
 /*****************************************************************************/
 
-int E_ved::f_trigger(OSTRINGSTREAM& ss, const C_confirmation* conf,
-    int needtest, int numargs, const STRING* args)
+int E_ved::f_trigger(ostringstream& ss, const C_confirmation* conf,
+    int needtest, int numargs, const string* args)
 {
 C_inbuf ib(conf->buffer(), conf->size());
 ib++; // errorcode ueberspringen

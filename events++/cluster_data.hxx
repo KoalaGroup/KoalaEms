@@ -3,18 +3,21 @@
  * 
  * created 2006-Apr-28 PW
  *
- * $ZEL: cluster_data.hxx,v 1.5 2007/02/12 10:09:46 wuestner Exp $
+ * $ZEL: cluster_data.hxx,v 1.6 2014/07/07 20:02:38 wuestner Exp $
  */
 
 #ifndef _ems_objects_hxx_
 #define _ems_objects_hxx_
 
 #include "config.h"
+#include <string>
+#include <sys/stat.h>
+#include <sys/time.h>
 #include <clusterformat.h>
 
 class ems_cluster {
   public:
-    ems_cluster(ems_u32* buf):type((enum clustertypes)buf[2]),
+    ems_cluster(ems_u32* buf):type(static_cast<enum clustertypes>(buf[2])),
             size(buf[0]), data(buf) {}
     ~ems_cluster() {delete[] data;}
 
@@ -29,14 +32,75 @@ class ems_file {
     ~ems_file();
 
     timeval tv;
-    string name;
+    std::string name;
     unsigned int fragment;
     bool complete;
     time_t ctime;
     time_t mtime;
     mode_t mode;
-    string content;
+    std::string content;
 
+    void dump(int level) const;
+};
+
+class ems_async2;
+
+class ems_mqtt {
+  public:
+    ems_mqtt(void) {}
+    virtual ~ems_mqtt() {}
+
+    std::string topic;
+
+    virtual int parse(const ems_async2&, const ems_u32*) =0;
+    //virtual void dump(int level) const =0;
+};
+
+class ems_mqtt_file: public ems_mqtt {
+  public:
+    ems_mqtt_file(void) {}
+    virtual ~ems_mqtt_file() {}
+
+    timeval mtime;
+    int version;
+    std::string filename;
+    std::string content;
+
+    virtual int parse(const ems_async2&, const ems_u32*);
+    //virtual void dump(int level) const;
+};
+
+class ems_mqtt_opaque: public ems_mqtt {
+  public:
+    ems_mqtt_opaque(void) {}
+    virtual ~ems_mqtt_opaque() {}
+
+    timeval mtime;
+    int version;
+    std::string filename;
+    std::string content;
+
+    virtual int parse(const ems_async2&, const ems_u32*);
+    //virtual void dump(int level) const;
+};
+
+class ems_async2 {
+  public:
+    ems_async2();
+    ~ems_async2();
+
+    const ems_cluster *cluster; // !!! not valid after parsing !!!
+    timeval received;
+    ems_u32 flags;
+    ems_u32 version;
+    std::string url;
+    bool is_mqtt; // to be changed later, if other types exist
+    union content {
+        void *any;
+        ems_mqtt *mqtt;
+    } content;
+
+    int parse(const ems_cluster *cluster);
     void dump(int level) const;
 };
 
@@ -46,9 +110,9 @@ class ems_text {
     ~ems_text();
 
     timeval tv;
-    string key;
+    std::string key;
     int nr_lines;
-    string* lines;
+    std::string* lines;
 
     void dump(int level) const;
 };
@@ -117,6 +181,7 @@ class ems_data {
     ems_text** texts;
     int nr_files;
     ems_file** files;
+    ems_async2 *current_async2;
     ems_ved_info ved_info;
     int nr_skip_is;
     int *skip_is;
@@ -127,6 +192,7 @@ class ems_data {
 
     int get_event(ems_event**);
     bool events_available(void);
+    static int parse_timestamp(const ems_cluster*, timeval*);
 
   protected:
     struct event_info {
@@ -145,9 +211,9 @@ class ems_data {
     void purge_uncomplete(void);
     event_info* find_ev_info(ems_u32, int);
     event_info* get_ev_info(int ev_no, int trigno, int ved_idx);
-    int parse_timestamp(const ems_cluster*, timeval*);
     int parse_cluster_file(const ems_cluster*, ems_file**);
     int parse_cluster_text(const ems_cluster*, ems_text*);
+    int parse_cluster_async2(const ems_cluster*, ems_async2**);
     int parse_cluster_ved_info(const ems_cluster*, ems_ved_info*);
     int parse_cluster_no_more_data(const ems_cluster*);
     //int parse_cluster_events(const ems_cluster*);

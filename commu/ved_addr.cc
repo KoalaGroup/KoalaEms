@@ -5,8 +5,11 @@
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
-
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <cstring>
 #include <ved_addr.hxx>
 #include <xdrstring.h>
@@ -14,9 +17,11 @@
 #include <errors.hxx>
 #include "versions.hxx"
 
-VERSION("2009-Feb-25", __FILE__, __DATE__, __TIME__,
-"$ZEL: ved_addr.cc,v 2.13 2009/08/21 21:50:51 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: ved_addr.cc,v 2.14 2014/07/14 15:12:20 wuestner Exp $")
 #define XVERSION
+
+using namespace std;
 
 /*****************************************************************************/
 
@@ -77,7 +82,7 @@ return(!operator==(addr));
 
 /*****************************************************************************/
 
-C_VED_addr_builtin::C_VED_addr_builtin(const STRING& name)
+C_VED_addr_builtin::C_VED_addr_builtin(const string& name)
 :name_(name)
 {}
 
@@ -139,7 +144,7 @@ return(!operator==(addr));
 
 /*****************************************************************************/
 
-C_VED_addr_unix::C_VED_addr_unix(const STRING& socket)
+C_VED_addr_unix::C_VED_addr_unix(const string& socket)
 :sockname_(socket)
 {}
 
@@ -202,7 +207,7 @@ return(!operator==(addr));
 
 /*****************************************************************************/
 
-C_VED_addr_inet::C_VED_addr_inet(const STRING& host, unsigned short port)
+C_VED_addr_inet::C_VED_addr_inet(const string& host, unsigned short port)
 :hostname_(host), port_(port)
 {}
 
@@ -266,7 +271,7 @@ return(!operator==(addr));
 
 /*****************************************************************************/
 
-C_VED_addr_inet_path::C_VED_addr_inet_path(const STRING& host,
+C_VED_addr_inet_path::C_VED_addr_inet_path(const string& host,
     unsigned short portnum, C_strlist* pathes)
 :C_VED_addr_inet(host, portnum), pathes(pathes)
 {}
@@ -281,7 +286,7 @@ int n, i;
 pathes=new C_strlist(n=inbuf.getint());
 for (i=0; i<n; i++)
   {
-  STRING s;
+  string s;
   inbuf >> s;
   pathes->set(i, s.c_str());
   }
@@ -445,7 +450,7 @@ switch (typ=(C_VED_addr::types)inbuf.getint())
   case C_VED_addr::VICbus:    addr=new C_VED_addr_vic(inbuf); break;
   default:
     {
-    OSTRINGSTREAM s;
+    ostringstream s;
     s << "extract_ved_addr(C_inbuf&): unknown type " << typ << ends;
     throw new C_program_error(s);
     }

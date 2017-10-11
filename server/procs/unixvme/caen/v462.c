@@ -15,6 +15,7 @@ static const char* cvsid __attribute__((unused))=
 #include "../../../objects/domain/dom_ml.h"
 #include "../../../lowlevel/unixvme/vme.h"
 #include "../../../lowlevel/devices.h"
+#include "../../../commu/commu.h"
 #include "../vme_verify.h"
 
 extern ems_u32* outptr;
@@ -98,6 +99,90 @@ plerrcode test_proc_v462init(ems_u32* p)
 
 char name_proc_v462init[] = "v462init";
 int ver_proc_v462init = 1;
+/*****************************************************************************/
+/*
+ * p[0]: 3
+ * p[1]: module
+ * p[2]: gate length for channel 0; -1: no change
+ * p[3]: gate length for channel 1; -1: no change
+ * ...
+ */
+plerrcode proc_v462init2(ems_u32* p)
+{
+    int j, res;
+    ems_i32 *ip=(ems_i32*)p;
+    ems_u16 state;
+
+    ml_entry* module=ModulEnt(p[1]);
+    struct vme_dev* dev=module->address.vme.dev;
+    ems_u32 base=module->address.vme.addr;
+
+    /* read status */
+    res=dev->read_a24d16(dev, base, &state);
+    if (res!=2) {
+        complain("v462init2: cannot read status");
+        return plErr_System;
+    }
+    printf("state: %08x\n", state);
+    /* check local or VME mode of both channels */
+    for (j=0; j<2; j++) {
+        if (ip[j+2]>=0 && state&(1<<(13+j))) {
+            complain("v462init2: channel %d not in VME mode", j);
+            return plErr_HW;
+        }
+    }
+
+    /* the module uses BCD for the gate length */
+    for (j=0; j<2; j++) {
+        int v, i;
+        ems_u32 bcd;
+        if (ip[j+2]<0)
+            continue; /* no change, skip it */
+        /* convert 8 decimal digits to BCD */
+        bcd=0;
+        v=p[j+2];
+        for (i=0; i<8; i++) {
+            bcd=(bcd>>4)|((v%10)<<28);
+            v/=10;
+        }
+        /* write the length values */
+        res=dev->write_a24d16(dev, base+0x2+4*j, (bcd>>16)&0xffff);
+        if (res!=2)
+            return plErr_System;
+        res=dev->write_a24d16(dev, base+0x4+4*j, bcd&0xffff);
+        if (res!=2)
+            return plErr_System;
+    }
+
+    return plOK;
+}
+
+plerrcode test_proc_v462init2(ems_u32* p)
+{
+    ems_i32 *ip=(ems_i32*)p;
+    ems_u32 mtypes[]={CAEN_V462, 0};
+    ml_entry *module;
+    plerrcode res;
+    int i;
+
+    if (p[0]!=3)
+        return plErr_ArgNum;
+    module=ModulEnt(p[1]);
+    if ((test_proc_vmemodule(module, mtypes))!=plOK)
+        return res;
+    for (i=0; i<2; i++) {
+        if (ip[i+2]>99999999) {
+            complain("v462init2: gate length %d too large: %d", i, ip[i+2]);
+            return plErr_ArgRange;
+        }
+    }
+
+    wirbrauchen=0;
+    return plOK;
+}
+
+char name_proc_v462init2[] = "v462init";
+int ver_proc_v462init2 = 2;
 /*****************************************************************************/
 /*
  * p[0]: argcount==0

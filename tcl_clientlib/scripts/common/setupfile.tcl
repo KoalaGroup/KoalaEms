@@ -1,4 +1,4 @@
-#$Id: setupfile.tcl,v 1.4 2011/01/13 19:53:29 wuestner Exp $
+#$Id: setupfile.tcl,v 1.5 2011/11/26 01:55:06 wuestner Exp $
 # 
 # global_setupfile(default)     default name; derived from display
 # global_setupfile(restored)    file used for restore
@@ -15,24 +15,51 @@
 proc display_name {} {
   global env
 
+# do we use a display?
+    if {[string length [info commands .]]==0} {
+        # no, we do not have a window
+        return {}
+    }
+
+# guess SSH tunnel
+    # we should check whether it is used or not
+    if {[info exists env(SSH_CLIENT)]} {
+        set ssh_client [lindex $env(SSH_CLIENT) 0]
+        return $ssh_client
+    }
+
+# no SSH tunnel; use conventional display
   set display [. cget -screen]
   if {$display==""} {
     set display $env(DISPLAY)
   }
+if {0} {
   regsub {\.[^:]*} $display {} display
   if [string match *:? $display] {
     set display $display.0
   }
+}
   return $display
 }
 
 #-----------------------------------------------------------------------------#
+if {0} {
+    proc setupfile_name {key} {
+      regsub -all { } "~/.[winfo name .]rc_$key" {} setup_file
+      return $setup_file
+    }
+} else {
+    proc setupfile_name {key} {
+        global argv0
 
-proc setupfile_name {key} {
-  regsub -all { } "~/.[winfo name .]rc_$key" {} setup_file
-  return $setup_file
+        set myname [file tail $argv0]
+        set setup_file ~/.${myname}rc
+        if {[string length $key]>0} {
+            append setup_file _$key
+        }
+        return $setup_file
+    }
 }
-
 #-----------------------------------------------------------------------------#
 
 proc find_setupfile {name key default} {

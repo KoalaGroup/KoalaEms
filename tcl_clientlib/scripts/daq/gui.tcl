@@ -1,4 +1,4 @@
-# $ZEL: gui.tcl,v 1.14 2009/02/09 17:56:26 wuestner Exp $
+# $ZEL: gui.tcl,v 1.17 2014/07/10 10:26:05 wuestner Exp $
 # copyright:
 # 1998 P. Wuestner; Zentrallabor fuer Elektronik; Forschungszentrum Juelich
 #
@@ -197,6 +197,10 @@ static unsigned char screen-logo_bits[] = {
   label .sp.status.c4 -text ": "
   entry .sp.status.e4 -textvariable global_daq(stoptime) -relief flat\
     -state $entry_ro
+  label .sp.status.l5 -text "file name"
+  label .sp.status.c5 -text ": "
+  entry .sp.status.e5 -textvariable global_daq(filename) -relief flat\
+    -state $entry_ro
 
   grid configure .sp.status.l1 -column 0 -row 0 -sticky w
   grid configure .sp.status.c1 -column 1 -row 0 -sticky w
@@ -211,6 +215,9 @@ static unsigned char screen-logo_bits[] = {
   grid configure .sp.status.l4 -column 0 -row 3 -sticky w
   grid configure .sp.status.c4 -column 1 -row 3 -sticky w
   grid configure .sp.status.e4 -column 2 -row 3 -sticky we
+  grid configure .sp.status.l5 -column 0 -row 4 -sticky w
+  grid configure .sp.status.c5 -column 1 -row 4 -sticky w
+  grid configure .sp.status.e5 -column 2 -row 4 -sticky we
   grid columnconfigure .sp.status 2 -weight 1
   pack .sp.status -fill x -expand 1 -padx 5 -pady 5
 
@@ -219,7 +226,7 @@ static unsigned char screen-logo_bits[] = {
   create_log .logframe
   frame .logo_ -borderwidth 2 -relief flat
   frame .logo_.logo -background $juelcolor
-  label .logo_.logo.t -text "Forschungszentrum Jülich / Zentralinstitut für Elektronik"\
+  label .logo_.logo.t -text "Forschungszentrum Jülich / ZEA - 2"\
     -background $juelcolor -foreground white -cursor {} -padx 2 -pady 2\
     -font {Helvetica -16 bold roman}
   label .logo_.logo.l -image sfzj -background $juelcolor

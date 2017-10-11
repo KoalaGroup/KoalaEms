@@ -1,8 +1,8 @@
 /*
- * proc_is.cc
+ * proclib/proc_is.cc
  * 
  * created: 05.09.95 PW
- * 24.02.1999 PW: [ro_]add_param(int|float|double|char) defined as inline
+ * 
  */
 
 #include <stdio.h>
@@ -14,9 +14,11 @@
 #include <stdarg.h>
 #include <versions.hxx>
 
-VERSION("Feb 24 1999", __FILE__, __DATE__, __TIME__,
-"$ZEL: proc_is.cc,v 2.15 2007/10/23 11:18:24 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: proc_is.cc,v 2.16 2014/07/14 15:11:54 wuestner Exp $")
 #define XVERSION
+
+using namespace std;
 
 /*****************************************************************************/
 C_instr_system::C_instr_system(C_VED* ved, int idx, openmode mode,
@@ -38,13 +40,13 @@ C_instr_system::C_instr_system(C_VED* ved, int idx, openmode mode,
     conf=ved->GetConf(xid);
     if ((conf->buffer(0)!=OK) && ((mode==create) ||
             (conf->buffer(0)!=Err_ISDef))) {
-        OSTRINGSTREAM s;
+        ostringstream s;
         s << "Can't create IS " << idx;
         throw new C_ved_error(ved, conf, s);
     }
 #ifdef XXX
     {
-        OSTRINGSTREAM ss();
+        ostringstream ss();
         ss<<"IS "<<idx;
         //cerr<<"C_instr_system::C_instr_system(IS "<<idx<<")"<<endl;
         is_name=ss.str();
@@ -53,7 +55,7 @@ C_instr_system::C_instr_system(C_VED* ved, int idx, openmode mode,
     {
         char s[100];
         sprintf(s, "IS %d", idx);
-        is_name=STRING(s);
+        is_name=string(s);
     }
 #endif
     ved->add_is(this);
@@ -83,13 +85,13 @@ C_instr_system::C_instr_system(C_VED* ved, int idx, openmode mode)
                 found=1;
         }
         if (!found) {
-            OSTRINGSTREAM s;
+            ostringstream s;
             s << "IS " << idx << " does not exist.";
             throw new C_ved_error(ved, s);
         }
     }
     {
-        OSTRINGSTREAM ss;
+        ostringstream ss;
         ss<<"IS "<<idx;
         //cerr<<"C_instr_system::C_instr_system(IS "<<idx<<")"<<endl;
         is_name=ss.str();
@@ -124,7 +126,7 @@ if (confmode_==synchron)
   conf=ved->GetConf(xid);
   if (conf->buffer(0)!=OK)
     {
-    OSTRINGSTREAM s;
+    ostringstream s;
     s << "Error in proclist";
     throw new C_ved_error(ved, conf, s);
     }
@@ -148,7 +150,7 @@ if (proclist.execmode==immediate) proclist.clear();
 
 if (proclist.add_proc(proc)==-1)
   {
-  OSTRINGSTREAM s;
+  ostringstream s;
   s << "unknown procedure \"" << proc << "\"";
   throw new C_ved_error(ved, s);
   }
@@ -167,7 +169,7 @@ if (proclist.execmode==immediate)
     conf=ved->GetConf(xid);
     if (conf->buffer(0)!=OK)
       {
-      OSTRINGSTREAM s;
+      ostringstream s;
       s << "Error in \"" << proc << "\"";
       throw new C_ved_error(ved, conf, s);
       }
@@ -194,7 +196,7 @@ if (proclist.execmode==immediate) proclist.clear();
 
 if (proclist.add_proc(proc)==-1)
   {
-  OSTRINGSTREAM s;
+  ostringstream s;
   s << "unknown procedure \"" << proc << "\"";
   throw new C_ved_error(ved, s);
   }
@@ -211,7 +213,7 @@ if (proclist.execmode==immediate)
     conf=ved->GetConf(xid);
     if (conf->buffer(0)!=OK)
       {
-      OSTRINGSTREAM s;
+      ostringstream s;
       s << "Error in \"" << proc << "\"";
       throw new C_ved_error(ved, conf, s);
       }
@@ -235,7 +237,7 @@ if (proclist.execmode==immediate) proclist.clear();
 
 if (proclist.add_proc(proc)==-1)
   {
-  OSTRINGSTREAM s;
+  ostringstream s;
   s << "unknown procedure \"" << proc << "\"";
   throw new C_ved_error(ved, s);
   }
@@ -250,7 +252,7 @@ if (proclist.execmode==immediate)
     conf=ved->GetConf(xid);
     if (conf->buffer(0)!=OK)
       {
-      OSTRINGSTREAM s;
+      ostringstream s;
       s << "Error in \"" << proc << "\"";
       throw new C_ved_error(ved, conf, s);
       }
@@ -274,7 +276,7 @@ if (proclist.execmode==immediate) proclist.clear();
 
 if (proclist.add_proc(proc)==-1)
   {
-  OSTRINGSTREAM s;
+  ostringstream s;
   s << "unknown procedure \"" << proc << "\"";
   throw new C_ved_error(ved, s);
   }
@@ -291,7 +293,7 @@ if (proclist.execmode==immediate)
     conf=ved->GetConf(xid);
     if (conf->buffer(0)!=OK)
       {
-      OSTRINGSTREAM s;
+      ostringstream s;
       s << "Error in \"" << proc << "\"";
       throw new C_ved_error(ved, conf, s);
       }
@@ -332,7 +334,7 @@ if (proclist.execmode==immediate)
     conf=ved->GetConf(xid);
     if (conf->buffer(0)!=OK)
       {
-      OSTRINGSTREAM s;
+      ostringstream s;
       s << "Error in \"" << proc << "\"";
       throw new C_exec_Error(C_ved_error(ved, conf, s));
       }
@@ -366,7 +368,7 @@ if (proclist.execmode==immediate)
     conf=ved->GetConf(xid);
     if (conf->buffer(0)!=OK)
       {
-      OSTRINGSTREAM s;
+      ostringstream s;
       s << "Error in \"" << proc << "\"";
       throw new C_ved_error(ved, conf, s);
       }
@@ -537,7 +539,7 @@ else
 void C_instr_system::ro_add_proc(const char* proc)
 {
     if (readoutlist.add_proc(proc)==-1) {
-        OSTRINGSTREAM s;
+        ostringstream s;
         s << "unknown procedure \"" << proc << "\"";
         throw new C_ved_error(ved, s);
     }
@@ -549,7 +551,7 @@ void C_instr_system::ro_add_proc(const char* proc, int num, ...)
     int i;
 
     if (readoutlist.add_proc(proc)==-1) {
-        OSTRINGSTREAM s;
+        ostringstream s;
         s << "unknown procedure \"" << proc << "\"";
         throw new C_ved_error(ved, s);
     }

@@ -1,4 +1,4 @@
-# $ZEL: Makefile.in,v 1.42 2010/09/10 22:51:20 wuestner Exp $
+# $ZEL: Makefile.in,v 1.43 2014/07/08 18:45:53 wuestner Exp $
 
 prefix = @prefix@
 exec_prefix = @exec_prefix@
@@ -25,6 +25,7 @@ SUPPORT_LIB = @EMSSUPPORTLIB@
 CC = @CC@
 CFLAGS := @CFLAGS@
 CXX = @CXX@
+# should be: -std=c++11 ...
 CXXFLAGS = @CXXFLAGS@
 #CXXFLAGS:= @CXXFLAGS@ -DTSMDIR=$(badir) -I$(sampledir)
 INSTALL = @INSTALL@
@@ -74,7 +75,8 @@ CCSOURCES := \
         cluster2raw.cc lvdtdc2text.cc lvdtdcraw2text.cc \
         parse_nothing.cc cluster.cc clusterreader.cc divhist.cc events.cc  \
 	evinput.cc evoutput.cc hbin.cc statist.cc subevents.cc memory.cc  \
-        multicopy.cc parse_lvd_sync.cc parse_lvd_nosync.cc parse_synced_lvd.cc
+        multicopy.cc parse_lvd_sync.cc parse_lvd_nosync.cc parse_synced_lvd.cc \
+        parse_strawtest.cc parse_mqtt.cc cl_consistency.cc
 
 SOURCES := $(CCSOURCES)
 DSOURCES := $(CCSOURCES) $(OBJSOURCES)
@@ -88,11 +90,14 @@ USEFULLEXECS := cluster2event event_deflector evselect
 usefull: $(USEFULLEXECS)
 all: $(EXECS)
 
+lvd_triggsync: lvd_triggsync.o cluster_data_timed.o
+	$(CXX) -o $@ $^ $(LIBS)
+
 parse_f1raw: parse_f1raw.o cluster_data.o
 	$(CXX) -o $@ $^ $(LIBS)
 
 parse_nothing: parse_nothing.o cluster_data.o
-	$(CXX) -o $@ $^ -L$(COMMON_LIB) -lcommon.$(COMMONVER)
+	$(CXX) -o $@ $^ $(LIBS)
 
 lvd_modstatist: lvd_modstatist.o cluster_data.o
 	$(CXX) -o $@ $^ $(LIBS)
@@ -170,6 +175,15 @@ parse_gpx1: parse_gpx1.o cluster_data.o
 	$(CXX) -o $@ $^ $(LIBS)
 
 parse_lvd: parse_lvd.o cluster_data.o
+	$(CXX) -o $@ $^ $(LIBS)
+
+parse_strawtest: parse_strawtest.o cluster_data.o strawtest_data.o
+	$(CXX) -o $@ $^ $(LIBS)
+
+parse_mqtt: parse_mqtt.o cluster_data.o
+	$(CXX) -o $@ $^ $(LIBS)
+
+cl_consistency: cl_consistency.o
 	$(CXX) -o $@ $^ $(LIBS)
 
 parse_synced_lvd: parse_synced_lvd.o cluster_data_synced.o

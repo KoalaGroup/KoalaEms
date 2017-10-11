@@ -1,7 +1,7 @@
 /*
  * commu_station.hxx
  *
- * $ZEL: commu_station.hxx,v 2.15 2009/08/21 21:50:51 wuestner Exp $
+ * $ZEL: commu_station.hxx,v 2.16 2014/07/14 15:12:20 wuestner Exp $
  *
  * created before 04.03.94
  */
@@ -10,11 +10,17 @@
 #define _commu_station_hxx_
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <commu_list_t.hxx>
 #include <commu_message.hxx>
 #include <commu_io.hxx>
 #include <nocopy.hxx>
+
+using namespace std;
 
 /*****************************************************************************/
 
@@ -25,7 +31,7 @@ class C_station:public nocopy
     virtual ~C_station() {}
 
   private:
-    STRING stationname;
+    string stationname;
 
   protected:
     typedef enum
@@ -60,8 +66,8 @@ class C_station:public nocopy
     static C_ints logtempl_in;
     static C_ints logtempl_out;
 
-    STRING grund;
-    STRING extgrund;
+    string grund;
+    string extgrund;
     int err;
 
     static const char *io_readfehler;
@@ -75,13 +81,13 @@ class C_station:public nocopy
     static const char *io_openfehler;
     static const char *io_serverclose;
     virtual const char* statstr() const =0;
-    void setname(const STRING& name) {stationname=name;}
+    void setname(const string& name) {stationname=name;}
     virtual void logmessage(const C_message*, int) =0;
 
   public:
-    virtual STRING name() const {return stationname;}
+    virtual string name() const {return stationname;}
     virtual stat status() const =0;
-    STRING reason() const {return(grund);}
+    string reason() const {return(grund);}
     int errnum() const {return(err);}
     //int hidden() const {return !regulaer;}
     //void hide() {regulaer=0;}

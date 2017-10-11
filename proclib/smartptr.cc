@@ -1,13 +1,16 @@
 /*
- * smartptr.cc
+ * proclib/smartptr.cc
  * 
  * created: 15.06.97
- * 25.03.1998 PW: adapded for <string>
- * 12.06.1998 PW: adapted for STD_STRICT_ANSI
+ * 
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <stdlib.h>
 #include "smartptr_t.hxx"
 #include <proc_namelist.hxx>
@@ -16,10 +19,11 @@
 #include <errors.hxx>
 #include <versions.hxx>
 
-VERSION("Jun 12 1998", __FILE__, __DATE__, __TIME__,
-"$ZEL: smartptr.cc,v 2.8 2004/11/26 14:44:36 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: smartptr.cc,v 2.9 2014/07/14 15:11:54 wuestner Exp $")
 
-volatile int xx;
+using namespace std;
+
 /*****************************************************************************/
 
 const int C_ptr_error::e_ptr(6);
@@ -28,7 +32,7 @@ const int C_ptr_error::e_ptr(6);
 //{}
 
 
-C_ptr_error::C_ptr_error(OSTRINGSTREAM& ss)
+C_ptr_error::C_ptr_error(ostringstream& ss)
 {
 message_=ss.str();
 }
@@ -55,7 +59,7 @@ return(ob);
 
 /*****************************************************************************/
 
-STRING C_ptr_error::message(void) const
+string C_ptr_error::message(void) const
 {
 return(message_);
 }

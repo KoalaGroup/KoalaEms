@@ -5,7 +5,11 @@
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include "histowin.hxx"
 #include <cstdlib>
 #include <cmath>
@@ -14,14 +18,15 @@
 #include <cstring>
 #include <tk.h>
 #include "findstring.hxx"
-#include "compat.h"
 #include <errors.hxx>
 #include "tcl_cxx.hxx"
 #include <versions.hxx>
 
-VERSION("2009-Feb-25", __FILE__, __DATE__, __TIME__,
-"$ZEL: histowin.cc,v 1.17 2010/09/10 23:18:58 wuestner Exp $")
+VERSION("2014-07-16", __FILE__, __DATE__, __TIME__,
+"$ZEL: histowin.cc,v 1.20 2014/07/16 16:54:27 wuestner Exp $")
 #define XVERSION
+
+using namespace std;
 
 /*****************************************************************************/
 E_histowin::E_histowin(Tcl_Interp* interp, ClientData clientdata,
@@ -54,14 +59,6 @@ E_histowin::E_histowin(Tcl_Interp* interp, ClientData clientdata,
     if (objc<2) {
         Tcl_WrongNumArgs(interp, 1, objv, "name ...");
         throw TCL_ERROR;
-    }
-
-    // fill idiotic defined ConfigSpecs
-    for (int i=0; config_specs[i].type!=TK_CONFIG_END; i++) {
-        config_specs[i].argvName=strdup(config_specnames[i]);
-    }
-    for (int i=0; arrconfig_specs[i].type!=TK_CONFIG_END; i++) {
-        arrconfig_specs[i].argvName=strdup(arrconfig_specnames[i]);
     }
 
     winpath=Tcl_GetString(objv[1]);
@@ -123,10 +120,6 @@ E_histowin::~E_histowin()
         XFreeGC(xdisplay, crossgc);
         Tk_FreeCursor(xdisplay, emptycursor);
     }
-    for (int i=0; config_specs[i].type!=TK_CONFIG_END; i++)
-        free(config_specs[i].argvName);
-    for (int i=0; arrconfig_specs[i].type!=TK_CONFIG_END; i++)
-        free(arrconfig_specs[i].argvName);
 }
 /*****************************************************************************/
 void E_histowin::inithints::destroy(ClientData clientdata, Tcl_Interp*)
@@ -178,28 +171,28 @@ void E_histowin::update_cross()
         if (reason&CR_delete) {
             return;
         } else {
-            OSTRINGSTREAM st;
+            ostringstream st;
             st << crosscommand << " create " << setprecision(20)
                 << cross_x+xoffs << ' ' << t_xv(cross_x) << ' '
                 << cross_y+yoffs << ' '  << t_yv(cross_y);
-            STRING s=st.str();
+            string s=st.str();
             if (Tcl_GlobalEval(interp, (char*)s.c_str())!=TCL_OK)
                 Tcl_BackgroundError(interp);
         }
     } else if (reason&CR_delete) {
-        OSTRINGSTREAM st;
+        ostringstream st;
         st << crosscommand << " delete " << setprecision(20)
             << cross_x+xoffs << ' ' << t_xv(cross_x) << ' ' << cross_y+yoffs
             << ' '  << t_yv(cross_y);
-        STRING s=st.str();
+        string s=st.str();
         if (Tcl_GlobalEval(interp, (char*)s.c_str())!=TCL_OK)
             Tcl_BackgroundError(interp);
     } else if (reason&CR_move) {
-        OSTRINGSTREAM st;
+        ostringstream st;
         st << crosscommand << " move " << setprecision(20)
             << cross_x+xoffs << ' ' << t_xv(cross_x) << ' ' << cross_y+yoffs
             << ' '  << t_yv(cross_y);
-        STRING s=st.str();
+        string s=st.str();
         if (Tcl_GlobalEval(interp, (char*)s.c_str())!=TCL_OK)
             Tcl_BackgroundError(interp);
     }
@@ -337,9 +330,9 @@ void E_histowin::initscaling(void)
     arrmaxx=dx1;
 }
 /*****************************************************************************/
-STRING E_histowin::zeit(double t)
+string E_histowin::zeit(double t)
 {
-    OSTRINGSTREAM st;
+    ostringstream st;
     if (fabs(t-anfang)<10000)
         st << t-anfang << "-start";
     else
@@ -349,9 +342,9 @@ STRING E_histowin::zeit(double t)
 /*****************************************************************************/
 void E_histowin::doxscalecommand()
 {
-    OSTRINGSTREAM st;
+    ostringstream st;
     st<<xscalecommand<<" "<<setprecision(20)<<dx0<<" "<<dx1;
-    STRING s=st.str();
+    string s=st.str();
     if (Tcl_GlobalEval(interp, (char*)s.c_str())!=TCL_OK)
         Tcl_BackgroundError(interp);
     char* command=new char[strlen("update idletasks")+1];
@@ -372,20 +365,20 @@ void E_histowin::doscrollcommand()
         p1=1;
     else
         p1=(dx1-arrminx)/(arrmaxx-arrminx);
-    OSTRINGSTREAM st;
+    ostringstream st;
     st << scrollcommand << ' ' << p0 << ' ' << p1;
-    STRING s=st.str();
+    string s=st.str();
     if (Tcl_GlobalEval(interp, (char*)s.c_str())!=TCL_OK)
         Tcl_BackgroundError(interp);
 }
 /*****************************************************************************/
 void E_histowin::docrosscommand()
 {
-    OSTRINGSTREAM st;
+    ostringstream st;
     st << crosscommand << " move " << setprecision(20)
         << cross_x+xoffs << ' ' << t_xv(cross_x) << ' ' << cross_y+yoffs
         << ' ' << t_yv(cross_y);
-    STRING s=st.str();
+    string s=st.str();
     if (Tcl_GlobalEval(interp, (char*)s.c_str())!=TCL_OK)
         Tcl_BackgroundError(interp);
 }
@@ -674,64 +667,52 @@ void E_histowin::installidleproc(ureason reason)
     }
 }
 /*****************************************************************************/
-STRING E_histowin::tclprocname(void) const
+string E_histowin::tclprocname(void) const
 {
-    STRING s;
+    string s;
     s=Tcl_GetCommandName(interp, tclcommand);
     return s;
 }
 /*****************************************************************************/
 Tk_ConfigSpec E_histowin::config_specs[]= {
     {
-        TK_CONFIG_PIXELS, 0, "width", "Width", "300",
+        TK_CONFIG_PIXELS, NCC86("-width"), "width", "Width", "300",
         Tk_Offset(struct E_histowin::config, c_width), 0, 0
     },
     {
-        TK_CONFIG_PIXELS, 0, "height", "Height", "100",
+        TK_CONFIG_PIXELS, NCC86("-height"), "height", "Height", "100",
         Tk_Offset(struct E_histowin::config, c_height), 0, 0
     },
     {
-        TK_CONFIG_SYNONYM, 0, "background", 0, 0, 0, 0, 0
+        TK_CONFIG_SYNONYM, NCC86("-bg"), "background", 0, 0, 0, 0, 0
     },
     {
-        TK_CONFIG_COLOR, 0, "background", "Background", "white",
+        TK_CONFIG_COLOR, NCC86("-background"), "background", "Background", "white",
         Tk_Offset(struct E_histowin::config, c_background), 0, 0
     },
     {
-        TK_CONFIG_SYNONYM, 0, "foreground", 0, 0, 0, 0, 0
+        TK_CONFIG_SYNONYM, NCC86("-fg"), "foreground", 0, 0, 0, 0, 0
     },
     {
-        TK_CONFIG_STRING, 0, "foreground", "Foreground", "black",
+        TK_CONFIG_STRING, NCC86("-foreground"), "foreground", "Foreground", "black",
         Tk_Offset(struct E_histowin::config, c_foreground), 0, 0
     },
     {
-        TK_CONFIG_ACTIVE_CURSOR, 0, "cursor", "Cursor", "",
+        TK_CONFIG_ACTIVE_CURSOR, NCC86("-cursor"), "cursor", "Cursor", "",
         Tk_Offset(struct E_histowin::config, c_cursor), TK_CONFIG_NULL_OK, 0
     },
     {
-        TK_CONFIG_PIXELS, 0, "xScrollIncrement",
+        TK_CONFIG_PIXELS, NCC86("-xscrollincrement"), "xScrollIncrement",
             "ScrollIncrement", "0",
         Tk_Offset(struct E_histowin::config, c_scrollincr), 0, 0
     },  
     {
-        TK_CONFIG_COLOR, 0, "crosscolor", "Crosscolor", "black",
+        TK_CONFIG_COLOR, NCC86("-crosscolor"), "crosscolor", "Crosscolor", "black",
         Tk_Offset(struct E_histowin::config, c_crosscolor), 0, 0
     },
     {
         TK_CONFIG_END, 0, 0, 0, 0, 0, 0, 0
     }
-};
-const char *E_histowin::config_specnames[]= {
-    "-width",
-    "-height",
-    "-bg",
-    "-background",
-    "-fg",
-    "-foreground",
-    "-cursor",
-    "-xscrollincrement",
-    "-crosscolor",
-    0
 };
 
 int E_histowin::configure(int objc, Tcl_Obj* const objv[], int flags)
@@ -917,7 +898,7 @@ Tk_CustomOption E_histowin::configstyleoption= {
 };
 
 int E_histowin::styleoption_parse(ClientData clientData, Tcl_Interp *interp,
-    Tk_Window tkwin, const char *value, char *widgRec, int offset)
+    Tk_Window tkwin, CONST84 char *value, char *widgRec, int offset)
 {
     int res=TCL_OK;
     switch (findstring(interp, value, (const char**)clientData, 0)) {
@@ -928,7 +909,8 @@ int E_histowin::styleoption_parse(ClientData clientData, Tcl_Interp *interp,
     return res;
 }
 
-char* E_histowin::styleoption_print(ClientData clientData, Tk_Window tkwin,
+CONST86 char* E_histowin::styleoption_print(ClientData clientData,
+    Tk_Window tkwin,
     char *widgRec, int offset, Tcl_FreeProc **freeProcPtr)
 {
     return ((char**)clientData)[*(int*)(widgRec+offset)];
@@ -951,12 +933,12 @@ int E_histowin::intoption_parse(ClientData clientData, Tcl_Interp *interp,
     int val;
     if (Tcl_GetInt(interp, value, &val)!=TCL_OK) return TCL_ERROR;
     if (val<((int*)clientData)[0]) {
-        OSTRINGSTREAM ss;
+        ostringstream ss;
         ss << "value has to be greater or equal than " << ((int*)clientData)[0];
         Tcl_SetResult_Stream(interp, ss);
         return TCL_ERROR;
     } else if (val>((int*)clientData)[1]) {
-        OSTRINGSTREAM ss;
+        ostringstream ss;
         ss << "value has to be less or equal than " << ((int*)clientData)[1];
         Tcl_SetResult_Stream(interp, ss);
         return TCL_ERROR;
@@ -972,12 +954,13 @@ void ch_free(char* p)
 }
 }
 
-char* E_histowin::intoption_print(ClientData clientData, Tk_Window tkwin,
+CONST86 char* E_histowin::intoption_print(ClientData clientData,
+    Tk_Window tkwin,
     char *widgRec, int offset, Tcl_FreeProc **freeProcPtr)
 {
-    OSTRINGSTREAM ss;
+    ostringstream ss;
     ss << *(int*)(widgRec+offset);
-    STRING s=ss.str();
+    string s=ss.str();
     *freeProcPtr=ch_free;
     return strdup(s.c_str());
 }
@@ -986,38 +969,28 @@ char* E_histowin::intoption_print(ClientData clientData, Tk_Window tkwin,
 
 Tk_ConfigSpec E_histowin::arrconfig_specs[]= {
     {
-        TK_CONFIG_COLOR, 0, "color", "Color", 0,
+        TK_CONFIG_COLOR, NCC86("-color"), "color", "Color", 0,
             Tk_Offset(E_histowin::arrentry, color), 0, 0
     },
     {
-        TK_CONFIG_PIXELS, 0, "width", "Width", "0",
+        TK_CONFIG_PIXELS, NCC86("-width"), "width", "Width", "0",
             Tk_Offset(E_histowin::arrentry, width), 0, 0
     },
-    {   TK_CONFIG_CUSTOM, 0, "style", "Style", "boxes",
+    {   TK_CONFIG_CUSTOM, NCC86("-style"), "style", "Style", "boxes",
             Tk_Offset(E_histowin::arrentry, drawmode), 0, &configstyleoption
     },
-//  {   TK_CONFIG_DOUBLE, 0, "scale", "Scale", "1",
+//  {   TK_CONFIG_DOUBLE, NCC86("-scale"), "scale", "Scale", "1",
 //          Tk_Offset(E_histowin::arrentry, scale), 0, 0
 //  },
-    {   TK_CONFIG_CUSTOM, 0, "exp", "Exp", "0",
+    {   TK_CONFIG_CUSTOM, NCC86("-exp"), "exp", "Exp", "0",
             Tk_Offset(E_histowin::arrentry, exp), 0, &configintoption
     },
-    {   TK_CONFIG_BOOLEAN, 0, "enabled", "Enabled", "1",
+    {   TK_CONFIG_BOOLEAN, NCC86("-enabled"), "enabled", "Enabled", "1",
             Tk_Offset(E_histowin::arrentry, enabled), 0, 0
     },
     {
         TK_CONFIG_END, 0, 0, 0, 0, 0, 0, 0
     }
-};
-
-const char *E_histowin::arrconfig_specnames[]= {
-    "-color",
-    "-width",
-    "-style",
-    //"-scale",
-    "-exp",
-    "-enabled",
-    0
 };
 
 int E_histowin::arrconfigure(E_histowin::arrentry* arrent, int objc,

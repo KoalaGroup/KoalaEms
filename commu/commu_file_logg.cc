@@ -5,17 +5,22 @@
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
-
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <cerrno>
 #include <cstring>
 #include <commu_logg.hxx>
 #include <errors.hxx>
 #include "versions.hxx"
 
-VERSION("2009-Feb-25", __FILE__, __DATE__, __TIME__,
-"$ZEL: commu_file_logg.cc,v 2.10 2009/08/21 21:50:50 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: commu_file_logg.cc,v 2.11 2014/07/14 15:12:19 wuestner Exp $")
 #define XVERSION
+
+using namespace std;
 
 /*****************************************************************************/
 
@@ -33,7 +38,7 @@ C_filelogger::C_filelogger(const char *progname, const char *logfile)
     } else {
         out.open(logfile);
         if (!out) {
-            OSTRINGSTREAM ss;
+            ostringstream ss;
             ss << "open logfile \"" << logfile << "\"" << ends;
             throw new C_unix_error(errno, ss);
         }
@@ -62,7 +67,7 @@ switch (dest)
 
 /*****************************************************************************/
 
-void C_filelogger::put(int prior, const STRING& s)
+void C_filelogger::put(int prior, const string& s)
 {
     switch (dest) {
         case 0: break;

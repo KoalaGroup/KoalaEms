@@ -2,15 +2,17 @@
  * commu.cc
  * 
  * created before 07.02.94
- * 26.03.1998 PW: adapded for <string>
- * 14.06.1998 PW: adapted for STD_STRICT_ANSI
- * 11.09.1998 PW: regulaer changed to policies
+ * 
  */
 
 #define _main_c_
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 //#define _ANSI_C_SOURCE
 #include <errno.h>
 #include <sys/time.h>
@@ -59,12 +61,14 @@
 
 #include "versions.hxx"
 
-VERSION("Sep 11 1998", __FILE__, __DATE__, __TIME__,
-"$ZEL: commu.cc,v 2.34 2006/02/16 20:53:03 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: commu.cc,v 2.37 2014/07/14 15:12:19 wuestner Exp $")
 #define XVERSION
 
 #define __xSTRING(x) #x
 #define __SSTRING(x) __xSTRING(x)
+
+using namespace std;
 
 /*****************************************************************************/
 
@@ -73,7 +77,7 @@ int allowautoexit=1;
 int leavemainloop=0;
 int leaveimmediatly=0;
 int termsig=0;
-STRING grund="";
+string grund="";
 int background;
 int dtablesize;
 loggstruct lgg;
@@ -135,7 +139,7 @@ args->use_env("socket", "EMSSOCKET");
 args->addoption("port", "p", DEFISOCKET,
     "socket for internet communication (TCP/IP)", "port");
 args->use_env("port", "EMSPORT");
-args->addoption("nosearch", "nosearch", false, "don't search for free port");
+args->addoption("nosearch", "nosearch", true, "don't search for free port");
 args->addoption("noinet", "noinet", false, "don't open ip socket");
 args->addoption("forkwatcher", "forkwatcher", "", "fork watch process", "watch");
 args->addoption("watchfile", "watchfile", "commuwatch", "logfile for watcher", "watchlog");
@@ -152,6 +156,8 @@ args->use_env("commlist", "COMMLIST");
 
 args->addoption("logfile", "logfile", "", "logfile");
 args->multiplicity("logfile", 0);
+
+args->addoption("pidfile", "pidfile", "/var/run/commu.pid", "pidfile");
 
 args->addoption("nobackground", "nb", false,
     "don't put program into background");
@@ -303,7 +309,9 @@ nlog << "watcher pid: " << cpid << flush;
 void acceptmainsocket(int sock)
 {/* acceptmainsocket */
     C_socket *ns;
+#if 0
     C_io_client *client;
+#endif
 
     TR(acceptmainsocket)
     try {
@@ -325,7 +333,13 @@ void acceptmainsocket(int sock)
         ns=NULL;
     }
     if (ns!=NULL) {
+#if 0
         client=new C_io_client(ns);
+#else
+        /* the return value of new is not used,
+           C_io_client registers itself somewhere */
+        new C_io_client(ns);
+#endif
     }
 }/* acceptmainsocket */
 /*****************************************************************************/
@@ -391,7 +405,7 @@ if (args->getboolopt("noinet"))
 
 if (args->getboolopt("nosearch"))
   {
-  mainisock.setname(STRING(""), port);
+  mainisock.setname(string(""), port);
   if ((res=mainisock.bind())==-1)
     {
     elog << "mainisock.bind(" << port << ")" << error << flush;
@@ -402,7 +416,7 @@ else
   {
   do
     {
-    mainisock.setname(STRING(""), port);
+    mainisock.setname(string(""), port);
     if ((res=mainisock.bind())==-1)
       {
       if (errno==EADDRINUSE) port++;
@@ -723,6 +737,23 @@ TR(main)
     //lgg.addlog(lgg_col);
     }
   #endif
+
+  /* write PID file */
+  {
+    const char *pidname=0;
+    FILE *pidfile=0;
+    pidname=args->getstringopt("pidfile");
+    if (pidname && pidname[0]) {
+      pid_t pid;
+      pid=getpid();
+      pidfile=fopen(pidname, "w");
+      if (pidfile) {
+        fprintf(pidfile, "%llu\n", (unsigned long long)pid);
+        fclose(pidfile);
+      }
+    }
+  }
+
   lgg.addlog(new C_syslogger(argv[0]));
   lgg.addlog(new C_speciallogger(argv[0]));
 

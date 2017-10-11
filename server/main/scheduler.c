@@ -2,7 +2,7 @@
  * main/scheduler.c
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: scheduler.c,v 1.10 2011/04/06 20:30:28 wuestner Exp $";
+    "$ZEL: scheduler.c,v 1.11 2014/09/10 15:28:59 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -291,7 +291,7 @@ sched_insert_poll_task(void(*proc)(union callbackdata),
     mytask->typ=sched_polling;
     mytask->proc=proc;
     mytask->arg=arg;
-    mytask->name=name;
+    mytask->name=strdup(name);
     mytask->p_prio1=p1;
     mytask->p_prio2=p2;
     mytask->p_p2=0; /* sofort */
@@ -326,7 +326,7 @@ sched_insert_block_task(void(*proc)(union callbackdata),
     mytask->p_pproc=pollproc;
     mytask->proc=pollproc;
     mytask->arg=arg;
-    mytask->name=name;
+    mytask->name=strdup(name);
     mytask->p_prio1=p1;
     mytask->p_prio2=p2;
     mytask->p_p2=0; /* sofort */
@@ -498,10 +498,10 @@ T(sched_delete_select_task)
 
 if (descr==0) return; /* emergency exit */
 path=descr->fds;
-    /*
+#if 1
     printf("sched_delete_select_task(%p, path=%d, name=%s)\n", descr, path,
             descr->name);
-    */
+#endif
 st=select_tasks;
 while (st && (st!=descr)) st=st->next;
 if (!st)
@@ -685,6 +685,7 @@ do_remove(union callbackdata data)
 
         t->p_next->p_prev=t->p_prev;
         t->p_prev->p_next=t->p_next;
+        free(t->name);
         free(t);
         numtasks--;
 
@@ -713,6 +714,7 @@ do_remove(union callbackdata data)
         break;
     case sched_timer:
         remove_timer(&t->t_timer);
+        free(t->name);
         free(t);
         break;
     default:
@@ -727,6 +729,8 @@ void sched_remove_task(struct taskdescr* descr)
 {
 T(sched_remove_task)
 if (descr==0) return; /* emergency exit */
+    printf("sched_remove_task: remove \"%s\", type %d\n",
+            descr->name, descr->typ);
   descr->p_remove_pending=1;
   descr->pl.proc=do_remove;
   descr->pl.arg.p=descr;
@@ -751,6 +755,7 @@ struct taskdescr *descr;
     insert_breakaction(descr->proc,0);
     breakflag=1;
     /* wakeup aus waiter? */
+    free(descr->name);
     free(descr);
 }
 
@@ -763,7 +768,7 @@ exec_later(void(*proc)(union callbackdata), int timeout, char* name)
         return 0;
     mytask->typ=sched_timer;
     mytask->proc=proc;
-    mytask->name=name;
+    mytask->name=strdup(name);
     install_timeout(timeout,do_exec_later,mytask,name,&mytask->t_timer);
     return mytask;
 }
@@ -783,9 +788,10 @@ sched_exec_periodic(void(*proc)(union callbackdata),
     mytask->typ=sched_timer;
     mytask->proc=mytask->pl.proc=proc;
     mytask->arg=mytask->pl.arg=arg;
-    mytask->name=name;
+    mytask->name=strdup(name);
     data.p=&mytask->pl;
     if (install_periodic(zyklus,sched_exec_once,data,name,&mytask->t_timer)<0) {
+        free(mytask->name);
         free(mytask);
         return 0;
     }

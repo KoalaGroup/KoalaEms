@@ -2,12 +2,15 @@
  * commu_server.cc
  * 
  * created 29.07.94
- * 26.03.1998 PW: adapded for <string>
- * 11.09.1998 PW: regulaer changed to policies
+ * 
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <errno.h>
 #include <sys/time.h>
 #include <sys/types.h>
@@ -21,13 +24,15 @@
 #include "commu_list_t.hxx"
 #include "versions.hxx"
 
-VERSION("Sep 11 1998", __FILE__, __DATE__, __TIME__,
-"$ZEL: commu_server.cc,v 2.21 2004/11/26 20:39:41 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: commu_server.cc,v 2.23 2014/07/14 15:12:19 wuestner Exp $")
 #define XVERSION
 
 extern C_clientlist clientlist;
 extern C_serverlist serverlist;
 extern C_log elog, nlog, dlog;
+
+using namespace std;
 
 /*****************************************************************************/
 
@@ -171,7 +176,7 @@ void C_server::logmessage(const C_message* message, int in_out /* in 0; out 1*/)
     C_client* client;
     msgheader header;
     C_outbuf buf;
-    STRING sname("sMIST"), cname("cMIST");
+    string sname("sMIST"), cname("cMIST");
 
     if (message->header.client==EMS_commu) {
         cname="commu_core";
@@ -235,7 +240,7 @@ return rhs.print(os);
 /*****************************************************************************/
 /*****************************************************************************/
 
-C_serverlist::C_serverlist(int size, STRING name)
+C_serverlist::C_serverlist(int size, string name)
 :C_list<C_server>(size, name), last_id(0)
 {
 TR(C_serverlist::C_serverlist)
@@ -250,7 +255,11 @@ TR(C_serverlist::~C_serverlist)
 
 void C_serverlist::free(char *name)
 {
+#if 0
 int i, j;
+#else
+int i;
+#endif
 
 TR(C_serverlist::free(char))
 i=0;
@@ -264,7 +273,11 @@ if (i==firstfree)
   return;
   }
 delete list[i];
+#if 0
 for (j=i; i<firstfree-1; i++) list[i]=list[i+1];
+#else
+for (; i<firstfree-1; i++) list[i]=list[i+1];
+#endif
 firstfree--;
 shrinklist();
 }
@@ -315,7 +328,7 @@ else
 
 /*****************************************************************************/
 
-C_server* C_serverlist::get(const STRING& name) const
+C_server* C_serverlist::get(const string& name) const
 {
 int i;
 
@@ -433,7 +446,7 @@ int i=0;
 while ((i<firstfree) && (list[i]->local_id!=local)) i++;
 if (i==firstfree)
   {
-  OSTRINGSTREAM ss;
+  ostringstream ss;
   ss << "C_server_infos::valid: cannot find local id " << local << ends;
   throw new C_program_error(ss);
   }
@@ -447,7 +460,7 @@ int i=0;
 while ((i<firstfree) && (list[i]->local_id!=local)) i++;
 if (i==firstfree)
   {
-  OSTRINGSTREAM ss;
+  ostringstream ss;
   ss << "C_server_infos::setvalid: cannot find local id " << local << ends;
   throw new C_program_error(ss);
   }

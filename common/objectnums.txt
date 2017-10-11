@@ -1,3 +1,8 @@
+/*
+ * common/objectnums.txt
+ * $ZEL: objectnums.txt,v 2.3 2014/09/05 17:58:19 wuestner Exp $
+ */
+
 Object:
   0 Object_null
   1 Object_ved
@@ -36,6 +41,10 @@ InOutTyp:
   0 InOut_Ringbuffer
   1 InOut_Stream
   2 InOut_Cluster
+  3 Filebuffer
+  4 Selected_Events
+  5 Opaque
+  6 MQTT
 
 IOAddr:
   0 Addr_Raw

@@ -3,7 +3,7 @@
  * created 1997-Mar-23 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: cl_interface.c,v 1.38 2011/04/06 20:30:21 wuestner Exp $";
+    "$ZEL: cl_interface.c,v 1.39 2015/04/21 16:05:45 wuestner Exp $";
 
 #include <string.h>
 #include <stdio.h>
@@ -787,7 +787,7 @@ start_dataout(void)
 errcode start_dataout(void)
 {
     T(dataout/cluster/cl_interface::start_dataout)
-    printf("start_dataout(); called from %s\n", caller);
+    /*printf("start_dataout(); called from %s\n", caller);*/
 
     clusterpool_clear();
 
@@ -801,9 +801,7 @@ errcode start_dataout(void)
     last_deposited_cluster=0;
     vedinfos.num_veds=-1;
     printf("start_dataout: vedinfos.info=%p, num_veds set to %d\n", vedinfos.info, vedinfos.num_veds);
-    start_all_dataouts();
-
-    return OK;
+    return start_all_dataouts();
 }
 #endif /* READOUT_CC */
 /*****************************************************************************/

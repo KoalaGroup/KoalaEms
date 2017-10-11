@@ -10,7 +10,7 @@
  * 24.Jun.2002 PW secs added in lc1881_buf and lc1877_buf              
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: fb_lc_util.c,v 1.15 2011/04/06 20:30:31 wuestner Exp $";
+    "$ZEL: fb_lc_util.c,v 1.16 2015/04/06 21:33:31 wuestner Exp $";
 
 #include <config.h>
 #include <errno.h>
@@ -673,7 +673,7 @@ correct_ptr(struct fastbus_dev* dev, int pa, int p_diff, int n_buf,
         }
         count++;
         if (count>128) {
-            printf("correct_ptr: terninated: count=%d\n", count);
+            printf("correct_ptr: terminated: count=%d\n", count);
             return plErr_Program;
         }
     }

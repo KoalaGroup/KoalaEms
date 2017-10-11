@@ -23,6 +23,7 @@ CXX_ANSI=0
 if test "$GXX" = yes ; then
     CXXFLAGS="-D__STD_STRICT_ANSI -ansi"
     CXXFLAGS="$CXXFLAGS -Wall -Woverloaded-virtual"
+    CXXFLAGS="$CXXFLAGS -Wold-style-cast -Wmissing-declarations"
     if test "$enable_debug" = yes ; then
         CXXFLAGS="$CXXFLAGS -g"
     else

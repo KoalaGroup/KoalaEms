@@ -11,6 +11,7 @@
 #include <sconf.h>
 #include <sys/types.h>
 #include "../../../main/scheduler.h"
+#include "dev/pci/sis1100_var.h"
 
 #ifdef DELAYED_READ
 struct delayed_hunk {
@@ -34,6 +35,7 @@ struct vme_sis_info {
     int p_vme;
     int p_mem;
     int p_dsp;
+    struct sis1100_ident ident;
     int current_datasize;
     int current_am;
 #ifdef DELAYED_READ
@@ -50,7 +52,6 @@ struct vme_sis_info {
 };
 
 errcode vme_init_sis3100(struct vme_dev*);
-
 #ifdef DELAYED_READ
 int sis3100_vme_delay_read(struct vme_dev*, off_t, void*, size_t);
 #endif

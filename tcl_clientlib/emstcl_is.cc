@@ -5,7 +5,11 @@
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <cstdlib>
 #include "emstcl_is.hxx"
 #include <proc_is.hxx>
@@ -13,10 +17,11 @@
 #include "tcl_cxx.hxx"
 #include <versions.hxx>
 
-VERSION("2009-Feb-25", __FILE__, __DATE__, __TIME__,
-"$ZEL: emstcl_is.cc,v 1.15 2010/02/03 00:15:50 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: emstcl_is.cc,v 1.17 2014/07/14 15:13:25 wuestner Exp $")
 #define XVERSION
 
+using namespace std;
 
 /*****************************************************************************/
 
@@ -45,17 +50,17 @@ if (tclcommand)
 /*****************************************************************************/
 void E_is::create_tcl_proc()
 {
-    STRING pn=eved->origtclprocname();
-    STRING pn1=pn.substr(3, pn.length()-3);
-    OSTRINGSTREAM ss;
+    string pn=eved->origtclprocname();
+    string pn1=pn.substr(3, pn.length()-3);
+    ostringstream ss;
     ss << "is" << pn1 << '_' << idx;
-    STRING rootname=ss.str();
-    STRING newname=rootname;
+    string rootname=ss.str();
+    string newname=rootname;
     int i=0;
     Tcl_CmdInfo info;
     while (Tcl_GetCommandInfo(interp, (char*)newname.c_str(), &info)!=0) {
         i++;
-        OSTRINGSTREAM ss;
+        ostringstream ss;
         ss << rootname << '#' << idx;
         newname=ss.str();
     }
@@ -96,33 +101,33 @@ if (!((E_is*)clientdata)->destructed)
 
 /*****************************************************************************/
 
-void E_is::deletecommand(STRING& comm)
+void E_is::deletecommand(string& comm)
 {
 //cout<<"E_is::deletecommand("<<comm<<")"<<endl;
 if (comm.length()!=0)
   {
   string::size_type x;
 #ifdef NO_ANSI_CXX
-  while ((x=comm.index(STRING("%n")))>=0)
+  while ((x=comm.index(string("%n")))>=0)
       comm=comm(0, x)+eved->name()+comm(x+2, comm.length()-x-2);
 #else
-  while ((x=comm.find(STRING("%n")))!=string::npos)
+  while ((x=comm.find(string("%n")))!=string::npos)
       comm=comm.substr(0, x)+eved->name()+comm.substr(x+2, string::npos);
 #endif
 #ifdef NO_ANSI_CXX
-  while ((x=comm.index(STRING("%v")))>=0)
+  while ((x=comm.index(string("%v")))>=0)
       comm=comm(0, x)+eved->tclprocname()+comm(x+2, comm.length()-x-2);
 #else
-  while ((x=comm.find(STRING("%v")))!=string::npos)
+  while ((x=comm.find(string("%v")))!=string::npos)
       comm=comm.substr(0, x)+eved->tclprocname()+comm.substr(x+2, string::npos);
 #endif
 #ifdef NO_ANSI_CXX
-  while ((x=comm.index(STRING("%i")))>=0)
+  while ((x=comm.index(string("%i")))>=0)
 #else
-  while ((x=comm.find(STRING("%i")))!=string::npos)
+  while ((x=comm.find(string("%i")))!=string::npos)
 #endif
     {
-    OSTRINGSTREAM ss;
+    ostringstream ss;
 #ifdef NO_ANSI_CXX
     ss << comm(0, x) << idx << comm(x+2, comm.length()-x-2) << ends;
 #else
@@ -131,15 +136,15 @@ if (comm.length()!=0)
     comm=ss.str();
     }
 #ifdef NO_ANSI_CXX
-  while ((x=comm.index(STRING("%c")))>=0)
+  while ((x=comm.index(string("%c")))>=0)
       comm=comm(0, x)+tclprocname()+comm(x+2, comm.length()-x-2);
 #else
-  while ((x=comm.find(STRING("%c")))!=string::npos)
+  while ((x=comm.find(string("%c")))!=string::npos)
       comm=comm.substr(0, x)+tclprocname()+comm.substr(x+2, string::npos);
 #endif
   if (Tcl_GlobalEval(interp, (char*)comm.c_str())!=TCL_OK)
     {
-    cerr << interp->result << endl;
+    cerr << Tcl_GetStringResult(interp) << endl;
     }
   }
 }

@@ -10,7 +10,11 @@
 #endif
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <cstdlib>
 #include <unistd.h>
 #include <cstring>
@@ -26,13 +30,14 @@
 #include <conststrings.h>
 #include <reqstrings.h>
 #include <clientcomm.h>
-#include "compat.h"
 #include "tcl_cxx.hxx"
 #include <versions.hxx>
 
-VERSION("2009-Feb-25", __FILE__, __DATE__, __TIME__,
-"$ZEL: emstcl.cc,v 1.30 2010/02/03 00:15:50 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: emstcl.cc,v 1.32 2014/07/14 15:13:25 wuestner Exp $")
 #define XVERSION
+
+using namespace std;
 
 /*****************************************************************************/
 
@@ -40,8 +45,8 @@ class globalcomm {
   public:
     globalcomm();
     Tcl_Interp* interp;
-    STRING unsolcomm[NrOfUnsolmsg];
-    STRING unknowncomm;
+    string unsolcomm[NrOfUnsolmsg];
+    string unknowncomm;
     int mtestpending;
 //  Tcl_File commpath;
     int commpath;
@@ -159,7 +164,7 @@ static int Ems_connection(ClientData clientdata, Tcl_Interp* interp, int objc,
     if (objc!=1)
         return Tcl_NoArgs(interp, 1, objv);
 
-    OSTRINGSTREAM ss;
+    ostringstream ss;
     ss << communication;
     Tcl_SetResult_Stream(interp, ss);
     return TCL_OK;
@@ -193,7 +198,7 @@ static int Ems_veds(ClientData clientdata, Tcl_Interp* interp, int objc,
         int num;
         inbuf >> num;
         for (int i=0; i<num; i++) {
-            STRING s;
+            string s;
             inbuf >> s;
             Tcl_AppendElement(interp, (char*)(s.c_str()));
         }
@@ -376,7 +381,7 @@ static int Ems_pendingcommand(ClientData clientdata, Tcl_Interp* interp,
         Tcl_SetObjResult(interp, Tcl_NewStringObj(strdup("no args expected"), -1));
         return TCL_ERROR;
     }
-    OSTRINGSTREAM st;
+    ostringstream st;
     st << eveds.pending();
     Tcl_SetResult_Stream(interp, st);
     return TCL_OK;
@@ -415,7 +420,7 @@ static int Ems_flushcommand(ClientData clientdata, Tcl_Interp* interp,
         }
     }
     if (timeout) Tcl_DeleteTimerHandler(token);
-    OSTRINGSTREAM st;
+    ostringstream st;
     st << num;
     Tcl_SetResult_Stream(interp, st);
     return TCL_OK;
@@ -441,7 +446,7 @@ static int Ems_timeoutcommand(ClientData clientdata, Tcl_Interp* interp,
     } else {
         to=communication.deftimeout();
     }
-    OSTRINGSTREAM st;
+    ostringstream st;
     st << to;
     Tcl_SetResult_Stream(interp, st);
     return TCL_OK;
@@ -449,7 +454,7 @@ static int Ems_timeoutcommand(ClientData clientdata, Tcl_Interp* interp,
 /*****************************************************************************/
 static void printunsol(Tcl_Interp* interp, C_confirmation* conf)
 {
-    OSTRINGSTREAM ss;
+    ostringstream ss;
     msgheader* header=conf->header();
     ss << "got message:" << endl
       << "  size  :" << header->size << endl
@@ -463,9 +468,9 @@ static void printunsol(Tcl_Interp* interp, C_confirmation* conf)
 }
 /*****************************************************************************/
 static void
-unpackheader(STRING& s, C_confirmation* conf)
+unpackheader(string& s, C_confirmation* conf)
 {
-    OSTRINGSTREAM ss;
+    ostringstream ss;
     msgheader* header=conf->header();
     ss << '{' << header->size << ' '
         << header->client << ' '
@@ -477,9 +482,9 @@ unpackheader(STRING& s, C_confirmation* conf)
 }
 /*****************************************************************************/
 static void
-unpackbody(STRING& s, C_confirmation* conf)
+unpackbody(string& s, C_confirmation* conf)
 {
-    OSTRINGSTREAM ss;
+    ostringstream ss;
     int size=conf->header()->size;
     ss << '{';
     for (int i=0; i<size; i++) {
@@ -496,14 +501,14 @@ dispatchresponse(Tcl_Interp* interp, C_confirmation* conf)
     msgheader* header=conf->header();
     E_ved* ved=eveds.find(header->ved);
     if (!ved) { // unknown VED
-        OSTRINGSTREAM ss;
+        ostringstream ss;
         ss << "confirmation from unknown ved " << header->ved;
         Tcl_SetResult_Stream(interp, ss);
         Tcl_BackgroundError(interp);
     } else { // VED found
         E_ved::confbackentry* entry;
         if ((entry=ved->extractconfback(header->transid))==0) {
-            OSTRINGSTREAM ss;
+            ostringstream ss;
                 ss << "no callback for ved " << ved->tclprocname() << endl
                     << "  xid     : " << header->transid << endl
                     << "  size    : " << header->size << endl
@@ -511,7 +516,7 @@ dispatchresponse(Tcl_Interp* interp, C_confirmation* conf)
             Tcl_SetResult_Stream(interp, ss);
             Tcl_BackgroundError(interp);
         } else { // callback found
-            OSTRINGSTREAM ss;
+            ostringstream ss;
             int err=TCL_OK;
             if ((conf->size()<1) || (conf->buffer(0)!=OK)) { // Ems-Fehler
                 if (entry->err_command==0)
@@ -529,7 +534,7 @@ dispatchresponse(Tcl_Interp* interp, C_confirmation* conf)
                     err=(ved->*(entry->form))(ss, conf, !entry->former_default,
                             entry->numformargs, entry->formargs);
                 } catch(C_error* error) {
-                    OSTRINGSTREAM ss;
+                    ostringstream ss;
                     ss << (*error);
                     Tcl_SetResult_Stream(interp, ss);
                     set_error_code(interp, error);
@@ -537,23 +542,23 @@ dispatchresponse(Tcl_Interp* interp, C_confirmation* conf)
                     err=TCL_ERROR;
                 }
                 if (err!=TCL_OK) {
-                    OSTRINGSTREAM ss;
+                    ostringstream ss;
                     ss << endl << "former '" << ved->formername(entry->form)
                         << "' called from callback for ved " << ved->name()
                         << " (" << ved->tclprocname() << ") " << ", xid "
                         << header->transid;
-                    STRING s=ss.str();
+                    string s=ss.str();
                     Tcl_AddErrorInfo(interp, s.c_str());
                 }
             }
-            STRING s=ss.str();
+            string s=ss.str();
             if (err==TCL_OK) {
                 if ((err=Tcl_GlobalEval(interp, (char*)s.c_str()))!=TCL_OK) {
-                    OSTRINGSTREAM ss;
+                    ostringstream ss;
                     ss << endl << "called from callback for ved " << ved->name()
                         << " (" << ved->tclprocname() << ") "
                         << ", xid " << header->transid;
-                    STRING s=ss.str();
+                    string s=ss.str();
                     Tcl_AddErrorInfo(interp, s.c_str());
                 }
             }
@@ -568,26 +573,26 @@ static void
 dispatchunsol_pseudo(Tcl_Interp* interp, C_confirmation* conf)
 {
     if (global.unsolcomm[header->type.unsoltype]!="") { // callback vorhanden
-        STRING st;
+        string st;
         int x;
         st=global.unsolcomm[header->type.unsoltype];
 
-        if ((x=st.index(STRING("%h")))>=0) { // header in Kommando einpacken
-            STRING s=unpackheader(conf);
+        if ((x=st.index(string("%h")))>=0) { // header in Kommando einpacken
+            string s=unpackheader(conf);
             do {
                 st=st(0, x)+s+st(x+2, st.length()-x-2);
-            } while ((x=st.index(STRING("%h")))>=0);
+            } while ((x=st.index(string("%h")))>=0);
         }
-        if ((x=st.index(STRING("%d")))>=0) { // Daten in Kommando einpacken
-            STRING s=unpackbody(conf);
+        if ((x=st.index(string("%d")))>=0) { // Daten in Kommando einpacken
+            string s=unpackbody(conf);
             do {
                 st=st(0, x)+s+st(x+2, st.length()-x-2);
-            } while ((x=st.index(STRING("%d")))>=0);
+            } while ((x=st.index(string("%d")))>=0);
         }
         if ((header->type.reqtype==Unsol_ServerDisconnect) && 
-                ((x=st.index(STRING("%v")))>=0)) {
+                ((x=st.index(string("%v")))>=0)) {
             // VED-Name in Kommando einpacken (wenn moeglich)
-            STRING s;
+            string s;
             E_ved* ved=eveds.find(conf->buffer(0));
             if (ved)
                 s=ved->tclprocname();
@@ -595,7 +600,7 @@ dispatchunsol_pseudo(Tcl_Interp* interp, C_confirmation* conf)
                 s="unknown_ved";
             do {
                 st=st(0, x)+s+st(x+2, st.length()-x-2);
-            } while ((x=st.index(STRING("%v")))>=0);
+            } while ((x=st.index(string("%v")))>=0);
         }
         if (Tcl_GlobalEval(global.interp, (char*)(const char*)st)!=TCL_OK)
             Tcl_BackgroundError(interp);
@@ -618,31 +623,31 @@ dispatchunsol_real(Tcl_Interp* interp, C_confirmation* conf)
     if (!ved) {
         printunsol(interp, conf); // Notloesung, wenn VED nicht mehr offen
     } else {
-        STRING st;
+        string st;
         int x;
         if ((header->type.unsoltype>0) && (header->type.unsoltype<NrOfUnsolmsg)
                 && (ved->unsolcomm[header->type.unsoltype]!=""))
             st=ved->unsolcomm[header->type.unsoltype];
         else
             st=ved->defunsolcomm;
-        if ((x=st.index(STRING("%h")))>=0) {
-            STRING s=unpackheader(conf);
+        if ((x=st.index(string("%h")))>=0) {
+            string s=unpackheader(conf);
             do {
                 st=st(0, x)+s+st(x+2, st.length()-x-2);
-            } while ((x=st.index(STRING("%h")))>=0);
+            } while ((x=st.index(string("%h")))>=0);
         }
-        if ((x=st.index(STRING("%d")))>=0) {
-            STRING s=unpackbody(conf);
+        if ((x=st.index(string("%d")))>=0) {
+            string s=unpackbody(conf);
             do {
                 st=st(0, x)+s+st(x+2, st.length()-x-2);
-            } while ((x=st.index(STRING("%d")))>=0);
+            } while ((x=st.index(string("%d")))>=0);
         }
-        if ((x=st.index(STRING("%v")))>=0) {
-            STRING s;
+        if ((x=st.index(string("%v")))>=0) {
+            string s;
             s=ved->tclprocname();
             do {
                 st=st(0, x)+s+st(x+2, st.length()-x-2);
-            } while ((x=st.index(STRING("%v")))>=0);
+            } while ((x=st.index(string("%v")))>=0);
         }
         if (Tcl_GlobalEval(global.interp, (char*)(const char*)st)!=TCL_OK)
             Tcl_BackgroundError(interp);
@@ -650,7 +655,7 @@ dispatchunsol_real(Tcl_Interp* interp, C_confirmation* conf)
 }
 #else // ANSI_CXX
 static void
-substitute_commandargs(STRING& command, C_confirmation* conf, STRING ved)
+substitute_commandargs(string& command, C_confirmation* conf, string ved)
 {
 // static int count=0;
 // cerr<<"substitute: "<<command<<" "<<(*conf)<<" "<<ved<<endl;
@@ -658,7 +663,7 @@ substitute_commandargs(STRING& command, C_confirmation* conf, STRING ved)
 // if (count==14) exit(0);
     string::size_type pos;
     if ((pos=command.find("%h"))!=string::npos) {
-        STRING s;
+        string s;
         unpackheader(s, conf);
         /*XXXX*/
         //do {
@@ -668,7 +673,7 @@ substitute_commandargs(STRING& command, C_confirmation* conf, STRING ved)
         command=command.substr(0, pos)+s+command.substr(pos+2, string::npos);
     }
     if ((pos=command.find("%d"))!=string::npos) {
-        STRING s;
+        string s;
         unpackbody(s, conf);
         //do {
         //    //command.replace(pos, 2, s);
@@ -687,10 +692,10 @@ dispatchunsol_pseudo(Tcl_Interp* interp, C_confirmation* conf)
 {
     msgheader* header=conf->header();
     if (global.unsolcomm[header->type.unsoltype]!="") { //callback vorhanden
-        STRING st;
+        string st;
         st=global.unsolcomm[header->type.unsoltype];
 
-        STRING vedcommand("");
+        string vedcommand("");
         if (header->type.unsoltype==Unsol_ServerDisconnect) {
             E_ved* ved=eveds.find(conf->buffer(0));
             if (ved)
@@ -704,7 +709,7 @@ dispatchunsol_pseudo(Tcl_Interp* interp, C_confirmation* conf)
             Tcl_BackgroundError(interp);
 
     } else if (header->type.unsoltype==Unsol_ServerDisconnect) {
-        OSTRINGSTREAM ss;
+        ostringstream ss;
         ss << "server " << conf->buffer(0) << " starb." << ends;
         Tcl_SetResult_Stream(interp, ss);
         Tcl_BackgroundError(interp);
@@ -726,7 +731,7 @@ dispatchunsol_real(Tcl_Interp* interp, C_confirmation* conf)
     if (!ved) {
         printunsol(interp, conf); // Notloesung, wenn VED nicht mehr offen
     } else {
-        STRING st;
+        string st;
         if ((header->type.unsoltype>0) && (header->type.unsoltype<NrOfUnsolmsg)
                 && (ved->unsolcomm[header->type.unsoltype]!=""))
             st=ved->unsolcomm[header->type.unsoltype];
@@ -777,7 +782,7 @@ static void commpathback(ClientData data, int mask)
         cerr << "x=" << x << endl;
     }
     if (mask & TCL_EXCEPTION) {
-        OSTRINGSTREAM ss;
+        ostringstream ss;
         ss << "commpathback: exception: " << mask << ends;
         Tcl_SetResult_Stream(interp, ss);
         Tcl_BackgroundError(interp);
@@ -856,7 +861,7 @@ static void commuback(ClientData data, int action, int reason, int path)
     }
     switch (action) {
     case -1: {
-        OSTRINGSTREAM st;
+        ostringstream st;
         st << "Communication aborted: error " << reason << endl;
         Tcl_DeleteExitHandler(emsexit, 0);
         Tcl_DeleteFileHandler(global.commpath);

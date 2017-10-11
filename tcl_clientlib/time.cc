@@ -5,20 +5,26 @@
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <errno.h>
 #include <time.h>
 #include <sys/time.h>
 #include <string.h>
 #include <tcl.h>
-#include "compat.h"
 #include <errors.hxx>
 #include "tcl_cxx.hxx"
+#include "time.hxx"
 #include "versions.hxx"
 
-VERSION("Nov 16 2004", __FILE__, __DATE__, __TIME__,
-"$ZEL: time.cc,v 1.12 2004/11/26 23:03:55 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: time.cc,v 1.15 2014/07/14 15:13:26 wuestner Exp $")
 #define XVERSION
+
+using namespace std;
 
 /*****************************************************************************/
 static int Tdoubletime(ClientData clientdata, Tcl_Interp* interp, int objc,
@@ -29,7 +35,7 @@ static int Tdoubletime(ClientData clientdata, Tcl_Interp* interp, int objc,
     }
     struct timeval tv;
     gettimeofday(&tv, 0);
-    OSTRINGSTREAM ss;
+    ostringstream ss;
     ss << setprecision(20) << tv.tv_sec+(double)tv.tv_usec/1000000.0;
     Tcl_SetResult_Stream(interp, ss);
     return TCL_OK;
@@ -43,7 +49,7 @@ static int Ttimeofday(ClientData clientdata, Tcl_Interp* interp, int objc,
     }
     struct timeval tv;
     gettimeofday(&tv, 0);
-    OSTRINGSTREAM ss;
+    ostringstream ss;
     ss << tv.tv_sec << ' ' << tv.tv_usec;
     Tcl_SetResult_Stream(interp, ss);
     return TCL_OK;
@@ -57,7 +63,7 @@ static int Ttimeofday_sec(ClientData clientdata, Tcl_Interp* interp, int objc,
     }
     struct timeval tv;
     gettimeofday(&tv, 0);
-    OSTRINGSTREAM ss;
+    ostringstream ss;
     ss << tv.tv_sec;
     Tcl_SetResult_Stream(interp, ss);
     return TCL_OK;
@@ -81,7 +87,7 @@ static int Tlocaltime(ClientData clientdata, Tcl_Interp* interp, int objc,
             Tcl_NewStringObj(strerror(errno), -1));
         return TCL_ERROR;
     } else {
-        OSTRINGSTREAM ss;
+        ostringstream ss;
         ss << tm->tm_sec <<' '<< tm->tm_min <<' '<< tm->tm_hour <<' '
             << tm->tm_mday <<' '<< tm->tm_mon <<' '<< tm->tm_year <<' '
             << tm->tm_wday <<' '<< tm->tm_yday <<' '<< tm->tm_isdst;
@@ -107,7 +113,7 @@ static int Tgmtime(ClientData clientdata, Tcl_Interp* interp, int objc,
             Tcl_NewStringObj(strerror(errno), -1));
         return TCL_ERROR;
     } else {
-        OSTRINGSTREAM ss;
+        ostringstream ss;
         ss << tm->tm_sec <<' '<< tm->tm_min <<' '<< tm->tm_hour <<' '
             << tm->tm_mday <<' '<< tm->tm_mon <<' '<< tm->tm_year <<' '
             << tm->tm_wday <<' '<< tm->tm_yday <<' '<< tm->tm_isdst;

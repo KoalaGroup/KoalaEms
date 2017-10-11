@@ -1,7 +1,7 @@
 /*
  * clusterreader.hxx
  * 
- * $ZEL: clusterreader.hxx,v 1.11 2004/11/26 14:40:13 wuestner Exp $
+ * $ZEL: clusterreader.hxx,v 1.12 2014/07/14 16:18:17 wuestner Exp $
  * 
  * created: 12.03.1998 PW
  * last changed: 31.07.1998 PW
@@ -11,7 +11,6 @@
 #define _clusterreader_hxx_
 
 #include "config.h"
-#include "cxxcompat.hxx"
 #include <sys/time.h>
 #include <iopathes.hxx>
 #include "cluster.hxx"
@@ -83,7 +82,7 @@ class Clusterreader: public nocopy {
   friend class VEDslot;
   friend class C_eventstatist;
   public:
-    Clusterreader(const STRING& pathname, int literally);
+    Clusterreader(const string& pathname, int literally);
     Clusterreader(int path);
     Clusterreader(const char* host, int port);
     ~Clusterreader();

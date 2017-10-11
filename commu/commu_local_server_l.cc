@@ -2,13 +2,15 @@
  * commu_local_server_l.cc
  * 
  * created 05.02.95
- * 26.03.1998 PW: adapded for <string>
- * 14.06.1998 PW: adapted for STD_STRICT_ANSI
- * 11.09.1998 PW: regulaer changed to policies
+ * 
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include "commu_server.hxx"
 #include "commu_client.hxx"
 #include "commu_io_client.hxx"
@@ -22,8 +24,8 @@
 #include <errors.hxx>
 #include "versions.hxx"
 
-VERSION("2009-Aug-21", __FILE__, __DATE__, __TIME__,
-"$ZEL: commu_local_server_l.cc,v 2.23 2009/08/21 22:02:28 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: commu_local_server_l.cc,v 2.24 2014/07/14 15:12:19 wuestner Exp $")
 #define XVERSION
 
 extern C_db* cdb;
@@ -31,6 +33,8 @@ extern C_serverlist serverlist;
 extern C_clientlist clientlist;
 extern C_ints globalunsollist;
 extern C_log elog, nlog, dlog;
+
+using namespace std;
 
 /*****************************************************************************/
 
@@ -49,7 +53,7 @@ TR(C_local_server_l::~C_local_dserver_c)
 
 /*****************************************************************************/
 
-void C_local_server_l::logstring(const STRING&)
+void C_local_server_l::logstring(const string&)
 {
 throw new C_program_error("C_local_server_l::logstring");
 }
@@ -383,14 +387,14 @@ logtype type=(logtype)ib.getint();
 nlog << "Add_station: num="<<num<<"; type="<<type<<flush;
 for (int i=0; i<num; i++)
   {
-  STRING name;
+  string name;
   try
     {
     ib >> name;
     }
   catch (C_error* e)
     {
-    OSTRINGSTREAM s;
+    ostringstream s;
     s << "C_local_server_l::proc_add_station: " << (*e) << ends;
     delete e;
     elog << s << flush;

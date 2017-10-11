@@ -3,7 +3,7 @@
  * created 2007-May-21 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: periodictrigger.c,v 1.4 2011/04/06 20:30:36 wuestner Exp $";
+    "$ZEL: periodictrigger.c,v 1.5 2013/12/06 20:28:14 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -69,7 +69,11 @@ suspend_trig_periodic(struct triggerinfo* trinfo)
 
     for (i=0; i<priv->num_periods; i++) {
         struct period *per=priv->periods+i;
-        sched_remove_task(per->taskdescr);
+        if (per->taskdescr) {
+            printf("suspend_trig_periodic: remove task %p\n", per->taskdescr);
+            sched_remove_task(per->taskdescr);
+            per->taskdescr=0;
+        }
     }
 }
 /*****************************************************************************/
@@ -86,7 +90,11 @@ remove_trig_periodic(struct triggerinfo* trinfo)
 
     for (i=0; i<priv->num_periods; i++) {
         struct period *per=priv->periods+i;
-        sched_remove_task(per->taskdescr);
+        if (per->taskdescr) {
+            printf("remove_trig_periodic: remove task %p\n", per->taskdescr);
+            sched_remove_task(per->taskdescr);
+            per->taskdescr=0;
+        }
     }
 }
 /*****************************************************************************/
@@ -108,6 +116,7 @@ printf("reactivate_trig_periodic\n");
         data.p=priv->periods+i;
         per->taskdescr=sched_exec_periodic(trig_periodic_callback,
                 data, per->period, "periodic trigger");
+        printf("reactivate_trig_periodic: got task %p\n", per->taskdescr);
         if (per->taskdescr==0) {
             printf("reactivate_trig_periodic: sched_exec_periodic failed\n");
         }
@@ -132,6 +141,7 @@ insert_trig_periodic(struct triggerinfo* trinfo)
         data.p=priv->periods+i;
         per->taskdescr=sched_exec_periodic(trig_periodic_callback,
                 data, per->period, "periodic trigger");
+        printf("insert_trig_periodic: got task %p\n", per->taskdescr);
         if (per->taskdescr==0) {
             printf("insert_trig_periodic: sched_exec_periodic failed\n");
             return Err_System;
@@ -164,9 +174,9 @@ get_trig_periodic(struct trigprocinfo* info)
 }
 #endif
 /*****************************************************************************/
-#if 0
+#if 1
 static void
-reset_trig_periodic(struct trigprocinfo* info)
+reset_trig_periodic(struct triggerinfo* trinfo)
 {
 /*printf("reset_trig_periodic\n");*/
     /* do nothing */
@@ -279,7 +289,7 @@ plerrcode init_trig_periodic(ems_u32* p, struct triggerinfo* trinfo)
     tinfo->reactivate_triggertask=reactivate_trig_periodic;
     tinfo->remove_triggertask=remove_trig_periodic;
     /*tinfo->get_trigger=get_trig_periodic;*/
-    /*tinfo->reset_trigger=reset_trig_periodic;*/
+    tinfo->reset_trigger=reset_trig_periodic;
     tinfo->done_trigger=done_trig_periodic;
 
     tinfo->proctype=tproc_callback;

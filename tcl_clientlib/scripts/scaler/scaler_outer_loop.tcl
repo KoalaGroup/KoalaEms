@@ -1,4 +1,4 @@
-# $ZEL: scaler_outer_loop.tcl,v 1.2 2006/08/13 17:32:08 wuestner Exp $
+# $ZEL: scaler_outer_loop.tcl,v 1.3 2014/08/19 20:20:50 wuestner Exp $
 # copyright 1998
 #   P. Wuestner; Zentralinstitut fuer Elektronik; Forschungszentrum Juelich
 #
@@ -22,13 +22,13 @@ proc outer_loop {} {
     return
   }
   if {[open_veds]!=0} {
-    disconnect_commu
+    disconnect_commu outer_loop_A
     output "open without success; will retry after 60 seconds"
     set global_after(outer_loop) [after 60000 outer_loop]
     return
   }
   if {[open_is]!=0} {
-    disconnect_commu
+    disconnect_commu outer_loop_B
     output "open IS without success; will retry after 60 seconds"
     set global_after(outer_loop) [after 60000 outer_loop]
     return

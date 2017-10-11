@@ -2,7 +2,7 @@
  * async_save.c
  * 
  * created 2011-08-26 PW
- * $ZEL: async_save.c,v 1.2 2011/09/01 19:56:02 wuestner Exp $
+ * $ZEL: async_save.c,v 1.3 2013/10/30 18:19:10 wuestner Exp $
  */
 
 #define _GNU_SOURCE
@@ -26,7 +26,7 @@
 static int loglevel=0;
 static int no_v4=0;
 static int no_v6=0;
-static int objsize=0;
+static int objsize=4;
 static int nhours=24;
 static char *logname=0;
 static FILE *logfile;
@@ -65,11 +65,12 @@ static const char filformat[]="%G/W%V/%Y%m%dT%H%M%SZ";
 static void
 printusage(char* argv0)
 {
-    eLOG("usage: %s [-h] [-4] [-s size] [-q] [-v] [-d] [-l <logname>] "
+    eLOG("usage: %s [-h] [-4|6] [-s size] [-q] [-v] [-d] [-l <logname>] "
                  "[-n hours] -i <inport> directory\n", argv0);
     eLOG("  -h: this help\n");
     eLOG("  -4: use IPv4 only\n");
-    eLOG("  -s: objectsize (1 or 4)\n");
+    eLOG("  -6: use IPv6 only\n");
+    eLOG("  -s: objectsize (1 or 4); default: 4\n");
     eLOG("  -i: <[host]:port>: address for data input\n");
     eLOG("  -n: start a new file every n hours (default: 24)\n");
     eLOG("  -l <filename>: logfile\n");
@@ -312,13 +313,14 @@ store_data(struct data_descr *descr)
     ssize_t sres;
 
     if (prepare_file()<0)
-        return 0;
+        return -1;
 
     sres=write(path, descr->opaque, descr->size);
     if (sres!=descr->size) {
         eLOG("write: %s\n", strerror(errno));
         return -1;
     }
+    
 
     /* free the data */
     free(descr->opaque);

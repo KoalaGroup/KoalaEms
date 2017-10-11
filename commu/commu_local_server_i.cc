@@ -2,12 +2,15 @@
  * commu_local_server_i.cc
  * 
  * created 09.11.94
- * 26.03.1998 PW: adapded for <string>
- * 14.06.1998 PW: adapted for STD_STRICT_ANSI
+ * 
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <stdlib.h>
 #include <commu_server.hxx>
 #include <commu_client.hxx>
@@ -25,8 +28,8 @@
 #include <compat.h>
 #include "versions.hxx"
 
-VERSION("2009-Aug-21", __FILE__, __DATE__, __TIME__,
-"$ZEL: commu_local_server_i.cc,v 2.27 2009/08/21 22:02:28 wuestner Exp $")
+VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
+"$ZEL: commu_local_server_i.cc,v 2.28 2014/07/14 15:12:19 wuestner Exp $")
 #define XVERSION
 
 extern C_db* cdb;
@@ -35,6 +38,8 @@ extern C_clientlist clientlist;
 extern C_log elog, nlog, dlog;
 extern C_unix_socket mainusock;
 extern C_tcp_socket mainisock;
+
+using namespace std;
 
 /*****************************************************************************/
 
@@ -96,15 +101,15 @@ if (ptr[0]>1)
   {
   for (int i=0; cppdefs[i]!=0; i++)
     {outbuf << cppdefs[i]; n++;}
-  OSTRINGSTREAM s1;
+  ostringstream s1;
   s1 << "commlist: " << cdb->listname() << ends;
   outbuf << s1;
   n++;
-  OSTRINGSTREAM s2;
+  ostringstream s2;
   s2 << "usocket: " << mainusock << ends;
   outbuf << s2;
   n++;
-  OSTRINGSTREAM s3;
+  ostringstream s3;
   s3 << "isocket: " << mainisock << ends;
   outbuf << s3;
   n++;
@@ -444,7 +449,7 @@ int C_local_server_i::ver_proc_vednamebyaddress=1;
 //
 plerrcode C_local_server_i::proc_vedaddress(const ems_u32* ptr)
 {
-STRING s;
+string s;
 C_VED_addr* addr;
 
 C_inbuf inbuf(ptr);
@@ -530,7 +535,7 @@ if (ptr[0]==0)
 else
   {
   C_server* server;
-  STRING s;
+  string s;
   int i, num, size, idx;
   ems_u32 x1, x2, x3;
   const C_ints* unsollist;
@@ -542,7 +547,7 @@ else
     }
   catch (C_error* e)
     {
-    OSTRINGSTREAM s;
+    ostringstream s;
     s << "C_local_server_i::proc_vedinfo: " << (*e) << ends;
     delete e;
     elog << s << flush;

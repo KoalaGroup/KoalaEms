@@ -1,7 +1,7 @@
 /*
  * commu_odb.hxx
  * 
- * $ZEL: commu_odb.hxx,v 2.4 2004/11/18 19:31:28 wuestner Exp $
+ * $ZEL: commu_odb.hxx,v 2.5 2014/07/14 15:12:19 wuestner Exp $
  * 
  * created 17.07.95 PW
  */
@@ -10,8 +10,14 @@
 #define _commu_odb_hxx_
 
 #include "config.h"
-#include "cxxcompat.hxx"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <commu_db.hxx>
+
+using namespace std;
 
 class C_odb: public C_db
   {
