@@ -1,0 +1,23 @@
+# sfisetup
+set vedname 393
+set description {Fastbus (SFI)}
+set triggermaster 1
+
+set isid(1) 2
+
+set modullist {25 0x6854}
+set memberlist(1) {25}
+
+set readouttrigg(1.1) {1}
+set readoutprio(1.1) 1
+set readoutproc(1.1) {FRDB {25 0 100}}
+
+set dataout(0) {cluster 1 0 socket ikpd10 9000}
+
+set trigger {zel '/tmp/sync0' 1 0 0 0 0 10}
+#set trigger {zel '/tmp/sync0' 1 10 2 1}
+
+set init_proclist_t {InitPCITrigger {'/tmp/sync0' 0}}
+
+set vars(10) 2
+set var_init(10) "0 4"

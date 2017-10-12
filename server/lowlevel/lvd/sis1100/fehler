@@ -1,0 +1,140 @@
+speed: 810826.146380 bytes/s
+speed: 810825.991533 bytes/s
+speed: 1254900.580067 bytes/s
+sis1100_lvd.c: LVD error in branch 0; doorbell=0x02000000
+sis1100_lvd_write  (0x1904) size=2 0x0: error=0x104 controller_bc.transp
+    crate 0, module
+trig_pcilvd_callback mask=0x42000000
+sis1100_lvd.c: LVD error in branch 0; doorbell=0x42000000
+sis1100_lvd_write  (0x1904) size=2 0x0: error=0x104 controller_bc.transp
+    crate 0, module
+trig_pcilvd_callback mask=0x42000000
+sis1100_lvd.c: LVD error in branch 0; doorbell=0x42000000
+sis1100_lvd_write  (0x1904) size=2 0x0: error=0x104 controller_bc.transp
+    crate 0, module
+trig_pcilvd_callback mask=0x42000000
+sis1100_lvd.c: LVD error in branch 0; doorbell=0x42000000
+sis1100_lvd_write  (0x1904) size=2 0x0: error=0x104 controller_bc.transp
+    crate 0, module
+trig_pcilvd_callback mask=0x42000000
+sis1100_lvd.c: LVD error in branch 0; doorbell=0x42000000
+sis1100_lvd_write  (0x1904) size=2 0x0: error=0x207 controller_bc.transp
+    crate 0, module
+sis1100_lvd.c: LVD error in branch 0; doorbell=0x02000000
+sis1100_lvd_write  (0x1904) size=2 0x0: error=0x104 controller_bc.transp
+    crate 0, module
+trig_pcilvd_callback mask=0x42000000
+sis1100_lvd.c: LVD error in branch 0; doorbell=0x42000000
+sis1100_lvd_write  (0x1904) size=2 0x0: error=0x207 controller_bc.transp
+    crate 0, module
+sis1100_lvd.c: LVD error in branch 0; doorbell=0x02000000
+sis1100_lvd_write  (0x1904) size=2 0x0: error=0x104 controller_bc.transp
+    crate 0, module
+trig_pcilvd_callback mask=0x42000000
+sis1100_lvd.c: LVD error in branch 0; doorbell=0x42000000
+sis1100_lvd_write  (0x1904) size=2 0x0: error=0x104 controller_bc.transp
+    crate 0, module
+trig_pcilvd_callback mask=0x42000000
+sis1100_lvd.c: LVD error in branch 0; doorbell=0x42000000
+sis1100_lvd_write  (0x1904) size=2 0x0: error=0x104 controller_bc.transp
+    crate 0, module
+trig_pcilvd_callback mask=0x42000000
+sis1100_lvd.c: LVD error in branch 0; doorbell=0x42000000
+sis1100_lvd_write  (0x1904) size=2 0x0: error=0x104 controller_bc.transp
+    crate 0, module
+trig_pcilvd_callback mask=0x42000000
+sis1100_lvd.c: LVD error in branch 0; doorbell=0x42000000
+sis1100_lvd_write  (0x1904) size=2 0x0: error=0x104 controller_bc.transp
+    crate 0, module
+trig_pcilvd_callback mask=0x42000000
+sis1100_lvd.c: LVD error in branch 0; doorbell=0x42000000
+sis1100_lvd_write  (0x1904) size=2 0x0: error=0x207 controller_bc.transp
+    crate 0, module
+sis1100_lvd.c: LVD error in branch 0; doorbell=0x02000000
+sis1100_lvd_write  (0x1904) size=2 0x0: error=0x104 controller_bc.transp
+    crate 0, module
+trig_pcilvd_callback mask=0x42000000
+sis1100_lvd.c: LVD error in branch 0; doorbell=0x42000000
+sis1100_lvd_write  (0x1904) size=2 0x0: error=0x104 controller_bc.transp
+    crate 0, module
+trig_pcilvd_callback mask=0x42000000
+sis1100_lvd.c: LVD error in branch 0; doorbell=0x42000000
+sis1100_lvd_write  (0x1904) size=2 0x0: error=0x104 controller_bc.transp
+    crate 0, module
+trig_pcilvd_callback mask=0x42000000
+sis1100_lvd.c: LVD error in branch 0; doorbell=0x42000000
+sis1100_lvd_write  (0x1904) size=2 0x0: error=0x104 controller_bc.transp
+    crate 0, module
+trig_pcilvd_callback mask=0x42000000
+sis1100_lvd.c: LVD error in branch 0; doorbell=0x42000000
+sis1100_lvd_write  (0x1904) size=2 0x0: error=0x104 controller_bc.transp
+    crate 0, module
+trig_pcilvd_callback mask=0x42000000
+sis1100_lvd.c: LVD error in branch 0; doorbell=0x42000000
+sis1100_lvd_write  (0x1904) size=2 0x0: error=0x104 controller_bc.transp
+    crate 0, module
+trig_pcilvd_callback mask=0x42000000
+sis1100_lvd.c: LVD error in branch 0; doorbell=0x42000000
+sis1100_lvd_write  (0x1904) size=2 0x0: error=0x104 controller_bc.transp
+   crate 0, module
+trig_pcilvd_callback mask=0x42000000
+sis1100_lvd.c: LVD error in branch 0; doorbell=0x42000000
+sis1100_lvd_write  (0x1904) size=2 0x0: error=0x104 controller_bc.transp
+    crate 0, module
+trig_pcilvd_callback mask=0x42000000
+sis1100_lvd.c: LVD error in branch 0; doorbell=0x42000000
+sis1100_lvd_write  (0x1904) size=2 0x0: error=0x104 controller_bc.transp
+    crate 0, module
+trig_pcilvd_callback mask=0x42000000
+sis1100_lvd.c: LVD error in branch 0; doorbell=0x42000000
+sis1100_lvd_write  (0x1904) size=2 0x0: error=0x104 controller_bc.transp
+    crate 0, module
+trig_pcilvd_callback mask=0x42000000
+sis1100_lvd.c: LVD error in branch 0; doorbell=0x42000000
+sis1100_lvd_write  (0x1904) size=2 0x0: error=0x104 controller_bc.transp
+    crate 0, module
+trig_pcilvd_callback mask=0x42000000
+sis1100_lvd.c: LVD error in branch 0; doorbell=0x42000000
+sis1100_lvd_write  (0x1904) size=2 0x0: error=0x104 controller_bc.transp
+    crate 0, module
+trig_pcilvd_callback mask=0x42000000
+sis1100_lvd.c: LVD error in branch 0; doorbell=0x42000000
+sis1100_lvd_write  (0x1904) size=2 0x0: error=0x104 controller_bc.transp
+    crate 0, module
+trig_pcilvd_callback mask=0x42000000
+sis1100_lvd.c: LVD error in branch 0; doorbell=0x42000000
+sis1100_lvd_write  (0x1904) size=2 0x0: error=0x104 controller_bc.transp
+    crate 0, module
+trig_pcilvd_callback mask=0x42000000
+sis1100_lvd.c: LVD error in branch 0; doorbell=0x42000000
+sis1100_lvd_write  (0x1904) size=2 0x0: error=0x104 controller_bc.transp
+    crate 0, module
+trig_pcilvd_callback mask=0x42000000
+sis1100_lvd.c: LVD error in branch 0; doorbell=0x42000000
+sis1100_lvd_write  (0x1904) size=2 0x0: error=0x104 controller_bc.transp
+    crate 0, module
+trig_pcilvd_callback mask=0x42000000
+sis1100_lvd.c: LVD error in branch 0; doorbell=0x42000000
+sis1100_lvd_write  (0x1904) size=2 0x0: error=0x104 controller_bc.transp
+    crate 0, module
+trig_pcilvd_callback mask=0x42000000
+sis1100_lvd.c: LVD error in branch 0; doorbell=0x42000000
+sis1100_lvd_write  (0x1904) size=2 0x0: error=0x104 controller_bc.transp
+    crate 0, module
+trig_pcilvd_callback mask=0x42000000
+sis1100_lvd.c: LVD error in branch 0; doorbell=0x42000000
+sis1100_lvd_write  (0x1904) size=2 0x0: error=0x104 controller_bc.transp
+    crate 0, module
+trig_pcilvd_callback mask=0x42000000
+sis1100_lvd.c: LVD error in branch 0; doorbell=0x42000000
+sis1100_lvd_write  (0x1904) size=2 0x0: error=0x104 controller_bc.transp
+    crate 0, module
+trig_pcilvd_callback mask=0x42000000
+sis1100_lvd.c: LVD error in branch 0; doorbell=0x42000000
+sis1100_lvd_write  (0x1904) size=2 0x0: error=0x104 controller_bc.transp
+    crate 0, module
+trig_pcilvd_callback mask=0x42000000
+sis1100_lvd.c: LVD error in branch 0; doorbell=0x42000000
+sis1100_lvd_write  (0x1904) size=2 0x0: error=0x104 controller_bc.transp
+    crate 0, module
+trig_pcilvd_callback mask=0x42000000

@@ -1,0 +1,190 @@
+/*
+  * Code for reading cluster format provided by
+  * Peter Wuestner, ZEL, FZJ
+  *
+  * Code adapted for use in RootSorter by VH:
+  * - removed configuration option for different platforms
+  * - removed certain references to global ems include files
+  */
+
+/*
+ * ems/events++/cluster_data.hxx
+ * 
+ * created 2006-Apr-28 PW
+ *
+ * $ZEL: cluster_data.hxx,v 1.1 2006/05/03 07:13:02 wuestner Exp $
+ */
+
+#ifndef _ems_objects_hxx_
+#define _ems_objects_hxx_
+
+#include "emsctypes.hh"
+#include <sys/time.h>
+#include <sys/types.h>
+#include <string>
+
+/*
+ * common/clusterformat.h
+ * created: 15.03.1998
+ * 09.May.2001 PW: clusterty_file added
+ */
+/*
+ * static char *rcsid="$ZEL: clusterformat.h,v 1.7 2005/03/29 15:51:31 wuestner Exp $";
+ */
+
+/*
+  Beschreibung siehe ems/server/dataout/cluster/CLUSTER
+*/
+
+enum clustertypes {
+    clusterty_events=0,
+    clusterty_ved_info=1,
+    clusterty_text=2,
+    /*clusterty_x_wendy_setup=3,*/
+    clusterty_file=4,
+    clusterty_no_more_data=0x10000000
+};
+
+enum clusterflags {
+    clusterfl_fragmented=1,
+    clusterfl_fragfollows=2
+};
+
+class ems_cluster {
+  public:
+    ems_cluster(ems_u32* buf):type((enum clustertypes)buf[2]),
+            size(buf[0]), data(buf) {}
+    ~ems_cluster() {delete[] data;}
+
+    enum clustertypes type;
+    int size;
+    ems_u32 *data;
+};
+
+class ems_file {
+  public:
+    ems_file();
+    ~ems_file();
+
+    timeval tv;
+    std::string name;
+    unsigned int fragment;
+    bool complete;
+    time_t ctime;
+    time_t mtime;
+    mode_t mode;
+    std::string content;
+
+    void dump(int level) const;
+};
+
+class ems_text {
+  public:
+    ems_text(void);
+    ~ems_text();
+
+    timeval tv;
+    std::string key;
+    int nr_lines;
+    std::string* lines;
+
+    void dump(int level) const;
+};
+
+class ems_ved_info {
+  public:
+    ems_ved_info(void);
+    ~ems_ved_info();
+
+    struct is_info {
+        int IS_ID;
+        int importance;
+    };
+    struct ved_info {
+        int VED_ID;
+        int nr_is;
+        bool skip;
+        is_info *is_infos;
+    };
+
+    bool valid;
+    timeval tv;
+    int version;
+    int nr_veds;
+    ved_info *ved_infos;
+
+    void dump(int level) const;
+};
+
+struct ems_subevent {
+    ems_subevent():data(0) {}
+    ~ems_subevent() {delete[] data;}
+
+    ems_subevent *next;
+    ems_u32 sev_id;
+    ems_u32 size;
+    ems_u32 *data;
+};
+
+struct ems_event {
+    ems_event():nr_subevents(0), subevents(0) {}
+    ~ems_event();
+
+    ems_u32 event_nr;
+    ems_u32 trigger;
+    ems_u32 nr_subevents;
+    ems_subevent* subevents;
+
+    void dump(int level) const;
+};
+
+class ems_data {
+  public:
+    ems_data(void);
+    ~ems_data();
+
+    int nr_texts;
+    ems_text** texts;
+    int nr_files;
+    ems_file** files;
+    ems_ved_info ved_info;
+    int nr_skip_is;
+    int *skip_is;
+    ems_u32 allow_uncomplete;
+   
+    int parse_cluster(const ems_cluster*);
+
+    int get_event(ems_event**);
+    bool events_available(void);
+
+  protected:
+    struct event_info {
+        event_info *next;
+        bool complete;
+        bool *veds;
+        ems_u32 ev_no;
+        ems_subevent* last_subevent;
+        ems_event *event;
+    };
+
+    void purge_uncomplete(void);
+    event_info* find_ev_info(ems_u32, int);
+    int find_ved_idx(int);
+    int parse_timestamp(const ems_cluster*, timeval*);
+    int parse_cluster_file(const ems_cluster*, ems_file**);
+    int parse_cluster_text(const ems_cluster*, ems_text*);
+    int parse_cluster_ved_info(const ems_cluster*, ems_ved_info*);
+    int parse_cluster_no_more_data(const ems_cluster*);
+    int parse_cluster_events(const ems_cluster*);
+    ems_u32 smallest_ev_no;
+    ems_u32 last_complete;
+    int nr_IS;
+    int *IS_IDs;
+    int nr_VED;
+    int *VED_IDs;
+    event_info* events;
+    event_info* last_event;
+    event_info** last_ved_event;
+};
+
+#endif

@@ -1,0 +1,145 @@
+struct lvd_qdc1_card {
+        u_int16_t           ident;      /*   0 */
+        u_int16_t           serial;     /*   2 */
+        int16_t             latency;    /*   4 */
+        u_int16_t           window;     /*   6 */
+        u_int16_t           ro_data;    /*   8 */
+        u_int16_t           res0a;      /*  10 */
+        u_int16_t	    cr;         /*  12 */
+        u_int16_t           sr;         /*  14 */
+        u_int16_t           trig_level; /*  16 */
+        u_int16_t           anal_ctrl;  /*  18 */
+        u_int16_t           res14;      /*  20 */
+        u_int16_t           aclk_shift; /*  22 */
+        u_int16_t           cha_inh;    /*  24 */
+        u_int16_t           cha_raw;    /*  26 */
+        u_int16_t           iw_start;   /*  28 */
+        u_int16_t           iw_length;  /*  30 */
+        union {                         /*  32 */
+            u_int16_t       noise_level[16]; /* read */
+            u_int16_t       q_threshold[16]; /* write */
+        } nq;
+        u_int16_t	    jtag_csr;   /*  64 */
+        u_int16_t           res42;      /*  66 */
+        u_int32_t           jtag_data;  /*  68 */
+        u_int16_t           res48[2];   /*  72 */
+        u_int16_t           int_length; /*  76 */
+        u_int16_t           res4e;      /*  78 */
+        u_int32_t           tdc_range;  /*  80 */
+        u_int16_t           res54[6];   /*  84 */
+        union {                         /*  96 */
+            u_int16_t       mean_level[16]; /* read */
+            u_int16_t       ofs_dac[4];     /* write */  lvd_qdc_set_dac
+        } mo;
+};
+struct lvd_qdc3_card {
+        u_int16_t           ident;      /*  0 */
+        u_int16_t           serial;     /*  2 */
+        u_int16_t           trig_level; /*  4 */
+        u_int16_t           aclk_shift; /*  6 */
+        u_int16_t           ro_data;    /*  8 */
+        u_int16_t           res0a;      /*  a */
+        u_int16_t	    cr;         /*  c */
+        u_int16_t           sr;         /*  e */
+        u_int16_t           cha_inh;    /* 10 */
+        u_int16_t           cha_raw;    /* 12 */
+        u_int16_t           iw_start;   /* 14 */
+        u_int16_t           iw_length;  /* 16 */
+        u_int16_t           sw_start;   /* 18 */
+        u_int16_t           sw_length;  /* 1a */
+        u_int16_t           sw_ilength; /* 1c */
+        u_int16_t           anal_ctrl;  /* 1e */
+        u_int16_t           noise_qthr[16];/* 20..3e */
+            write
+                00 Q-thresh
+                01 
+                10 
+                11
+            read
+                00 noise
+                01 
+                10 Q-thresh shadow       (ab V5)
+                11
+        u_int16_t           bline_thlevel[16];/* 40..5e */
+            write
+                00 fixed base line
+                01 threshold level       (ab V5)  lvd_qdc_set_ped
+                                                  lvd_qdc_set_thrh
+                10 
+                11
+            read
+                00 auto base line
+                01 threshold level shadow (ab V5)
+                10 fixed base line        (ab V5)
+                11 
+        u_int32_t           tdc_range;  /* 60 */
+        u_int16_t           traw_cycle; /* 64 */
+        u_int16_t           ovr;        /* 66 */
+        u_int16_t           bline_adjust; /* 68 */
+        u_int16_t           res6a[3];   /* 6a..6e */
+        u_int16_t           ofs_dac[4]; /* 70..76 */  lvd_qdc_set_dac
+        u_int32_t           jtag_data;  /* 78..7a */
+        u_int16_t	    jtag_csr;   /* 7c */
+        u_int16_t           res7e;      /* 7e */
+};
+struct lvd_qdc6_card {
+        u_int16_t           ident;      /*  0 */
+        u_int16_t           serial;     /*  2 */
+        u_int16_t           grp_coinc;   /*  4 */
+        u_int16_t           aclk_shift; /*  6 */
+        u_int16_t           ro_data;    /*  8 */
+        u_int16_t           res0a;      /*  a */
+        u_int16_t           cr;         /*  c */
+        u_int16_t           sr;         /*  e */
+        u_int16_t           cha_inh;    /* 10 */
+        u_int16_t           cha_raw;    /* 12 */
+        u_int16_t           iw_start;   /* 14 */
+        u_int16_t           iw_length;  /* 16 */
+        u_int16_t           sw_start;   /* 18 */
+        u_int16_t           sw_length;  /* 1a */
+        u_int16_t           sw_ilength; /* 1c */
+        u_int16_t           anal_ctrl;  /* 1e */
+        u_int16_t           noise_qthr_coi[16];/* 20..3e */
+            write
+                00 Q-thresh
+                01 coincidence param
+                10 Q-thresh
+                11 coincidence param
+            read
+                00 noise
+                01 noise
+                10 Q-thresh shadow
+                11 coincidence param
+        u_int16_t           bline_thlevel[16];/* 40..5e */ 00
+            write
+                00 fixed base line
+                01 threshold level  lvd_qdc_set_ped
+                10 fixed base line
+                11 threshold level
+            read
+                00 auto bline
+                01 auto bline
+                10 fixed base line
+                11 threshold level
+        u_int32_t           tdc_range;  /* 60 */
+        u_int16_t           traw_cycle; /* 64 */
+        u_int16_t           ovr;        /* 66 */
+        u_int16_t           bline_adjust; /* 68 */
+        u_int16_t           res6a[1];   /* 6a */
+        u_int16_t           trigger_time; /* 6c */
+        u_int16_t           res6d[1];   /* 6e */
+        u_int16_t           dac_coinc[4]; /* 70..76 */
+            write
+                00 test pulse level (dac_coinc[0])  lvd_qdc_set_testdac
+                01 coincidence lookup
+                10 
+                11
+            read
+                00 
+                01 coincidence lookup
+                10 
+                11
+        u_int32_t           jtag_data;  /* 78..7a */
+        u_int16_t	    jtag_csr;   /* 7c */
+        u_int16_t           ctrl;      /* 7e */
+};

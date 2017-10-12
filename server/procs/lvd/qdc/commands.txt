@@ -1,0 +1,104 @@
+char name_proc_lvd_qdc_init[] = "lvd_qdc_init";
+ * p[0]: argcount==3
+ * p[1]: branch
+ * p[2]: module addr  (absolute address or -1 for all modules)
+ * p[3]: daqmode      (see manual)
+
+char name_proc_lvd_qdc_window[] = "lvd_qdc_window";
+ * p[0]: argcount (4 or 5)
+ * p[1]: branch
+ * p[2]: addr
+ * p[3]: latency/ns (if raw==0)
+ * p[4]: width/ns   (if raw==0)
+ * [p[5]: raw]
+ * raw==0 is not allowed any more!
+
+char name_proc_lvd_qdc_getwindow[] = "lvd_qdc_getwindow";
+ * p[0]: argcount==3
+ * p[1]: branch
+ * p[2]: addr
+
+char name_proc_lvd_qdc_swstart[] = "lvd_qdc_swstart";
+ * p[0]: argcount (2 or 3)
+ * p[1]: branch
+ * p[2]: module addr
+ * [p[3]: swstart]
+
+char name_proc_lvd_qdc_swlength[] = "lvd_qdc_swlength";
+ * p[0]: argcount (2 or 3)
+ * p[1]: branch
+ * p[2]: module addr
+ * [p[3]: swlength]
+
+char name_proc_lvd_qdc_intlength[] = "lvd_qdc_intlength";
+ * p[0]: argcount (2 or 3)
+ * p[1]: branch
+ * p[2]: module addr
+ * [p[3]: intlength]
+
+char name_proc_lvd_qdc_iwstart[] = "lvd_qdc_iwstart";
+ * p[0]: argcount (2 or 3)
+ * p[1]: branch
+ * p[2]: module addr
+ * [p[3]: iwstart]
+
+char name_proc_lvd_qdc_iwlength[] = "lvd_qdc_iwlength";
+ * p[0]: argcount (2 or 3)
+ * p[1]: branch
+ * p[2]: module addr
+ * [p[3]: iwlength]
+
+char name_proc_lvd_qdc_rawcycle[] = "lvd_qdc_rawcycle";
+ * p[0]: argcount (2 or 3)
+ * p[1]: branch
+ * p[2]: module addr
+ * [p[3]: rawcycle]
+
+char name_proc_lvd_qdc_dac[] = "lvd_qdc_dac";
+ * p[0]: argcount==4
+ * p[1]: branch
+ * p[2]: module addr (absolute address or -1 for all modules)
+ * [p[3]: channel   (0..15 or -1 for all channels)
+ *  p[4]: dac       (0..4095)]
+
+char name_proc_lvd_qdc_pedestal[] = "lvd_qdc_pedestal";
+ * p[0]: argcount==4
+ * p[1]: branch
+ * p[2]: module addr (absolute address or -1 for all modules)
+ * [p[3]: channel   (0..15 or -1 for all channels)
+ *  p[4]: pedestal]
+
+char name_proc_lvd_qdc_threshold[] = "lvd_qdc_threshold";
+ * p[0]: argcount==4
+ * p[1]: branch
+ * p[2]: module addr (absolute address or -1 for all modules)
+ * [p[3]: channel   (0..15 or -1 for all channels)
+ *  p[4]: threshold]
+
+char name_proc_lvd_qdc_inhibit[] = "lvd_qdc_inhibit";
+ * p[0]: argcount (2 or 3)
+ * p[1]: branch
+ * p[2]: module addr
+ * [p[3]: mask]
+
+char name_proc_lvd_qdc_raw[] = "lvd_qdc_raw";
+ * p[0]: argcount==4
+ * p[1]: branch
+ * p[2]: module addr
+ * [p[3]: mask]
+
+char name_proc_lvd_qdc_anal[] = "lvd_qdc_anal";
+ * p[0]: argcount (2 or 3)
+ * p[1]: branch
+ * p[2]: module addr
+ * [p[3]: anal_ctrl]
+
+char name_proc_lvd_qdc_noise[] = "lvd_qdc_noise";
+ * p[0]: argcount==2
+ * p[1]: branch
+ * p[2]: module addr
+
+char name_proc_lvd_qdc_mean[] = "lvd_qdc_mean";
+ * p[0]: argcount==2
+ * p[1]: branch
+ * p[2]: module addr

@@ -1,0 +1,82 @@
+case sync_signal:
+
+        printf("read trigstatus: %s\n", strerror(errno));
+        buf[0]=rtErr_Trig;
+        buf[1]=eventcnt;
+        buf[2]=1;
+        buf[3]=errno;
+        send_unsolicited(Unsol_RuntimeError, buf, 4);
+
+      printf("got signal; but mbx is %08x (%s)\n",pci_trigdata.mbx,
+          getbits(pci_trigdata.mbx));
+      buf[0]=rtErr_Trig;
+      buf[1]=eventcnt;
+      buf[2]=2;
+      buf[3]=pci_trigdata.mbx;
+      buf[4]=pci_trigdata.state;
+      send_unsolicited(Unsol_RuntimeError, buf, 5);
+
+      printf("got signal; but stat is %08x (%s)\n", pci_trigdata.state,
+          getbits(pci_trigdata.state));
+      printf("got: %08x %08x %08x\n", pci_trigdata.mbx, pci_trigdata.state,
+          pci_trigdata.evc);
+      buf[0]=rtErr_Trig;
+      buf[1]=eventcnt;
+      buf[2]=3;
+      buf[3]=pci_trigdata.mbx;
+      buf[4]=pci_trigdata.state;
+      send_unsolicited(Unsol_RuntimeError, buf, 5);
+  case sync_poll:
+  case sync_select:
+#ifndef SCHED_TRIGGER
+      printf("select in get_trig_zelsync: %s\n", strerror(errno));
+      buf[0]=rtErr_Trig;
+      buf[1]=eventcnt;
+      buf[2]=4;
+      buf[3]=errno;
+      send_unsolicited(Unsol_RuntimeError, buf, 4);
+#endif
+      (short read)
+      printf("read trigstatus: got=%d: %s\n", got, strerror(errno));
+      buf[0]=rtErr_Trig;
+      buf[1]=eventcnt;
+      buf[2]=5;
+      buf[3]=errno;
+      send_unsolicited(Unsol_RuntimeError, buf, 4);
+
+        printf("\007 Trigger: no EOC or no INH\n");
+        print_zelsync_status(0, 1);
+        buf[0]=rtErr_Trig;
+        buf[1]=eventcnt;
+        buf[2]=9;
+        buf[3]=pci_trigdata.mbx;
+        buf[4]=pci_trigdata.state;
+        send_unsolicited(Unsol_RuntimeError, buf, 5);
+
+  printf("\007 Trigger: eventcnt: %d ==> %d\n", eventcnt, pci_trigdata.evc);
+  print_zelsync_status(0, 1);
+  buf[0]=rtErr_Trig;
+  buf[1]=eventcnt;
+  buf[2]=6;
+  buf[3]=pci_trigdata.mbx;
+  buf[4]=pci_trigdata.state;
+  buf[5]=pci_trigdata.evc;
+  send_unsolicited(Unsol_RuntimeError, buf, 6);
+
+  printf("\007 Trigger: Subenvent invalid\n");
+  print_zelsync_status(0, 1);
+  buf[0]=rtErr_Trig;
+  buf[1]=eventcnt;
+  buf[2]=7;
+  buf[3]=pci_trigdata.mbx;
+  buf[4]=pci_trigdata.state;
+  send_unsolicited(Unsol_RuntimeError, buf, 5);
+
+  printf("\007 Trigger: got no trigger\n");
+  print_zelsync_status(0, 1);
+  buf[0]=rtErr_Trig;
+  buf[1]=eventcnt;
+  buf[2]=8;
+  buf[3]=pci_trigdata.mbx;
+  buf[4]=pci_trigdata.state;
+  send_unsolicited(Unsol_RuntimeError, buf, 5);

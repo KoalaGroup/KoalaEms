@@ -1,0 +1,42 @@
+
+id[0x10]:  HWtype=0x1, HWver=0x0, FW=0x20 00002010 master controller SN 0
+id[0x10]:  HWtype=0x1, FW=0x03 00000301 master controller (OLD!!!)   SN 1
+id[0x10]:  HWtype=0x1, HWver=0x2, FW=0x20 00002012 master controller SN 4
+id[0x10]:  HWtype=0x1, HWver=0x2, FW=0x20 00002012 master controller SN 6
+
+
+id[0x100]: HWtype=0x4, HWver=0x1, FW=0x10 00001041 VERTEX ADC
+
+
+id[0x101]: HWtype=0x3, HWver=0x0, FW=0x12 00002031 F1 TDC SN6 (Ohm)
+id[0x102]: HWtype=0x3, HWver=0x0, FW=0x12 00001230 F1 TDC SN7 (Ohm)
+id[0x103]: HWtype=0x3, FW=0x03 00000303 F1 TDC (OLD!!!)   SN1 (Winz)
+id[0x104]: HWtype=0x3, FW=0x03 00000303 F1 TDC (OLD!!!)   SN2 (Winz)
+id[0x105]: HWtype=0x3, HWver=0x1, FW=0x20 00002031 F1 TDC SN3 (meins)
+id[0x106]: HWtype=0x3, HWver=0x1, FW=0x20 00002031 F1 TDC PN1 (proto)
+
+
+uralt
+13478    128 F1_V0303.fpga
+Ohm
+44509    128 F1_V1230.fpga
+Wintz
+65178    128 F1_V2031.fpga
+
+
+55726    128 MCONTR_V0301_1.fpga
+03865    128 MCONTR_V0301_2.fpga
+
+fuer Rev. 1.0 (PW5336)
+35891    128 MCONTR_V2010_1.fpga
+26625    128 MCONTR_V2010_2.fpga
+
+fuer Rev. 1.1 (PW5336-1)
+05613    128 MCONTR_V2012.4_1.fpga
+06122    128 MCONTR_V2012.6_1.fpga
+58719    128 MCONTR_V2012.8_1.fpga
+26625    128 MCONTR_V2012_2.fpga
+
+
+46582    512 VERTEX_V1041_0.fpga
+12851    512 VERTEX_V1041_1.fpga

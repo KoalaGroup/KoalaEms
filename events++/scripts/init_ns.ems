@@ -1,0 +1,87 @@
+proc init_is {ved is idx} {
+  set name [$ved name]
+  variable ::${name}::${is}::id
+  variable ::${name}::${is}::readoutlist
+  set isv [$ved is create $idx $id]
+  if [info exists ::${name}::${is}::memberlist] {
+    variable ::${name}::${is}::memberlist
+    $isv memberlist create $memberlist
+  }
+  if [info exists ::${name}::${is}::memberlist] {
+    variable ::${name}::${is}::memberlist
+    $isv memberlist create $memberlist
+  }
+  if [info exists ::${name}::${is}::readoutlist] {
+    variable ::${name}::${is}::readoutlist
+    foreach i [array names readoutlist] {
+      eval "$isv readoutlist create $readoutlist($i)"
+    }
+  }
+}
+
+proc init_ved {ved} {
+  set name [$ved name]
+  if [info exists ::${name}::var] {
+    variable ::${name}::var
+    foreach i [array names var] {
+      $ved var create $i [lindex $var($i) 0]
+      if {[llength $var($i)]>1} {
+        $ved var write $i [lindex $var($i) 1] 
+      }
+    }
+  }
+  if [info exists ::${name}::trigger] {
+    variable ::${name}::trigger
+    eval "$ved trigger create $trigger"
+  }
+  if [info exists ::${name}::dataout] {
+    variable ::${name}::dataout
+    foreach i [array names dataout] {
+      eval "$ved dataout create $i $dataout($i)"
+    }
+  }
+  if [info exists ::${name}::datain] {
+    variable ::${name}::datain
+    foreach i [array names datain] {
+      eval "$ved datain create $i $datain($i)"
+    }
+  }
+  if [info exists ::${name}::modullist] {
+    variable ::${name}::modullist
+    $ved modullist create $modullist
+  }
+  if [info exists ::${name}::IS] {
+    variable ::${name}::IS
+    set idx 1
+    foreach is $IS {
+      init_is $ved $is $idx
+      incr idx
+    }
+  }
+}
+
+proc init_all {} {
+  global all_veds veds
+
+  foreach i $all_veds {
+    puts "initialize $i"
+
+    foreach j [ems_openveds] {
+      if {"[$j name]"=="$i"} {
+        if [catch {$j close} mist] {puts "close $j: $mist"}
+      }
+    }
+    if [catch {set ved [ems_open $i]} mist] {
+      puts "ems_open $i: $mist"
+      return -1
+    } else {
+      set veds($i) $ved
+    }
+    catch {$ved readout reset}
+    if [catch {$ved reset} mist] {
+      echo $mist
+    } 
+    init_ved $veds($i)
+  }
+return 0;
+}

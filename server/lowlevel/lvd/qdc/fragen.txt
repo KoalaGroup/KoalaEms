@@ -1,0 +1,6 @@
+u_int16_t           ofs_dac[4]; /* 70..76 */  lvd_qdc_set_dac
+    Auch in Version 6?
+
+qdc1.trig_level, qdc3.trig_level
+    gibt's das auch in V6 oder ist es ersetzt durch (bline_)thlevel?
+

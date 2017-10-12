@@ -1,0 +1,106 @@
+proc open_all {} {
+  global cc em num_cc v_cc v_em
+
+  for {set i 0} {$i<$num_cc} {incr i} {
+    set vname [lindex $cc $i]
+    if {$v_cc($i)!={}} {
+      set ved $v_cc($i)
+      if [catch {set name [$ved name]} mist] {
+        puts "$ved name: $mist"
+        set v_cc($i) {}
+      } else {
+        if {$name!=$vname} {
+          puts "$ved has name $name"
+          set v_cc($i) {}
+        }
+      }
+    }
+    if {$v_cc($i)=={}} {
+      if [catch {set ved [ems_open $vname]} mist] {
+        puts "ems_open $vname: $mist"
+        close_all
+        return -1
+      } else {
+        set v_cc($i) $ved
+      }
+    }
+  }
+  if {$v_em!={}} {
+    if [catch {set name [$v_em name]} mist] {
+      puts "$v_em name: $mist"
+      set v_em {}
+    } else {
+      if {$name!=$em} {
+        puts "$v_em has name $name"
+        set v_em {}
+      }
+    }
+  }
+  if {$v_em=={}} {
+    if [catch {set ved [ems_open $em]} mist] {
+      puts "ems_open $em: $mist"
+      close_all
+      return -1
+    } else {
+      set v_em $ved
+    }
+  }
+return 0
+}
+
+proc close_all {} {
+  global all_veds num_cc v_cc v_em
+
+  foreach i [ems_openveds] {
+    if {[lsearch -exact $all_veds [$i name]]>=0} {
+      if [catch {$i close} mist] {puts "close $i: $mist"}
+    }
+  }
+
+  for {set i 0} {$i<$num_cc} {incr i} {
+    set v_cc($i) {}
+  }
+  set v_em {}
+}
+
+proc init_all {} {
+  global num_cc v_cc v_em
+  global cc_do_host em_di_port_base em_do
+
+  if {[open_all]!=0} {
+    puts "open not ok"
+    return
+  }
+  set is_id 1;
+  set name unknown
+  if [catch {
+    for {set i 0} {$i<$num_cc} {incr i} {
+      set name [$v_cc($i) name]
+      $v_cc($i) var create 1 1
+      $v_cc($i) var create 10 1
+      $v_cc($i) var write 10 1000
+#     $v_cc($i) trigger create Rate 1 2000 1
+      $v_cc($i) trigger create shm 1
+      $v_cc($i) dataout create 0 cluster 1 0 socket $cc_do_host [expr $em_di_port_base+$i]
+      set is [$v_cc($i) is create 1 $is_id]
+      incr is_id
+      $is readoutlist create 1 1 {WriteVarRSize {10}}
+    }
+    set name [$v_cc(0) name]
+    $v_cc(0) var write 10 1
+    set name [$v_cc(1) name]
+    $v_cc(1) var write 10 100
+#     set name [$v_cc(3) name]
+#     $v_cc(3) var write 10 5000
+
+    set name [$v_em name]
+    for {set i 0} {$i<$num_cc} {incr i} {
+      $v_em datain create $i "cluster 0 0 1000" "socket [expr $em_di_port_base+$i]"
+    }
+
+    eval "$v_em dataout create 0 $em_do"
+  } mist] {
+    puts "$name: $mist"
+  }
+}
+

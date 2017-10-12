@@ -1,0 +1,19 @@
+there is an example of the c-functions,
+calling "hbook" cern library
+j.b.
+-------------------------
+Jhist_lib
+It is an independent set of tools for creating, filling and saveing
+histograms , developed by J.Balewski
+
+jhist_lib.c + jhist_lib.h
+files are included temporary in this directory
+j.b.
+
+==========
+ver 103
+new functions from Hbook were included:
+ 
+ void Hmdir(char* dir, char *opt);
+ void Hcdir(char* dir, char *opt);
+ void Hopera(int id1, char *oper, int id2, int id3, float f1, float f2);

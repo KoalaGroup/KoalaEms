@@ -1,0 +1,46 @@
+# ferasetup
+set vedname p23
+set description {FERA, Side detector}
+
+set FQDC 0x1214300B
+set FTDC 0x1314300B
+
+set modullist {}
+
+set isid(1) 1
+set memberlist(1) {}
+
+for {set i 1} {$i<=20} {incr i} {
+  if {$i>5} then {
+    set F $FTDC
+  } else {
+    set F $FQDC
+  } 
+  lappend modullist "$i $F"
+  lappend memberlist(1) $i
+}
+
+set readouttrigg(1.1) {1}
+set readoutprio(1.1) 1
+set readoutproc(1.1) {FERAreadoutZEL {}}
+
+set dataout(0) {cluster 1 0 socket ikpd10 9000}
+
+set trigger {zel '/tmp/sync0' 0 10 2 1}
+
+set init_proclist(0) {CCCI 0 ClusterEvMax 50}
+set start_proclist_t {InitPCITrigger {'/tmp/sync0' 0}}
+
+set init_command(1) load_pedestals
+
+proc load_pedestals {ved is} {
+  set args "30 120 1"
+  for {set i 1} {$i<=5} {incr i} {
+    for {set j 0} {$j<16} {incr j} {lappend args 60}
+  }
+  for {set i 6} {$i<=20} {incr i} {
+    for {set j 0} {$j<16} {incr j} {lappend args 0}
+  }
+  lappend command FERAsetupZEL $args
+  $is command $command
+}

@@ -1,0 +1,92 @@
+dnl procs/unixvme/mesytec/procedures.config
+dnl $ZEL: procedures.config,v 1.2 2011/08/02 15:15:08 huagen Exp $
+dnl created 2011-07-05 h.xu
+
+dnl madc32 32-channel QDC
+dnl A32D16 (registers) A32D32/BLT32 (data buffer)
+dnl reserves 65536 Byte
+dnl proc(madc32init)
+dnl proc(madc32start)
+dnl proc(madc32convert)
+proc(madc32reset)
+dnl proc(madc32bitset2)
+dnl proc(madc32bitres2)
+dnl proc(madc32read)
+dnl proc(madc32read_all)
+proc(madc32read_one)
+dnl proc(madc32flush)
+dnl proc(madc32readblock)
+dnl proc(madc32writethreshold)
+dnl proc(madc32writethreshold2)
+dnl proc(madc32readthreshold)
+dnl proc(madc32writeslide)
+dnl proc(madc32readslide)
+dnl proc(madc32cblt)
+
+proc(madc32bitset)
+proc(madc32rangeset)
+
+dnl to be removed
+dnl proc(madc32_init_single)
+dnl proc(madc32_start_single)
+dnl proc(madc32_stop)
+dnl proc(madc32_read_single)
+
+
+
+dnl general initialisation
+dnl ======================
+
+dnl madc32_init idx ID resolution input_range marking_type sliding_scale bank_operation
+proc(madc32_init)
+
+dnl madc32_irq idx level vector irq_threshold (maximimum 956)
+proc(madc32_irq)
+
+dnl madc32_threshold idx 32*thr
+dnl madc32_threshold idx channel thr (channel may be -1)
+proc(madc32_threshold)
+
+dnl madc32_gate idx [bank delay width]
+proc(madc32_gate)
+
+dnl madc32_nimbusy idx val
+proc(madc32_nimbusy)
+
+
+dnl simple readout (single and multi event)
+dnl =======================================
+
+dnl madc32_start_simple idx multievent max_transfer_data
+proc(madc32_start_simple)
+
+dnl madc32_stop_simple idx
+proc(madc32_stop_simple)
+
+dnl madc32_read_simple idx max_words
+proc(madc32_read_simple)
+
+
+dnl readout with mcst [and cblt]
+dnl ============================
+
+dnl madc32_init_cblt [mcst_module [cblt_module]]
+proc(madc32_init_cblt)
+
+dnl madc32_start_cblt mcst_module multievent max_transfer_data
+proc(madc32_start_cblt)
+
+dnl madc32_stop_cblt mcst_module
+proc(madc32_stop_cblt)
+
+dnl madc32_read_mcst mcst_module  max_words
+proc(madc32_read_mcst)
+
+dnl madc32_read_cblt mcst_module cblt_module max_words_all
+proc(madc32_read_cblt)
+
+dnl statistics and debugging
+dnl ========================
+
+proc(madc32_evnr)
+proc(madc32_status)

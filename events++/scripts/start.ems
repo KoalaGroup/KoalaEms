@@ -1,0 +1,110 @@
+proc start_all {} {
+  global num_cc v_cc v_em
+
+  for {set i 0} {$i<$num_cc} {incr i} {
+    if [catch {$v_cc($i) readout start} mist] {
+      puts "[$v_cc($i) name]: $mist"
+    }
+  }
+  if [catch {$v_em readout start} mist] {
+    puts "[$v_em name]: $mist"
+  }
+  stat_all all
+}
+
+proc do_stat_names {i} {
+  switch -exact $i {
+    0 {set stat "running"}
+    1 {set stat "neverstarted"}
+    2 {set stat "done"}
+    3 {set stat "error"}
+    4 {set stat "flushing"}
+    default {set stat $i}
+  }
+return $stat
+}
+
+# proc stat_do {ved} {
+#   foreach i [$ved namelist do] {
+#     set status [$ved dataout status $i]
+#     set error [lindex $status 0]
+#     switch -exact [lindex $status 1] {
+#       0 {set stat "running"}
+#       1 {set stat "neverstarted"}
+#       2 {set stat "done"}
+#       3 {set stat "error"}
+#       4 {set stat "flushing"}
+#     }
+#     set switch [lindex $status 2]
+#     puts "[$ved name] do $i: error $error status $stat switch $switch"
+#   }  
+# }
+
+# proc stat_all {} {
+#   global num_cc v_cc v_em
+#   global stat_cc stat_em
+# 
+#   for {set i 0} {$i<$num_cc} {incr i} {
+#     if [catch {set status [$v_cc($i) readout status]} mist] {
+#       puts "$v_cc($i) readout status: $mist"
+#     }
+#     set stat_cc($i) [lindex $status 0]
+#     puts "[$v_cc($i) name]: $status"
+#     stat_do $v_cc($i)
+#   }
+#   if [catch {set status [$v_em readout status]} mist] {
+#     puts "$v_em readout status: $mist"
+#   }
+#   set stat_em [lindex $status 0]
+#   puts "[$v_em name]: $status"
+#   stat_do $v_em
+# }
+
+proc stat_all {what} {
+  global num_cc v_cc v_em
+
+  set ok_cc 1
+  set ok_em 1
+  if {$what=="all" || $what=="cc"} {
+    for {set i 0} {$i<$num_cc} {incr i} {
+      if [catch {set ro_stat [$v_cc($i) readout status]} mist] {
+        puts "$v_cc($i) readout status: $mist"
+      } else {
+        if {[lindex $ro_stat 0]=="running"} {set ok_cc 0}
+        puts -nonewline "[$v_cc($i) name]: $ro_stat"
+      }
+      if [catch {set do_stat [$v_cc($i) dataout status 0]} mist] {
+        puts "$v_cc($i) dataout status: $mist"
+      } else {
+        set stat [lindex $do_stat 1]
+        if {$stat==0 || $stat==4} {set ok_cc 0}
+        puts "; dataout [do_stat_names $stat]"
+      }
+    }
+  }
+
+  if {$what=="all" || $what=="em"} {
+    if [catch {set ro_stat [$v_em readout status]} mist] {
+      puts "$v_em readout status: $mist"
+    } else {
+      if {[lindex $ro_stat 0]=="running"} {set ok_em 0}
+      puts "[$v_em name]: $ro_stat"
+    }
+    foreach i [$v_em namelist do] {
+      if [catch {set do_stat [$v_em dataout status $i]} mist] {
+        puts "$v_em dataout status $i: $mist"
+      } else {
+        set stat [lindex $do_stat 1]
+        if {$stat==0 || $stat==4} {set ok_em 0}
+        puts "    dataout $i: [do_stat_names $stat]"
+      }
+    }
+  }
+
+  switch -exact $what {
+    "all" {set res [expr $ok_em*2+$ok_cc]}
+    "em" {set res $ok_em}
+    "cc" {set res $ok_cc}
+  }
+  return $res
+}

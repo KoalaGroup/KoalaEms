@@ -1,0 +1,28 @@
+reset/init:
+===========
+
+
+lvdbus_init:
+    (als ems-procedure) macht immer kompletten reset und init
+
+Server starten:
+    nicht resetten
+    testen, ob modules offline sind -> Adressen verteilen
+    Konfiguration einlesen
+
+Link wurde aktiv:
+    nicht resetten
+    testen, ob modules offline sind -> Adressen verteilen
+    Konfiguration vergleichen
+    Message verschicken
+        unveraendert
+        war offline
+        veraendert oder falsches Crate
+
+reset VED:
+    in lvdbus_done hardware resetten
+    weiter wie "Server starten"
+
+
+
+in lvdbus.c

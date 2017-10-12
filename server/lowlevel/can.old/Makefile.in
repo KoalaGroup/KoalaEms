@@ -1,0 +1,42 @@
+# lowlevel/can/Makefile.in
+# $ZEL: Makefile.in,v 1.1 2006/04/20 09:43:56 peterka Exp $
+
+CONF = ../../conf
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+include $(CONF)/rules.make
+include $(CONF)/config.make
+
+cfiles = can.c
+ofiles = $(cfiles:.c=.o)
+depfiles = $(cfiles)
+
+subdirs := $(can)
+
+CANTYPES = $(shell echo $(can)|tr '[:lower:]' '[:upper:]')
+CANFLAGS=$(foreach typ,$(CANTYPES),-DCAN_$(typ) )
+CFLAGS += $(CANFLAGS)
+export CANFLAGS
+
+lib = ../libll.a
+
+all: $(lib)
+
+$(lib): $(lib)($(ofiles)) $(subdirs)
+	$(RANLIB) $@
+
+$(subdirs): FORCE
+	$(MAKE) -C $@ all
+
+define MAKEIT
+	$(MAKE) -C $(dir) depend
+
+endef
+MAKEDEP = $(foreach dir,$(can),$(MAKEIT))
+
+depend: xdepend
+	$(MAKEDEP)
+
+.PHONY: FORCE depend

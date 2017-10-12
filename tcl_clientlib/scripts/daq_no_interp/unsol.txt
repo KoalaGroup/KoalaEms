@@ -1,0 +1,343 @@
+send_unsolicited
+
+Unsol_RuntimeError (7):
+
+dataout/cluster/do_cluster.c:203
+dataout/cluster/do_cluster_file.c:161
+dataout/cluster/do_cluster_sock.c:68/89
+[0]rtErr_OutDev
+[1]  do_idx
+[2]    0
+[3]      errno // write-error
+
+dataout/cluster/do_cluster_tape.c:301
+[0]rtErr_OutDev
+[1]  do_idx
+[2]    1 // scsi error
+[3]      error_code
+[4]      sense_key
+[5]      add_sense_code
+[6]      add_sense_code_qual
+[7]      eom
+
+dataout/cluster/do_cluster_tape.c:1174
+[0]rtErr_OutDev
+[1]  do_idx
+[2]    2
+[3]      typ // 1: WIFEXITED 2: WIFSIGNALED 3: WIFSTOPPED 4: WIFCONTINUED
+[4]        code // exitstatus/signal
+                // child process exited
+
+dataout/cluster/do_cluster_tape.c:394
+[0]rtErr_OutDev
+[1]  do_idx
+[2]    3 // end of tape warning
+
+dataout/cluster/cl_interface.c:651
+[0]rtErr_Other
+[1]  -1
+[2]    1 // no memory for ved-cluster
+
+objects/pi/readout_em_cluster/di_cluster.c:257
+[0]rtErr_InDev
+[1]  di_idx
+[2]    2
+[3]      selected // wrong select-type in cluster_read
+
+objects/pi/readout_em_cluster/di_cluster.c:282
+[0]rtErr_InDev
+[1]  di_idx
+[2]    3
+[3]      errno // read error (header)
+
+objects/pi/readout_em_cluster/di_cluster.c:307
+[0]rtErr_InDev
+[1]  di_idx
+[2]    4
+[3]      dat->head[1] // wrong endien
+
+objects/pi/readout_em_cluster/di_cluster.c:355
+[0]rtErr_InDev
+[1]  di_idx
+[2]    5
+[3]      errno //  read error (data)
+
+objects/pi/readout_em_cluster/di_cluster.c:425
+[0]rtErr_InDev
+[1]  di_idx
+[2]    6 // old style vedinfo
+
+objects/pi/readout_em_cluster/di_cluster.c:468
+[0]rtErr_InDev
+[1]  di_idx
+[2]    7
+[3]      type // unknown type of ved info
+
+objects/pi/readout_em_cluster/di_cluster.c:557
+[0]rtErr_InDev
+[1]  di_idx
+[2]    8 // exception in di_sock_connect
+
+objects/pi/readout_em_cluster/di_cluster.c:574
+[0]rtErr_InDev
+[1]  di_idx
+[2]    9
+[3]      errno // getsockopt error
+
+objects/pi/readout_em_cluster/di_cluster.c:589
+[0]rtErr_InDev
+[1]  di_idx
+[2]    10
+[3]      val // bad status in di_sock_connect
+
+objects/pi/readout_em_cluster/di_cluster.c:609
+[0]rtErr_InDev
+[1]  di_idx
+[2]    11 // task creation error
+
+objects/pi/readout_em_cluster/di_cluster.c:640
+[0]rtErr_InDev
+[1]  di_idx
+[2]    12 // accept error
+
+objects/pi/readout_em_cluster/di_cluster.c:661
+[0]rtErr_InDev
+[1]  di_idx
+[2]    13
+[3]      errno // accept error
+
+objects/pi/readout_em_cluster/di_cluster.c:691
+[0]rtErr_InDev
+[1]  di_idx
+[2]    14
+[3]      errno // accept error
+
+objects/pi/readout_em_cluster/di_cluster.c:710
+[0]rtErr_InDev
+[1]  di_idx
+[2]    15 // accept error
+
+objects/pi/readout_em/readevents.c:138/627
+[0]rtErr_Mismatch
+[1]  eventcnt
+[2]    i
+[3]      evh.info.evno // wrong eventbuffer received
+
+
+
+trigger/pci/zelsync/zelsynctrigger.c:800
+[0]rtErr_Trig
+[1]  eventcnt
+[2]    1
+[3]      errno // read-error vom Triggermodul
+
+trigger/pci/zelsync/zelsynctrigger.c:816
+[0]rtErr_Trig
+[1]  eventcnt
+[2]    2
+[3]      pci_trigdata.mbx
+[4]        pci_trigdata.state // SYNC_MBX_EOC in Mailbox nicht gesetzt
+
+trigger/pci/zelsync/zelsynctrigger.c:832
+[0]rtErr_Trig;
+[1]  eventcnt
+[2]    3
+[3]      pci_trigdata.mbx
+[4]        pci_trigdata.state // SYNC_GET_EOC im Status nicht gesetzt
+
+trigger/pci/zelsync/zelsynctrigger.c:924
+[0]rtErr_Trig
+[1]  eventcnt
+[2]    4
+[3]      errno // select-error
+
+trigger/pci/zelsync/zelsynctrigger.c:940
+[0]rtErr_Trig
+[1]  eventcnt
+[2]    5
+[3]      errno // got!=sizeof(struct trigstatus)
+
+trigger/pci/zelsync/zelsynctrigger.c:983
+[0]rtErr_Trig
+[1]  eventcnt
+[2]    9
+[3]      pci_trigdata.mbx
+[4]        pci_trigdata.state // no EOC or no INH
+
+trigger/pci/zelsync/zelsynctrigger.c:1003
+[0]rtErr_Trig
+[1]  eventcnt // erwarteter Eventcounter
+[2]    6
+[3]      pci_trigdata.mbx
+[4]        pci_trigdata.state
+[5]          pci_trigdata.evc // erwarteter!=erhaltener Eventcounter
+
+trigger/pci/zelsync/zelsynctrigger.c:1018
+[0]rtErr_Trig
+[1]  eventcnt
+[2]    7
+[3]      pci_trigdata.mbx
+[4]        pci_trigdata.state // Subevent Invalid
+
+trigger/pci/zelsync/zelsynctrigger.c:1034
+[0]rtErr_Trig
+[1]  eventcnt
+[2]    8
+[3]      pci_trigdata.mbx
+[4]        pci_trigdata.state // Trigger_ID=0
+
+trigger/chi/gsi_old/gsitrigger.c:158/331
+trigger/chi/gsi/gsitrigger.c:154/326
+trigger/camac/gsi_test/gsitrigger.c:339
+trigger/camac/gsi/gsitrigger.c:157/345
+[0]rtErr_Trig
+[1]  oldcnt
+[2]    status // REJECT || MISMATCH ||  event!=eventcnt
+
+
+Unsol_Warning (10):
+
+procs/fastbus/fb_lecroy/fb_lc1885f_init.c:475/907
+procs/fastbus/fb_lecroy/fb_lc1881_init.c:560/1074
+[0]0
+[1]  1
+[2]    (evt+1) // no trigger detected (Pedestalmessung)
+
+procs/fastbus/fb_lecroy/fb_lc1885f_init.c:622/1054
+procs/fastbus/fb_lecroy/fb_lc1881_init.c:752/1270
+[0]1
+[1]  3
+[2]    evt_max // trigger for pedestal measurement recorded (einer zu viel)
+
+procs/fastbus/fb_lecroy/fb_lc1885f_read.c:159/461
+procs/fastbus/fb_lecroy/fb_lc1885f_read.c:461
+procs/fastbus/fb_lecroy/fb_lc1885f_init.c:516/948
+procs/fastbus/fb_lecroy/fb_lc1885f_init.c:948
+procs/fastbus/fb_lecroy/fb_lc1881_read.c:371/572/796/1032/1236
+procs/fastbus/fb_lecroy/fb_lc1881_init.c:598/1116
+procs/fastbus/fb_lecroy/fb_lc1877_read.c:372/591/840/1111/1352
+procs/fastbus/fb_lecroy/fb_lc1876_read.c:365/598/798
+procs/fastbus/fb_lecroy/fb_lc1875p_read.c:125
+procs/fastbus/fb_lecroy/fb_lc1875a_read.c:140/345/568/789
+procs/fastbus/fb_lecroy/fb_lc1875_read.c:154/427
+procs/fastbus/fb_lecroy/fb_lc1872a_read.c:135/356
+[0]1
+[1]  3
+[2]    eventcnt
+[3]      LC_ADC_1885F/LC_ADC_1881/LC_TDC_1877/LC_TDC_1876/LC_TDC_1875A/
+         LC_TDC_1875A/LC_TDC_1875/LC_TDC_1872A
+[4]        con_pat // time elapsed: conversion not completed
+
+procs/fastbus/fb_lecroy/fb_lc1885f_init.c:553/985
+procs/fastbus/fb_lecroy/fb_lc1881_init.c:658/669/1176/1187
+[0]2
+[1]  4
+[2]    (evt+1)
+[3]      pa
+[4]        *ped
+[5]          read_err // error in data word (Pedestalmessung)
+
+procs/fastbus/fb_lecroy/fb_lc_util.c:569/654/714/799/859/944
+[0]4
+[1]  4
+[2]    evt
+[3]      pa
+[4]        ptr
+[5]          ptr // read and write pointer mismatch
+
+procs/fastbus/fb_lecroy/fb_lc1810_init.c:260/321/450
+[0]5
+[1]  3
+[2]    evt
+[3]      pa
+[4]        err_flag // multiple gates occured
+
+procs/fastbus/fb_lecroy/fb_lc1885f_init.c:216
+procs/fastbus/fb_lecroy/fb_lc1875a_init.c:199
+procs/fastbus/fb_lecroy/fb_lc1875_init.c:204
+procs/fastbus/fb_lecroy/fb_lc1872a_init.c line 188
+[0]6
+[1]  3
+[2]    pa
+[3]      sa
+[4]        val // active channel depth wrong (??)
+
+procs/fastbus/fb_lecroy/fb_lc_util.c:62
+[0]7
+[1]  1
+[2]    type // empty pattern for modultype type
+
+procs/fastbus/fb_lecroy/fb_lc1885f_read.c:182/216/483/517
+procs/fastbus/fb_lecroy/fb_lc1881_read.c:822/1060/1260
+procs/fastbus/fb_lecroy/fb_lc1879_read.c:636/652/894/910
+procs/fastbus/fb_lecroy/fb_lc1877_read.c:857/883/1132/1157/1369/1394
+procs/fastbus/fb_lecroy/fb_lc1876_read.c:390/626/822
+procs/fastbus/fb_lecroy/fb_lc1875p_read.c:143
+procs/fastbus/fb_lecroy/fb_lc1875a_read.c:587/807
+procs/fastbus/fb_lecroy/fb_lc1875_read.c:176/205/449/478
+procs/fastbus/fb_lecroy/fb_lc1872a_read.c:154/374
+[0]8
+[1]  3
+[2]    eventcnt
+[3]      LC_ADC_1885F/LC_TDC_1879/LC_TDC_1877/LC_TDC_1876/LC_TDC_1875A/
+         LC_TDC_1875A/LC_TDC_1875/LC_TDC_1872A
+[4]        wc // sscode==0 (too many data)
+
+Unsol_Patience (11):
+
+procs/fastbus/fb_lecroy/fb_lc1885f_init.c:449/881
+procs/fastbus/fb_lecroy/fb_lc1881_init.c:526/1040
+[0]0
+[1]  2
+[2]    evt
+[3]      patience // Restzeit fuer Pedestals in Sekunden
+
+procs/camac/drams/c219_help.c:103/111
+[0]17
+[1]  1
+[2]    0 // flat beendet
+[2]    1 // flat hat wieder begonnen
+
+procs/camac/drams/drams.c:239
+[0]17
+[1]  0
+[2]    remaining triggers // Resttrigger fuer Pedestals
+
+
+Unsol_Data (8):
+
+procs/fastbus/fb_lecroy/fb_lc1879_read.c:146/364/611/875
+[0]1
+[1]  3
+[2]    eventcnt
+[3]      LC_TDC_1879
+[4]        con_pat // time elapsed: conversion not completed
+                   // (sollte Unsol_Warning sein?)
+
+Unsol_LAM (4):
+
+objects/pi/lam/lam.c:155
+... // output of lam procedure
+
+Unsol_StatusChanged (12):
+
+objects/notifystatus.c:31
+[0]action
+[1]  object
+[...]
+
+Unsol_ActionCompleted (13):
+
+dataout/cluster/do_cluster_tape.c:466/481/496/511/526
+[0]completion_dataout
+[1]  do_idx
+[2]    dataout_completion_filemark
+[2]    dataout_completion_rewind
+[2]    dataout_completion_wind
+[2]    dataout_completion_seod
+[2]    dataout_completion_unload
+[3]      message.data[0] ???
+
+
+
+

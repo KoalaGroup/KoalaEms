@@ -1,0 +1,9 @@
+#! /usr/local/bin/emssh
+
+source defines_393.ems
+
+source init_ns.ems
+
+source start_ns.ems
+
+source reset_ns.ems

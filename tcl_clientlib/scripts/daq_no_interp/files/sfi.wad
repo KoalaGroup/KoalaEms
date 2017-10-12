@@ -1,0 +1,100 @@
+# sfisetup
+set vedname p19
+set description {Fastbus}
+set pedestaldir ~/anke/...
+
+set isid(1) 2
+
+set seqaddr 0
+set syncdev /tmp/sync0
+set pa 10
+set sa 2
+set count 1000
+set modullist {3 0x10C6 4 0x10C6 5 0x10C6 6 0x10C6 7 0x10C2 8 0x10C2 \
+  9 0x10C2 10 0x10C2}
+set memberlist(1) {3 4 5 6 7 8 9 10}
+
+set readouttrigg(1.1) {1}
+set readoutprio(1.1) 1
+set readoutproc(1.1) {SFI_FRDBreadinit {0}}
+
+set dataout(0) {cluster 1 0 socket ikpd10 9001}
+
+set trigger {zel '/tmp/sync0' 0 10 2 1}
+
+set start_proclist_t {InitPCITrigger {'/tmp/sync0' 0}}
+
+set init_proclist(0) {ClusterEvMax 50}
+
+set init_command(1) load_pedestals
+set init_args(1) "$syncdev $pa $sa $count ~/ems/tcl_clientlib/scripts/daq/files"
+
+set start_proclist(1) "SFI_FRDBinit $seqaddr"
+set stop_proclist(1) "SFIseqreset"
+
+###############################################################################
+
+proc PhilSetup {ved pa id csr0 fname} {
+  output "PhilSetup $ved $pa $id $csr0 $fname" tag_blue
+  set par {}
+  set file [open $fname]
+
+  set res [gets $file xxx]
+  while {$res>=0} {
+    foreach i $xxx {lappend par $i}
+    set res [gets $file xxx]
+  }
+  close $file
+
+  # Reset CSR#0 + LIFO
+  $ved command1 FWC $pa 0 0xc0000000
+  set n 0
+  set c 0xc0000000
+  for {set i 0} {$i<96} {incr i} {
+      # Pedestals; Lower Thresholds; Upper Thresholds
+      $ved command1 FWC $pa $c [lindex $par $n]
+      incr n; incr c
+  }
+
+  $ved command1 FWC $pa 1 $id
+  $ved command1 FWC $pa 0 $csr0
+}
+
+proc load_pedestals {ved is syncdev pa sa count dir} {
+  set endlink 0x3344
+  set simplink 0x3b44
+  set mastlink 0x2b44
+
+  set syncpath [$ved command1 SyncOpen '$syncdev']
+  $ved command1 SyncAuxOut $syncpath 0 7
+  $ved command1 SyncClose $syncpath
+  $ved command1 SFIout 0 0xffff 1
+
+# set   mod_id(3) 0xC6
+# set mod_csr0(3) $endlink
+# set   mod_id(4) 0xC6
+# set mod_csr0(4) $simplink
+# set   mod_id(5) 0xC6
+# set mod_csr0(5) $simplink
+# set   mod_id(6) 0xC6
+# set mod_csr0(6) $simplink
+# set   mod_id(7) 0xC2
+# set mod_csr0(7) $simplink
+# set   mod_id(8) 0xC2
+# set mod_csr0(8) $simplink
+# set   mod_id(9) 0xC2
+# set mod_csr0(9) $simplink
+# set   mod_id(10) 0xC2
+# set mod_csr0(10) $mastlink
+
+  $ved command1 SFI_FRDBload 0 $pa $sa $count
+
+  PhilSetup $ved 3 0xC6 $endlink [file join $dir load_parqdc1]
+  PhilSetup $ved 4 0xC6 $simplink [file join $dir load_parqdc1]
+  PhilSetup $ved 5 0xC6 $simplink [file join $dir load_parqdc1]
+  PhilSetup $ved 6 0xC6 $simplink [file join $dir load_parqdc1]
+  PhilSetup $ved 7 0xC2 $simplink [file join $dir load_parqdc1]
+  PhilSetup $ved 8 0xC2 $simplink [file join $dir load_parqdc1]
+  PhilSetup $ved 9 0xC2 $simplink [file join $dir load_parqdc1]
+  PhilSetup $ved 10 0xC2 $mastlink [file join $dir load_parqdc1]
+}

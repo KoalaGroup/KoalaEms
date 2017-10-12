@@ -1,0 +1,79 @@
+#define NAFREAD _IOWR('C', 7, struct camactransfer)
+#define NAFWRITE _IOW('C', 8, struct camactransfer)
+#define NAFREADBLK _IOW('C', 56, struct camactransfer)
+#define NAFWRITEBLK _IOW('C', 57, struct camactransfer)
+#define NAFREADBLKQSTOP _IOWR('C', 65, struct camactransfer)
+#define NAFREADBLKFAST _IOW('C', 66, struct camactransfer)
+#define NAFREADBLKQSTOPFAST _IOWR('C', 67, struct camactransfer)
+#define CAMSTATUS _IOR('C', 88, int)
+#define SETLAMHANDLING _IOW('C', 71, struct lamhandling)
+
+
+#define FERASETUP _IOW('F', 55, struct ferasetup)
+#define FERASETMEM _IOW('F', 56, struct feramem)
+#define FERAEVENT _IOWR('F', 58, struct feraeventinfo)
+#define FERAGETSTATS _IOR('F', 60, struct ferastats)
+#define FERAGETDIAGS _IOR('F', 61, struct feradiags)
+
+struct camactransfer {
+    int n, a, f;
+    union {
+        struct {
+            int *buf;
+            int buflen;
+        } b;
+        int val;
+    } u;
+};
+
+struct lamhandling {
+    u_int32_t selectmask,;
+    u_int32_t sigmask;
+    int sig;
+};
+
+struct ferasetup {
+	int mode;
+#define PCICAMMODE_CAMBLT 123
+#define PCICAMMODE_FERASGL 456
+#define PCICAMMODE_FERAMULTI 789
+        int reqdelay;
+        int timeout;
+};
+
+struct feramem {
+	int type;
+#define FERAMEMTYPE_PHYSICAL 1234
+#define FERAMEMTYPE_USER 5678 /* not yet */
+	unsigned long base;
+        unsigned long len;
+};
+
+struct feraeventinfo {
+	int flags;
+#define FERACLEAR 0x01
+#define FERAGATE 0x02
+#define FERAWAIT 0x04
+#define FERADMAADR 0x08
+	int waitstat;
+	int dmacnt;
+	int timeout;
+};
+
+struct ferastats {
+	int rejects;
+	int timeouts;
+	int maint_timer;
+};
+
+struct feradiags {
+	u_int32_t cntl;       /* IE_OFFLINE | IE_LAM */
+        u_int32_t statcntl;   /* PCICAM_OFF|PCICAM_FERAPRESENT|PCICAM_OFFLINE */
+        u_int32_t camstat;
+	u_int32_t F_reqdelay;
+        u_int32_t F_rotimo;
+	int event_pending;    /* sc->feraevent_present */
+	u_int32_t imb4;
+        u_int32_t mwtc;
+        u_int32_t mcsr;
+};

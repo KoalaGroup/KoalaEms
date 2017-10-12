@@ -1,0 +1,26 @@
+#objects/pi/readout_eventfilter/Makefile.in
+#$ZEL$
+
+CONF = ../../../conf
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+include $(CONF)/rules.make
+include $(CONF)/config.make
+
+cfiles = piops.c datains.c di_eventfilter.c
+ofiles = $(cfiles:.c=.o)
+depfiles = $(cfiles)
+
+lib = ../../libobj.a
+
+all: $(lib)
+
+$(lib): $(lib)($(ofiles))
+	$(AR) cr $@ $(ofiles)
+	$(RANLIB) $@
+
+depend: xdepend
+
+.PHONY: depend

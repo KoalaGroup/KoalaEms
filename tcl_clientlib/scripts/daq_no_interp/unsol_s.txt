@@ -1,0 +1,269 @@
+Unsol_RuntimeError:
+
+[0]rtErr_OutDev
+[1]  do_idx
+[2]    0
+[3]      errno // write-error
+
+[0]rtErr_OutDev
+[1]  do_idx
+[2]    1 // scsi error
+[3]      error_code
+[4]      sense_key
+[5]      add_sense_code
+[6]      add_sense_code_qual
+[7]      eom
+
+[0]rtErr_OutDev
+[1]  do_idx
+[2]    2
+[3]      typ // 1: WIFEXITED 2: WIFSIGNALED 3: WIFSTOPPED 4: WIFCONTINUED
+[4]        code // exitstatus/signal
+                // child process exited
+
+[0]rtErr_OutDev
+[1]  do_idx
+[2]    3 // end of tape warning
+
+[0]rtErr_Other
+[1]  -1
+[2]    1 // no memory for ved-cluster
+
+[0]rtErr_InDev
+[1]  di_idx
+[2]    2
+[3]      selected // wrong select-type in cluster_read
+
+[0]rtErr_InDev
+[1]  di_idx
+[2]    3
+[3]      errno // read error (header)
+
+[0]rtErr_InDev
+[1]  di_idx
+[2]    4
+[3]      dat->head[1] // wrong endien
+
+[0]rtErr_InDev
+[1]  di_idx
+[2]    5
+[3]      errno //  read error (data)
+
+[0]rtErr_InDev
+[1]  di_idx
+[2]    6 // old style vedinfo
+
+[0]rtErr_InDev
+[1]  di_idx
+[2]    7
+[3]      type // unknown type of ved info
+
+[0]rtErr_InDev
+[1]  di_idx
+[2]    8 // exception in di_sock_connect
+
+[0]rtErr_InDev
+[1]  di_idx
+[2]    9
+[3]      errno // getsockopt error
+
+[0]rtErr_InDev
+[1]  di_idx
+[2]    10
+[3]      val // bad status in di_sock_connect
+
+[0]rtErr_InDev
+[1]  di_idx
+[2]    11 // task creation error
+
+[0]rtErr_InDev
+[1]  di_idx
+[2]    12 // accept error
+
+[0]rtErr_InDev
+[1]  di_idx
+[2]    13
+[3]      errno // accept error
+
+[0]rtErr_InDev
+[1]  di_idx
+[2]    14
+[3]      errno // accept error
+
+[0]rtErr_InDev
+[1]  di_idx
+[2]    15 // accept error
+
+[0]rtErr_Mismatch
+[1]  eventcnt
+[2]    i
+[3]      evh.info.evno // wrong eventbuffer received
+
+[0]rtErr_Trig
+[1]  eventcnt // erwarteter Eventcounter
+[2]    erhaltener Eventcounter
+[3]      Status (des Trigger-moduls) // erwarteter!=erhaltener Eventcounter
+
+[0]rtErr_Trig
+[1]  eventcnt
+[2]    1
+[3]      errno // read-error vom Triggermodul
+
+[0]rtErr_Trig
+[1]  eventcnt
+[2]    2
+[3]      pci_trigdata.mbx
+[4]        pci_trigdata.state // SYNC_MBX_EOC in Mailbox nicht gesetzt
+
+[0]rtErr_Trig;
+[1]  eventcnt
+[2]    3
+[3]      pci_trigdata.mbx
+[4]        pci_trigdata.state // SYNC_GET_EOC im Status nicht gesetzt
+
+[0]rtErr_Trig
+[1]  eventcnt
+[2]    4
+[3]      errno // select-error
+
+[0]rtErr_Trig
+[1]  eventcnt
+[2]    5
+[3]      errno // got!=sizeof(struct trigstatus)
+
+[0]rtErr_Trig
+[1]  eventcnt
+[2]    5
+[3]      pci_trigdata.mbx
+[4]        pci_trigdata.state // no EOC or no INH
+
+[0]rtErr_Trig
+[1]  eventcnt // erwarteter Eventcounter
+[2]    6
+[3]      pci_trigdata.mbx
+[4]        pci_trigdata.state
+[5]          pci_trigdata.evc // erwarteter!=erhaltener Eventcounter
+
+[0]rtErr_Trig
+[1]  eventcnt
+[2]    7
+[3]      pci_trigdata.mbx
+[4]        pci_trigdata.state // Subevent Invalid
+
+[0]rtErr_Trig
+[1]  eventcnt
+[2]    8
+[3]      pci_trigdata.mbx
+[4]        pci_trigdata.state // Trigger_ID=0
+
+[0]rtErr_Trig
+[1]  oldcnt
+[2]    status // REJECT || MISMATCH ||  event!=eventcnt
+
+
+Unsol_Warning:
+
+[0]7
+[1]  1
+[2]    type // empty pattern for modultype type
+
+[0]4
+[1]  4
+[2]    evt
+[3]      pa
+[4]        ptr
+[5]          ptr // read and write pointer mismatch
+
+[0]1
+[1]  3
+[2]    evt_max // trigger for pedestal measurement recorded (einer zu viel)
+
+[0]1
+[1]  3
+[2]    eventcnt
+[3]      LC_ADC_1885F/LC_ADC_1881/LC_TDC_1877/LC_TDC_1876/LC_TDC_1875A/
+         LC_TDC_1875A/LC_TDC_1875/LC_TDC_1872A
+[4]        con_pat // time elapsed: conversion not completed
+
+[0]8
+[1]  3
+[2]    eventcnt
+[3]      LC_ADC_1885F/LC_TDC_1879/LC_TDC_1877/LC_TDC_1876/LC_TDC_1875A/
+         LC_TDC_1875A/LC_TDC_1875/LC_TDC_1872A
+[4]        wc // sscode==0 (too many data)
+
+[0]6
+[1]  3
+[2]    pa
+[3]      sa
+[4]        val // active channel depth wrong (??)
+
+[0]0
+[1]  1
+[2]    (evt+1) // no trigger detected (Pedestalmessung)
+
+[0]2
+[1]  4
+[2]    (evt+1)
+[3]      pa
+[4]        *ped
+[5]          read_err // error in data word (Pedestalmessung)
+
+[0]5
+[1]  3
+[2]    evt
+[3]      pa
+[4]        err_flag // multiple gates occured
+
+Unsol_Patience:
+
+[0]0
+[1]  2
+[2]    evt
+[3]      patience // Restzeit fuer Pedestals in Sekunden
+
+[0]17
+[1]  1
+[2]    0 // flat beendet
+[2]    1 // flat hat wieder begonnen
+
+[0]17
+[1]  0
+[2]    remaining triggers // Resttrigger fuer Pedestals
+
+
+Unsol_Data:
+
+procs/fastbus/fb_lecroy/fb_lc1879_read.c:146/364/611/875
+[0]1
+[1]  3
+[2]    eventcnt
+[3]      LC_TDC_1879
+[4]        con_pat // time elapsed: conversion not completed
+                   // (sollte Unsol_Warning sein?)
+
+Unsol_LAM:
+
+objects/pi/lam/lam.c:155
+... // output of lam procedure
+
+Unsol_StatusChanged:
+
+objects/notifystatus.c:31
+[0]action
+[1]  object
+[...]
+
+Unsol_ActionCompleted:
+
+dataout/cluster/do_cluster_tape.c:466/481/496/511/526
+[0]completion_dataout
+[1]  do_idx
+[2]    dataout_completion_filemark
+[2]    dataout_completion_rewind
+[2]    dataout_completion_wind
+[2]    dataout_completion_seod
+[2]    dataout_completion_unload
+[3]      message.data[0] ???
+
+

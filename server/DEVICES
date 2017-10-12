@@ -1,0 +1,31 @@
+main
+    lowlevel_init
+        devices_init cleared devices[<device_unspec] und numdevs[<device_unspec]
+
+fastbus_low_init
+    register_device(device_fastbus, crate_idx, struct fastbus_dev* dev);
+
+void* find_device(device_class class, int crate); /* slow, with checks */
+int num_devices(device_class class);
+void* get_device(device_class class, int crate);
+int valid_device(device_class class, int crate);
+
+int get_mod_type(unsigned int idx)
+{
+if (memberlist)
+    return modullist->entry[memberlist[idx]].modultype; 
+else
+    return modullist->entry[idx].modultype; 
+}
+
+modul_class get_mod_class(unsigned int idx)
+{
+if (memberlist)
+    return modullist->entry[memberlist[idx]].modulclass; 
+else
+    return modullist->entry[idx].modulclass; 
+}
+
+int valid_module(unsigned int idx, Modulclass class, int accept_unspec);
+
+keine default-Modulliste

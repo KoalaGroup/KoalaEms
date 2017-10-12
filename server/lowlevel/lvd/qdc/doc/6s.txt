@@ -1,0 +1,30 @@
+struct lvd_qdc6s_card {
+        u_int16_t           ident;      /*  0 */
+        u_int16_t           serial;     /*  2 */
+        u_int16_t           grp_coinc;   /*  4 */
+        u_int16_t           aclk_shift; /*  6 */
+        u_int16_t           ro_data;    /*  8 */
+        u_int16_t           res0a;      /*  a */
+        u_int16_t           cr;         /*  c */
+        u_int16_t           sr;         /*  e */
+        u_int16_t           cha_inh;    /* 10 */
+        u_int16_t           cha_raw;    /* 12 */
+        u_int16_t           iw_start;   /* 14 */
+        u_int16_t           iw_length;  /* 16 */
+        u_int16_t           sw_start;   /* 18 */
+        u_int16_t           sw_length;  /* 1a */
+        u_int16_t           sw_ilength; /* 1c */
+        u_int16_t           anal_ctrl;  /* 1e */
+        u_int16_t           noise_qthr_coi[16];/* 20..3e */
+        u_int16_t           bline_thlevel[16];/* 40..5e */
+        u_int32_t           tdc_range;  /* 60 */
+        u_int16_t           traw_cycle; /* 64 */
+        u_int16_t           ovr;        /* 66 */
+        u_int16_t           scaler[2] ; /* 68,6a */
+        u_int16_t           trigger_time; /* 6c */
+        u_int16_t           res6d[1];   /* 6e */
+        u_int16_t           dac_coinc[4]; /* 70..76 */
+        u_int32_t           jtag_data;  /* 78..7a */
+        u_int16_t	    jtag_csr;   /* 7c */
+        u_int16_t           ctrl_bline_adjust;      /* 7e */
+};

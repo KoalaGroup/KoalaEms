@@ -1,0 +1,28 @@
+# lowlevel/hlral/Makefile.in
+# $ZEL: Makefile.in,v 1.3 2002/11/06 15:36:44 wuestner Exp $
+
+CONF = ../../conf
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+@SET_MAKE@
+
+include $(CONF)/rules.make
+include $(CONF)/config.make
+
+cfiles = hlral.c
+ofiles = $(cfiles:.c=.o)
+depfiles = $(cfiles)
+
+lib = ../libll.a
+
+all: $(lib)
+
+$(lib): $(lib)($(ofiles))
+	$(RANLIB) $@
+
+depend: xdepend
+
+.PHONY: depend
+
+######################################################
