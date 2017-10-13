@@ -5,7 +5,7 @@
  */
 
 #include "config.h"
-#include "cxxcompat.hxx"
+//#include "cxxcompat.hxx"
 #include <versions.hxx>
 
 VERSION("Apr 09 2003", __FILE__, __DATE__, __TIME__)
