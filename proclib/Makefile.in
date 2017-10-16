@@ -73,7 +73,7 @@ depend: sed.in
 	done
 
 sed.in:
-#	echo 's|/usr/include/[^ ]*||g' >sed.in
+	echo 's|/usr/include/[^ ]*||g' >sed.in
 	echo '/.*: $$/d' >>sed.in
 	echo '/^ *\\ *$$/d' >>sed.in
 

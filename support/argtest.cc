@@ -12,7 +12,7 @@
 ******************************************************************************/
 
 #include "config.h"
-//#include "cxxcompat.hxx"
+#include "cxxcompat.hxx"
 
 #include "readargs.hxx"
 #include "versions.hxx"

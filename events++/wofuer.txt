@@ -1,0 +1,51 @@
+ev2text.cc
+  Konvertiert Events in lesbare Zahlen (Wort fuer Wort; wenig brauchbar)
+
+events.cc
+  Implementation der Klasse C_event
+
+events.hxx
+  Definition der Klassen C_event, C_evinput, C_evoutput
+
+evinput.cc
+  Implementation der Klasse C_evinput
+
+evoutput.cc
+  Implementation der Klasse C_evoutput
+
+evselect.cc
+  Liest Events von Tape oder Platte, filtert Subevents, schreibt auf Tape oder
+  Platte; manipuliert Headerrecords
+
+headscan.cc
+  Liest Datenfiles von Tape, schreibt Headerrecords in Files (in ein Direktory
+  pro Datenfile)
+
+recscan.cc
+  Billigversion von headscan, macht das nur mit einem File
+
+searchped.cc
+  Liest Headerrecords (nur fuer Drams), die von headscan geschrieben wurden,
+  schreibt nichtredundante Pedestals in Files (Format wie von Drochnerschem
+  Klient geschrieben)
+
+sock2out.cc
+  Liest Events aus Socket, schreibt sie in stdout.
+
+subevents.cc
+  Implementation der Klasse C_subevent
+
+tapecmp.cc
+  Vergleicht zwei Tapes byteweise
+
+tapedup.cc
+  Kopiert Files von Inputtapes zu Outputtapes
+
+tapescan.cc
+  Liest Datenfiles von Tape, schreibt Datum und Eventanzahl in File.
+
+usrrec2txt.cc
+  unvollendet, sollte Watzrecortds konvertieren
+
+w2ped.cc
+  Billigversion von searchped.cc, konvertiert einen Watzrecortd in Pedestelfile

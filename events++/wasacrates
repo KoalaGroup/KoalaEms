@@ -1,0 +1,139 @@
+w08: ikpwc10
+Controller:
+  GPX id 0x1100 serial 2
+14 modules:
+  0: SQDC id 0x1590 serial 72 new firmware
+  1: SQDC id 0x1590 serial 75 new firmware
+  2: SQDC id 0x1590 serial 51 new firmware
+  3: SQDC id 0x1590 serial 32 new firmware
+  4: SQDC id 0x1590 serial 31 new firmware
+  5: SQDC id 0x1590 serial 29 new firmware
+  6: SQDC id 0x1590 serial 27 new firmware
+  7: SQDC id 0x1590 serial 42 new firmware
+  8: SQDC id 0x1590 serial 61 new firmware
+  9: SQDC id 0x1590 serial 46 new firmware
+  a: SQDC id 0x1590 serial 9 new firmware
+  b: SQDC id 0x1590 serial 58 new firmware
+  c: SQDC id 0x1590 serial 38 new firmware
+  d: SQDC id 0x1590 serial 30 new firmware
+
+w14: ikpwc20
+Controller:
+  GPX id 0x1100 serial 8
+15 modules:
+  0: SQDC id 0x1590 serial 11 new firmware
+  1: SQDC id 0x1590 serial 73 new firmware
+  2: SQDC id 0x1590 serial 34 new firmware
+  3: SQDC id 0x1590 serial 67 new firmware
+  4: SQDC id 0x1590 serial 49 new firmware
+  5: SQDC id 0x1590 serial 7 new firmware
+  6: SQDC id 0x1590 serial 23 new firmware
+  7: SQDC id 0x1590 serial 6 new firmware
+  8: SQDC id 0x1590 serial 37 new firmware
+  9: SQDC id 0x1590 serial 28 new firmware
+  a: SQDC id 0x1590 serial 18 new firmware
+  b: SQDC id 0x1590 serial 20 new firmware
+  c: SQDC id 0x1590 serial 21 new firmware
+  d: SQDC id 0x1590 serial 22 new firmware
+  e: SQDC id 0x1590 serial 76 new firmware
+
+w18: ikpwc07
+Controller:
+  GPX id 0x1100 serial 9
+15 modules:
+  0: SQDC id 0x1590 serial 43 new firmware
+  1: SQDC id 0x1590 serial 39 new firmware
+  2: SQDC id 0x1590 serial 5 new firmware
+  3: SQDC id 0x1590 serial 36 new firmware
+  4: SQDC id 0x1590 serial 25 new firmware
+  5: SQDC id 0x1590 serial 19 new firmware
+  6: SQDC id 0x1590 serial 33 new firmware
+  7: SQDC id 0x1590 serial 35 new firmware
+  8: SQDC id 0x1590 serial 44 new firmware
+  9: SQDC id 0x1590 serial 77 new firmware
+  a: SQDC id 0x1590 serial 12 new firmware
+  b: SQDC id 0x1590 serial 10 new firmware
+  c: SQDC id 0x1590 serial 54 new firmware
+  d: SQDC id 0x1590 serial 65 new firmware
+  e: SQDC id 0x1590 serial 66 new firmware
+  
+  
+w17: ikpwc08
+Controller:
+  GPX id 0x1100 serial 5
+14 modules:
+  0: SQDC id 0x1590 serial 71 new firmware
+  1: SQDC id 0x1590 serial 63 new firmware
+  2: SQDC id 0x1590 serial 74 new firmware
+  3: SQDC id 0x1590 serial 68 new firmware
+  4: SQDC id 0x1590 serial 55 new firmware
+  5: SQDC id 0x1590 serial 56 new firmware
+  6: SQDC id 0x1590 serial 47 new firmware
+  7: SQDC id 0x1590 serial 45 new firmware
+  8: SQDC id 0x1590 serial 13 new firmware
+  9: SQDC id 0x1590 serial 16 new firmware
+  a: SQDC id 0x1590 serial 53 new firmware
+  b: SQDC id 0x1590 serial 57 new firmware
+  c: SQDC id 0x1590 serial 62 new firmware
+  d: SQDC id 0x1590 serial 48 new firmware
+
+w07: ikpwc09
+Controller:
+  GPX id 0x1100 serial 4
+3 modules:
+  0: SQDC id 0x1590 serial 59 new firmware
+  1: SQDC id 0x1590 serial 52 new firmware
+  2: SQDC id 0x1590 serial 15 new firmware
+
+w16: ikpwc03
+Controller:
+  GPX id 0x1100 serial 3
+15 modules:
+  0: SQDC id 0x1590 serial 1 new firmware
+  1: SQDC id 0x1590 serial 2 new firmware
+  2: SQDC id 0x1590 serial 79 new firmware
+  3: SQDC id 0x1590 serial 78 new firmware
+  4: FQDC id 0x1570 serial 6
+  5: FQDC id 0x1570 serial 7
+  6: FQDC id 0x1570 serial 11
+  7: FQDC id 0x1570 serial 3
+  8: FQDC id 0x1570 serial 28
+  9: FQDC id 0x1570 serial 14
+  a: FQDC id 0x1570 serial 32
+  b: FQDC id 0x1570 serial 23
+  c: FQDC id 0x1570 serial 20
+  d: FQDC id 0x1570 serial 5
+  e: FQDC id 0x1570 serial 9
+
+w15: 
+Controller:
+  GPX id 0x1101 serial 7 Verwirrt!
+12 modules:
+  0: SQDC id 0x1590 serial 41 new firmware
+  1: SQDC id 0x1590 serial 50 new firmware
+  2: SQDC id 0x1590 serial 3 new firmware
+  3: SQDC id 0x1590 serial 26 new firmware
+  4: FQDC id 0x1570 serial 24
+  5: FQDC id 0x1570 serial 13
+  6: FQDC id 0x1570 serial 22
+  7: FQDC id 0x1570 serial 19
+  8: FQDC id 0x1570 serial 16
+  9: FQDC id 0x1570 serial 21
+  a: FQDC id 0x1570 serial 25
+  b: FQDC id 0x1570 serial 18
+
+w10: 
+  GPX id 0x1100 serial 6
+12 modules:
+  0: GPX  id 0x1180 serial 8
+  1: GPX  id 0x1180 serial 9
+  2: GPX  id 0x1180 serial 10
+  3: GPX  id 0x1180 serial 11
+  4: GPX  id 0x1180 serial 1
+  5: GPX  id 0x1180 serial 3
+  6: GPX  id 0x1180 serial 4
+  7: GPX  id 0x1180 serial 6
+  8: GPX  id 0x1180 serial 13
+  9: GPX  id 0x1180 serial 12
+  a: GPX  id 0x1180 serial 15
+  b: GPX  id 0x1180 serial 14

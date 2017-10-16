@@ -1,0 +1,149 @@
+/******************************************************************************
+*                                                                             *
+* tapedup.cc                                                                  *
+*                                                                             *
+* OSF1/ULTRIX                                                                 *
+*                                                                             *
+* created: 31.01.95                                                           *
+* last changed: 31.01.95                                                      *
+*                                                                             *
+* PW                                                                          *
+*                                                                             *
+******************************************************************************/
+
+#include <iostream.hxx>
+#include <iomanip.hxx>
+#include <readargs.hxx>
+#include <String.h>
+#include <errno.h>
+//#include <sys/ioctl.h>
+#include <sys/types.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <prototypes.h>
+
+C_readargs* args;
+int max;
+int dontask;
+String infile;
+String outfile;
+
+/*****************************************************************************/
+
+int readargs()
+{
+args->addoption("recsize", "rs", 65535, "max. record size", "recsize");
+args->addoption("dontask", "da", C_readargs::false, "keine dummen fragen", "dontask");
+args->addoption("infile", 0, "", "input file", "input");
+args->addoption("outfile", 1, "", "output file", "output");
+
+if (args->interpret(1)!=0) return(-1);
+
+infile=args->getstringopt("infile");
+outfile=args->getstringopt("outfile");
+max=args->getintopt("recsize");
+dontask=args->getboolopt("dontask");
+
+return(0);
+}
+
+/*****************************************************************************/
+
+int copy()
+{
+int ip, op, rres, wres;
+
+int recs, frecs, files, fmarks, weiter;
+int c;
+
+char* buf=new char[max];
+if (buf==0)
+  {
+  clog << "malloc buffer: " << strerror(errno) << endl;
+  return(-1);
+  }
+ip=open((char*)infile, O_RDONLY, 0);
+if (ip==-1)
+  {
+  clog << "open " << infile << " for reading: " << strerror(errno) << endl;
+  return(-1);
+  }
+op=open((char*)outfile, O_WRONLY, 0);
+if (op==-1)
+  {
+  clog << "open " << outfile << " for writing: " << strerror(errno) << endl;
+  close(ip);
+  return(-1);
+  }
+
+recs=0; frecs=0; files=0; fmarks=0;
+weiter=1;
+
+rres=read(ip, buf, max);
+//if ((rres==-1) && (errno==EIO))
+//  {
+//  clog << "read " << infile << strerror(errno) << "; try blocksize 64K" << endl;
+//  max=smallmax;
+//  rres=read(ip, buf, max);
+//  }
+
+while (weiter && (rres!=-1))
+  {
+  while (rres==0) {fmarks++; rres=read(ip, buf, max);}
+  if (rres==-1) clog << "read: " << strerror(errno) << endl;
+  if (fmarks)
+    {
+    cout << fmarks << (fmarks==1?" filemark":" filemarks") << " found" << endl;
+    cout << frecs << " records in last file" << endl;
+    files++;
+    if (!dontask)
+      {
+      cout << "continue? [y]/n: ";
+      if (((c=cin.get())=='n') || (c=='N'))
+        weiter=0;
+      else
+        frecs=0;
+//      cout << endl;
+      }
+    else
+      frecs=0;
+    if (write(op, buf, 0)==-1) clog << "write filemark: " << strerror(errno)
+        << endl;
+    fmarks=0;
+    }
+  if (weiter)
+    {
+    if ((wres=write(op, buf, rres))!=rres)
+      {
+      clog << "write: " << strerror(errno) << endl;
+      weiter=0;
+      }
+    recs++, frecs++;
+    if ((recs%1000)==0) clog << "record " << recs << endl;
+    rres=read(ip, buf, max);
+    }
+  }
+if (weiter) clog << "read: " << strerror(errno) << endl;
+cout << recs << " records in " << files << " files saved" << endl;
+cout << frecs << " records in last file" << endl;
+
+close(ip);
+close(op);
+
+return(0);
+}
+
+/*****************************************************************************/
+
+main(int argc, char* argv[])
+{
+args=new C_readargs(argc, argv);
+if (readargs()!=0) return(0);
+
+copy();
+
+return(0);
+}
+
+/*****************************************************************************/
+/*****************************************************************************/

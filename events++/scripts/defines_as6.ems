@@ -1,0 +1,8 @@
+set cc {as6_1 as6_2 as6_3 as6_4}
+set em as6
+set all_veds $cc
+lappend all_veds $em
+set cc_do_host zelas6
+set em_di_port_base 6001
+set em_do "cluster 1 0 socket zelas6-a 5005"
+#set em_do "cluster 1 0 tape /dev/nrmt1h"

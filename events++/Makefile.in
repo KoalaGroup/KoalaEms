@@ -1,0 +1,431 @@
+# $ZEL: Makefile.in,v 1.43 2014/07/08 18:45:53 wuestner Exp $
+
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+BIN_DIR = $(exec_prefix)/bin
+COMMONVER    := @COMMONVER@
+SUPPORTVER   := @SUPPORTVER@
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+@SET_MAKE@
+
+machname = @target@
+badir     := @badir@
+apidir    := @apidir@
+apilib    := @apilib@
+sampledir := $(apidir)/sample
+
+COMMON_INCLUDE = @EMSCOMMON@
+COMMON_EX_INCLUDE = @EMSEXCOMMON@
+COMMON_LIB = @EMSCOMMONLIB@
+SUPPORT_INCLUDE = @EMSSUPPORT@
+SUPPORT_LIB = @EMSSUPPORTLIB@
+
+CC = @CC@
+CFLAGS := @CFLAGS@
+CXX = @CXX@
+# should be: -std=c++11 ...
+CXXFLAGS = @CXXFLAGS@
+#CXXFLAGS:= @CXXFLAGS@ -DTSMDIR=$(badir) -I$(sampledir)
+INSTALL = @INSTALL@
+INSTALL_DATA = @INSTALL_DATA@
+RANLIB = @RANLIB@
+LDFLAGS=
+LDFLAGS_TSM := $(LDFLAGS) -L$(apidir) -l$(apilib)
+LIBSUFFIX = @LIBSUFFIX@
+CERNLIBDIR  = /usr/local/cern/decunix/lib/
+CERNLIB     = -lpacklib
+
+ROOTBASE   := /usr/local/root
+ROOTSYS   := $(ROOTBASE)/alpha-dec-osf4.0_cxx
+ROOTLIBS  := -L$(ROOTSYS)/lib -lNew -lBase -lCint -lClib -lCont -lFunc -lGraf \
+            -lGraf3d -lHist -lHtml -lMatrix -lMeta -lMinuit -lNet -lPostscript \
+            -lProof -lTree -lUnix -lZip
+ROOTGLIBS := -lGpad -lGui -lGX11 -lX3d -lXpm -lX11
+ROOTINC   := -I$(ROOTBASE)/share/include
+
+CPPFLAGS = @CPPFLAGS@ -I$(srcdir) -I. -I$(COMMON_INCLUDE)  \
+        -I$(COMMON_EX_INCLUDE)  \
+	-I$(SUPPORT_INCLUDE)  \
+        -I$(sampledir)  \
+        -DTSMDIR=$(badir)  \
+        -DHAVE_CONFIG_H
+
+LIBS =  -L$(SUPPORT_LIB) -lsupp.$(SUPPORTVER) -L$(COMMON_LIB)  \
+        -lcommon.$(COMMONVER)
+
+OBJSOURCES = cluster_data.cc
+# only with hbook
+HSOURCES := cl2hist.cc trigg_mar98.cc hbin.cc rebin1.cc rebin2.cc resil.cc
+#only with OSF1
+OSOURCES := tapedup.cc tapedup_async.cc
+
+CCSOURCES := \
+	clusterscan.cc deadtrig.cc ev2text.cc  \
+        evmerge.cc evselect.cc evstat.cc  \
+        evstream.cc  \
+        tapecmp.cc tapescan.cc  \
+        usrrec2txt.cc anketest.cc  \
+        event_deflector.cc cl2file.cc  \
+        generate_log.cc tsm_cl2tade.cc tsm_cl2tade_2007.cc \
+        tsm_cl2tade_nosplit.cc tsm_tade_check.cc \
+        tsm_cl2tade_nosplit.cc tsm_tade_check.cc \
+        parse_sqdc.cc parse_gpx.cc parse_lvd.cc cluster_parser.cc \
+        cluster2raw.cc lvdtdc2text.cc lvdtdcraw2text.cc \
+        parse_nothing.cc cluster.cc clusterreader.cc divhist.cc events.cc  \
+	evinput.cc evoutput.cc hbin.cc statist.cc subevents.cc memory.cc  \
+        multicopy.cc parse_lvd_sync.cc parse_lvd_nosync.cc parse_synced_lvd.cc \
+        parse_strawtest.cc parse_mqtt.cc cl_consistency.cc
+
+SOURCES := $(CCSOURCES)
+DSOURCES := $(CCSOURCES) $(OBJSOURCES)
+
+OLDSOURCES := atraphist.cc atrappe.cc cluster2event_2.cc
+
+ALLEXECS := $(SOURCES:.cc=) $(OSOURCES:.cc=)
+USEFULLEXECS := cluster2event event_deflector evselect
+
+.PHONY: all usefull
+usefull: $(USEFULLEXECS)
+all: $(EXECS)
+
+lvd_triggsync: lvd_triggsync.o cluster_data_timed.o
+	$(CXX) -o $@ $^ $(LIBS)
+
+parse_f1raw: parse_f1raw.o cluster_data.o
+	$(CXX) -o $@ $^ $(LIBS)
+
+parse_nothing: parse_nothing.o cluster_data.o
+	$(CXX) -o $@ $^ $(LIBS)
+
+lvd_modstatist: lvd_modstatist.o cluster_data.o
+	$(CXX) -o $@ $^ $(LIBS)
+
+lvdtdc2text: lvdtdc2text.o cluster_data.o
+	$(CXX) -o $@ $^ $(LIBS)
+
+lvdtdcraw2text: lvdtdcraw2text.o cluster_data.o
+	$(CXX) -o $@ $^ $(LIBS)
+
+cluster2raw_f1: cluster2raw_f1.o cluster_data.o
+	$(CXX) -o $@ $^ -L$(COMMON_LIB) -lcommon.$(COMMONVER)
+
+cluster2raw_sev: cluster2raw_sev.o cluster_data.o
+	$(CXX) -o $@ $^ $(LIBS)
+
+cluster2raw: cluster2raw.o cluster_data.o
+	$(CXX) -o $@ $^ $(LIBS)
+
+qdc_powerspect: qdc_powerspect.o cluster_data.o
+	$(CXX) -o $@ $^ $(LIBS) -lfft -lfftw3
+
+parse_header: parse_header.o cluster_data.o
+	$(CXX) -o $@ $^ -L$(COMMON_LIB) -lcommon.$(COMMONVER)
+
+parse_sqdc1000: parse_sqdc1000.o cluster_data.o
+	$(CXX) -o $@ $^ $(LIBS)
+
+parse_fqdc: parse_fqdc.o cluster_data.o
+	$(CXX) -o $@ $^ $(LIBS)
+
+parse_fqdc_scatter: parse_fqdc_scatter.o cluster_data.o
+	$(CXX) -o $@ $^ $(LIBS)
+
+parse_fqdc_base: parse_fqdc_base.o cluster_data.o
+	$(CXX) -o $@ $^ $(LIBS)
+
+parse_fqdc_bq: parse_fqdc_bq.o cluster_data.o
+	$(CXX) -o $@ $^ $(LIBS)
+
+parse_fqdc_q: parse_fqdc_q.o cluster_data.o
+	$(CXX) -o $@ $^ $(LIBS)
+
+parse_fqdc_qt: parse_fqdc_qt.o cluster_data.o
+	$(CXX) -o $@ $^ $(LIBS)
+
+parse_qdc_check: parse_qdc_check.o cluster_data.o
+	$(CXX) -o $@ $^ $(LIBS)
+
+parse_fading_qdc2: parse_fading_qdc2.o cluster_data.o
+	$(CXX) -o $@ $^ $(LIBS)
+
+parse_fading_qdc1: parse_fading_qdc1.o cluster_data.o
+	$(CXX) -o $@ $^ $(LIBS)
+
+parse_fading_qdc: parse_fading_qdc.o cluster_data.o
+	$(CXX) -o $@ $^ $(LIBS)
+
+parse_qdc: parse_qdc.o cluster_data.o
+	$(CXX) -o $@ $^ $(LIBS)
+
+parse_sqdc: parse_sqdc.o cluster_data.o
+	$(CXX) -o $@ $^ $(LIBS)
+
+parse_ftdc_gpx: parse_ftdc_gpx.o cluster_data.o
+	$(CXX) -o $@ $^ $(LIBS)
+
+parse_ftdc: parse_ftdc.o cluster_data.o
+	$(CXX) -o $@ $^ $(LIBS)
+
+parse_gpx: parse_gpx.o cluster_data.o
+	$(CXX) -o $@ $^ $(LIBS)
+
+parse_gpx1: parse_gpx1.o cluster_data.o
+	$(CXX) -o $@ $^ $(LIBS)
+
+parse_lvd: parse_lvd.o cluster_data.o
+	$(CXX) -o $@ $^ $(LIBS)
+
+parse_strawtest: parse_strawtest.o cluster_data.o strawtest_data.o
+	$(CXX) -o $@ $^ $(LIBS)
+
+parse_mqtt: parse_mqtt.o cluster_data.o
+	$(CXX) -o $@ $^ $(LIBS)
+
+cl_consistency: cl_consistency.o
+	$(CXX) -o $@ $^ $(LIBS)
+
+parse_synced_lvd: parse_synced_lvd.o cluster_data_synced.o
+	$(CXX) -o $@ $^ $(LIBS)
+
+parse_lvd_sync: parse_lvd_sync.o cluster_data_sync.o
+	$(CXX) -o $@ $^ $(LIBS)
+
+parse_lvd_nosync: parse_lvd_nosync.o cluster_data_sync.o
+	$(CXX) -o $@ $^ $(LIBS)
+
+cluster_parser: cluster_parser.o cluster_data.o
+	$(CXX) -o $@ $^ $(LIBS)
+
+tsm_tade_check: tsm_tade_check.o
+	$(CXX) $(LDFLAGS_TSM) -o $@ $^  $(LIBS) ../tsm/tsm_tools.a
+
+tsm_tade2tade: tsm_tade2tade.o
+	$(CXX) $(LDFLAGS_TSM) -o $@ $^  $(LIBS) ../tsm/tsm_tools.a
+
+tsm_cl2tade: tsm_cl2tade.o ems_objects.o event2tade.o
+	$(CXX) $(LDFLAGS_TSM) -o $@ $^  $(LIBS) ../tsm/tsm_tools.a
+
+tsm_cl2tade_2007: tsm_cl2tade_2007.o ems_objects.o event2tade_2007.o
+	$(CXX) $(LDFLAGS_TSM) -o $@ $^  $(LIBS) ../tsm/tsm_tools.a
+
+tsm_cl2tade_nosplit: tsm_cl2tade_nosplit.o ems_objects.o event2tade_nosplit.o
+	$(CXX) $(LDFLAGS_TSM) -o $@ $^  $(LIBS) ../tsm/tsm_tools.a
+
+cl2f1: cl2f1.o
+	$(CXX) $(LDFLAGS) -o $@ $^  $(LIBS)
+
+cl2tade: cl2tade.o ems_objects.o event2tade.o
+	$(CXX) $(LDFLAGS) -o $@ $^  $(LIBS)
+
+clusterdecoder: clusterdecoder.o $(LIBDEPS)
+	$(CXX) $(LDFLAGS) -o $@ clusterdecoder.o $(LIBS)
+
+evslowdaemon: evslowdaemon.o
+	$(CC) $^ -o $@ -lrt -lm
+
+event_deflector: event_deflector.o $(LIBDEPS)
+	$(CXX) $(LDFLAGS) -o $@ event_deflector.o $(LIBS)
+
+divhist: divhist.o hbook_c.o $(LIBDEPS)
+	$(CXX) $(LDFLAGS) -o $@	divhist.o hbook_c.o  \
+	-L$(CERNLIBDIR) $(CERNLIB) $(LIBS) -lcxx -lUfor -lfor -lFutil -lots -lm
+
+cl2ev: dyn_main.o cl2ev_so.o
+	$(CXX) -g $(LDFLAGS) -o $@ $^  \
+	-expect_unresolved 'run_main*'
+
+cl2ev_test:	cl2ev_test.o events.o subevents.o evinput.o evoutput.o  \
+	$(LIBDEPS)
+	$(CXX) $(LDFLAGS) -o $@ cl2ev_test.o events.o subevents.o evinput.o  \
+	evoutput.o $(LIBS)
+
+cl2ev.so: cl2ev.o clusterreader.o cluster.o memory.o
+	$(CXX) -nodemangle -g -shared -o $@ $^
+        # -none -lsupp -lcommon
+
+cl_evselect:	cl_evselect.o $(LIBDEPS)
+	$(CXX) $(LDFLAGS) -o $@	cl_evselect.o $(LIBS)
+
+cl_zeit:	cl_zeit.o $(LIBDEPS)
+	$(CXX) $(LDFLAGS) -o $@ $< $(LIBS)
+
+cl2hist: cl2hist.o hbook_c.o $(LIBDEPS)
+	$(CXX) $(LDFLAGS) -o $@	cl2hist.o hbook_c.o  \
+	    -L$(CERNLIBDIR) $(CERNLIB) $(LIBS) -lcxx -lUfor -lfor -lFutil -lots -lm
+
+atrappe:	atrappe.o $(LIBDEPS)
+	$(CXX) $(LDFLAGS) -o $@ atrappe.o $(LIBS)
+
+atraphist:	atraphist.o clusterreader.o cluster.o memory.o make_file.o  \
+	$(LIBDEPS)
+	$(CXX) $(LDFLAGS) -o $@ atraphist.o clusterreader.o cluster.o  \
+        memory.o make_file.o  \
+        -L$(PROC_LIB) -lproc.$(PROCLIBVER)  \
+        -lvedsupp.$(SUPPORTVER)  \
+        -L$(CLIENTLIB_LIB) -lemscommxx.$(CLIENTLIBVER)  \
+        $(LIBS)
+
+cluster2event:	cluster2event.o clusterreader.o cluster.o memory.o  \
+	make_file.o $(LIBDEPS)
+	$(CXX) $(LDFLAGS) -o $@	cluster2event.o clusterreader.o cluster.o  \
+	make_file.o memory.o $(LIBS)
+
+cl2ev_offline: cl2ev_offline.o memory.o  \
+	$(LIBDEPS)
+	$(CXX) $(LDFLAGS) -o $@	cl2ev_offline.o  \
+	memory.o $(LIBS)
+
+cl2file:	cl2file.o memory.o $(LIBDEPS)
+	$(CXX) $(LDFLAGS) -o $@	cl2file.o memory.o $(LIBS)
+
+raltotal:	raltotal.o clusterreader.o cluster.o memory.o make_file.o  \
+	$(LIBDEPS)
+	$(CXX) $(LDFLAGS) -o $@	raltotal.o clusterreader.o cluster.o  \
+	memory.o make_file.o  \
+	-L$(PROC_LIB) -lproc.$(PROCLIBVER)  \
+	-lvedsupp.$(SUPPORTVER)  \
+	-L$(CLIENTLIB_LIB) -lemscommxx.$(CLIENTLIBVER)  \
+        $(LIBS) -lX11
+
+anketest: anketest.o clusterreader.o cluster.o memory.o make_file.o $(LIBDEPS)
+	$(CXX) $(LDFLAGS) -o $@	anketest.o clusterreader.o cluster.o  \
+	memory.o make_file.o $(LIBS)
+
+clusterscan:	clusterscan.o $(LIBDEPS)
+	$(CXX) $(LDFLAGS) -o $@ $< $(LIBS)
+
+deadtime:	deadtime.o events.o subevents.o evinput.o evoutput.o $(LIBDEPS)
+	$(CXX) $(LDFLAGS) -o $@ deadtime.o events.o subevents.o evinput.o  \
+	evoutput.o $(LIBS)
+
+deadtrig:	deadtrig.o events.o subevents.o evinput.o $(LIBDEPS)
+	$(CXX) $(LDFLAGS) -o $@ deadtrig.o events.o subevents.o evinput.o  \
+	$(LIBS)
+
+evstat:	evstat.o events.o subevents.o evinput.o statist.o $(LIBDEPS)
+	$(CXX) $(LDFLAGS) -o $@ evstat.o events.o subevents.o evinput.o  \
+	statist.o $(LIBS)
+
+evstream:	evstream.o events.o subevents.o evinput.o $(LIBDEPS)
+	$(CXX) $(LDFLAGS) -o $@	evstream.o events.o subevents.o evinput.o $(LIBS)
+
+dtscan:	dtscan.o events.o subevents.o evinput.o $(LIBDEPS)
+	$(CXX) $(LDFLAGS) -o $@ dtscan.o events.o subevents.o evinput.o $(LIBS)
+
+ev2text: ev2text.o
+	$(CXX) $(LDFLAGS) -o $@ $< $(LIBS)
+
+evdtselect:	evdtselect.o events.o subevents.o evinput.o evoutput.o  \
+	$(LIBDEPS)
+	$(CXX) $(LDFLAGS) -o $@ evdtselect.o events.o subevents.o evinput.o  \
+	evoutput.o $(LIBS)
+
+evmerge:	evmerge.o events.o subevents.o evinput.o evoutput.o $(LIBDEPS)
+	$(CXX) $(LDFLAGS) -o $@ evmerge.o events.o subevents.o evinput.o  \
+	evoutput.o $(LIBS)
+
+evselect:	evselect.o events.o subevents.o evinput.o evoutput.o $(LIBDEPS)
+	$(CXX) $(LDFLAGS) -o $@ evselect.o events.o subevents.o evinput.o  \
+	evoutput.o $(LIBS)
+
+evsplit:	evsplit.o events.o subevents.o evinput.o evoutput.o $(LIBDEPS)
+	$(CXX) $(LDFLAGS) -o $@ evsplit.o events.o subevents.o evinput.o  \
+	evoutput.o $(LIBS)
+
+hbin: hbin.o hbook_c.o $(LIBDEPS)
+	$(CXX) $(LDFLAGS) -o $@	hbin.o hbook_c.o  \
+	-L$(CERNLIBDIR) $(CERNLIB) $(LIBS) -lcxx -lUfor -lfor -lFutil -lots -lm
+
+headscan:	headscan.o events.o subevents.o evinput.o $(LIBDEPS)
+	$(CXX) $(LDFLAGS) -o $@ headscan.o events.o subevents.o evinput.o $(LIBS)
+
+rebin2: rebin2.o hbook_c.o $(LIBDEPS)
+	$(CXX) $(LDFLAGS) -o $@	rebin2.o hbook_c.o  \
+	-L$(CERNLIBDIR) $(CERNLIB) $(LIBS) -lcxx -lUfor -lfor -lFutil -lots -lm
+
+rebin1: rebin1.o hbook_c.o $(LIBDEPS)
+	$(CXX) $(LDFLAGS) -o $@	rebin1.o hbook_c.o  \
+	-L$(CERNLIBDIR) $(CERNLIB) $(LIBS) -lcxx -lUfor -lfor -lFutil -lots -lm
+
+recscan:	recscan.o events.o subevents.o evinput.o $(LIBDEPS)
+	$(CXX) $(LDFLAGS) -o $@ recscan.o events.o subevents.o evinput.o $(LIBS)
+
+resil: resil.o hbook_c.o $(LIBDEPS)
+	$(CXX) $(LDFLAGS) -o $@	resil.o hbook_c.o  \
+	-L$(CERNLIBDIR) $(CERNLIB) $(LIBS) -lcxx -lUfor -lfor -lFutil -lots -lm
+
+searchped:	searchped.o $(LIBDEPS)
+	$(CXX) $(LDFLAGS) -o $@ $< $(LIBS)
+
+sock2out:	sock2out.o $(LIBDEPS)
+	$(CXX) $(LDFLAGS) -o $@ $< $(LIBS)
+
+trigg_mar98:	$(srcdir)/trigg_mar98.cc events.o subevents.o evinput.o  \
+	evoutput.o $(LIBDEPS) 
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) $(ROOTINC) -o $@  \
+	$(srcdir)/trigg_mar98.cc events.o subevents.o evinput.o  \
+	evoutput.o $(LIBS) $(ROOTLIBS) -lm
+
+tapescan:	tapescan.o tapescan_c.o events.o subevents.o evinput.o
+	$(CXX) $(LDFLAGS) -o $@ tapescan.o tapescan_c.o events.o subevents.o  \
+	evinput.o $(LIBS)
+
+tapecheck:	tapecheck.o events.o subevents.o evinput.o
+	$(CXX) $(LDFLAGS) -o $@ tapecheck.o events.o subevents.o  \
+	evinput.o $(LIBS)
+
+tapecmp:	tapecmp.o $(LIBDEPS)
+	$(CXX) $(LDFLAGS) -o $@ $< $(LIBS)
+
+tapedup:	tapedup.o
+	$(CXX) $(LDFLAGS) -o $@ $< $(LIBS)
+
+tapedup_async:	tapedup_async.o
+	$(CXX) $(LDFLAGS) -o $@ $< $(LIBS)
+
+multicopy: multicopy.o
+	$(CXX) $(LDFLAGS) -o $@ $< $(LIBS)
+
+generate_log:	generate_log.o
+	$(CXX) $(LDFLAGS) -o $@ generate_log.o  \
+	$(LIBS)
+
+usrrec2txt:	usrrec2txt.o $(LIBDEPS)
+	$(CXX) $(LDFLAGS) -o $@ $< $(LIBS)
+
+w2ped:	w2ped.o $(LIBDEPS)
+	$(CXX) $(LDFLAGS) -o $@ $< $(LIBS)
+
+depend: sed.in
+	cp Makefile Makefile.bak
+	sed -e '/^# DO NOT DELETE THIS LINE/,$$d' < Makefile.bak > Makefile
+	echo '# DO NOT DELETE THIS LINE' >> Makefile
+	echo ' ' >> Makefile
+	for i in $(CSOURCES); do \
+	  echo checking $$i ; \
+	  $(CC) -MM -MG $(CPPFLAGS) $(srcdir)/$$i|sed -f sed.in>> Makefile ; \
+	done
+	for i in $(DSOURCES) ; do \
+	  echo checking $$i ; \
+	  $(CXX) -MM -MG $(CPPFLAGS) $(CXXFLAGS) $(srcdir)/$$i|sed -f sed.in>> Makefile ; \
+	done
+
+sed.in:
+	echo 's|/usr/include/[^ ]*||g' >sed.in
+	echo '/.*: $$/d' >>sed.in
+	echo '/^ *\\ *$$/d' >>sed.in
+
+clean:
+	rm -f *.o $(EXECS) core sed.in
+
+realclean: clean
+
+distclean: realclean
+	rm -f Makefile Makefile.bak config.cache config.log config.status config.h
+
+install: all
+	for i in $(EXECS) ; do \
+		$(INSTALL) $$i $(BIN_DIR)/$$i ; \
+	done

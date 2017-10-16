@@ -1,0 +1,16 @@
+#! /usr/local/bin/emssh
+
+source defines_as6.ems
+
+set num_cc [llength $cc]
+for {set i 0} {$i<$num_cc} {incr i} {set v_cc($i) {}}
+set v_em {}
+
+source init.ems
+
+source start.ems
+
+source reset.ems
+
+close_all
+

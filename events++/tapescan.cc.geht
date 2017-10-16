@@ -1,0 +1,304 @@
+/******************************************************************************
+*                                                                             *
+* tapescan.cc                                                                 *
+*                                                                             *
+* OSF1/ULTRIX                                                                 *
+*                                                                             *
+* created: 11.04.95                                                           *
+* last changed: 12.04.95                                                      *
+*                                                                             *
+* PW                                                                          *
+*                                                                             *
+******************************************************************************/
+
+#include <iostream.hxx>
+#include <iomanip.hxx>
+#include <fstream.hxx>
+#include <strstream.hxx>
+#include <readargs.hxx>
+#include <errno.h>
+#include <strstream.hxx>
+#include <String.hxx>
+#include <prototypes.h>
+#include <events.hxx>
+
+C_readargs* args;
+int verbose;
+int debug;
+int ask;
+int protocol;
+String protocolname;
+int single;
+String headline;
+int buffered;
+String infile;
+ofstream* ofile;
+C_evinput* evin;
+
+/*****************************************************************************/
+
+int readargs()
+{
+args->addoption("verbose", "verbose", C_readargs::false, "verbose");
+args->addoption("debug", "debug", C_readargs::false, "debug");
+args->addoption("ask", "ask", C_readargs::false, "ask for next file");
+args->addoption("protocol", "protocol", "", "protocol file", "protocol");
+args->addoption("single", "single", C_readargs::false, "only one file");
+args->addoption("headline", "headline", "", "headline for protocol", "headline");
+args->addoption("no_tape", "nt", C_readargs::false, "input not from tape");
+args->addoption("infile", 0, "/dev/nrmt0h", "input file", "input");
+args->hints(C_readargs::exclusive, "ask", "single", 0);
+args->hints(C_readargs::exclusive, "ask", "protocol", 0);
+
+if (args->interpret(1)!=0) return(-1);
+
+verbose=args->getboolopt("verbose");
+debug=args->getboolopt("debug");
+ask=args->getboolopt("ask");
+if (args->isdefault("protocol"))
+  protocol=0;
+else
+  {
+  protocol=1;
+  protocolname=args->getstringopt("protocol");
+  }
+single=args->getboolopt("single");
+headline=args->getstringopt("headline");
+buffered=(args->getboolopt("no_tape"));
+infile=args->getstringopt("infile");
+
+return(0);
+}
+
+/*****************************************************************************/
+
+int openproto()
+{
+if (protocol)
+  {
+  ofile=new ofstream(protocolname);
+  if (!ofile->good())
+    {
+    clog << "can't open " << protocolname << " for writing: ???" << endl;
+    return(-1);
+    }
+  cout=*ofile;
+  }
+else
+  ofile=0;
+cout << headline << endl;
+return(0);
+}
+
+/*****************************************************************************/
+
+void printwatzstring(int* p, int size)
+{
+union
+  {
+  char s[256];
+  int i[64];
+  } uni;
+int il=(size+3)/4;
+
+int i;
+for (i=0; i<il; i++) uni.i[i]=p[i];
+uni.s[size]=0;
+cout << uni.s << endl;
+}
+
+/*****************************************************************************/
+
+void scan_file()
+{
+C_eventp event;
+int wrote_line=0;
+int first, last, evnum, numevents=0;
+int start_found=0, stop_found=0, event_found=0;
+int records_found=0;
+int mismatches=0;
+
+if (debug) clog << "scan_file()" << endl;
+first=0;
+try
+  {
+  while ((*evin) >> event)
+    {
+    if (!wrote_line)
+      {
+      cout <<
+"------------------------------------------------------------------------------"
+          << endl;
+      wrote_line=1;
+      }
+    records_found++;
+    if (event.evnr()==0)
+      {
+      switch (event[4])
+        {
+        case 1:
+          {
+          if (start_found)
+            {
+            stop_found=1;
+            cout << "trailer:" << endl;
+            }
+          else
+            {
+            start_found=1;
+            cout << "header:" << endl;
+            }
+          if (verbose) cout << "    main header" << endl;
+          int run=event[7];
+          cout << "run " << run << endl;
+          printwatzstring(event+8, 28);
+          if (verbose)
+            {
+            printwatzstring(event+15, 80);
+            printwatzstring(event+35, 80);
+            }
+          }
+          break;
+        case 2: if (verbose) cout << "    hardware config" << endl; break;
+        case 3: if (verbose) cout << "    module types" << endl; break;
+        case 4: if (verbose) cout << "    synchronisation setup" << endl; break;
+        case 5:
+          if (verbose)
+            {
+            cout << "    is setup: ";
+            switch (event[6])
+              {
+              case 1: cout << "fera" << endl; break;
+              case 2: cout << "fastbus multi block" << endl; break;
+              case 3: cout << "struck dl350" << endl; break;
+              case 4: cout << "lecroy tdc2277" << endl; break;
+              case 5: cout << "fastbus lecroy" << endl; break;
+              case 6: cout << "camac scaler" << endl; break;
+              case 7: cout << "zel discriminator" << endl; break;
+              case 8: cout << "fastbus kinetic" << endl; break;
+              case 9: cout << "drams" << endl; break;
+              case 10: cout << "lecroy tdc2228" << endl; break;
+              case 11: cout << "multi purpose" << endl; break;
+              default: cout << "unknown type: " << event[6] << endl; break;
+              }
+            }
+          break;
+        case 6: if (verbose) cout << "    user record" << endl; break;
+        default:
+          if (verbose ) cout << "    unknown record: " << event[4] << endl;
+          break;
+        }
+      }
+    else
+      {
+      if (!event_found)
+        {
+        first=event.evnr();
+        event_found=1;
+//      cout << "first event: " << first << endl;
+        }
+      else if (event.evnr()!=evnum+1)
+        {
+        if (mismatches++<=10)
+          {
+          if (event.evnr()==evnum+1)
+            {
+            cout << "event " << evnum << " missing" << endl;
+            }
+          else if (event.evnr()>evnum)
+            {
+            cout << "events from " << evnum << " to " << event.evnr()-1
+                << " missing" << endl;
+            }
+          else
+            {
+            cout << "jump from event " << evnum-1 << " to " << event.evnr()
+                << endl;
+            }
+          if (!verbose && (mismatches==10))
+            cout << "further mismatches suppressed" << endl;
+          }
+        }
+      numevents++;
+      evnum=event.evnr();
+      }
+    }
+  if (records_found)
+    {
+    if (event_found)
+      {
+      cout << "first event     : " << first << endl;
+      cout << "last event      : " << evnum << endl;
+      cout << "number of events: " << numevents << endl;
+      }
+    else
+      cout << "no event found" << endl;
+    if (mismatches>10) cout << mismatches << " mismatches" << endl;
+    if (!start_found) cout << "no header found" << endl;
+    if (!stop_found) cout << "no trailer found" << endl;
+    }
+  if (evin->is_tape())
+    {
+    C_evtinput* in=(C_evtinput*)evin;
+    if (!in->fatal() && in->filemark()) cout << "filemark" << endl;
+    }
+  }
+catch (const C_error& error)
+  {
+  if (protocol) clog << error << endl;
+  cout << error << endl;
+  }
+}
+
+/*****************************************************************************/
+
+void scan_tape()
+{
+try
+  {
+  if (debug) clog << "try to open" << endl;
+  if (buffered)
+    {
+    if (debug) clog << "open buffered" << endl;
+    evin=new C_evfinput(infile);
+    }
+  else
+    {
+    if (debug) clog << "open tape" << endl;
+    evin=new C_evtinput(infile);
+    }
+  if (debug) clog << "open ok" << endl;
+  }
+catch (const C_error& err)
+  {
+  cerr << err << endl;
+  return;
+  }
+
+if (evin->fatal()) clog << "fatal vor erstem Versuch" << endl;
+while (!evin->fatal())
+  {
+  scan_file();
+  evin->reset();
+  }
+
+delete evin;
+}
+
+/*****************************************************************************/
+
+main(int argc, char* argv[])
+{
+//cerr << "das ist ein dummy-output" << endl;
+args=new C_readargs(argc, argv);
+if (readargs()!=0) return(0);
+if (openproto()!=0) return(0);
+
+scan_tape();
+
+delete ofile;
+return(0);
+}
+
+/*****************************************************************************/
+/*****************************************************************************/

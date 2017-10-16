@@ -6,7 +6,7 @@
  */
 
 #include "config.h"
-//#include "cxxcompat.hxx"
+#include "cxxcompat.hxx"
 #include <errno.h>
 #include <unistd.h>
 #include <stdlib.h>
