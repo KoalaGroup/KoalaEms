@@ -77,8 +77,9 @@ typedef enum{
  * modul_unspec must not be used any longer,
  * therefore remaned to modul_unspec_
  */
+/* Change modul_unspec_ back to modul_unspec, By Yong 16.10.2017 */
 enum Modulclass {
-    modul_none, modul_unspec_, modul_generic, modul_camac,
+    modul_none, modul_unspec, modul_generic, modul_camac,
     modul_fastbus, modul_vme, modul_lvd, modul_perf, modul_can, modul_caenet,
     modul_sync, modul_pcihl, modul_ip, modul_invalid
 };

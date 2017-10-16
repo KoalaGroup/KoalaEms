@@ -1,0 +1,220 @@
+# saved at Thu Sep 10 13:13:55 MET DST 1998
+set global_setup(auto_save) {1}
+set global_setup(channel_measured) {13}
+set global_setup(channel_triggered) {12}
+set global_setup(commu_host) {ikpe1102}
+set global_setup(commu_port) {4097}
+set global_setup(commu_socket) {/var/tmp/c11_comm}
+set global_setup(commu_transport) {tcp}
+set global_setup(display_repeat) {10}
+set global_setup(graphical_display) {0}
+set global_setup(interval_slider) {1}
+set global_setup(num_panes) {3}
+set global_setup(num_print_channels) {24}
+set global_setup(numerical_display) {1}
+set global_setup(print_auto) {0}
+set global_setup(print_command) {scal1_copy lp0}
+set global_setup(readout_repeat) {10000}
+set global_setup(show_average_rate) {0}
+set global_setup(show_content) {1}
+set global_setup(show_index) {1}
+set global_setup(show_max_rate) {1}
+set global_setup(show_min_rate) {0}
+set global_setup(show_name) {1}
+set global_setup(show_rate) {1}
+set global_setup(termfont) {-*-courier-medium-r-*-*-12-*-*-*-*-*-*-*}
+set global_setup(view_deadtime) {1}
+set global_setup(xh_host) {localhost}
+set global_setup(xh_port) {1238}
+set global_setup(xh_socket) {/var/tmp/xhcomm}
+set global_setup(xh_transport) {tcp}
+global global_commands
+ladd global_setup_extra global_commands
+set global_commands(0) {Crate_5 4 p
+  {Timestamp {}
+    Scaler2551_update_read {1 1 0xfff}
+    Scaler2551_update_read {1 2 0xfff}}
+  {{got_Timestamp 0} {got_Scaler2551 12} {got_Scaler2551 12}}}
+set global_commands(1) {Crate_5 5 p
+  {Timestamp {}
+    nAFwrite.1 {1 0 16 8064}
+    nAFreadQstop1.1 {1 0 2 32}}
+  {{got_Timestamp 0} {got_Scaler4434 32}}}
+set global_commands(2) {Crate_6 0 c {readout status 1} {{got_Evrate 1}}}
+global global_setup_names
+ladd global_setup_extra global_setup_names
+set global_setup_names(0) {S1 (mu 1)}
+set global_setup_names(1) {-}
+set global_setup_names(10) {T5 (S1 mu1,pre)}
+set global_setup_names(11) {leer}
+set global_setup_names(12) {Triggered}
+set global_setup_names(13) {Measured}
+set global_setup_names(14) {flattop-count (?)}
+set global_setup_names(15) {T1 (ppK+K-)}
+set global_setup_names(16) {T2 (dpi+,pre)}
+set global_setup_names(17) {T3 (pp dip,pre)}
+set global_setup_names(18) {T4 (pp mon,pre)}
+set global_setup_names(19) {dpi+}
+set global_setup_names(2) {S2 (mu 1)}
+set global_setup_names(20) {pp dip}
+set global_setup_names(21) {pp mon}
+set global_setup_names(22) {S4 (43&44)}
+set global_setup_names(23) {S5 (49)}
+set global_setup_names(24) {T1 (ppK+K-)}
+set global_setup_names(25) {T2 (dpi+,pre)}
+set global_setup_names(26) {T3 (pp dip,pre)}
+set global_setup_names(27) {T4 (pp mon,pre)}
+set global_setup_names(28) {dpi+}
+set global_setup_names(29) {pp dip}
+set global_setup_names(3) {-}
+set global_setup_names(30) {pp mon}
+set global_setup_names(31) {S1 (mu 1)}
+set global_setup_names(32) {S1 (mu 2)}
+set global_setup_names(33) {S1 (mu 3)}
+set global_setup_names(34) {S2 (mu 1)}
+set global_setup_names(35) {S2 (mu 2)}
+set global_setup_names(36) {S2 (mu 3)}
+set global_setup_names(37) {S1&S2 (high)}
+set global_setup_names(38) {S1/S2 Trigger}
+set global_setup_names(39) {T5 (S1 mu1,pre)}
+set global_setup_names(4) {S1 (mu 2)}
+set global_setup_names(40) {Triggered}
+set global_setup_names(41) {Pulser}
+set global_setup_names(42) {Super Cycle}
+set global_setup_names(43) {Luminosity Monitor}
+set global_setup_names(44) {S4 (43&44)}
+set global_setup_names(45) {S5 (49)}
+set global_setup_names(46) {x22}
+set global_setup_names(47) {x23}
+set global_setup_names(48) {x24}
+set global_setup_names(49) {x25}
+set global_setup_names(5) {S1 (mu 3)}
+set global_setup_names(50) {x26}
+set global_setup_names(51) {x27}
+set global_setup_names(52) {x28}
+set global_setup_names(53) {x29}
+set global_setup_names(54) {x30}
+set global_setup_names(55) {COSY-11 clock}
+set global_setup_names(56) {Eventrate}
+set global_setup_names(6) {S2 (mu 2)}
+set global_setup_names(7) {S2 (mu 3)}
+set global_setup_names(8) {S1&S2 (high)}
+set global_setup_names(9) {S1/S2 Trigger}
+global global_setup_pane
+ladd global_setup_extra global_setup_pane
+set global_setup_pane(0) {1}
+set global_setup_pane(1) {1}
+set global_setup_pane(10) {0}
+set global_setup_pane(11) {0}
+set global_setup_pane(12) {2}
+set global_setup_pane(13) {2}
+set global_setup_pane(14) {2}
+set global_setup_pane(15) {0}
+set global_setup_pane(16) {1}
+set global_setup_pane(17) {1}
+set global_setup_pane(18) {1}
+set global_setup_pane(19) {0}
+set global_setup_pane(2) {1}
+set global_setup_pane(20) {0}
+set global_setup_pane(21) {0}
+set global_setup_pane(22) {1}
+set global_setup_pane(23) {1}
+set global_setup_pane(24) {2}
+set global_setup_pane(25) {2}
+set global_setup_pane(26) {2}
+set global_setup_pane(27) {2}
+set global_setup_pane(28) {2}
+set global_setup_pane(29) {2}
+set global_setup_pane(3) {1}
+set global_setup_pane(30) {2}
+set global_setup_pane(31) {2}
+set global_setup_pane(32) {2}
+set global_setup_pane(33) {2}
+set global_setup_pane(34) {2}
+set global_setup_pane(35) {2}
+set global_setup_pane(36) {3}
+set global_setup_pane(37) {3}
+set global_setup_pane(38) {3}
+set global_setup_pane(39) {3}
+set global_setup_pane(4) {1}
+set global_setup_pane(40) {3}
+set global_setup_pane(41) {2}
+set global_setup_pane(42) {3}
+set global_setup_pane(43) {3}
+set global_setup_pane(44) {3}
+set global_setup_pane(45) {3}
+set global_setup_pane(46) {3}
+set global_setup_pane(47) {3}
+set global_setup_pane(48) {4}
+set global_setup_pane(49) {5}
+set global_setup_pane(5) {1}
+set global_setup_pane(50) {0}
+set global_setup_pane(51) {1}
+set global_setup_pane(52) {2}
+set global_setup_pane(53) {3}
+set global_setup_pane(54) {4}
+set global_setup_pane(55) {2}
+set global_setup_pane(56) {0}
+set global_setup_pane(6) {1}
+set global_setup_pane(7) {1}
+set global_setup_pane(8) {0}
+set global_setup_pane(9) {0}
+global global_setup_vis
+ladd global_setup_extra global_setup_vis
+set global_setup_vis(0) {1}
+set global_setup_vis(1) {0}
+set global_setup_vis(10) {0}
+set global_setup_vis(11) {0}
+set global_setup_vis(12) {1}
+set global_setup_vis(13) {1}
+set global_setup_vis(14) {1}
+set global_setup_vis(15) {1}
+set global_setup_vis(16) {0}
+set global_setup_vis(17) {0}
+set global_setup_vis(18) {0}
+set global_setup_vis(19) {1}
+set global_setup_vis(2) {1}
+set global_setup_vis(20) {1}
+set global_setup_vis(21) {1}
+set global_setup_vis(22) {0}
+set global_setup_vis(23) {0}
+set global_setup_vis(24) {0}
+set global_setup_vis(25) {0}
+set global_setup_vis(26) {0}
+set global_setup_vis(27) {0}
+set global_setup_vis(28) {0}
+set global_setup_vis(29) {0}
+set global_setup_vis(3) {0}
+set global_setup_vis(30) {0}
+set global_setup_vis(31) {0}
+set global_setup_vis(32) {0}
+set global_setup_vis(33) {0}
+set global_setup_vis(34) {0}
+set global_setup_vis(35) {0}
+set global_setup_vis(36) {0}
+set global_setup_vis(37) {0}
+set global_setup_vis(38) {0}
+set global_setup_vis(39) {0}
+set global_setup_vis(4) {1}
+set global_setup_vis(40) {0}
+set global_setup_vis(41) {1}
+set global_setup_vis(42) {0}
+set global_setup_vis(43) {0}
+set global_setup_vis(44) {0}
+set global_setup_vis(45) {0}
+set global_setup_vis(46) {0}
+set global_setup_vis(47) {0}
+set global_setup_vis(48) {0}
+set global_setup_vis(49) {0}
+set global_setup_vis(5) {1}
+set global_setup_vis(50) {0}
+set global_setup_vis(51) {0}
+set global_setup_vis(52) {0}
+set global_setup_vis(53) {0}
+set global_setup_vis(54) {0}
+set global_setup_vis(55) {1}
+set global_setup_vis(56) {1}
+set global_setup_vis(6) {1}
+set global_setup_vis(7) {1}
+set global_setup_vis(8) {0}
+set global_setup_vis(9) {0}
