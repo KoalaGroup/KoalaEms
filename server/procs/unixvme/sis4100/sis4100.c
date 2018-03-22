@@ -3,7 +3,7 @@
  * created 18.Sep.2003 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: sis4100.c,v 1.7 2015/04/06 21:33:39 wuestner Exp $";
+    "$ZEL: sis4100.c,v 1.8 2017/10/09 21:09:25 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -22,7 +22,6 @@ static const char* cvsid __attribute__((unused))=
 #include "sis4100_map.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
 extern int *memberlist;
 
 #define get_vmedevice(crate) \

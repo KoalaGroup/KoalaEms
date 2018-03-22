@@ -3,7 +3,7 @@
  * created 2006-Jul-05 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: procjtag.c,v 1.8 2011/04/06 20:30:33 wuestner Exp $";
+    "$ZEL: procjtag.c,v 1.9 2017/10/09 21:25:38 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -17,7 +17,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../../lowlevel/devices.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
 
 RCS_REGISTER(cvsid, "procs/jtag")
 

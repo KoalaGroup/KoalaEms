@@ -4,7 +4,7 @@
  * 04.11.94
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: select_statist.c,v 1.7 2011/04/06 20:30:34 wuestner Exp $";
+    "$ZEL: select_statist.c,v 1.8 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <math.h>
 #include <errorcodes.h>
@@ -17,7 +17,6 @@ static const char* cvsid __attribute__((unused))=
 /*#include <xdrfloat.h>*/
 #include <xdrstring.h>
 
-extern ems_u32* outptr;
 #ifdef SELECT_STATIST
 /*
  * extern void sched_select_task_get_statist(seltaskdescr* descr, float* enabled,
@@ -47,7 +46,7 @@ static void putfloat(double v)
 #endif
 /*****************************************************************************/
 
-plerrcode proc_SelStat(ems_u32* p)
+plerrcode proc_SelStat(__attribute__((unused)) ems_u32* p)
 {
 #ifdef SELECT_STATIST
     struct seltaskdescr* h;
@@ -77,7 +76,7 @@ plerrcode proc_SelStat(ems_u32* p)
     return plOK;
 }
 
-plerrcode test_proc_SelStat(ems_u32* p)
+plerrcode test_proc_SelStat(__attribute__((unused)) ems_u32* p)
 {
 #ifdef SELECT_STATIST
     if (p[0]!=1) return plErr_ArgNum;

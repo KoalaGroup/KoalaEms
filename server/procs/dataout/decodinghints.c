@@ -3,7 +3,7 @@
  * created: 2007-02-08 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: decodinghints.c,v 1.5 2011/04/06 20:30:31 wuestner Exp $";
+    "$ZEL: decodinghints.c,v 1.6 2017/10/09 21:25:37 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -16,7 +16,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../../objects/is/is.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
 extern struct IS *current_IS;
 
 RCS_REGISTER(cvsid, "procs/dataout")

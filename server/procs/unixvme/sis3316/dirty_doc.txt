@@ -1,0 +1,183 @@
+sis3316_init
+ * p[0]: argcount(==1)
+ * p[1]: index in memberlist (or -1 for all modules)
+
+sis3316_irq
+0x8
+ * p[0]: argcount(2 or 3)
+ * p[1]: index in memberlist (or -1 for all sis3316 modules)
+ * p[2]: level (level==0 disables IRQ)
+ * [p[3]: vector
+ *         <0: -vector is used for all modules
+ *         >=0: vector is used for the first module and incremented for each
+ *              following module
+ *  p[4]: 0: RORA; 1: ROAK]
+
+sis3316_irq_ctrl
+0xc
+ * p[1]: index in memberlist (or -1 for all sis3316 modules)
+ * [p[2]: val]
+
+sis3316_channel_id
+0x1014, 0x2014, 0x3014, 0x4014
+ * p[0]: argcoun)
+ * p[1]: index in memberlist (or -1 for all sis3316 modules)
+ * [p[2 ...]: val ...] (0..255)
+
+sis3316_clock
+ * p[0]: argcount(1 or 2)
+ * p[1]: index in memberlist (or -1 for all modules)
+ * [p[2]: 0: 62.5 MHz 1: 128 MHz 2: 250 MHz]
+
+sis3316_clock_distribution
+0x50
+ * p[0]: argcount(1 or 2)
+ * p[1]: index in memberlist (or -1 for all modules)
+ * p[2]: val
+ *       0: onboard oscillator
+ *       1: VXS clock
+ *       2: FP-bus clock
+ *       3: NIM input
+ */
+
+sis3316_lemo_out_co
+0x70
+ * p[0]: argcount(2 or 3)
+ * p[1]: index in memberlist (or -1 for all sis3316 modules)
+ * [p[2]: val]
+ *        bits:
+ *           0: select sample clock
+ *          16: select internal high energy trigger stretched pulse ch1-4
+ *          17: select internal high energy trigger stretched pulse ch5-8
+ *          18: select internal high energy trigger stretched pulse ch9-12
+ *          19: select internal high energy trigger stretched pulse ch13-16
+ *          20: select "sample bank swap control with nim input ti/ui"
+ *              logic enabled
+ *          21: select sample logic bankx armed
+ *          22: select sample logic bank2 flag
+
+sis3316_lemo_in
+0x5c
+ * p[0]: argcount(2 or 3)
+ * p[1]: index in memberlist (or -1 for all sis3316 modules)
+ * [p[2]: val]
+ *        bits:
+ *           0: enable NIM input CI
+ *           1: invert NIM input CI
+ *           2: NIM input CI level sensitive
+ *           3: set NIM input CI function
+ *           4: enable NIM input TI as trigger
+ *           5: invert NIM input TI
+ *           6: NIM input TI level sensitive
+ *           7: set NIM input TI function
+ *           8: enable NIM input UI as timestamp clear enable
+ *           9: invert NIM input UI
+ *          10: NIM input UI level sensitive
+ *          11: set NIM input UI function
+ *          12: NIM input UI as veto enable
+ *          13: NIM input UI as PPS enable
+ *
+ *          16: status of external NIM input CI
+ *          17: status of NIM input signal CI
+ *
+ *          20: status of external NIM input TI
+ *          21: status of NIM input signal TI
+ *
+ *          24: status of external NIM input UI
+ *          25: status of NIM input signal UI
+
+sis3316_analog_ctrl
+0x1004, 0x2004, 0x3004, 0x4004
+ * p[0]: argcount(2 or 3)
+ * p[1]: index in memberlist (or -1 for all sis3316 modules)
+ * p[2]: channel group (or -1 for all)
+ * [p[3]: val]
+ *       for each byte:
+ *           bit 0 gain control bit 0
+ *           bit 1 gain Control bit 1
+ *           bit 2 disable 50 Ohm termination
+ *           bit 3..7 reserved
+ *           gain: 
+ *               00 5 V
+ *               01 2 V
+ *               10 1.9 V
+ *               11 1.9 v
+
+sis3316_mem_threshold
+0x1018, 0x2018, 0x3018, 0x4018
+ * p[0]: argcount(2 or 4)
+ * p[1]: index in memberlist (or -1 for all sis3316 modules)
+ * p[2]: channel group (or -1 for all)
+ * [p[3]: val]
+
+sis3316_event_conf
+0x1010, 0x2010, 0x3010, 0x4010
+0x109c, 0x209c, 0x309c, 0x409c
+ * p[0]: argcount(2 or 4)
+ * p[1]: index in memberlist (or -1 for all sis3316 modules)
+ * p[2]: channel group (or -1 for all)
+ * [p[3]: conf
+ *  p[4]: ext. conf]
+ *       for each byte in conf:
+ *           bit 0 invert input
+ *           bit 1 enable internal sum-trigger
+ *           bit 2 enable internal trigger
+ *           bit 3 enable external trigger
+ *           bit 4 enable internal gate 1
+ *           bit 5 enable internal gate 2
+ *           bit 6 enable external gate
+ *           bit 7 enable external veto
+ *
+ *       for each byte in ext conf:
+ *           bit 0 enable internal pileup trigger
+ *           bit 1..7: reserved
+
+sis3316_format_conf
+0x1030, 0x2030, 0x3030, 0x4030
+ * p[0]: argcount(3)
+ * p[1]: index in memberlist (or -1 for all sis3316 modules)
+ * p[2]: channel group (or -1 for all)
+ * [p[3]: conf]
+ *       for each byte in conf:
+ *           bit 0 peak high values + 6*accumulator values
+ *           bit 1 2*accumulator values (gates 7, 8)
+ *           bit 2 3*fast trigger MAW values
+ *           bit 3 start and max. energy MAW value
+ *           bit 4 enable MAW test buffer
+ *           bit 5 select energy MAW test buffer bit
+ *           bit 6 reserved
+ *           bit 7 reserved
+
+sis3316_rawdata_conf
+0x1020, 0x1098
+0x2020, 0x2098
+0x3020, 0x3098
+0x4020, 0x4098
+ * p[0]: argcount(2 or 4)
+ * p[1]: index in memberlist (or -1 for all sis3316 modules)
+ * p[2]: channel group (or -1 for all)
+ * [p[3]: raw buffer start index
+ *  p[4]: raw buffer sample length]
+
+sis3316_pre_trigger_delay
+0x1028, 0x2028, 0x3028, 0x4028
+ * p[0]: argcount(2..3)
+ * p[1]: index in memberlist (or -1 for all sis3316 modules)
+ * p[2]: channel group (or -1 for all)
+ * [p[3]: delay (max. 16378)]
+
+sis3316_set_offset
+ * p[0]: argcount(==6)
+ * p[1]: index in memberlist (or -1 for all sis3316 modules)
+ * p[2]: channel group (or -1 for all)
+ * p[3]: value chan0
+ * p[4]: value chan1
+ * p[5]: value chan2
+ * p[6]: value chan3
+
+sis3316_acq_ctrl
+0x60
+ * p[0]: argcoun)
+ * p[1]: index in memberlist (or -1 for all sis3316 modules)
+ * [p[2]: val]
+

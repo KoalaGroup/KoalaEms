@@ -5,7 +5,7 @@
  * 20.Jun.2002 PW: var_read
  */
 /*
- * static char *rcsid="$ZEL: variables.h,v 1.10 2008/01/15 14:10:46 wuestner Exp $";
+ * static char *rcsid="$ZEL: variables.h,v 1.11 2017/10/20 23:21:31 wuestner Exp $";
  */
 
 #ifndef _variables_h_
@@ -15,7 +15,7 @@
 #include "varobj.h"
 
 struct Var {
-    int len;
+    unsigned int len;
     union {
         ems_u32 val;
         ems_u32 *ptr;

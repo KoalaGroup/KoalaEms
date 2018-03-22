@@ -28,7 +28,7 @@
 #include "versions.hxx"
 
 VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
-"$ZEL: inbuf.cc,v 2.28 2014/07/14 15:09:53 wuestner Exp $")
+"$ZEL: inbuf.cc,v 2.29 2016/05/02 15:20:06 wuestner Exp $")
 #define XVERSION
 
 using namespace std;
@@ -216,6 +216,28 @@ val=buffer[idx++];
 return *this;
 }
 
+/*****************************************************************************/
+
+C_inbuf& C_inbuf::operator >>(char& val)
+{
+if (idx>=dsize)
+  throw new C_program_error("C_inbuf::operator>>(u_short&): buffer exhausted");
+val=buffer[idx++];
+return *this;
+}
+
+/*****************************************************************************/
+C_inbuf& C_inbuf::operator >>(char*& s)
+{
+ems_u32* ptr=buffer+idx;
+if (idx>=dsize)
+  throw new C_program_error("C_inbuf::operator>>(char*&): no count");
+idx+=xdrstrlen(ptr);
+if (idx>dsize)
+  throw new C_program_error("C_inbuf::operator>>(char*&): not enough words");
+s=xdrstrdup(ptr);
+return *this;
+}
 /*****************************************************************************/
 #if 0
 C_inbuf& C_inbuf::operator>>(float& v)

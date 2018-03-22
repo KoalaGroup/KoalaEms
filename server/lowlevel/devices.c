@@ -3,7 +3,7 @@
  * created 01.Oct.2002 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: devices.c,v 1.22 2011/04/06 20:30:22 wuestner Exp $";
+    "$ZEL: devices.c,v 1.24 2017/10/21 23:03:51 wuestner Exp $";
 
 #include <sconf.h>
 #include <stdlib.h>
@@ -17,10 +17,10 @@ static const char* cvsid __attribute__((unused))=
 #endif
 
 struct generic_dev** devices;
-int numdevs;
+unsigned int numdevs;
 
-int* xdevices[modul_invalid]; /* index in devices[] */
-int numxdevs[modul_invalid]; /* number of devices */
+unsigned int* xdevices[modul_invalid]; /* index in devices[] */
+unsigned int numxdevs[modul_invalid]; /* number of devices */
 
 RCS_REGISTER(cvsid, "lowlevel")
 
@@ -39,7 +39,7 @@ void devices_init(void)
 errcode devices_done(void)
 {
     errcode res=OK;
-    int i;
+    unsigned int i;
     for (i=0; i<numdevs; i++) {
         errcode lres;
         if (devices[i]) {
@@ -60,8 +60,8 @@ int register_device(Modulclass class, struct generic_dev* dev,
         const char* caller)
 {
     struct generic_dev** help;
-    int* ihelp;
-    int i;
+    unsigned int* ihelp;
+    unsigned int i;
 
     printf("register_device(class=%d (%s) called from %s)\n",
             class, Modulclass_names[class], caller);
@@ -177,24 +177,25 @@ find_odevice(Modulclass class, unsigned int crate, struct generic_dev **dev)
 /*****************************************************************************/
 #ifdef DELAYED_READ
 static int
-dummy_enable_delayed_read(struct generic_dev* dev, int val)
+dummy_enable_delayed_read(__attribute__((unused)) struct generic_dev* dev,
+        __attribute__((unused)) int val)
 {
     return 0;
 }
 
 static void
-dummy_reset_delayed_read(struct generic_dev* gdev)
+dummy_reset_delayed_read(__attribute__((unused)) struct generic_dev* gdev)
 {}
 
 static int
-dummy_read_delayed(struct generic_dev* gdev)
+dummy_read_delayed(__attribute__((unused)) struct generic_dev* gdev)
 {
     return -1;
 }
 
 void reset_delayed_read(void)
 {
-    int i;
+    unsigned int i;
     for (i=0; i<numdevs; i++) {
         if (devices[i] && devices[i]->generic.delayed_read_enabled)
                 devices[i]->generic.reset_delayed_read(devices[i]);
@@ -203,7 +204,8 @@ void reset_delayed_read(void)
 
 int read_delayed(void)
 {
-    int err=0, i;
+    unsigned int i;
+    int err=0;
 
     for (i=0; i<numdevs; i++) {
         if (devices[i] && devices[i]->generic.delayed_read_enabled)
@@ -214,7 +216,8 @@ int read_delayed(void)
 #endif
 
 static plerrcode
-dummy_init_jtag_dev(struct generic_dev* dev, void* jdev)
+dummy_init_jtag_dev(__attribute__((unused)) struct generic_dev* dev,
+        __attribute__((unused)) void* jdev)
 {
     return plErr_BadModTyp;
 }

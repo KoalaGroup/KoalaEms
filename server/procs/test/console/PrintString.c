@@ -1,5 +1,5 @@
 /******************************************************************************
-* $ZEL: PrintString.c,v 1.6 2011/04/06 20:30:34 wuestner Exp $
+* $ZEL: PrintString.c,v 1.7 2017/10/09 21:25:38 wuestner Exp $
 *                                                                             *
 * PrintString.c                                                               *
 *                                                                             *
@@ -9,15 +9,13 @@
 *                                                                             *
 ******************************************************************************/
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: PrintString.c,v 1.6 2011/04/06 20:30:34 wuestner Exp $";
+    "$ZEL: PrintString.c,v 1.7 2017/10/09 21:25:38 wuestner Exp $";
 
 #include <stdio.h>
 #include <errorcodes.h>
 #include <xdrstring.h>
 #include <rcs_ids.h>
 #include "../../procs.h"
-
-extern int wirbrauchen;
 
 RCS_REGISTER(cvsid, "procs/test/console")
 

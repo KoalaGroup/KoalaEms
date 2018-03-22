@@ -1,0 +1,133 @@
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+BIN_DIR = $(exec_prefix)/bin
+COMMONVER    := @COMMONVER@
+SUPPORTVER   := @SUPPORTVER@
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+@SET_MAKE@
+
+machname = @target@
+
+COMMON_INCLUDE = @EMSCOMMON@
+COMMON_EX_INCLUDE = @EMSEXCOMMON@
+COMMON_LIB = @EMSCOMMONLIB@
+SUPPORT_INCLUDE = @EMSSUPPORT@
+SUPPORT_LIB = @EMSSUPPORTLIB@
+
+CXX = @CXX@
+CXXFLAGS = @CXXFLAGS@
+INSTALL = @INSTALL@
+INSTALL_DATA = @INSTALL_DATA@
+RANLIB = @RANLIB@
+LDFLAGS =
+COSYLOG_INCLUDE = @cosylog_include@
+COSYDB_INCLUDE_A = @cosydb_include_a@
+COSYDB_INCLUDE_B = @cosydb_include_b@
+
+#CPPFLAGS = @CPPFLAGS@ -I. -I$(srcdir) -I. -I$(COMMON_INCLUDE)  \
+#	-I$(COMMON_EX_INCLUDE)  -I$(SUPPORT_INCLUDE) -I$(CLIENTLIB_INCLUDE)  \
+#	-I$(COSYLOG_INCLUDE) -I$(COSYDB_INCLUDE_A) -I$(COSYDB_INCLUDE_B)
+
+CPPFLAGS = @DEFFLAGS@ @CPPFLAGS@ -I. -I$(srcdir) -I$(COMMON_INCLUDE)  \
+	-I$(COMMON_EX_INCLUDE)  -I$(SUPPORT_INCLUDE)  \
+	$(COSYLOG_INCLUDE) $(COSYDB_INCLUDE_A) $(COSYDB_INCLUDE_B) @DEFS@
+
+CORESRC := commu.cc commu_client.cc  \
+	commu_db.cc commu_file_logg.cc commu_io.cc commu_io_client.cc  \
+	commu_io_server.cc commu_list.cc  \
+ 	commu_local_server.cc  \
+	commu_local_server_a.cc commu_local_server_i.cc  \
+	commu_local_server_l.cc  \
+	commu_log.cc commu_logg.cc commu_message.cc  \
+	commu_server.cc commu_sock.cc commu_special_logg.cc  \
+        commu_station.cc  \
+	commu_sys_logg.cc commu_zdb.cc daemon.cc debug.cc ved_addr.cc  \
+        commu_templates.cc  \
+	linkdate.cc cppdefines.cc
+COREOBJS := $(CORESRC:.cc=.o)
+
+cosylogsrc	:= commu_cosy_logg.cc
+COSYLOGSRC	:= @COSYLOGSRC@
+COSYLOGOBJS := $(COSYLOGSRC:.cc=.o)
+cosydbsrc	:= commu_cdb.cc
+COSYDBSRC	:= @COSYDBSRC@
+COSYDBOBJS	:= $(COSYDBSRC:.cc=.o)
+odbsrc		:= commu_odb.cc # not used
+ODBSRC		:= @ODBSRC@
+ODBOBJS		:= $(ODBSRC:.cc=.o)
+annosrc		:= commu_anno.cc
+ANNOSRC		:= @ANNOSRC@
+ANNOOBJS	:= $(ANNOSRC:.cc=.o)
+EMSLIBS		:= -lcommon.$(COMMONVER) -lsupp.$(SUPPORTVER)
+WENDYLIBS	:= @WENDYLIBS@
+WENDYLIBDIRS	:= @WENDYLIBDIRS@
+M4HDR = commu_local_server.hxx commu_local_server_a.hxx  \
+	commu_local_server_i.hxx commu_local_server_l.hxx
+M4SRC = commu_ls_req.cc commu_procs_a.cc commu_procs_i.cc  \
+	commu_procs_l.cc
+M4HDR_ = $(M4HDR:=.m4)
+M4SRC_ = $(M4SRC:=.m4)
+M4OBJS = $(M4SRC:.cc=.o)
+M4FLAGS = -DSRC=$(srcdir) -DCOMMON=$(COMMON_INCLUDE)  \
+	-DEXCOMMON=$(COMMON_EX_INCLUDE)
+
+EXEC := @EXEC@
+
+.PHONY: all
+all: $(EXEC)
+
+commu:	$(M4HDR) $(M4OBJS) $(COREOBJS) $(ANNOOBJS) $(COSYLOGOBJS)  \
+	$(COSYDBOBJS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(srcdir)/linkdate.cc -c
+	$(CXX) -v $(LDFLAGS) -o $@ $(COREOBJS) $(M4OBJS)  \
+	$(ANNOOBJS) $(COSYLOGOBJS) $(COSYDBOBJS)  \
+	-L$(SUPPORT_LIB) -L$(COMMON_LIB) $(EMSLIBS)  \
+	$(WENDYLIBDIRS) $(WENDYLIBS)
+	
+linkdate.cc:
+	
+# $(M4HDR) $(M4SRC):	$(M$HDR_) $(M$SRC_)
+# 	m4 $(M4FLAGS) $(srcdir)/$@.m4 >$@
+        
+% ::	$(srcdir)/%.m4
+	m4 $(M4FLAGS) $< >$@
+
+depend: sed.in $(M4HDR) $(M4SRC)
+	cp Makefile Makefile.bak
+	sed -e '/^# DO NOT DELETE THIS LINE/,$$d' < Makefile.bak > Makefile
+	echo '# DO NOT DELETE THIS LINE' >> Makefile
+	echo ' ' >> Makefile
+	for i in $(CORESRC) $(COSYLOGSRC) $(COSYDBSRC) $(ODBSRC) $(ANNOSRC) ; do \
+	  echo checking $$i ; \
+	  $(CXX) -M $(CPPFLAGS) $(CXXFLAGS) $(srcdir)/$$i|sed -f sed.in>> Makefile ; \
+	done
+	for i in $(M4SRC) ; do \
+	  echo checking $$i ; \
+	  $(CXX) -M $(CPPFLAGS) $(CXXFLAGS) $$i|sed -f sed.in>> Makefile ; \
+	done
+
+sed.in:
+	echo 's|/usr/include/[^ ]*||g' >sed.in
+	echo '/.*: $$/d' >>sed.in
+	echo '/^ *\\ *$$/d' >>sed.in
+
+clean:
+	rm -f *.o *.a *.so $(EXEC) core sed.in
+
+realclean: clean
+	rm -f $(M4HDR) $(M4SRC)
+
+distclean: realclean
+	rm -f Makefile Makefile.bak config.cache config.log config.status config.h
+
+local: all
+	-mkdir $(machname)
+	$(INSTALL) $(lib) $(libxx) $(machname)
+
+.PHONY: install
+install: all
+	for i in $(EXEC)  ; do \
+		$(INSTALL) $$i $(BIN_DIR)/$$i ; \
+	done

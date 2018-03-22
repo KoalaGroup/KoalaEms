@@ -21,7 +21,6 @@
 #include "nco_drv.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
 
 #define  BUFLEN  1048576
 

@@ -1,4 +1,4 @@
-# $ZEL: stop.tcl,v 1.15 2007/04/15 13:15:09 wuestner Exp $
+# $ZEL: stop.tcl,v 1.17 2017/11/08 00:17:20 wuestner Exp $
 # copyright 1998
 #   Peter Wuestner; Zentrallabor fuer Elektronik; Forschungszentrum Juelich
 #
@@ -45,6 +45,12 @@ proc stop_button {} {
   change_status idle "initialized"
   set global_daq(stoptime) [clock format $global_daq(_stoptime) -format $clockformat]
   output "Stop of run $global_daq(run_nr) complete" tag_green
+
+  epics_put runnr 0 none
+  epics_put filename {} none
+  epics_put datarate 0 none
+  epics_put eventrate 0 none
+
   run_nr::get_new_run_nr
 }
 
@@ -72,6 +78,12 @@ proc automatic_stop {ved do_idx reason} {
   change_status idle "initialized"
   set global_daq(stoptime) [clock format $global_daq(_stoptime) -format $clockformat]
   output "Automatic Stop of run $global_daq(run_nr) complete" tag_green
+
+  epics_put runnr 0 none
+  epics_put filename {} none
+  epics_put datarate 0 none
+  epics_put eventrate 0 none
+
   run_nr::get_new_run_nr
 
     switch $reason {

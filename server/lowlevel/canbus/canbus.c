@@ -3,7 +3,7 @@
  * created 9.1.2006 pk
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: canbus.c,v 1.6 2011/04/06 20:30:22 wuestner Exp $";
+    "$ZEL: canbus.c,v 1.7 2017/10/21 23:23:06 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -53,7 +53,7 @@ struct canbus_init can_init[]= {
 errcode canbus_low_init(char* arg)
 {
     char *devicepath, *help;
-    int i, j, n;
+    unsigned int i, j, n;
     errcode res;
 
     T(can_low_init)

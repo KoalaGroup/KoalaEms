@@ -3,15 +3,13 @@
  * created before 28.09.93
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: IncIntVar.c,v 1.7 2011/04/06 20:30:32 wuestner Exp $";
+    "$ZEL: IncIntVar.c,v 1.8 2017/10/09 21:25:37 wuestner Exp $";
 
 #include <errorcodes.h>
 #include <rcs_ids.h>
 #include "../../procs.h"
 #include "../../procprops.h"
 #include "../../../objects/var/variables.h"
-
-extern int wirbrauchen;
 
 RCS_REGISTER(cvsid, "procs/general/vars")
 

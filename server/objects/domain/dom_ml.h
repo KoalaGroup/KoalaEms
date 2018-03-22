@@ -1,6 +1,6 @@
 /*
  * objects/domain/dom_ml.h
- * $ZEL: dom_ml.h,v 1.14 2015/04/06 21:35:02 wuestner Exp $
+ * $ZEL: dom_ml.h,v 1.16 2017/10/20 23:21:31 wuestner Exp $
  * created 15.01.93
  */
 
@@ -27,7 +27,7 @@ typedef struct {
  */
 
 typedef struct ml_entry {
-    int modultype;
+    ems_u32 modultype;
     Modulclass modulclass;
     union { /* selected by modulclass */
         struct {
@@ -56,9 +56,12 @@ typedef struct ml_entry {
             ems_u32 id;
         } can;
         struct { /* for modules like sis3316 with ethernet connection */
-            struct ip_dev* dev;
-            char *address; /* host:port or [numerical_v6_host]:port */
+            char *node;     /* remote host */
             char *protocol; /* udp or tcp */
+            char *rserv;    /* remote service */
+            char *lserv;    /* local service */
+            struct ipsock *sock; /* must be 0 if not allocated */
+            int recvtimeout;     /* in ms */
         } ip;
         struct {
             int length;
@@ -72,7 +75,7 @@ typedef struct ml_entry {
 } ml_entry;
 
 typedef struct {
-    int modnum;
+    unsigned int modnum;
     ml_entry entry[1];
 } Modlist;
 
@@ -86,6 +89,7 @@ extern Modlist *modullist;
 errcode dom_ml_init(void);
 errcode dom_ml_done(void);
 int valid_module(unsigned int idx, Modulclass class);
+plerrcode get_modent(unsigned int idx, ml_entry **module);
 
 plerrcode dump_modent(ml_entry *entry, int verbose);
 plerrcode dump_modulelist(void);

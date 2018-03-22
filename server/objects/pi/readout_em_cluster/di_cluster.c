@@ -3,7 +3,7 @@
  * created 25.03.97 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: di_cluster.c,v 1.19 2011/08/16 19:19:51 wuestner Exp $";
+    "$ZEL: di_cluster.c,v 1.21 2017/10/27 21:10:09 wuestner Exp $";
 
 #include <errno.h>
 #include <stdio.h>
@@ -49,8 +49,8 @@ struct di_cluster_data {
     /* data information */
     struct Cluster* cluster;
     int head[2];
-    int idx;
-    int bytes;
+    unsigned int idx;
+    unsigned int bytes;
 };
 
 RCS_REGISTER(cvsid, "objects/pi/readout_em_cluster")
@@ -229,7 +229,9 @@ if (dat->cluster==0) /* noch kein Cluster alloziert */
     }
   if (dat->idx==2*sizeof(int)) /* header vollstaendig */
     {
-    int size, swapped;
+    size_t size;
+    int swapped;
+
     swapped=dat->head[1]!=0x12345678;
     if (swapped)
       {
@@ -254,7 +256,7 @@ if (dat->cluster==0) /* noch kein Cluster alloziert */
     else
       size=dat->head[0]+1;
     if (size>CLUSTER_MAX) printf("di_cluster.c: JUMBOCLUSTER "
-        "(di=%d; size=%d; CLUSTER_MAX=%d)\n",
+        "(di=%d; size=%zu; CLUSTER_MAX=%llu)\n",
         di_idx, size, CLUSTER_MAX);
     dat->cluster=clusters_create(size, di_idx, "di_cluster_read");
     if (dat->cluster)

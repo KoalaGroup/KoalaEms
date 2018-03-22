@@ -3,7 +3,7 @@
  * created: 2013-03-01 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL$";
+    "$ZEL: vme_irq.c,v 1.4 2017/10/23 00:01:51 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -15,15 +15,11 @@ static const char* cvsid __attribute__((unused))=
 #include "../../lowlevel/unixvme/vme_address_modifiers.h"
 #include "../../lowlevel/devices.h"
 
-extern ems_u32 *outptr;
-extern int* memberlist;
-extern int wirbrauchen;
-
 RCS_REGISTER(cvsid, "procs/unixvme")
 
 /*****************************************************************************/
 static plerrcode
-test_vmeparm(ems_u32* p, int n)
+test_vmeparm(ems_u32* p, unsigned int n)
 {
     if (p[0]!=n)
         return plErr_ArgNum;
@@ -43,9 +39,9 @@ struct vmeirq_callbackdata {
 };
 */
 static void
-callback(struct vme_dev* dev,
+callback(__attribute__((unused)) struct vme_dev* dev,
         const struct vmeirq_callbackdata* cbd,
-        void* data)
+        __attribute__((unused)) void* data)
 {
     printf("IRQ received.");
     printf("  mask   %08x\n", cbd->mask);

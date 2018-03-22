@@ -3,7 +3,7 @@
  * created 06.Sep.2002 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: vme_verify.c,v 1.21 2015/04/06 21:33:34 wuestner Exp $";
+    "$ZEL: vme_verify.c,v 1.23 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -34,19 +34,22 @@ struct ident_configrom {
     ems_u32 oui;
     ems_u32 board;
 };
-
 struct ident_sis {
     ems_u32 am;
     ems_u32 offs;
     ems_u32 ident;
 };
+struct ident_none {
+};
+
 union ident_descr {
     struct ident_faf5 faf5;
     struct ident_configrom configrom;
     struct ident_sis sis;
+    struct ident_none none;
 };
 struct vme_info {
-    int ems_type;
+    ems_u32 ems_type;
     char* name;
     char* descr;
     enum ident_type id_type;
@@ -113,6 +116,7 @@ struct vme_info vme_types[]={
     {CAEN_V693, "V693", "Multihit TDC",
         id_faf5,
         {.faf5={0x9, 0x1fa, 0x2, 0x12e}},
+        16 /* guessed; no manual */
     },
     {CAEN_V729A, "V729A", "4 channel 40 MHz flash ADC",
         id_faf5,
@@ -179,6 +183,11 @@ struct vme_info vme_types[]={
         {.sis={0x09, 0x4, 0x3300}},
         16
     },
+    {SIS_3300, "SIS3316", "16 channel 125/250 MHz ADC",
+        id_sis,
+        {.sis={0x09, 0x4, 0x3316}},
+        16
+    },
     {SIS_3400, "SIS3400", "time stamper",
         id_sis,
         {.sis={0x09, 0x4, 0x3400}},
@@ -204,7 +213,7 @@ struct vme_info vme_types[]={
         {.sis={0x09, 0x4, 0x3820}},
         16
     },
-    {0, 0, 0, id_stop} 
+    {0, 0, 0, id_stop, {.none={}}, 0} 
 };
 /*****************************************************************************/
 static int
@@ -227,7 +236,8 @@ verify_faf5(struct vme_dev* dev, ems_u32 addr, struct vme_info* info,
         int verbose)
 {
     ems_u16 v[3];
-    int ver, ser, man, mod;
+    ems_u32 man, mod;
+    int ver, ser;
     struct ident_faf5* ident=&info->idd.faf5;
 
     if (verbose) printf("verify_faf5: checking %s addr=0x%08x\n",
@@ -324,7 +334,7 @@ read_ident_configrom2(struct vme_dev* dev, int am, ems_u32 addr, ems_u32* ident_
 }
 /*****************************************************************************/
 static struct vme_info*
-find_vme_info_configrom(int id)
+find_vme_info_configrom(ems_u32 id)
 {
     struct vme_info* types=vme_types;
     for (types=vme_types; types->id_type!=id_stop; types++) {
@@ -415,7 +425,7 @@ verify_sis(struct vme_dev* dev, ems_u32 addr, struct vme_info* info,
 {
     ems_u32 v;
     struct ident_sis* ident=&info->idd.sis;
-    int board;
+    ems_u32 board;
 
     if (verbose)
         printf("verify_sis: checking %s addr=0x%08x\n", info->name, addr);
@@ -495,7 +505,7 @@ plerrcode verify_vme_module(ml_entry* module, int verbose)
 /*
  * checking whether all modulues of IS have the correct type
  */
-plerrcode test_proc_vme(int* list, ems_u32* module_types)
+plerrcode test_proc_vme(unsigned int* list, ems_u32* module_types)
 {
     int i, res;
     plerrcode pres;
@@ -570,7 +580,7 @@ plerrcode test_proc_vmemodule(ml_entry* module, ems_u32* module_types)
 }
 /*****************************************************************************/
 static struct vme_info*
-find_vme_info_faf5(int id)
+find_vme_info_faf5(ems_u32 id)
 {
     struct vme_info* types=vme_types;
     for (types=vme_types; types->id_type!=id_stop; types++) {

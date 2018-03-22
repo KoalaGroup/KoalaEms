@@ -3,7 +3,7 @@
  * created 22.Aug.2003 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: lvd.c,v 1.10 2011/04/06 20:30:25 wuestner Exp $";
+    "$ZEL: lvd.c,v 1.11 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -176,7 +176,7 @@ errcode lvd_low_init(char* arg)
     free(devicepath);
 
     if (res!=OK) {
-        int i;
+        unsigned int i;
         for (i=0; i<num_devices(modul_lvd); i++) {
             struct generic_dev* dev;
             if (find_device(modul_lvd, i, &dev)==OK) {

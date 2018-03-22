@@ -4,7 +4,7 @@
  * created: 2011-08-04 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: mmappeddata.c,v 1.3 2014/09/10 15:29:57 wuestner Exp $";
+    "$ZEL: mmappeddata.c,v 1.5 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <sconf.h>
 #include <errno.h>
@@ -42,8 +42,8 @@ struct mmaphandle {
  * We should use a common header file!
  */
 struct mem {
-    int sequence;
-    int valid;
+    u_int32_t sequence;
+    u_int32_t valid;
     u_int32_t size;
     u_int32_t data[1];
 };
@@ -55,14 +55,14 @@ struct mem {
 static const int proj_id=31; /* arbitrary constant for ftok */
 
 static struct mmaphandle *maps=0;
-static int nummaps=0;
+static unsigned int nummaps=0;
 
 /*****************************************************************************/
 plerrcode
 mmap_data(char *name, ems_u32 *handle)
 {
     struct mmaphandle *map=0;
-    int idx;
+    unsigned int idx;
 
     /* find an unused map entry or create a new one */
     for (idx=0; idx<nummaps; idx++) {
@@ -263,7 +263,7 @@ error:
 
 /*****************************************************************************/
 errcode
-mmapped_data_low_init(char* arg)
+mmapped_data_low_init(__attribute__((unused)) char* arg)
 {
     maps=0;
     nummaps=0;
@@ -273,7 +273,7 @@ mmapped_data_low_init(char* arg)
 errcode
 mmapped_data_low_done(void)
 {
-    int i;
+    unsigned int i;
 
     for (i=0; i<nummaps; i++)
         do_unmap(maps+i);
@@ -281,7 +281,7 @@ mmapped_data_low_done(void)
 }
 /*****************************************************************************/
 int
-mmapped_data_low_printuse(FILE* outpath)
+mmapped_data_low_printuse(__attribute__((unused)) FILE* outpath)
 {
     return 0;
 }

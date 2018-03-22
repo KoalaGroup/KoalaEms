@@ -3,7 +3,7 @@
  * created 2006-Feb-07 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: gpx.c,v 1.16 2013/01/17 22:44:54 wuestner Exp $";
+    "$ZEL: gpx.c,v 1.17 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -73,7 +73,7 @@ lvd_stop_gpx(struct lvd_dev* dev, struct lvd_acard* acard)
 }
 /*****************************************************************************/
 static int
-lvd_clear_gpx(struct lvd_dev* dev, struct lvd_acard* acard)
+lvd_clear_gpx(__attribute__((unused)) struct lvd_dev* dev, __attribute__((unused)) struct lvd_acard* acard)
 {
     return 0;
 }
@@ -112,8 +112,8 @@ gpx_dcm_shift_(struct lvd_dev* dev, struct lvd_acard* acard, int dcm, int absol,
     int val)
 {
     struct gpx_info* info=(struct gpx_info*)acard->cardinfo;
-    int v, i, t;
-    ems_u32 r;
+    int v, i;
+    ems_u32 r, t;
 
     if (absol)
         val-=info->dcm_shift[dcm?1:0];
@@ -730,7 +730,7 @@ gpx_dac_(struct lvd_dev* dev, struct lvd_acard* acard, int connector, int dac,
 }
 /*****************************************************************************/
 plerrcode
-gpx_mask_(struct lvd_dev *dev, struct lvd_acard *acard, u_int32_t *mask)
+gpx_mask_(__attribute__((unused)) struct lvd_dev *dev, struct lvd_acard *acard, u_int32_t *mask)
 {
     struct gpx_info* info=(struct gpx_info*)acard->cardinfo;
     int edgereg, channelbyte, chanmask, gpx;
@@ -752,7 +752,7 @@ gpx_mask_(struct lvd_dev *dev, struct lvd_acard *acard, u_int32_t *mask)
 }
 /*****************************************************************************/
 plerrcode
-gpx_get_mask_(struct lvd_dev *dev, struct lvd_acard *acard, u_int32_t *mask)
+gpx_get_mask_(__attribute__((unused)) struct lvd_dev *dev, __attribute__((unused)) struct lvd_acard *acard, __attribute__((unused)) u_int32_t *mask)
 {
     return plErr_NotImpl;
 }
@@ -905,7 +905,7 @@ dump_cr(struct lvd_dev* dev, int addr, void *xp)
 }
 /*****************************************************************************/
 static int
-decode_gpx_reg(int gpx, int reg, ems_u32 val, void *xp, int level)
+decode_gpx_reg(__attribute__((unused)) int gpx, int reg, ems_u32 val, void *xp, __attribute__((unused)) int level)
 {
     char s[33];
     int i;
@@ -1085,7 +1085,7 @@ dump_gpx_range(struct lvd_dev* dev, int addr, void *xp)
 }
 /*****************************************************************************/
 static int
-dump_dcm_shift(struct lvd_dev* dev, struct lvd_acard* acard, void *xp)
+dump_dcm_shift(__attribute__((unused)) struct lvd_dev* dev, struct lvd_acard* acard, void *xp)
 {
     struct gpx_info* info=(struct gpx_info*)acard->cardinfo;
 
@@ -1095,7 +1095,7 @@ dump_dcm_shift(struct lvd_dev* dev, struct lvd_acard* acard, void *xp)
 }
 /*****************************************************************************/
 static int
-dump_softinfo(struct lvd_dev* dev, struct lvd_acard* acard, void *xp)
+dump_softinfo(__attribute__((unused)) struct lvd_dev* dev, struct lvd_acard* acard, void *xp)
 {
     xprintf(xp, "  daq_mode  =0x%04x\n", acard->daqmode);
     return 0;
@@ -1139,14 +1139,14 @@ lvd_cardstat_gpx(struct lvd_dev* dev, struct lvd_acard* acard, void *xp,
 }
 /*****************************************************************************/
 static void
-lvd_gpx_acard_free(struct lvd_dev* dev, struct lvd_acard* acard)
+lvd_gpx_acard_free(__attribute__((unused)) struct lvd_dev* dev, struct lvd_acard* acard)
 {
     free(acard->cardinfo);
     acard->cardinfo=0;
 }
 /*****************************************************************************/
 int
-lvd_gpx_acard_init(struct lvd_dev* dev, struct lvd_acard* acard)
+lvd_gpx_acard_init(__attribute__((unused)) struct lvd_dev* dev, struct lvd_acard* acard)
 {
     struct gpx_info *info;
 

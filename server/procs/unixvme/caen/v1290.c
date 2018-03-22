@@ -5,7 +5,7 @@
  * check of valid data by Data Ready bit of Status Register
  ************************************************************************/
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: v1290.c,v 1.8 2015/04/06 21:33:34 wuestner Exp $";
+    "$ZEL: v1290.c,v 1.10 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,9 +21,8 @@ static const char* cvsid __attribute__((unused))=
 
 #include "v1290.h"
 
-extern int wirbrauchen;
 extern Modlist *modullist;
-extern int *memberlist;
+extern unsigned int *memberlist;
 extern ems_u32* outptr;
 
 RCS_REGISTER(cvsid, "procs/unixvme/caen")
@@ -125,7 +124,7 @@ int v1290readoutDSP(ml_entry * module,int memberidx)
 char name_proc_v1290roWithDSP[] = "v1290roWithDSP";
 int  ver_proc_v1290roWithDSP = 1;
 
-plerrcode proc_v1290roWithDSP(ems_u32 *p) {
+plerrcode proc_v1290roWithDSP(__attribute__((unused)) ems_u32 *p) {
   int modanz = *memberlist;
   int i;
   ml_entry * module;
@@ -259,7 +258,7 @@ static int SetWindow(ml_entry * module, ems_u16* data) {
 plerrcode proc_v1290SetWindow(ems_u32 *p) {
   ems_u16 arg[5];
   ml_entry * module;
-  int i;
+  unsigned int i;
 
   module = ModulEnt(p[1]);    
   arg[0] = p[2] &0xfff;

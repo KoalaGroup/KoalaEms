@@ -3,7 +3,7 @@
  * created 01.04.93
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: qtrigger.c,v 1.14 2011/04/06 20:30:35 wuestner Exp $";
+    "$ZEL: qtrigger.c,v 1.16 2017/10/21 22:06:13 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -23,7 +23,7 @@ struct private {
     struct camac_dev* dev;
 };
 
-extern int* memberlist;
+extern unsigned int* memberlist;
 
 RCS_REGISTER(cvsid, "trigger/camac")
 
@@ -46,14 +46,14 @@ get_trig_q(struct triggerinfo* trinfo)
 
     priv->dev->CAMACread(priv->dev, &priv->addr, &qx);
     if (priv->dev->CAMACgotQ(qx)) {
-        trinfo->eventcnt++;
+        trinfo->count++;
         return 1;
     }
     return 0;
 }
 
 static void
-reset_trig_q(struct triggerinfo* trinfo)
+reset_trig_q(__attribute__((unused)) struct triggerinfo* trinfo)
 {}
 
 
@@ -75,7 +75,7 @@ plerrcode init_trig_q(ems_u32* p, struct triggerinfo* trinfo)
     m=ModulEnt(p[1]);
     priv->dev=m->address.camac.dev;
     priv->addr=CAMACaddrM(m, p[2], p[3]);
-    trinfo->eventcnt=0;
+    trinfo->count=0;
 
     tinfo->get_trigger=get_trig_q;
     tinfo->reset_trigger=reset_trig_q;

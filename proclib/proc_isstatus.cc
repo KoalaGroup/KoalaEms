@@ -17,7 +17,7 @@
 #include "versions.hxx"
 
 VERSION("Jun 05 1998", __FILE__, __DATE__, __TIME__,
-"$ZEL: proc_isstatus.cc,v 2.4 2004/11/26 14:44:30 wuestner Exp $")
+"$ZEL: proc_isstatus.cc,v 2.5 2016/05/10 16:24:46 wuestner Exp $")
 #define XVERSION
 
 /*****************************************************************************/
@@ -44,7 +44,8 @@ C_isstatus::C_isstatus(const C_confirmation* conf)
     trigger_=new ems_u32[num_trigger_];
     if (trigger_==0)
         throw new C_unix_error(errno, "alloc triggerlist in isstatus");
-    for (int i=0; i<num_trigger_; i++) trigger_[i]=(ems_u32)b[i+5];
+    for (int i=0; i<num_trigger_; i++)
+        trigger_[i]=static_cast<ems_u32>(b[i+5]);
 }
 /*****************************************************************************/
 /*****************************************************************************/

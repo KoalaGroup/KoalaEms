@@ -2,7 +2,7 @@
  * lowlevel/oscompat/datamodule.c
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: datamodule.c,v 1.11 2011/04/06 20:30:27 wuestner Exp $";
+    "$ZEL: datamodule.c,v 1.12 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <sconf.h>
 #include <stdio.h>
@@ -36,7 +36,7 @@ RCS_REGISTER(cvsid, "lowlevel/oscompat")
 int *init_datamod(char* name, int size, modresc* ref)
 {
     key_t key;
-    int i;
+    unsigned int i;
     key=0;
     for (i=0; i<strlen(name); i++) {
         key<<=7;
@@ -64,7 +64,7 @@ void done_datamod(modresc* ref)
 int *link_datamod(char* name, modresc* ref)
 {
     key_t key;
-    int j;
+    unsigned int j;
     struct shmid_ds ds;
 
     key=0;
@@ -100,7 +100,10 @@ void unlink_datamod(modresc* ref)
     shmdt((char*)ref->shmaddr);
 }
 
-int *map_memory(int* start, int len, mmapresc* ref)
+int
+*map_memory(__attribute__((unused)) int* start,
+        __attribute__((unused)) int len,
+        __attribute__((unused)) mmapresc* ref)
 {
 #ifdef Lynx
     static int cnt=0;
@@ -124,7 +127,7 @@ int *map_memory(int* start, int len, mmapresc* ref)
 #endif /* Lynx */
 }
 
-void unmap_memory(mmapresc* ref)
+void unmap_memory(__attribute__((unused)) mmapresc* ref)
 {
 #ifdef Lynx
     if(ref->name) {
@@ -212,13 +215,13 @@ void unmap_memory(mmapresc* ref)
 
 #endif /* unix || Lynx */
 
-int oscompat_low_printuse(FILE* outfilepath)
+int oscompat_low_printuse(__attribute__((unused)) FILE* outfilepath)
 {
 /* nothing to configure */
     return 0;
 }
 
-errcode oscompat_low_init(char* arg)
+errcode oscompat_low_init(__attribute__((unused)) char* arg)
 {
     return OK;
 }

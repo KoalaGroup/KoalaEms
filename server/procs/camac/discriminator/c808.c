@@ -3,7 +3,7 @@
  * created 2007-04-04 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: c808.c,v 1.3 2015/04/06 21:33:24 wuestner Exp $";
+    "$ZEL: c808.c,v 1.5 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -16,11 +16,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../../../objects/domain/dom_ml.h"
 
 RCS_REGISTER(cvsid, "procs/camac/discriminator")
-
-extern ems_u32* outptr;
-extern int* memberlist;
-extern int wirbrauchen;
-
 
 /*
  * CAEN C808 16-channel constant fraction Discriminator

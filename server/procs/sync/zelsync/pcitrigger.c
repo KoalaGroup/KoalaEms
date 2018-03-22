@@ -3,7 +3,7 @@
  * created 17.10.96 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: pcitrigger.c,v 1.12 2011/04/06 20:30:34 wuestner Exp $";
+    "$ZEL: pcitrigger.c,v 1.14 2017/10/21 21:59:53 wuestner Exp $";
 
 #include <debug.h>
 #include <errno.h>
@@ -179,7 +179,7 @@ get8bits(int v)
  * }
  */
 static void
-PUWR_write(volatile ems_u32 *base, int val, int time)
+PUWR_write(volatile ems_u32 *base, int val, unsigned int time)
 {
     printf("PUWR: %s %d\n", get8bits(val), time);
     base[SYNC_PUWR]=val;
@@ -316,7 +316,7 @@ proc_SyncBit(ems_u32* p)
     return plOK;
 }
 
-plerrcode test_proc_SyncBit(ems_u32* p)
+plerrcode test_proc_SyncBit(__attribute__((unused)) ems_u32* p)
 {
     return(plOK);
 }
@@ -528,6 +528,7 @@ char name_proc_SyncAuxIn[]="SyncAuxIn";
 int ver_proc_SyncAuxIn=1;
 
 /*****************************************************************************/
+#if 0 /* more work needed to make it compatible multiple triggers */
 /*
  * [0]: 3
  * [1]: id
@@ -634,5 +635,6 @@ return(&StatusPCITrigger_prop);
 char name_proc_StatusPCITrigger[]="StatusPCITrigger";
 int ver_proc_StatusPCITrigger=1;
 
+#endif
 /*****************************************************************************/
 /*****************************************************************************/

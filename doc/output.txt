@@ -1,4 +1,0 @@
-world first
-world second
-dummy line
-world third

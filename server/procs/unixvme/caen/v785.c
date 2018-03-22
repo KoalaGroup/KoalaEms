@@ -3,7 +3,7 @@
  * created 23.Sep.2002 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: v785.c,v 1.5 2011/04/06 20:30:35 wuestner Exp $";
+    "$ZEL: v785.c,v 1.7 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -18,8 +18,7 @@ static const char* cvsid __attribute__((unused))=
 #include "../vme_verify.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
-extern int *memberlist;
+extern unsigned int *memberlist;
 
 RCS_REGISTER(cvsid, "procs/unixvme/caen")
 
@@ -72,7 +71,7 @@ RCS_REGISTER(cvsid, "procs/unixvme/caen")
 /*
  * p[0]: argcount==0
  */
-plerrcode proc_v785convert(ems_u32* p)
+plerrcode proc_v785convert(__attribute__((unused)) ems_u32* p)
 {
     int i, res;
 
@@ -105,7 +104,7 @@ int ver_proc_v785convert = 1;
 /*
  * p[0]: argcount==0
  */
-plerrcode proc_v785reset(ems_u32* p)
+plerrcode proc_v785reset(__attribute__((unused)) ems_u32* p)
 {
     int i, res;
 
@@ -225,9 +224,10 @@ int ver_proc_v785bitres2 = 1;
 /*
  * p[0]: argcount==0
  */
-plerrcode proc_v785read(ems_u32* p)
+plerrcode proc_v785read(__attribute__((unused)) ems_u32* p)
 {
-    int i, res;
+    unsigned int i;
+    int res;
 
     *outptr++=memberlist[0];
     for (i=1; i<=memberlist[0]; i++) {
@@ -325,9 +325,10 @@ int ver_proc_v785read = 1;
 /*
  * p[0]: argcount==0
  */
-plerrcode proc_v785readblock(ems_u32* p)
+plerrcode proc_v785readblock(__attribute__((unused)) ems_u32* p)
 {
-    int i, res;
+    unsigned int i;
+    int res;
 
     *outptr++=memberlist[0];
     for (i=1; i<=memberlist[0]; i++) {
@@ -416,7 +417,8 @@ int ver_proc_v785readblock = 2;
  */
 plerrcode proc_v785threshold(ems_u32* p)
 {
-    int i, res;
+    unsigned int i;
+    int res;
 
     p++;
     for (i=1; i<=memberlist[0]; i++) {

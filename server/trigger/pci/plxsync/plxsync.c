@@ -3,7 +3,7 @@
  * created 2007-Jun-23 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: plxsync.c,v 1.10 2011/04/06 20:30:36 wuestner Exp $";
+    "$ZEL: plxsync.c,v 1.12 2017/10/21 22:19:00 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -113,7 +113,7 @@ push_evnr(ems_u32 evnr)
     }
 }
 /*****************************************************************************/
-static void sighndlr(union SigHdlArg arg, int sig)
+static void sighndlr(union SigHdlArg arg, __attribute__((unused)) int sig)
 {
     struct trigprocinfo* tinfo=(struct trigprocinfo*)arg.ptr;
     struct private* priv=(struct private*)tinfo->private;
@@ -161,14 +161,14 @@ get_trig_plxsync(struct triggerinfo* trinfo)
         reg.offset=ofs(struct plxsync_reg, sr);
         if (ioctl(priv->p, PLXSYNC_CTRL_READ, &reg)<0) {
             printf("trig_plxsync: CTRL_READ: %s\n", strerror(errno));
-            send_unsol_var(Unsol_RuntimeError, 4, rtErr_Trig, trinfo->eventcnt,
+            send_unsol_var(Unsol_RuntimeError, 4, rtErr_Trig, global_evc.ev_count,
                     4, errno);
             fatal_readout_error();
             return 0;
         }
         if (reg.val&(sr_err|irq_err|irq_tout)) {
             printf("trig_plxsync: unexpected status: 0x%2x\n", reg.val);
-            send_unsol_var(Unsol_RuntimeError, 4, rtErr_Trig, trinfo->eventcnt,
+            send_unsol_var(Unsol_RuntimeError, 4, rtErr_Trig, global_evc.ev_count,
                     5, errno);
             //fatal_readout_error();
             //return 0;
@@ -179,17 +179,17 @@ get_trig_plxsync(struct triggerinfo* trinfo)
         reg.offset=ofs(struct plxsync_reg, evc);
         if (ioctl(priv->p, PLXSYNC_CTRL_READ, &reg)<0) {
             printf("trig_plxsync: CTRL_READ: %s\n", strerror(errno));
-            send_unsol_var(Unsol_RuntimeError, 4, rtErr_Trig, trinfo->eventcnt,
+            send_unsol_var(Unsol_RuntimeError, 4, rtErr_Trig, global_evc.ev_count,
                     4, errno);
             fatal_readout_error();
             return 0;
         }
-        trinfo->eventcnt=reg.val;
+        trinfo->count=reg.val;
         if (priv->flags&1) {
             reg.offset=ofs(struct plxsync_reg, tpat);
             if (ioctl(priv->p, PLXSYNC_CTRL_READ, &reg)<0) {
                 printf("trig_plxsync: CTRL_READ: %s\n", strerror(errno));
-                send_unsol_var(Unsol_RuntimeError, 4, rtErr_Trig, trinfo->eventcnt,
+                send_unsol_var(Unsol_RuntimeError, 4, rtErr_Trig, global_evc.ev_count,
                         4, errno);
                 fatal_readout_error();
                 return 0;
@@ -207,7 +207,7 @@ get_trig_plxsync(struct triggerinfo* trinfo)
             return 0;
         if (res<0) {
             printf("trig_plxsync: read: %s\n", strerror(errno));
-            send_unsol_var(Unsol_RuntimeError, 4, rtErr_Trig, trinfo->eventcnt,
+            send_unsol_var(Unsol_RuntimeError, 4, rtErr_Trig, global_evc.ev_count,
                     4, errno);
             fatal_readout_error();
             return 0;
@@ -215,12 +215,12 @@ get_trig_plxsync(struct triggerinfo* trinfo)
         if ((info.state&(sr_err|irq_err|irq_tout))||
             ((info.state&(sr_busy|irq_busy))!=(sr_busy|irq_busy))) {
             printf("trig_plxsync: unexpected status: 0x%02x\n", info.state);
-            send_unsol_var(Unsol_RuntimeError, 4, rtErr_Trig, trinfo->eventcnt,
+            send_unsol_var(Unsol_RuntimeError, 4, rtErr_Trig, global_evc.ev_count,
                     5, errno);
             fatal_readout_error();
             return 0;
         }
-        trinfo->eventcnt=info.evc;
+        trinfo->count=info.evc;
         trinfo->time.tv_sec=info.irq_sec;
         trinfo->time.tv_nsec=info.irq_nsec;
         trinfo->time_valid=1;
@@ -236,7 +236,7 @@ get_trig_plxsync(struct triggerinfo* trinfo)
         }
         if (res<0) {
             printf("trig_plxsync: read: %s\n", strerror(errno));
-            send_unsol_var(Unsol_RuntimeError, 4, rtErr_Trig, trinfo->eventcnt,
+            send_unsol_var(Unsol_RuntimeError, 4, rtErr_Trig, global_evc.ev_count,
                     4, errno);
             fatal_readout_error();
             return 0;
@@ -249,24 +249,27 @@ get_trig_plxsync(struct triggerinfo* trinfo)
             ((info.state&(sr_busy|irq_busy))!=(sr_busy|irq_busy))) {
             char ss[256];
             sprintf(ss, "trig_plxsync: unexpected status: 0x%02x in event %u "
-                    "after %u", info.state, info.evc, trinfo->eventcnt);
+                    "after %u (local count %u)", info.state, info.evc,
+                    global_evc.ev_count, trinfo->count);
             printf("%s\n", ss);
             send_unsol_text("RuntimeError (probably nonfatal, check eventrate!)",
                             ss, 0);
             save_ev_ring();
 #if 0
-            send_unsol_var(Unsol_RuntimeError, 4, rtErr_Trig, trinfo->eventcnt,
+            send_unsol_var(Unsol_RuntimeError, 4, rtErr_Trig, global_evc.ev_count,
                     10, info.state);
             fatal_readout_error();
             return 0;
 #endif
         }
-        trinfo->eventcnt=info.evc;
+        trinfo->count=info.evc;
         trinfo->time.tv_sec=info.irq_sec;
         trinfo->time.tv_nsec=info.irq_nsec;
         trinfo->time_valid=1;
         if (priv->flags&1)
             trigger=info.tpat;
+        break;
+    case trig_none:
         break;
     }
 
@@ -285,7 +288,7 @@ reset_trig_plxsync(struct triggerinfo* trinfo)
     reg.val=sr_busy;
     if (ioctl(priv->p, PLXSYNC_CTRL_WRITE, &reg)<0) {
         printf("trig_plxsync: CTRL_WRITE: %s\n", strerror(errno));
-        send_unsol_var(Unsol_RuntimeError, 4, rtErr_Trig, trinfo->eventcnt,
+        send_unsol_var(Unsol_RuntimeError, 4, rtErr_Trig, global_evc.ev_count,
                 4, errno);
         fatal_readout_error();
     }
@@ -296,14 +299,14 @@ reset_trig_plxsync(struct triggerinfo* trinfo)
 {
     struct trigprocinfo* tinfo=(struct trigprocinfo*)trinfo->tinfo;
     struct private* priv=(struct private*)tinfo->private;
-    u_int32_t evt=trinfo->eventcnt;
+    u_int32_t evt=trinfo->count;
 
 #if 0
     printf("reset_trig_plxsync: called\n");
 #endif
     if (ioctl(priv->p, PLXSYNC_ACK, &evt)<0) {
         printf("trig_plxsync: PLXSYNC_ACK: %s\n", strerror(errno));
-        send_unsol_var(Unsol_RuntimeError, 4, rtErr_Trig, trinfo->eventcnt,
+        send_unsol_var(Unsol_RuntimeError, 4, rtErr_Trig, global_evc.ev_count,
                 4, errno);
         fatal_readout_error();
     }
@@ -339,7 +342,7 @@ init_trig_plxsync_(ems_u32* p, int pc, struct triggerinfo* trinfo)
 
     priv->mode=(enum trigg_mode)p[0];
 
-    trinfo->eventcnt=0;
+    trinfo->count=0;
 
     priv->signal=-1;
 
@@ -441,7 +444,7 @@ init_trig_plxsync_(ems_u32* p, int pc, struct triggerinfo* trinfo)
     reg.offset=ofs(struct plxsync_reg, cr);
     if (ioctl(priv->p, PLXSYNC_CTRL_READ, &reg)<0) {
         printf("trig_plxsync: CTRL_READ: %s\n", strerror(errno));
-        send_unsol_var(Unsol_RuntimeError, 4, rtErr_Trig, trinfo->eventcnt,
+        send_unsol_var(Unsol_RuntimeError, 4, rtErr_Trig, global_evc.ev_count,
                 4, errno);
         fatal_readout_error();
     }
@@ -450,7 +453,7 @@ init_trig_plxsync_(ems_u32* p, int pc, struct triggerinfo* trinfo)
         reg.val|=cr_tpat;
     if (ioctl(priv->p, PLXSYNC_CTRL_WRITE, &reg)<0) {
         printf("trig_plxsync: CTRL_WRITE: %s\n", strerror(errno));
-        send_unsol_var(Unsol_RuntimeError, 4, rtErr_Trig, trinfo->eventcnt,
+        send_unsol_var(Unsol_RuntimeError, 4, rtErr_Trig, global_evc.ev_count,
                 4, errno);
         fatal_readout_error();
     }
@@ -466,6 +469,8 @@ init_trig_plxsync_(ems_u32* p, int pc, struct triggerinfo* trinfo)
         tinfo->proctype=tproc_select;
         tinfo->i.tp_select.path=priv->p;
         tinfo->i.tp_select.seltype=select_read;
+        break;
+    case trig_none:
         break;
     }
     tinfo->get_trigger=get_trig_plxsync;

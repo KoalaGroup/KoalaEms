@@ -3,7 +3,7 @@
  * created 10.Dec.2003 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: lvd_cratescan.c,v 1.9 2011/04/06 20:30:33 wuestner Exp $";
+    "$ZEL: lvd_cratescan.c,v 1.11 2017/10/20 22:52:59 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -13,10 +13,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../../objects/domain/dom_ml.h"
 #include "../../lowlevel/lvd/lvdbus.h"
 #include "../../lowlevel/devices.h"
-
-extern ems_u32* outptr;
-extern int wirbrauchen;
-extern int *memberlist;
 
 #define get_device(branch) \
     (struct lvd_dev*)get_gendevice(modul_lvd, (branch))

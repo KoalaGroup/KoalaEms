@@ -3,7 +3,7 @@
  * created 12.Dec.2003 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: f1.c,v 1.16 2013/01/17 22:44:54 wuestner Exp $";
+    "$ZEL: f1.c,v 1.17 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -879,13 +879,13 @@ f1_edge_(struct lvd_dev* dev, struct lvd_acard* acard, int channel,
 }
 /*****************************************************************************/
 plerrcode
-f1_mask_(struct lvd_dev *dev, struct lvd_acard *acard, u_int32_t *mask)
+f1_mask_(__attribute__((unused)) struct lvd_dev *dev, __attribute__((unused)) struct lvd_acard *acard, __attribute__((unused)) u_int32_t *mask)
 {
     return plErr_NotImpl;
 }
 /*****************************************************************************/
 plerrcode
-f1_get_mask_(struct lvd_dev *dev, struct lvd_acard *acard, u_int32_t *mask)
+f1_get_mask_(__attribute__((unused)) struct lvd_dev *dev, __attribute__((unused)) struct lvd_acard *acard, u_int32_t *mask)
 {
     mask[0]=0;
     mask[1]=0;
@@ -996,7 +996,7 @@ dump_cr(struct lvd_dev* dev, int addr, void *xp)
 }
 /*****************************************************************************/
 static int
-dump_cr_saved(struct lvd_acard *acard, struct f1_info *info, void *xp)
+dump_cr_saved(struct lvd_acard *acard, __attribute__((unused)) struct f1_info *info, void *xp)
 {
     if (!acard->initialized)
         return 0;
@@ -1165,14 +1165,14 @@ lvd_cardstat_f1(struct lvd_dev* dev, struct lvd_acard* acard, void *xp,
 }
 /*****************************************************************************/
 static void
-lvd_f1_acard_free(struct lvd_dev* dev, struct lvd_acard* acard)
+lvd_f1_acard_free(__attribute__((unused)) struct lvd_dev* dev, struct lvd_acard* acard)
 {
     free(acard->cardinfo);
     acard->cardinfo=0;
 }
 /*****************************************************************************/
 int
-lvd_f1_acard_init(struct lvd_dev* dev, struct lvd_acard* acard)
+lvd_f1_acard_init(__attribute__((unused)) struct lvd_dev* dev, struct lvd_acard* acard)
 {
     struct f1_info *info;
 

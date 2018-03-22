@@ -2,7 +2,7 @@
  * procs/unixvme/vme_cratescan.c
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: vme_cratescan.c,v 1.15 2011/08/13 20:21:58 wuestner Exp $";
+    "$ZEL: vme_cratescan.c,v 1.18 2017/10/23 00:01:23 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -15,10 +15,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../../lowlevel/devices.h"
 #include "vme_verify.h"
 
-extern ems_u32* outptr;
-extern int wirbrauchen;
-extern int *memberlist;
-
 #define get_device(class, crate) \
     (struct vme_dev*)get_gendevice((class), (crate))
 
@@ -28,9 +24,10 @@ RCS_REGISTER(cvsid, "procs/unixvme")
 /*
  * p[0]: argcount==0
  */
-plerrcode proc_VMEverifylist(ems_u32* p)
+plerrcode proc_VMEverifylist(__attribute__((unused)) ems_u32* p)
 {
-    int errors=0, i;
+    int errors=0;
+    unsigned int i;
 
     if (memberlist) {
         for (i=memberlist[0]; i>0; i--) {

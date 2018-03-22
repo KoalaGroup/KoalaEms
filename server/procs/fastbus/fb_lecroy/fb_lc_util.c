@@ -10,7 +10,7 @@
  * 24.Jun.2002 PW secs added in lc1881_buf and lc1877_buf              
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: fb_lc_util.c,v 1.16 2015/04/06 21:33:31 wuestner Exp $";
+    "$ZEL: fb_lc_util.c,v 1.17 2017/10/09 21:25:37 wuestner Exp $";
 
 #include <config.h>
 #include <errno.h>
@@ -33,7 +33,6 @@ static const char* cvsid __attribute__((unused))=
 
 extern ems_u32* outptr;
 extern int *memberlist;
-extern int wirbrauchen;
 
 RCS_REGISTER(cvsid, "procs/fastbus/fb_lecroy")
 

@@ -14,10 +14,10 @@ proc correct_setup {} {
     set global_setup(maintitle) "ZEL DAQ Control"}
 
   if {![info exists global_setup(facility)]} {
-    set global_setup(facility) "TOF"}
+    set global_setup(facility) "KOALA@ANKE"}
 
   if {![info exists global_setup(location)]} {
-    set global_setup(location) "Research Center Juelich"}
+    set global_setup(location) "IKP, Research Center Juelich"}
 
   if {![info exists global_setup(auto_save)]} {
     set global_setup(auto_save) 0}
@@ -44,7 +44,7 @@ proc correct_setup {} {
     set global_setup(maxlogfiles) 100}
 
   if {![info exists global_setup(super_setup)]} {
-    set global_setup(super_setup) veds.setup}
+    set global_setup(super_setup) ~/workspace/ems_setup/test/master.wad}
 
   if {![info exists global_setup(run_nr_file)]} {
     set global_setup(run_nr_file) {~/.run_nr}}

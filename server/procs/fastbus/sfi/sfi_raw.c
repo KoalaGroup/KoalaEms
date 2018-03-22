@@ -4,7 +4,7 @@
  * created: 09.11.97
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: sfi_raw.c,v 1.7 2011/04/06 20:30:32 wuestner Exp $";
+    "$ZEL: sfi_raw.c,v 1.8 2017/10/09 21:25:37 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -17,7 +17,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../../procprops.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
 
 #define get_device(crate) \
     (struct fastbus_dev*)get_gendevice(modul_fastbus, (crate))

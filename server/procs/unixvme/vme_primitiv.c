@@ -2,7 +2,7 @@
  * procs/unixvme/vme_primitiv.c
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: vme_primitiv.c,v 1.13 2011/04/06 20:30:35 wuestner Exp $";
+    "$ZEL: vme_primitiv.c,v 1.15 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -16,7 +16,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../../trigger/trigger.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
 
 #define get_device(class, crate) \
     (struct vme_dev*)get_gendevice((class), (crate))
@@ -25,7 +24,7 @@ RCS_REGISTER(cvsid, "procs/unixvme")
 
 /*****************************************************************************/
 static plerrcode
-test_vmeparm(ems_u32* p, int n)
+test_vmeparm(ems_u32* p, unsigned int n)
 {
     plerrcode pres;
     if (p[0]!=n)

@@ -3,7 +3,7 @@
  * 04.11.94
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: Echo.c,v 1.8 2011/04/06 20:30:32 wuestner Exp $";
+    "$ZEL: Echo.c,v 1.9 2017/10/09 21:25:37 wuestner Exp $";
 
 #include <errorcodes.h>
 #include <rcs_ids.h>
@@ -11,7 +11,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../procs.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
 
 RCS_REGISTER(cvsid, "procs/general")
 

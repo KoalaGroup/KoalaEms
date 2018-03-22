@@ -3,7 +3,7 @@
  * created 10.04.97 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: do_cluster.c,v 1.15 2015/04/21 16:05:45 wuestner Exp $";
+    "$ZEL: do_cluster.c,v 1.17 2016/05/12 20:35:44 wuestner Exp $";
 
 #include <errno.h>
 #include <stdio.h>
@@ -22,7 +22,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../../objects/pi/readout.h"
 #include "../../objects/pi/readout_em_cluster/datains.h"
 #include "../../objects/ved/ved.h"
-#include "../../trigger/trigger.h"
 
 extern ems_u32* outptr;
 extern struct Cluster* last_deposited_cluster;
@@ -118,7 +117,7 @@ static void do_cluster_read(int path, int do_idx)
         int evnum=req[3];
 #ifdef READOUT_CC
         printf("empfing request: evnum=%d; local evnum=%d, ved=%d, local ved=%d\n",
-            evnum, trigger.eventcnt, ved, ved_globals.ved_id);
+            evnum, global_evc.ev_count, ved, ved_globals.ved_id);
         flush_databuf(0);
 #else
         /*printf("empfing request: evnum=%d; ved=%d, local ved=%d\n", evnum, ved, get_ved_id());*/

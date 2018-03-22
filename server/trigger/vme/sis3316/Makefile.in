@@ -1,0 +1,31 @@
+# trigger/vme/sis3316Makefile.in
+# created 2016-11-14 PeWue
+# $ZEL: Makefile.in,v 1.1 2016/11/26 01:26:35 wuestner Exp $
+
+CONF = ../../../conf
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+include $(CONF)/rules.make
+include $(CONF)/config.make
+
+cfiles = sis3316_poll.c
+ofiles = $(cfiles:.c=.o)
+depfiles = $(cfiles)
+
+VMETYPES = $(shell echo $(unixvme)|tr '[:lower:]' '[:upper:]')
+VMEFLAGS=$(foreach typ,$(VMETYPES),-DUNIXVME_$(typ) )
+CFLAGS += $(VMEFLAGS)
+export VMEFLAGS
+
+lib = ../../libtrig.a
+
+all: $(lib)
+
+$(lib): $(lib)($(ofiles))
+	$(RANLIB) $@
+
+depend: xdepend
+
+.PHONY: depend

@@ -3,7 +3,7 @@
  * created 11.Sep.2002 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: v729a_n.c,v 1.2 2011/04/06 20:30:35 wuestner Exp $";
+    "$ZEL: v729a_n.c,v 1.4 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -19,8 +19,7 @@ static const char* cvsid __attribute__((unused))=
 #include "../../../objects/var/variables.h"
 
 extern ems_u32 *outptr;
-extern int wirbrauchen;
-extern int *memberlist;
+extern unsigned int *memberlist;
 
 RCS_REGISTER(cvsid, "procs/unixvme/caen")
 
@@ -59,7 +58,8 @@ RCS_REGISTER(cvsid, "procs/unixvme/caen")
  */
 plerrcode proc_v729pzread(ems_u32* p)
 {
-    int i, res;
+    unsigned int i;
+    int res;
 
     *outptr++=memberlist[0];
     for (i=1; i<=memberlist[0]; i++) {
@@ -147,7 +147,8 @@ plerrcode test_proc_v729pzread(ems_u32* p)
     plerrcode pres;
     ems_u32 mtypes[]={CAEN_V729A, 0};
     ems_u16 data;
-    int i, res;
+    unsigned int i;
+    int res;
 
     if (p[0]!=1) return plErr_ArgNum;
     if (p[1]>MAX_VAR) return(plErr_IllVar);

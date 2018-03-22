@@ -1,6 +1,6 @@
 /*
  * procs/unixvme/vme_verify.h
- * $ZEL: vme_verify.h,v 1.6 2006/08/21 00:53:52 wuestner Exp $
+ * $ZEL: vme_verify.h,v 1.7 2017/10/20 23:20:52 wuestner Exp $
  * created 07.Sep.2002 PW
  *
  */
@@ -18,7 +18,7 @@ ems_u32 vme_module_id(struct vme_dev* dev, ems_u32 addr);
 int scan_vme_crate(struct vme_dev* dev, ems_u32 addr, ems_u32 incr, int num,
         ems_u32* outptr);
 
-plerrcode test_proc_vme(int* list, ems_u32* module_types);
+plerrcode test_proc_vme(unsigned int* list, ems_u32* module_types);
 plerrcode test_proc_vmemodule(ml_entry* module, ems_u32* module_types);
 
 #endif

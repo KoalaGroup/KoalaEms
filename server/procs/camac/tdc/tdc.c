@@ -4,7 +4,7 @@
  * 21.Jan.2001 PW: multicrate support
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: tdc.c,v 1.17 2015/04/06 21:33:29 wuestner Exp $";
+    "$ZEL: tdc.c,v 1.19 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <errorcodes.h>
 #include <modultypes.h>
@@ -14,17 +14,13 @@ static const char* cvsid __attribute__((unused))=
 #include "../../procprops.h"
 #include "../../../objects/domain/dom_ml.h"
 
-extern ems_u32* outptr;
-extern int* memberlist;
-extern int wirbrauchen;
-
 RCS_REGISTER(cvsid, "procs/camac/tdc")
 
 /*****************************************************************************/
 
 static plerrcode tdc2277modtest(void)
 {
-    int i;
+    unsigned int i;
     for (i=1; i<=*memberlist; i++) {
         ml_entry* module;
         if (!valid_module(i, modul_camac)) {
@@ -46,7 +42,8 @@ static procprop all_prop={-1, -1, "keine Ahnung", "keine Ahnung"};
 
 plerrcode proc_TDC2277setup(ems_u32* p)
 {
-    int vsn, res;
+    unsigned int vsn;
+    int res;
 
     for (vsn=1; vsn<=*memberlist; vsn++) {
         ml_entry* module=ModulEnt_m(vsn);
@@ -97,9 +94,10 @@ plerrcode test_proc_TDC2277gate(ems_u32* p)
     return tdc2277modtest();
 }
 
-plerrcode proc_TDC2277readout(ems_u32* p)
+plerrcode proc_TDC2277readout(__attribute__((unused)) ems_u32* p)
 {
-    register int vsn, res;
+    unsigned int vsn;
+    int res;
 
     for (vsn=1; vsn<=*memberlist; vsn++) {
         ml_entry* module=ModulEnt_m(vsn);
@@ -119,7 +117,7 @@ plerrcode proc_TDC2277readout(ems_u32* p)
 
 plerrcode proc_TDC2277gate(ems_u32* p)
 {
-    int vsn;
+    unsigned int vsn;
     p++;
     for (vsn=1; vsn<=*memberlist; vsn++) {
         ml_entry* module=ModulEnt_m(vsn);
@@ -163,7 +161,7 @@ int ver_proc_TDC2277gate=1;
 /*****************************************************************************/
 plerrcode test_proc_TDC2228readout(ems_u32* p)
 {
-    int i;
+    unsigned int i;
     if (!memberlist) return plErr_NoISModulList;
     if (*p) return plErr_ArgNum;
     for (i=1; i<=*memberlist; i++) {
@@ -179,9 +177,10 @@ plerrcode test_proc_TDC2228readout(ems_u32* p)
     return plOK;
 }
 
-plerrcode proc_TDC2228readout(ems_u32* p)
+plerrcode proc_TDC2228readout(__attribute__((unused)) ems_u32* p)
 {
-    register int vsn, res;
+    unsigned int vsn;
+    int res;
 
     for (vsn=1; vsn<=*memberlist; vsn++) {
         ml_entry* module=ModulEnt_m(vsn);
@@ -210,7 +209,7 @@ int ver_proc_TDC2228readout=1;
 /*****************************************************************************/
 plerrcode test_proc_Scaler2551readout(ems_u32* p)
 {
-    int i;
+    unsigned int i;
     if (!memberlist) return plErr_NoISModulList;
     if (*p) return plErr_ArgNum;
     for (i=1; i<=*memberlist; i++) {
@@ -225,9 +224,10 @@ plerrcode test_proc_Scaler2551readout(ems_u32* p)
     return plOK;
 }
 
-plerrcode proc_Scaler2551readout(ems_u32* p)
+plerrcode proc_Scaler2551readout(__attribute__((unused)) ems_u32* p)
 {
-    register int vsn, res;
+    unsigned int vsn;
+    int res;
 
     for (vsn=1; vsn<=*memberlist; vsn++) {
         ml_entry* module=ModulEnt_m(vsn);

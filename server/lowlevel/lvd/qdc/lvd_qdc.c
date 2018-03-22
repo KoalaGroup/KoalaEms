@@ -3,7 +3,7 @@
  * created 2006-Feb-07 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: lvd_qdc.c,v 1.6 2011/04/06 20:30:26 wuestner Exp $";
+    "$ZEL: lvd_qdc.c,v 1.7 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -29,12 +29,12 @@ static const char* cvsid __attribute__((unused))=
 RCS_REGISTER(cvsid, "lowlevel/lvd/qdc")
 
 /*****************************************************************************/
-int lvd_qdc_low_printuse(FILE* outfilepath)
+int lvd_qdc_low_printuse(__attribute__((unused)) FILE* outfilepath)
 {
     return 0;
 }
 /*****************************************************************************/
-errcode lvd_qdc_low_init(char* arg)
+errcode lvd_qdc_low_init(__attribute__((unused)) char* arg)
 {
     lvdbus_register_cardtype(ZEL_LVD_FQDC, lvd_qdc_acard_init);
     lvdbus_register_cardtype(ZEL_LVD_SQDC, lvd_qdc_acard_init);

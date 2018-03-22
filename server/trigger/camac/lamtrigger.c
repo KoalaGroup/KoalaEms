@@ -3,7 +3,7 @@
  * created 24.03.98
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: lamtrigger.c,v 1.11 2011/04/06 20:30:35 wuestner Exp $";
+    "$ZEL: lamtrigger.c,v 1.13 2017/10/21 22:07:48 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -46,14 +46,14 @@ get_trig_lam(struct triggerinfo* trinfo)
 
     priv->dev->CAMAClams(priv->dev, &lam);
     if (lam & priv->triggermask) {
-        trinfo->eventcnt++;
+        trinfo->count++;
         res = 1;
     }
     return res;
 }
 
 static void
-reset_trig_lam(struct triggerinfo* trinfo)
+reset_trig_lam(__attribute__((unused)) struct triggerinfo* trinfo)
 {}
 
 /*
@@ -85,7 +85,7 @@ plerrcode init_trig_lam(ems_u32* p, struct triggerinfo* trinfo)
         return pres;
     }
     priv->triggermask=p[2];
-    trinfo->eventcnt=0;
+    trinfo->count=0;
 
     tinfo->get_trigger=get_trig_lam;
     tinfo->reset_trigger=reset_trig_lam;

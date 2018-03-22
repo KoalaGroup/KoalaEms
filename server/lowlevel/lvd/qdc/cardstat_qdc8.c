@@ -3,7 +3,7 @@
  * created 2012-Sep-11 PW/PK
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: cardstat_qdc8.c,v 1.2 2013/01/17 22:44:54 wuestner Exp $";
+    "$ZEL: cardstat_qdc8.c,v 1.3 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -21,7 +21,7 @@ RCS_REGISTER(cvsid, "lowlevel/lvd/qdc")
 
 /*****************************************************************************/
 static int
-dump_ident(struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_ident(struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
     ems_u32 val;
     int res, a=0;
@@ -38,7 +38,7 @@ dump_ident(struct lvd_acard *acard, struct qdc_info *info, void *xp)
 }
 /*****************************************************************************/
 static int
-dump_serial(struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_serial(struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
     ems_u32 val;
     int res, a=2;
@@ -87,7 +87,7 @@ decode_cr(ems_u32 cr, void *xp)
 }
 /*****************************************************************************/
 static int
-dump_cr(struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_cr(struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
     ems_u32 cr;
     int res, a=0xc;
@@ -105,7 +105,7 @@ dump_cr(struct lvd_acard *acard, struct qdc_info *info, void *xp)
 }
 /*****************************************************************************/
 static int
-dump_cr_saved(struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_cr_saved(struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
     if (!acard->initialized)
         return 0;
@@ -116,7 +116,7 @@ dump_cr_saved(struct lvd_acard *acard, struct qdc_info *info, void *xp)
 }
 /*****************************************************************************/
 static int
-dump_qdc80_outp (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_outp (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Set register outp */
 
@@ -210,7 +210,7 @@ dump_qdc80_outp (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_festart (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_festart (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Add search window to output data (time,baseline) */
 
@@ -304,7 +304,7 @@ dump_qdc80_festart (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_femin (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_femin (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Add minimum to output data (time,amplitude) */
 
@@ -398,7 +398,7 @@ dump_qdc80_femin (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_femax (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_femax (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Add maximum to output data (time,amplitude) */
 
@@ -492,7 +492,7 @@ dump_qdc80_femax (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_feend (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_feend (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Add pulse end  to output data (time,amplitude) */
 
@@ -586,7 +586,7 @@ dump_qdc80_feend (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_fetot (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_fetot (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Add tot to output data (timeup)(timedown) */
 
@@ -680,7 +680,7 @@ dump_qdc80_fetot (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_fecfd (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_fecfd (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Add cfd to output data (time) */
 
@@ -774,7 +774,7 @@ dump_qdc80_fecfd (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_fezero (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_fezero (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Add zero crossing time to output data (time dx(1,2,4)) */
 
@@ -868,7 +868,7 @@ dump_qdc80_fezero (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_feqae (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_feqae (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Add amplitude at the end of pulse integral to output data */
 
@@ -962,7 +962,7 @@ dump_qdc80_feqae (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_feqpls (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_feqpls (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Add pulse integral to output data (Integral 20 bit) */
 
@@ -1056,7 +1056,7 @@ dump_qdc80_feqpls (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_feqclab (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_feqclab (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Add main Cluster integral,amplitude at begin to output data (Integral 20 bit) */
 
@@ -1150,7 +1150,7 @@ dump_qdc80_feqclab (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_feqclae (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_feqclae (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Add main Cluster integral,amplitude at end to output data (Integral 20 bit) */
 
@@ -1244,7 +1244,7 @@ dump_qdc80_feqclae (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_feiwedge (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_feiwedge (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Add IW Amplitudes at start and end to output data (Integral 20 bit)  */
 
@@ -1338,7 +1338,7 @@ dump_qdc80_feiwedge (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_feiwmax (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_feiwmax (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Add IW Amplitudes at start and end to output data (Integral 20 bit)  */
 
@@ -1432,7 +1432,7 @@ dump_qdc80_feiwmax (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_feiwcenter (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_feiwcenter (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Add IW time of centre  to output data */
 
@@ -1526,7 +1526,7 @@ dump_qdc80_feiwcenter (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_feovrun (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_feovrun (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Add overruns since last readout to output data */
 
@@ -1620,7 +1620,7 @@ dump_qdc80_feovrun (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_fenoise (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_fenoise (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Add maximum noise peak since last redout to output data */
 
@@ -1714,7 +1714,7 @@ dump_qdc80_fenoise (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_chctrl (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_chctrl (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Set register chtrl */
 
@@ -1808,7 +1808,7 @@ dump_qdc80_chctrl (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_chaena (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_chaena (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Inhibit channel */
 
@@ -1902,7 +1902,7 @@ dump_qdc80_chaena (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_plev (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_plev (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Use level in pulse search algorithm */
 
@@ -1996,7 +1996,7 @@ dump_qdc80_plev (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_polarity (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_polarity (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Select positive pulse */
 
@@ -2090,7 +2090,7 @@ dump_qdc80_polarity (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_gradient (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_gradient (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Select gradient for zero crossing to 2 */
 
@@ -2184,7 +2184,7 @@ dump_qdc80_gradient (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_noext (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_noext (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Do not extend search window */
 
@@ -2278,7 +2278,7 @@ dump_qdc80_noext (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_tot4raw (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_tot4raw (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Use tot_thr for raw selection */
 
@@ -2372,7 +2372,7 @@ dump_qdc80_tot4raw (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_cfqrise (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_cfqrise (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Set register cf_qrise */
 
@@ -2466,7 +2466,7 @@ dump_qdc80_cfqrise (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_qrise (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_qrise (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Begin charge value for pulse search algorithm */
 
@@ -2560,7 +2560,7 @@ dump_qdc80_qrise (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_cf (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_cf (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* fraction for CF timing */
 
@@ -2654,7 +2654,7 @@ dump_qdc80_cf (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_totlevel (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_totlevel (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Set register tot_level */
 
@@ -2748,7 +2748,7 @@ dump_qdc80_totlevel (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_totthr (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_totthr (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* level for ToT and RAW threshold  */
 
@@ -2842,7 +2842,7 @@ dump_qdc80_totthr (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_totwidth (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_totwidth (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* minimal width for ToT and RAW level threshold  */
 
@@ -2936,7 +2936,7 @@ dump_qdc80_totwidth (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_logiclevel (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_logiclevel (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Set register logic_level */
 
@@ -3030,7 +3030,7 @@ dump_qdc80_logiclevel (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_logicthr (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_logicthr (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* level for scaler and logic threshold  */
 
@@ -3124,7 +3124,7 @@ dump_qdc80_logicthr (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_logicwidth (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_logicwidth (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* width for scaler and logic level threshold  */
 
@@ -3218,7 +3218,7 @@ dump_qdc80_logicwidth (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_iwqthr (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_iwqthr (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Q threshold for integral in integral window */
 
@@ -3312,7 +3312,7 @@ dump_qdc80_iwqthr (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_swqthr (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_swqthr (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Q threshold for cluster  integral  */
 
@@ -3406,7 +3406,7 @@ dump_qdc80_swqthr (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_swilen (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_swilen (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Search window pulse integral length */
 
@@ -3500,7 +3500,7 @@ dump_qdc80_swilen (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_clqstlen (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_clqstlen (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Cluster start integral length */
 
@@ -3594,7 +3594,7 @@ dump_qdc80_clqstlen (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_cllen (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_cllen (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Cluster integral length */
 
@@ -3688,7 +3688,7 @@ dump_qdc80_cllen (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_clqdel (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_clqdel (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Delay for Cluster integral */
 
@@ -3782,7 +3782,7 @@ dump_qdc80_clqdel (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_coincpar (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_coincpar (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Set register coinc_par */
 
@@ -3876,7 +3876,7 @@ dump_qdc80_coincpar (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_coincdel (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_coincdel (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Delay for coincidence */
 
@@ -3970,7 +3970,7 @@ dump_qdc80_coincdel (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_coincwidth (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_coincwidth (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Length for coincidence */
 
@@ -4064,7 +4064,7 @@ dump_qdc80_coincwidth (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_dttau (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_dttau (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Tau value for base line algorithm */
 
@@ -4158,7 +4158,7 @@ dump_qdc80_dttau (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_rawtable (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_rawtable (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* lookup table for RAW request */
 
@@ -4252,7 +4252,7 @@ dump_qdc80_rawtable (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_swstart (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_swstart (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Search window latency */
 
@@ -4346,7 +4346,7 @@ dump_qdc80_swstart (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_swlen (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_swlen (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Search window length */
 
@@ -4440,7 +4440,7 @@ dump_qdc80_swlen (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_iwstart (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_iwstart (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Integral window latency */
 
@@ -4534,7 +4534,7 @@ dump_qdc80_iwstart (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_iwlen (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_iwlen (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Integral window length */
 
@@ -4628,7 +4628,7 @@ dump_qdc80_iwlen (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_coinctab (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_coinctab (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Lookup table for inputs FPGA coincidences */
 
@@ -4722,7 +4722,7 @@ dump_qdc80_coinctab (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_cr (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_cr (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Set cr register */
 
@@ -4786,7 +4786,7 @@ dump_qdc80_cr (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_ena (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_ena (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Enable module */
 
@@ -4850,7 +4850,7 @@ dump_qdc80_ena (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_trgmode (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_trgmode (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Select trigger mode */
 
@@ -4914,7 +4914,7 @@ dump_qdc80_trgmode (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_tdcena (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_tdcena (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Enable TDC on external trigger input */
 
@@ -4978,7 +4978,7 @@ dump_qdc80_tdcena (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_fixbaseline (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_fixbaseline (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Fix baseline with last value */
 
@@ -5042,7 +5042,7 @@ dump_qdc80_fixbaseline (struct lvd_acard *acard, struct qdc_info *info, void *xp
 
 /*****************************************************************************/
 static int
-dump_qdc80_tstsig (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_tstsig (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Switch on test signal */
 
@@ -5106,7 +5106,7 @@ dump_qdc80_tstsig (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_adcpwr (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_adcpwr (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Switch on ADC power */
 
@@ -5170,7 +5170,7 @@ dump_qdc80_adcpwr (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_f1mode (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_f1mode (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Switch to F1 mode */
 
@@ -5234,7 +5234,7 @@ dump_qdc80_f1mode (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_grpcoinc (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_grpcoinc (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Lookup table for main coincidences */
 
@@ -5298,7 +5298,7 @@ dump_qdc80_grpcoinc (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_scalerrout (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_scalerrout (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Set scaler readout rate */
 
@@ -5362,7 +5362,7 @@ dump_qdc80_scalerrout (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_coinmintraw (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_coinmintraw (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Set coinmin_traw register */
 
@@ -5426,7 +5426,7 @@ dump_qdc80_coinmintraw (struct lvd_acard *acard, struct qdc_info *info, void *xp
 
 /*****************************************************************************/
 static int
-dump_qdc80_traw (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_traw (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Raw cycle frequency */
 
@@ -5490,7 +5490,7 @@ dump_qdc80_traw (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_coinmin (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_coinmin (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Minimum coincidence length */
 
@@ -5554,7 +5554,7 @@ dump_qdc80_coinmin (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_tpdac (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_tpdac (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Test pulse level */
 
@@ -5618,7 +5618,7 @@ dump_qdc80_tpdac (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_blcorcycle (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_blcorcycle (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Baseline correction cycle */
 
@@ -5682,7 +5682,7 @@ dump_qdc80_blcorcycle (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_baseline (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_baseline (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Read actual baseline */
 
@@ -5776,7 +5776,7 @@ dump_qdc80_baseline (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 
 /*****************************************************************************/
 static int
-dump_qdc80_tcornoise (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_tcornoise (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Read tcornoise register */
 
@@ -5871,7 +5871,7 @@ dump_qdc80_tcornoise (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 /*****************************************************************************/
 #if 0
 static int
-dump_qdc80_tcor (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_tcor (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Read max tau correction */
 
@@ -5966,7 +5966,7 @@ dump_qdc80_tcor (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 /*****************************************************************************/
 #if 0
 static int
-dump_qdc80_noise (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_noise (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Read max tau correction */
 
@@ -6060,7 +6060,7 @@ dump_qdc80_noise (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 #endif
 /*****************************************************************************/
 static int
-dump_qdc80_dttauquality (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_dttauquality (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Capacity correction assessment */
 
@@ -6154,7 +6154,7 @@ dump_qdc80_dttauquality (struct lvd_acard *acard, struct qdc_info *info, void *x
 
 /*****************************************************************************/
 static int
-dump_qdc80_ovr (struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_qdc80_ovr (struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info, void *xp)
 {
   /* Read and clear overruns bits */
 
@@ -6247,8 +6247,8 @@ dump_qdc80_ovr (struct lvd_acard *acard, struct qdc_info *info, void *xp)
 }
 /*****************************************************************************/
 int
-lvd_cardstat_qdc80(struct lvd_dev* dev, struct lvd_acard* acard, void *xp,
-    int level)
+lvd_cardstat_qdc80(__attribute__((unused)) struct lvd_dev* dev,
+        struct lvd_acard* acard, void *xp, int level)
 {
     struct qdc_info *info=(struct qdc_info*)acard->cardinfo;
 

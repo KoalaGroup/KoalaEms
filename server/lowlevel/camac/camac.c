@@ -3,7 +3,7 @@
  * created 04.Oct.2002 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: camac.c,v 1.18 2011/04/06 20:30:22 wuestner Exp $";
+    "$ZEL: camac.c,v 1.20 2017/10/21 23:06:52 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -47,7 +47,7 @@ struct camac_init camac_init[]= {
     {camac_pcicamac, camac_init_pcicamac, "pcicamac"},
 #endif
 #ifdef CAMAC_JORWAY73A
-    {camac_jorway73a, camac_init_orway73a, "jorway73a"},
+    {camac_jorway73a, camac_init_jorway73a, "jorway73a"},
 #endif
 #ifdef CAMAC_LNXDSP
     {camac_lnxdsp, camac_init_lnxdsp, "lnxdsp"},
@@ -62,7 +62,7 @@ struct camac_init camac_init[]= {
 };
 
 static struct camac_raw_procs*
-get_raw_procs_dummy(struct camac_dev* dev)
+get_raw_procs_dummy(__attribute__((unused)) struct camac_dev* dev)
 {
     return 0;
 }
@@ -70,7 +70,8 @@ get_raw_procs_dummy(struct camac_dev* dev)
 errcode camac_low_init(char* arg)
 {
     char *devicepath, *help;
-    int i, j, n, camacdelay=0;
+    unsigned int i;
+    int j, n, camacdelay=0;
     errcode res;
 
     T(camac_init)

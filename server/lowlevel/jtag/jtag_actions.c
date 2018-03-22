@@ -3,7 +3,7 @@
  * created 2006-Jul-06 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: jtag_actions.c,v 1.4 2011/04/06 20:30:24 wuestner Exp $";
+    "$ZEL: jtag_actions.c,v 1.5 2017/10/22 22:09:36 wuestner Exp $";
 
 /*
  * This file contains the general jtag function but has now knowledge
@@ -222,7 +222,7 @@ jtag_force_TLR(struct jtag_chain* chain)
 }
 /****************************************************************************/
 int
-jtag_read_ids(struct jtag_chain* chain, ems_u32** IDs, int* IDnum)
+jtag_read_ids(struct jtag_chain* chain, ems_u32** IDs, unsigned int* IDnum)
 {
     ems_u32* ids=0;
     ems_u32 id;

@@ -3,7 +3,7 @@
  * created: 23.03.97 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: piops.c,v 1.14 2014/09/10 15:25:53 wuestner Exp $";
+    "$ZEL: piops.c,v 1.15 2017/10/25 20:56:43 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -128,7 +128,8 @@ static int getprot_pi_readout(ems_u32* idx, unsigned int idxlen,
 #endif
 /*****************************************************************************/
 
-static errcode createreadout(ems_u32* p, unsigned int num)
+static errcode createreadout(__attribute__((unused)) ems_u32* p,
+        unsigned int num)
 {
 T(readout_em_cluster/piops.c:createreadout)
 if (num!=1) return Err_ArgNum;
@@ -137,7 +138,8 @@ return Err_ObjDef;
 
 /*****************************************************************************/
 
-static errcode deletereadout(ems_u32* p, unsigned int num)
+static errcode deletereadout(__attribute__((unused)) ems_u32* p,
+        unsigned int num)
 {
 T(readout_em_cluster/piops.c:deletereadout)
 if (num!=1) return Err_ArgNum;
@@ -145,7 +147,8 @@ return Err_ObjNonDel;
 }
 
 /*****************************************************************************/
-static errcode startreadout(ems_u32* p, unsigned int num)
+static errcode startreadout(__attribute__((unused)) ems_u32* p,
+        __attribute__((unused)) unsigned int num)
 {
     ems_u32 obj[]={Invocation_readout, 0};
     errcode res;
@@ -199,7 +202,8 @@ static errcode startreadout(ems_u32* p, unsigned int num)
     return res;
 }
 /*****************************************************************************/
-static errcode resetreadout(ems_u32* p, unsigned int num)
+static errcode resetreadout(__attribute__((unused)) ems_u32* p,
+        unsigned int num)
 {
     ems_u32 obj[]={Invocation_readout, 0};
     int i;
@@ -227,7 +231,8 @@ static errcode resetreadout(ems_u32* p, unsigned int num)
     return OK;
 }
 /*****************************************************************************/
-static errcode stopreadout(ems_u32* p, unsigned int num)
+static errcode stopreadout(__attribute__((unused)) ems_u32* p,
+        unsigned int num)
 {
     ems_u32 obj[]={Invocation_readout, 0};
     int i;
@@ -250,7 +255,8 @@ static errcode stopreadout(ems_u32* p, unsigned int num)
 }
 /*****************************************************************************/
 
-static errcode resumereadout(ems_u32* p, unsigned int num)
+static errcode resumereadout(__attribute__((unused)) ems_u32* p,
+        unsigned int num)
 {
 int i;
 T(readout_em_cluster/piops.c:resumereadout)
@@ -308,7 +314,7 @@ printf("all datains finished.\n");
 getreadoutparams
 p[0] : id (ignoriert)
 */
-static errcode getreadoutparams(ems_u32* p, unsigned int num)
+static errcode getreadoutparams(__attribute__((unused)) ems_u32* p, unsigned int num)
 {
     if (num!=1)
         return Err_ArgNum;

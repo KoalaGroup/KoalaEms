@@ -6,7 +6,7 @@
 /*   So, corresponding check must be provided. */
 /*   Bit counts from ZERO to 31 */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: VPGbitTest.c,v 1.3 2011/04/06 20:30:34 wuestner Exp $";
+    "$ZEL: VPGbitTest.c,v 1.4 2017/10/09 21:25:38 wuestner Exp $";
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -20,7 +20,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../../objects/domain/dom_ml.h"
 #include "../../lowlevel/unixvme/vme.h"
 
-extern int wirbrauchen;
 extern Modlist *modullist;
 extern int *memberlist;
  

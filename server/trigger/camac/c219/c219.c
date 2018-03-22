@@ -3,7 +3,7 @@
  * created 17.01.95 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: c219.c,v 1.7 2011/04/06 20:30:35 wuestner Exp $";
+    "$ZEL: c219.c,v 1.8 2016/05/12 22:00:12 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -50,7 +50,7 @@ get_trig_c219(struct triggerinfo* trinfo)
     /* output, positive, normal, transparent */
     dev->CAMACwrite(dev, dev->CAMACaddrP(priv->slot, priv->kanal, 17), 6);
     dev->CAMACwrite(dev, dev->CAMACaddrP(priv->slot, 0, 16), 1<<priv->kanal);
-    trinfo->eventcnt++;
+    trinfo->count++;
     return priv->trigger;
 }
 
@@ -95,7 +95,7 @@ plerrcode init_trig_c219(ems_u32* p, struct triggerinfo* trinfo)
 
     priv->kanal=p[2];
     priv->trigger=p[3];
-    trinfo->eventcnt=0;
+    trinfo->count=0;
     priv->dev=modullist->entry[p[1]].address.camac.dev;
     priv->slot=modullist->entry[p[1]].address.camac.slot;
 

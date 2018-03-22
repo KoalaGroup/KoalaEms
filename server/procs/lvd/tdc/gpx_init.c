@@ -3,7 +3,7 @@
  * created 2006-05-04 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: gpx_init.c,v 1.3 2011/04/06 20:30:33 wuestner Exp $";
+    "$ZEL: gpx_init.c,v 1.5 2017/10/20 23:19:11 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -16,10 +16,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../../../lowlevel/lvd/tdc/gpx.h"
 #include "../../../lowlevel/devices.h"
 #include "../lvd_verify.h"
-
-extern ems_u32* outptr;
-extern int wirbrauchen;
-extern int *memberlist;
 
 #define get_device(branch) \
     (struct lvd_dev*)get_gendevice(modul_lvd, (branch))
@@ -61,7 +57,7 @@ plerrcode test_proc_gpx_reg(ems_u32* p)
 
     if ((p[0]!=4)&&(p[0]!=5))
         return plErr_ArgNum;
-    if ((pres=find_odevice(modul_lvd, p[1], (struct generic_dev**)&dev))!=plOK)
+    if ((pres=_find_lvd_odevice(p[1], &dev))!=plOK)
         return pres;
 
     if ((ip[2]>=0)||(p[0]<5)) {
@@ -100,7 +96,7 @@ plerrcode test_proc_gpx_state(ems_u32* p)
 
     if (p[0]!=3)
         return plErr_ArgNum;
-    if ((pres=find_odevice(modul_lvd, p[1], (struct generic_dev**)&dev))!=plOK)
+    if ((pres=_find_lvd_odevice(p[1], &dev))!=plOK)
         return pres;
 
     if ((ems_i32)p[2]>=0) {
@@ -142,7 +138,7 @@ plerrcode test_proc_gpx_clear(ems_u32* p)
 
     if (p[0]!=4)
         return plErr_ArgNum;
-    if ((pres=find_odevice(modul_lvd, p[1], (struct generic_dev**)&dev))!=plOK)
+    if ((pres=_find_lvd_odevice(p[1], &dev))!=plOK)
         return pres;
 
     if ((ems_i32)p[2]>=0) {
@@ -182,7 +178,7 @@ plerrcode test_proc_gpx_dcm_shift(ems_u32* p)
 
     if (p[0]!=5)
         return plErr_ArgNum;
-    if ((pres=find_odevice(modul_lvd, p[1], (struct generic_dev**)&dev))!=plOK)
+    if ((pres=_find_lvd_odevice(p[1], &dev))!=plOK)
         return pres;
 
     if ((ems_i32)p[2]>=0) {

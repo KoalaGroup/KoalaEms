@@ -3,7 +3,7 @@
  * created 10.Jul.2002 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: fbmultisingle_primitiv.c,v 1.7 2011/04/06 20:30:32 wuestner Exp $";
+    "$ZEL: fbmultisingle_primitiv.c,v 1.8 2017/10/09 21:25:37 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -16,7 +16,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../../../lowlevel/devices.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
 
 #define get_device(class, crate) \
     (struct fastbus_dev*)get_gendevice((class), (crate))

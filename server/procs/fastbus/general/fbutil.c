@@ -5,7 +5,7 @@
  * 24.Oct.2002 PW: FBpulse FBin FBout
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: fbutil.c,v 1.11 2011/04/06 20:30:32 wuestner Exp $";
+    "$ZEL: fbutil.c,v 1.12 2017/10/09 21:25:37 wuestner Exp $";
 
 #include <sconf.h>
 #include <errno.h>
@@ -20,7 +20,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../fastbus_verify.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
 extern int *memberlist;
 
 #define get_device(class, crate) \

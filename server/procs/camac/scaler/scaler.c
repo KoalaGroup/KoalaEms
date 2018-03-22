@@ -7,7 +7,7 @@
  * 
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: scaler.c,v 1.18 2015/04/06 21:33:28 wuestner Exp $";
+    "$ZEL: scaler.c,v 1.20 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -22,10 +22,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../../procprops.h"
 
 #undef OPTIMIERT
-
-extern ems_u32* outptr;
-extern int* memberlist;
-extern int wirbrauchen;
 
 RCS_REGISTER(cvsid, "procs/camac/scaler")
 
@@ -51,7 +47,7 @@ struct int64 {
 static plerrcode test_it(ems_u32* p, int ttyp)
 {
     plerrcode res;
-    int num, n, numchan;
+    unsigned int num, n, numchan;
     unsigned int mask, vsize;
 
     if (argnum!=2) return plErr_ArgNum;
@@ -791,7 +787,7 @@ plerrcode proc_Scaler4434_update_read(ems_u32* p)
     struct int64* arr;
     struct camac_dev* dev;
     camadr_t addr;
-    int k, n, slot;
+    unsigned int k, n, slot;
     unsigned int mask;
     ems_u32 val, stat;
     ml_entry* m;
@@ -965,7 +961,7 @@ int ver_proc_Scaler4434_update_read_n=1;
  */
 plerrcode proc_Scaler2551_update_read(ems_u32* p)
 {
-    int n, k;
+    unsigned int n, k;
     struct camac_dev* dev;
     ml_entry* m;
     ems_u32 val, *help;
@@ -1060,7 +1056,7 @@ int ver_proc_Scaler2551_update_read=1;
  */
 plerrcode proc_Scaler2551_update_read_noclear(ems_u32* p)
 {
-    int n, k;
+    unsigned int n, k;
     struct camac_dev* dev;
     ml_entry* m;
     ems_u32 val, *help;
@@ -1147,7 +1143,8 @@ plerrcode proc_Scaler4434_read(ems_u32* p)
     struct int64* arr;
     struct camac_dev* dev;
     camadr_t addr;
-    unsigned int mask, xmask, i, k, n;
+    unsigned int mask, xmask, i, n;
+    int k;
     ems_u32 val;
     ml_entry* m;
     unsigned int flanken, cluster, numchan;

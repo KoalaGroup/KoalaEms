@@ -3,7 +3,7 @@
  * created: 2007-Mar-20 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: caenet.c,v 1.7 2011/04/06 20:30:29 wuestner Exp $";
+    "$ZEL: caenet.c,v 1.9 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <stdio.h>
 #include <errno.h>
@@ -13,9 +13,6 @@ static const char* cvsid __attribute__((unused))=
 #include <rcs_ids.h>
 #include "../../lowlevel/caenet/caennet.h"
 #include "../procs.h"
-
-extern ems_u32* outptr;
-extern int wirbrauchen;
 
 #define get_device(bus) \
     (struct caenet_dev*)get_gendevice(modul_caenet, (bus))
@@ -33,7 +30,7 @@ plerrcode proc_caenet_write(ems_u32* p)
     struct caenet_dev* dev=get_device(p[1]);
     ems_u8* buf;
     plerrcode pres;
-    int i, j;
+    unsigned int i, j;
 
     dev->buffer(dev, &buf);
 
@@ -73,7 +70,7 @@ plerrcode proc_caenet_writeB(ems_u32* p)
     struct caenet_dev* dev=get_device(p[1]);
     ems_u8* buf;
     plerrcode pres;
-    int i;
+    unsigned int i;
 
     dev->buffer(dev, &buf);
 
@@ -200,7 +197,8 @@ plerrcode proc_caenet_write_read(ems_u32* p)
     struct caenet_dev* dev=get_device(p[1]);
     ems_u8* buf;
     plerrcode pres;
-    int len, i, j;
+    unsigned int i, j;
+    int ii, len;
 
     dev->buffer(dev, &buf);
 
@@ -215,8 +213,8 @@ plerrcode proc_caenet_write_read(ems_u32* p)
     if (len&1)
         return plErr_Overflow;
     *outptr++=len/2;
-    for (i=0; i<len; i+=2)
-        *outptr++=buf[i]+(buf[i+1]<<8);
+    for (ii=0; ii<len; ii+=2)
+        *outptr++=buf[ii]+(buf[ii+1]<<8);
 
     return plOK;
 }
@@ -246,7 +244,8 @@ plerrcode proc_caenet_write_readB(ems_u32* p)
     struct caenet_dev* dev=get_device(p[1]);
     ems_u8* buf;
     plerrcode pres;
-    int len, i;
+    unsigned int i;
+    int len, ii;
 
     dev->buffer(dev, &buf);
 
@@ -257,8 +256,8 @@ plerrcode proc_caenet_write_readB(ems_u32* p)
     if ((pres=dev->write_read(dev, buf, p[0]-1, buf, &len))!=plOK)
         return pres;
     *outptr++=len;
-    for (i=0; i<len; i++)
-        *outptr++=buf[i];
+    for (ii=0; ii<len; ii++)
+        *outptr++=buf[ii];
 
     return plOK;
 }

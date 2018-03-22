@@ -2,7 +2,7 @@
  * objects/pi/readout_eventfilter/datains.h
  * created 2007-Jun-09 PW
  *
- * $ZEL$
+ * $ZEL: datains.h,v 1.1 2017/10/12 21:44:32 wuestner Exp $
  */
 
 #ifndef _datains_h_

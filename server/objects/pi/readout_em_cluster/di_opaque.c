@@ -3,7 +3,7 @@
  * created 2011-04-14 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: di_opaque.c,v 1.3 2011/08/18 22:32:41 wuestner Exp $";
+    "$ZEL: di_opaque.c,v 1.6 2017/10/25 21:02:04 wuestner Exp $";
 
 #include <errno.h>
 #include <stdio.h>
@@ -30,6 +30,10 @@ static const char* cvsid __attribute__((unused))=
 
 #ifdef DMALLOC
 #include dmalloc.h
+#endif
+
+#if 1
+#define DEBUG
 #endif
 
 #define swap_int(a) ( ((a) << 24) | \
@@ -76,7 +80,7 @@ possible_readout_error(void)
 /*****************************************************************************/
 /*
  * store_to_cluster has to reset num and headnum if the data are used
- * (stored to a cluster) or if the are unusable (i.e. incomplete).
+ * (stored to a cluster) or if they are unusable (i.e. incomplete).
  * 
  * struct cluster {
  *   int size;                        // Anzahl aller folgenden Worte
@@ -104,8 +108,12 @@ static int
 create_async_cluster(int di_idx, int size, struct Cluster **cluster, int *pos)
 {
     struct Cluster *cl;
-    int clustersize;
+    unsigned int clustersize;
     int nidx;
+
+#ifdef DEBUG
+    printf("di_opaque: create_async_cluster\n");
+#endif
 
     clustersize =4;    /* header: size, endiantest, type, optionsize */
 #if defined(CLUSTERTIMESTAMPS)
@@ -166,6 +174,10 @@ store_to_cluster(int di_idx)
         (struct di_opaque_data*)datain_cl[di_idx].private;
     struct Cluster *cl;
     int pos, res=0;
+
+#ifdef DEBUG
+    printf("di_opaque: store_to_cluster\n");
+#endif
 
     if (!private->running)
         goto error;
@@ -231,6 +243,10 @@ di_opaque_read(int path, enum select_types selected, union callbackdata data)
 
     T(readout_em_opaque/di_opaque.c:di_opaque_read)
 
+#ifdef DEBUG
+    printf("di_opaque_read\n");
+#endif
+
     if (di_cl->suspended) {
         complain("di_opaque_read called while suspended");
         di_cl->error=-1;
@@ -289,8 +305,8 @@ di_opaque_read(int path, enum select_types selected, union callbackdata data)
                 private->space=private->size;
                 data=realloc(private->data, private->space);
                 if (!data) {
-                    complain("di_opaque_read:read(header): %s",
-                            strerror(errno));
+                    complain("di_opaque_read:realloc(%d): %s",
+                            private->space, strerror(errno));
                     di_cl->error=-1;
                     di_cl->status=Invoc_error;
                     sched_delete_select_task(di_cl->seltask);
@@ -542,6 +558,10 @@ di_opaque_sock_start(int idx)
 {
     struct di_opaque_data *private=datain_cl[idx].private;
 
+#ifdef DEBUG
+    printf("di_opaque_sock_start\n");
+#endif
+
     private->running=1;
 
     return OK;
@@ -552,6 +572,10 @@ di_opaque_sock_stop(int idx)
 {
     struct di_opaque_data *private=datain_cl[idx].private;
 
+#ifdef DEBUG
+    printf("di_opaque_sock_stop\n");
+#endif
+
     private->running=0;
 
     return OK;
@@ -561,6 +585,10 @@ static void
 di_opaque_sock_reactivate(int idx)
 {
     T(readout_em_opaque/di_opaque.c:di_opaque_sock_reactivate)
+
+#ifdef DEBUG
+    printf("di_opaque_sock_reactivate\n");
+#endif
 
     if (datain_cl[idx].seltask) {
         sched_select_task_reactivate(datain_cl[idx].seltask);
@@ -738,7 +766,8 @@ printf("di_opaque_sock_v6client: node=%s service=%s\n",
  *     (selected by a flag)
  */
 errcode
-di_opaque_sock_init(int idx, int qlen, ems_u32* q)
+di_opaque_sock_init(int idx, __attribute__((unused)) int qlen,
+        __attribute__((unused)) ems_u32* q)
 {
     struct di_opaque_data *private=
             (struct di_opaque_data*)datain_cl[idx].private;
@@ -746,7 +775,10 @@ di_opaque_sock_init(int idx, int qlen, ems_u32* q)
 
     T(readout_em_opaque/di_opaque.c:di_opaque_sock_init)
 
-    
+#ifdef DEBUG
+    printf("di_opaque_sock_init\n");
+#endif
+
     private=calloc(1, sizeof(struct di_opaque_data));
     if (!private) {
         printf("di_cluster_sock_init: %s\n", strerror(errno));

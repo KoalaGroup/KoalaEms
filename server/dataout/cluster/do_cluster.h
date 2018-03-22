@@ -2,7 +2,7 @@
  * dataout/cluster/do_cluster.h
  * created      04.04.97
  * 
- * $ZEL: do_cluster.h,v 1.16 2015/04/21 16:05:45 wuestner Exp $
+ * $ZEL: do_cluster.h,v 1.17 2016/05/10 19:58:46 wuestner Exp $
  */
 
 #ifndef _do_cluster_h_
@@ -100,6 +100,9 @@ void clusters_conv_to_network(struct Cluster* cluster);
 void send_ved_cluster(int do_idx);
 
 void calculate_checksum(struct Cluster* cluster);
+
+void set_max_ev_per_cluster(ems_i32, ems_i32*);
+void set_max_time_per_cluster(ems_i32, ems_i32*); /* time in ms */
 
 #endif
 

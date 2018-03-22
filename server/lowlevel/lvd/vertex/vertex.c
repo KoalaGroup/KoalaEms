@@ -3,7 +3,7 @@
  * created 2005-Feb-25 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: vertex.c,v 1.57 2011/10/17 22:53:55 wuestner Exp $";
+    "$ZEL: vertex.c,v 1.59 2017/02/17 10:20:45 trusov Exp $";
 
 /* If controller is in DDMA(async readout) mode,
  * i.e LVD_SIS1100_MMAPPED is defined
@@ -43,7 +43,9 @@ static const char* cvsid __attribute__((unused))=
 #include "../lvd_vertex_map.h"
 
 /* #define VTX_DEBUG 0
+#define DEBUG_VA_CHECKS
  */
+
 #define iMAX(m, n)  ({ int _m=m, _n=n; _m>_n?m:n; })
 #define iMIN(m, n)  ({ int _m=m, _n=n; _m<_n?m:n; })
 
@@ -94,6 +96,8 @@ int const VTX_STOP_MODE = VTX_CR_RAW    |
 #define  GET_I2C_ACK_PERIOD(_b)     (((_b) >> MATE3_ACK_PERIOD_SHIFT) & MATE3_ACK_PERIOD_MASK)
 
 #define MAX_MATE3_ACK_DELAY 0x7
+
+static ems_u32 ignore_va_check = 0;
 
 static enum {ACK_MIN=0, ACK_MAX, ACK_OPT, ACK_CHIP, ACK_SCALING , ACK_LEN} ACK_DELAY_IND;
 static const ems_u32 def_scaling = 0x1f77; /* for VERTEXM3 */
@@ -219,6 +223,13 @@ static int       lvd_vertex_count_vata_bits(struct lvd_dev* dev, int addr, int i
 					    int nrwords);
 static int get_seq_csr(struct lvd_dev* dev, ems_u32 addr, int* ddma_in, ems_u32* seq_csr_val);
 
+void set_ignore_va_check(ems_u32 v) {
+  ignore_va_check = (v) ? 1 : 0;
+}
+
+ems_u32 get_ignore_va_check(void) {
+  return ignore_va_check;
+}
 
 static void print_csr_regs(struct lvd_dev* dev, int addr, int idx, char* str) {
   ems_u32 cr, sr, seq_csr, rrr=0;
@@ -3348,7 +3359,13 @@ static plerrcode load_vata_chips(struct lvd_dev* dev, struct lvd_acard* acard,
   }
   /* check number of chips at current delay and period (scaling) */  
   bits = exp_chips*VA32TA2_BITS; /* all available chips must be initialized */
-  int n_bits = lvd_vertex_count_vata_bits(dev, acard->addr, idx, words);
+  int n_bits = bits;
+  if(ignore_va_check != 1) {
+    n_bits = lvd_vertex_count_vata_bits(dev, acard->addr, idx, words);
+#ifdef DEBUG_VA_CHECKS
+    printf("load_vata_chips(): addr=0x%1x idx=%1d n_bits=%1d\n", addr, idx, n_bits);
+#endif
+  }
   if(n_bits != bits) { /* failed count proper number of bits */
     /* find delay to read back chip settings */    
     if(find_vata_chip_delay(dev, acard, idx, exp_chips*VA32TA2_BITS) <= 0) {
@@ -3357,6 +3374,7 @@ static plerrcode load_vata_chips(struct lvd_dev* dev, struct lvd_acard* acard,
       return plErr_HW;
     }
   }
+
   /* ----- load chips */
   n_chips = exp_chips;
   bits = n_chips*VA32TA2_BITS; /* all available chips must be initialized */
@@ -3496,7 +3514,6 @@ lvd_vertex_count_vata_bits(struct lvd_dev* dev, int addr, int idx,
 			      int nrwords) {
   int i, j;
   int words=0, wbits=0;
-
   ems_u32* in  = alloca(sizeof(ems_u32)*nrwords);
   ems_u32* out = alloca(sizeof(ems_u32)*nrwords);
 
@@ -3507,28 +3524,37 @@ lvd_vertex_count_vata_bits(struct lvd_dev* dev, int addr, int idx,
   }
   /* fill the chain with 1-bits, ignore output */
   for (i=0; i<nrwords; i++)
-    out[i]=0xffff;
+    out[i] = 0;  /* out[i]=0xffff; it was for inverted reg out? */
   if (lvd_vertex_rw_vata(dev, addr, idx, nrwords*16, out, 0)<0) {
-    printf("lvd_vertex_count_vata_bits(): addr0x%1x idx=%1d -failed write 0xffff, error\n",
+    printf("lvd_vertex_count_vata_bits(): p.1 addr: 0x%1x idx=%1d - failed write 0xffff, error\n",
 	   addr, idx);
     return -1;
   }
   /* shift 0-bits into the chain */
   for (i=0; i<nrwords; i++)
-    out[i]=0;
+    out[i]=0xffff;  /* out[i]=0; it was for inverted reg out? */
   if (lvd_vertex_rw_vata(dev, addr, idx, nrwords*16, out, in)<0) {
-    printf("lvd_vertex_count_vata_bits(): addr0x%1x idx=%1d -failed write/read, error\n",
+    printf("lvd_vertex_count_vata_bits(): p.2 addr0x%1x idx=%1d -failed write/read, error\n",
 	   addr, idx);
     return -1;
   }
+#ifdef DEBUG_VA_CHECKS
+  printf("lvd_vertex_count_vata_bits: addr: 0x%1x idx=%1d:\n", addr, idx);
+  for (i=0; i<nrwords; i++) {
+    printf("lvd_vertex_count_vata_bits: in[%1d]: 0x%1x\n", i, in[i]);
+  }
+#endif  
   /* find first word which contains a 1-bit */  
   for (i=0; i<nrwords; i++) {
     if (in[i]!=0xffff) {
+#ifdef DEBUG_VA_CHECKS
+      printf("lvd_vertex_count_vata_bits: first not 0xffff: in[%1d]: 0x%1x\n", i, in[i]);
+#endif
       ems_u16 word=in[i];
       ems_u16 mask;
       /* sanity check */
       if ((~word&(~word+1))&0xffff) {
-	printf("lvd_vertex_count_vata_bits: unexpected word at %d: 0x%04x, error\n",
+	printf("lvd_vertex_count_vata_bits: p.3 unexpected word at %d: 0x%04x, error\n",
 	       i, word);
 	return -1;
       }
@@ -3544,14 +3570,22 @@ lvd_vertex_count_vata_bits(struct lvd_dev* dev, int addr, int idx,
     }
   }
   i++;
+#ifdef DEBUG_VA_CHECKS
+  printf("lvd_vertex_count_vata_bits: addr: 0x%1x idx=%1d i: %1d words: %1d wbits: %1d  nrwords: %1d\n",
+	 addr, idx, i, words, wbits, nrwords);
+#endif
   /* sanity check */
   for (; i<nrwords; i++) {
     if (in[i]!=0) {
-      printf("lvd_vertex_count_vata_bits: unexpected word at %d: 0x%04x, error\n",
+      printf("lvd_vertex_count_vata_bits: non-zero unexpected word in[%d]: 0x%04x, error\n",
 	     i, in[i]);
       return -1;
     }
   }
+#ifdef DEBUG_VA_CHECKS
+  printf("lvd_vertex_count_vata_bits: addr0x%1x idx=%1d words: %1d wbits: %1d\n",
+	 addr, idx, words, wbits);
+#endif
   return (words*16-wbits); /* correct delay in reg_cr must be set */
 }
 /*****************************************************************************
@@ -3653,7 +3687,7 @@ lvd_vertex_count_vata_chips(struct lvd_dev* dev, int addr, int idx,
         int max) {
   const int defmaxchips=10;
   int chips;
-  int nrwords= (max < defmaxchips) ? (defmaxchips*VA32TA2_BITS+15)/16 : (max*VA32TA2_BITS+15)/16;
+  int nrwords= (max > defmaxchips) ? (defmaxchips*VA32TA2_BITS+15)/16 : (max*VA32TA2_BITS+15)/16;
   struct lvd_acard* acard = GetVertexCard(dev, addr);
   int bits = lvd_vertex_count_vata_bits(dev, acard->addr, idx, nrwords);
   

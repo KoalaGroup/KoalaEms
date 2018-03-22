@@ -1,7 +1,7 @@
 /*
  * objects/ved/ved.h
  * 
- * $ZEL: ved.h,v 1.6 2008/08/26 00:12:53 wuestner Exp $
+ * $ZEL: ved.h,v 1.7 2017/10/20 23:21:31 wuestner Exp $
  */
 
 #ifndef _ved_h_
@@ -20,7 +20,7 @@ errcode GetVEDStatus(ems_u32*, int);
 errcode Identify(ems_u32*, int);
 errcode GetNameList(ems_u32*, unsigned int);
 errcode GetCapabilityList(ems_u32*, unsigned int);
-errcode GetProcProperties(ems_u32*, int);
+errcode GetProcProperties(ems_u32*, unsigned int);
 /*
  * objectcommon *lookup_ved(int* id, int idlen, int* remlen)
  * int *dir_ved(int* ptr)

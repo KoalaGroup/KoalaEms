@@ -4,7 +4,7 @@
  * created: 14. Aug 2000 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: uname.c,v 1.6 2011/04/06 20:30:32 wuestner Exp $";
+    "$ZEL: uname.c,v 1.8 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <sconf.h>
 #include <errno.h>
@@ -16,13 +16,12 @@ static const char* cvsid __attribute__((unused))=
 #include <xdrstring.h>
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
 
 RCS_REGISTER(cvsid, "procs/general")
 
 /*****************************************************************************/
 
-plerrcode proc_Uname(ems_u32* p)
+plerrcode proc_Uname(__attribute__((unused)) ems_u32* p)
 {
 struct utsname name;
 

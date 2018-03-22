@@ -3,7 +3,7 @@
  * created 25.Jan.2001 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: sis3800_shadow.c,v 1.19 2015/04/06 21:33:37 wuestner Exp $";
+    "$ZEL: sis3800_shadow.c,v 1.21 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -21,8 +21,7 @@ static const char* cvsid __attribute__((unused))=
 #include "../../../trigger/trigger.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
-extern int *memberlist;
+extern unsigned int *memberlist;
 
 #define lumis 21
 static int lumi[lumis];
@@ -38,7 +37,8 @@ RCS_REGISTER(cvsid, "procs/unixvme/sis3800")
 plerrcode proc_sis3800ShadowInit(ems_u32* p)
 {
 ems_u32 *var;
-int i, res;
+unsigned int i;
+int res;
 
 for (i=2; i<=p[0]; i++)
   {
@@ -83,7 +83,7 @@ return plOK;
 plerrcode test_proc_sis3800ShadowInit(ems_u32* p)
 {
 unsigned int vsize;
-int i;
+unsigned int i;
 plerrcode pcode;
 
 for (i=2; i<=p[0]; i++)
@@ -114,7 +114,7 @@ plerrcode proc_sis3800ShadowClear(ems_u32* p)
 {
     ems_u32 *var;
     unsigned int vsize;
-    int i;
+    unsigned int i;
 
     var_get_ptr(p[1], &var);
     var_attrib(p[1], &vsize);
@@ -144,8 +144,9 @@ plerrcode test_proc_sis3800ShadowClear(ems_u32* p)
 {
     ems_u32 mtypes[]={SIS_3800, 0};
     unsigned int vsize;
-    int nr_modules, nr_channels, res;
+    unsigned int nr_modules, nr_channels;
     plerrcode pcode;
+    int res;
 
     if (p[0]!=1)
         return plErr_ArgNum;
@@ -182,7 +183,7 @@ int ver_proc_sis3800ShadowClear = 1;
 plerrcode proc_sis3800ShadowUpdate(ems_u32* p)
 {
     ems_u32 *var;
-    int i, idx;
+    unsigned int i, idx;
 
     var_get_ptr(p[1], &var);
 
@@ -258,7 +259,7 @@ plerrcode proc_sis3800ShadowUpdate(ems_u32* p)
 plerrcode test_proc_sis3800ShadowUpdate(ems_u32* p)
 {
     unsigned int vsize;
-    int i;
+    unsigned int i;
     plerrcode pcode;
 
     if (p[0]<2)
@@ -312,7 +313,7 @@ int ver_proc_sis3800ShadowUpdate = 1;
 plerrcode proc_sis3800ShadowUpdateAll(ems_u32* p)
 {
     ems_u32 *var;
-    int i, idx;
+    unsigned int i, idx;
 
     var_get_ptr(p[1], &var);
 
@@ -385,8 +386,9 @@ plerrcode test_proc_sis3800ShadowUpdateAll(ems_u32* p)
 {
     ems_u32 mtypes[]={SIS_3800, 0};
     unsigned int vsize;
-    int nr_modules, nr_channels, res;
+    unsigned int nr_modules, nr_channels;
     plerrcode pcode;
+    int res;
 
     if ((p[0]<1) && (p[0]>2))
         return plErr_ArgNum;
@@ -434,7 +436,7 @@ plerrcode proc_sis3800ShadowUpdateAll2(ems_u32* p)
 {
     ems_u32 tmp[32];
     ems_u32 *var;
-    int i, j;
+    unsigned int i, j;
 
     var_get_ptr(p[1], &var);
 
@@ -503,7 +505,8 @@ plerrcode test_proc_sis3800ShadowUpdateAll2(ems_u32* p)
 {
     ems_u32 mtypes[]={SIS_3800, 0};
     unsigned int vsize;
-    int nr_modules, nr_channels, res, i;
+    unsigned int nr_modules, nr_channels, i;
+    int res;
     plerrcode pcode=plOK;
 
     if ((p[0]<1) && (p[0]>2))

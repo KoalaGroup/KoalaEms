@@ -1,6 +1,6 @@
 /*
  * objects/domain/dom_dataout.h
- * $ZEL: dom_dataout.h,v 1.8 2011/08/16 19:19:50 wuestner Exp $
+ * $ZEL: dom_dataout.h,v 1.9 2017/10/20 23:21:31 wuestner Exp $
  * 
  * created (before?) 12.05.93
  */
@@ -37,9 +37,9 @@ struct dataout_info {
           int flags;
         } inetV6sock;
     } addr;
-    int inout_arg_num;
+    unsigned int inout_arg_num;
     int* inout_args;
-    int address_arg_num;
+    unsigned int address_arg_num;
     int* address_args;
     char* logfilename;
     char* loginfo;

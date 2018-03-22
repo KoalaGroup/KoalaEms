@@ -1,4 +1,4 @@
-# $ZEL: write_setup.tcl,v 1.22 2003/02/04 19:28:06 wuestner Exp $
+# $ZEL: write_setup.tcl,v 1.23 2017/11/08 00:17:20 wuestner Exp $
 # copyright 1998
 #   Peter Wuestner; Zentrallabor fuer Elektronik; Forschungszentrum Juelich
 #
@@ -36,7 +36,7 @@ proc write_text_header {ved do header} {
   set weiter 1
   set second_try 0
   if {$global_verbose} {output "write text header: [lindex $header 0]"}
-  set to [ems_timeout 190]
+#  set to [ems_timeout 190]
   while {$weiter} {
     if [catch {$ved dataout write $do $header} mist] {
       if {$errorCode=="EMS_REQ 38" || $errorCode=="EMS_REQ 35"} {
@@ -68,7 +68,7 @@ proc write_text_header {ved do header} {
       set weiter 0
     }
   }
-  ems_timeout $to
+#  ems_timeout $to
   return $res
 }
 

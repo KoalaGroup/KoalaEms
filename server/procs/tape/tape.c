@@ -4,7 +4,7 @@
  * created 17.07.1998 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: tape.c,v 1.6 2011/10/17 23:14:47 wuestner Exp $";
+    "$ZEL: tape.c,v 1.7 2017/10/09 21:25:38 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -17,7 +17,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../../dataout/cluster/do_cluster_tape.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
 
 RCS_REGISTER(cvsid, "procs/tape")
 

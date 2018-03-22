@@ -5,7 +5,7 @@
  * 02.Aug.2001 PW: multicrate support
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: FERAmesspeds.c,v 1.11 2011/04/06 20:30:30 wuestner Exp $";
+    "$ZEL: FERAmesspeds.c,v 1.13 2017/10/20 23:20:52 wuestner Exp $";
 
 /* Setup-Feld fuer FERA-Systeme erzeugen,
   dafuer Input der FERA-ADCs mitteln,
@@ -29,12 +29,6 @@ static const char* cvsid __attribute__((unused))=
 #define MAXVSN 20
 
 RCS_REGISTER(cvsid, "procs/camac/fera")
-
-/*****************************************************************************/
-
-extern ems_u32* outptr;
-extern int* memberlist;
-extern int wirbrauchen;
 
 /*****************************************************************************/
 
@@ -279,7 +273,7 @@ plerrcode test_proc_FERAmesspeds(ems_u32* p)
     ems_u32 modDRV[]={FERA_DRV_4301, 0};
     ems_u32 modADC[]={FERA_ADC_4300B, SILENA_ADC_4418V, BIT_PATTERN_UNIT, 0};
     plerrcode pres;
-    int i;
+    unsigned int i;
 
     if (*p!=2) return plErr_ArgNum;
     if (!memberlist) return plErr_NoISModulList ;

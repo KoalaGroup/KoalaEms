@@ -1,4 +1,4 @@
-# $ZEL: scaler_open_is.tcl,v 1.4 2014/08/19 20:20:50 wuestner Exp $
+# $ZEL: scaler_open_is.tcl,v 1.5 2016/10/11 21:38:34 wuestner Exp $
 # copyright 1998
 #   P. Wuestner; Zentralinstitut fuer Elektronik; Forschungszentrum Juelich
 #
@@ -37,8 +37,9 @@ proc open_ISs_by_ID {} {
     global global_islist
 
     foreach idx $global_comm_indices {
-        # only if a ems procedure is used, ems commands do not need an IS
-        if {$global_comm_proc($idx)} {
+# Also commands can (and want) use ISs. IS 0 is identical to pure VED.
+#        # only if a ems procedure is used, ems commands do not need an IS
+#        if {$global_comm_proc($idx)} {
             set ved $global_comm_xved($idx)
             set isid $global_comm_is($idx)
             if {![info exists global_islist($ved)]} {
@@ -79,7 +80,7 @@ proc open_ISs_by_ID {} {
                     update idletasks
                 }
             }
-        }
+#        }
     }
     return 0
 }

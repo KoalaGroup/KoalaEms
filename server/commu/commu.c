@@ -2,7 +2,7 @@
  * commu/commu.c
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: commu.c,v 1.19 2011/04/06 20:30:21 wuestner Exp $";
+    "$ZEL: commu.c,v 1.21 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -41,7 +41,7 @@ ems_u32* outbuf;
 static mmapresc om;
 #else /* OUT_BUFBEG */
 #ifndef LOWLEVELBUFFER
-static ems_u32 _outbuf[OUT_MAX+1];
+static ems_u32 *_outbuf=0;
 #endif /* LOWLEVELBUFFER */
 #endif /* OUT_BUFBEG */
 
@@ -86,6 +86,13 @@ errcode init_comm(char* port)
 #ifdef LOWLEVELBUFFER
     outbuf=lowbuf_outbuffer();
 #else /* LOWLEVELBUFFER */
+    _outbuf=calloc(OUT_MAX+1, 4);
+    if (!_outbuf) {
+        /* complain in 'init_comm' not available yet */
+        printf("alloc outbuf(%lld words): %s\n",
+                (unsigned long long)(OUT_MAX+1), strerror(errno));
+        return Err_NoMem;
+    }
     outbuf=_outbuf;
 #endif /* LOWLEVELBUFFER */
 #endif /* OSK */
@@ -101,6 +108,15 @@ errcode done_comm(){
     T(commu.c::done_comm);
 #ifdef OUT_BUFBEG
     unmap_memory(&om);
+#else
+#ifndef LOWLEVELBUFFER
+    free(_outbuf);
+    _outbuf=0;
+#endif
+#endif
+#ifndef LOWLEVELBUFFER
+    free(_outbuf);
+    outbuf=0;
 #endif
     return _done_comm();
 }
@@ -136,7 +152,7 @@ static int read_data(unsigned int size, ems_u32** buf)
 	            return -1;
 	        }
             } else {
-	        if (res!=size) {
+	        if (res!=(int)size) {
 	            conn_abort("bad size");
 	            free_data(*buf);
 	            return -1;
@@ -300,10 +316,7 @@ Request select_indication(ems_u32** reqbuf, unsigned int* size)
 void send_response(unsigned int size)
 {
     T(commu.c::send_response)
-    if (size<0) {
-        printf("wrong size (%d) in send_response\n", size);
-        return;
-    }
+
     header->flags |=Flag_Confirmation;
     header->size=size;
 

@@ -4,7 +4,7 @@
  * created 06.Oct.2002 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: delayread.c,v 1.3 2011/04/06 20:30:35 wuestner Exp $";
+    "$ZEL: delayread.c,v 1.5 2017/10/21 22:03:43 wuestner Exp $";
 
 #include <sconf.h>
 #include <stdio.h>
@@ -16,9 +16,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../../procprops.h"
 #include "../../procs.h"
 #include "../../../lowlevel/devices.h"
-
-extern ems_u32* outptr;
-extern int wirbrauchen;
 
 RCS_REGISTER(cvsid, "procs/test/delayedread")
 
@@ -36,7 +33,8 @@ RCS_REGISTER(cvsid, "procs/test/delayedread")
 plerrcode proc_DelayRead(ems_u32* p)
 {
     ems_u32* pp, mask;
-    int i, enable;
+    unsigned int i;
+    int enable;
     char* devname;
     Modulclass mclass;
 

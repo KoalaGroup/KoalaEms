@@ -3,7 +3,7 @@ dnl                                                                           *
 dnl modultypes.inc                                                            *
 dnl  R. Nellen                                               03.03.1993       *
 dnl                                                                           *
-dnl $ZEL: modultypes.inc,v 2.52 2015/09/05 00:17:11 wuestner Exp $
+dnl $ZEL: modultypes.inc,v 2.54 2016/04/28 21:52:11 wuestner Exp $
 dnl                                                                           *
 dnl ***************************************************************************
 dnl
@@ -28,7 +28,7 @@ dnl  3=DL350  3=TDC    3=Struck              043fc ==> FSC
 dnl  4=Fastb. 4=Scaler 4=Kinetics            043be ==> Bitpattern
 dnl  5=LVD    5=Flash  5=Philips
 dnl  6=CANbus 6=Contr. 6=CES
-dnl           7=Memory 7=GSI
+dnl  7=IP     7=Memory 7=GSI
 dnl           8=Logic  8=CERN
 dnl           9=Bitpat 9=CAEN
 dnl           a=Trig.M a=SIS
@@ -40,6 +40,7 @@ dnl           f=other  f=other
 dnl                    f0=JORWAY
 dnl                    f1=mesytec
 dnl                    f2=Joerger
+dnl                    f3=opaque commands
 dnl
 dnl  in case of Factory==0xf nibble 4 is used for factory too
 dnl    Module Type can then use nibble 0..3 only
@@ -244,6 +245,10 @@ module(E233_1            ,2331)
 module(CHANNEL           ,123)
 module(ILL_CHANNEL       ,30)
 module(IEC               ,100)
+
+dnl device server over IP; arbitrary (text) commands
+
+module(IP_opaque         ,0x7ff30001)
 
 dnl ***************************************************************************
 dnl ***************************************************************************

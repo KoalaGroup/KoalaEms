@@ -3,7 +3,7 @@
  * created 2007-Jun-11 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL$";
+    "$ZEL: datains.c,v 1.1 2017/10/12 21:44:32 wuestner Exp $";
 
 #include <string.h>
 #include <errorcodes.h>

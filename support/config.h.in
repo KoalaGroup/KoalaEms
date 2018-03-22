@@ -2,11 +2,13 @@
  * support/config.h.in
  * created 28.07.96 PW
  * 
- * $ZEL: config.h.in,v 2.15 2009/10/08 11:52:18 wuestner Exp $
+ * $ZEL: config.h.in,v 2.16 2015/10/22 20:20:42 wuestner Exp $
  */
 
 #ifndef _config_h_
 #define _config_h_
+
+#if 0
 
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
@@ -15,6 +17,15 @@
 #ifndef _BSD_SOURCE
 #define _BSD_SOURCE
 #endif
+
+#else
+
+#ifndef _DEFAULT_SOURCE
+#define _DEFAULT_SOURCE
+#endif
+
+#endif
+
 
 #ifdef __linux__
 

@@ -1,5 +1,5 @@
 /*
- * $ZEL: trigger.h,v 1.8 2009/07/27 22:14:26 wuestner Exp $
+ * $ZEL: trigger.h,v 1.9 2016/05/12 22:00:12 wuestner Exp $
  */
 
 #ifndef _trigger_h_
@@ -39,7 +39,9 @@
 enum triggerstate {trigger_idle=0, trigger_inserted=1, trigger_active=2};
 
 struct triggerinfo {
-    ems_u32 eventcnt;
+//    ems_u32 eventcnt;
+    ems_u32 count;
+    ems_u32 last_ev_count;
     ems_u32 trigger;
     struct timespec time;
     int time_valid;
@@ -52,7 +54,7 @@ struct triggerinfo {
 /*
  * defined in trigprocs.c.m4, used in objects/pi/.../readout.c
  */
-extern struct triggerinfo trigger;
+//extern struct triggerinfo trigger;
 
 /*
  * returns (in list) the names and indices of all trigger procedures

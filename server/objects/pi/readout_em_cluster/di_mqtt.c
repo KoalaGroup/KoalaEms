@@ -3,7 +3,7 @@
  * created 2014-09-05 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: di_mqtt.c,v 1.5 2015/04/23 19:07:24 wuestner Exp $";
+    "$ZEL: di_mqtt.c,v 1.6 2017/10/27 21:10:48 wuestner Exp $";
 
 #include <errno.h>
 #include <stdio.h>
@@ -115,7 +115,7 @@ write_to_cluster(struct di_mqtt_data *private,
         const struct mosquitto_message *message, struct timeval *now)
 {
     struct Cluster *cl;
-    int clustersize;
+    size_t clustersize;
     int nidx, xtlen, xplen, topiclen;
     char *cptr;
 
@@ -238,7 +238,8 @@ mqtt_subscribe(struct di_mqtt_data *private)
 }
 /******************************************************************************/
 static void
-mqtt_on_connect(struct mosquitto *mosq, void *obj, int rc)
+mqtt_on_connect(__attribute__((unused)) struct mosquitto *mosq, void *obj,
+        int rc)
 {
     struct di_mqtt_data *private=(struct di_mqtt_data*)obj;
 
@@ -251,7 +252,8 @@ mqtt_on_connect(struct mosquitto *mosq, void *obj, int rc)
 }
 /******************************************************************************/
 static void
-mqtt_on_disconnect(struct mosquitto *mosq, void *obj, int rc)
+mqtt_on_disconnect(__attribute__((unused)) struct mosquitto *mosq, void *obj,
+        int rc)
 {
     struct di_mqtt_data *private=(struct di_mqtt_data*)obj;
 
@@ -278,7 +280,7 @@ mqtt_on_publish(struct mosquitto *mosq, void *obj, int mid)
 #endif
 /******************************************************************************/
 static void
-mqtt_on_message(struct mosquitto *mosq, void *obj,
+mqtt_on_message(__attribute__((unused)) struct mosquitto *mosq, void *obj,
         const struct mosquitto_message *message)
 {
     struct di_mqtt_data *private=(struct di_mqtt_data*)obj;
@@ -313,7 +315,8 @@ mqtt_on_unsubscribe(struct mosquitto *mosq, void *obj, int mid)
 #endif
 /******************************************************************************/
 static void
-mqtt_on_log(struct mosquitto *mosq, void *obj, int level, const char *str)
+mqtt_on_log(__attribute__((unused)) struct mosquitto *mosq, void *obj,
+        int level, const char *str)
 {
     struct di_mqtt_data *private=(struct di_mqtt_data*)obj;
     int idx=private->idx;
@@ -363,8 +366,8 @@ mqtt_periodic_callback(union callbackdata data)
 }
 /*****************************************************************************/
 static void
-mqtt_select_callback(int path, enum select_types selected,
-    union callbackdata data)
+mqtt_select_callback(__attribute__((unused)) int path,
+        enum select_types selected, union callbackdata data)
 {
     struct di_mqtt_data *private=(struct di_mqtt_data*)data.p;
     int res;

@@ -5,7 +5,7 @@
  * 02.Aug.2001 PW: multicrate support
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: FERAreadout.c,v 1.16 2011/04/06 20:30:30 wuestner Exp $";
+    "$ZEL: FERAreadout.c,v 1.18 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -17,9 +17,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../../procs.h"
 #include "../../procprops.h"
 #include "../camac_verify.h"
-
-extern ems_u32* outptr;
-extern int *memberlist, wirbrauchen;
 
 RCS_REGISTER(cvsid, "procs/camac/fera")
 
@@ -60,7 +57,7 @@ plerrcode proc_FERAreadoutM(ems_u32* p)
 
 /* Auslesen eines FERA-Speichers, pollt FSC dafuer.
  (Singleevent-Modus) */
-plerrcode proc_FERAreadout(ems_u32* p)
+plerrcode proc_FERAreadout(__attribute__((unused)) ems_u32* p)
 /* in memberlist: FSC, M1, M2, ... */
 {
     struct camac_dev* dev_fsc;
@@ -111,7 +108,7 @@ poll:
     return(plOK);
 }
 
-plerrcode proc_FERAreadoutC(ems_u32* p)
+plerrcode proc_FERAreadoutC(__attribute__((unused)) ems_u32* p)
 /* in memberlist: FSC, M1, M2, ... */
 {
     struct camac_dev* dev_fsc;

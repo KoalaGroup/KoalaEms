@@ -4,20 +4,24 @@
  * 22.Jan.2001 PW: multicrate support
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: dom_ml.c,v 1.37 2015/04/06 21:35:01 wuestner Exp $";
+    "$ZEL: dom_ml.c,v 1.41 2017/11/02 21:01:07 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
 #include <errno.h>
 #include <string.h>
+#include <netdb.h>
 #include <modultypes.h>
 #include <errorcodes.h>
 #include <rcs_ids.h>
 #include <xdrstring.h>
 #include "dom_ml.h"
 #include "dommlobj.h"
+#include "../../commu/commu.h"
+#include "../../lowlevel/ipmod/ipmodules.h"
 #ifdef TEST_ML
 #include "test_modul_id.h"
 #endif
@@ -38,7 +42,7 @@ RCS_REGISTER(cvsid, "objects/domain")
 
 Modlist *modullist; /* changed from modlist (for check) */
 extern ems_u32* outptr;
-extern int *memberlist;
+extern unsigned int *memberlist;
 
 /*****************************************************************************/
 
@@ -52,13 +56,14 @@ errcode dom_ml_init()
 static void
 free_modullist(void)
 {
-    int i;
+    unsigned int i;
 /*
  *     if an error occures during creation of the modullist we have to delete
- *     an incomplete modullist. Thus we require require than all data fields
+ *     an incomplete modullist. Thus we require that all data fields
  *     used here are either valid or have an safe default value (==NULL
  *     for pointers)
  */
+printf("free_modullist(%p)\n", modullist);
     if (!modullist)
         return;
     for (i=0; i<modullist->modnum; i++) {
@@ -68,9 +73,18 @@ free_modullist(void)
             if (modullist->entry[i].address.generic.data)
                 free(modullist->entry[i].address.generic.data);
             break;
+#ifdef LOWLEVEL_IPMOD
         case modul_ip:
-            free(modullist->entry[i].address.ip.address);
+            if (modullist->entry[i].address.ip.sock)
+                ipmod_unlink(modullist->entry[i].address.ip.sock);
+            free(modullist->entry[i].address.ip.node);
             free(modullist->entry[i].address.ip.protocol);
+            free(modullist->entry[i].address.ip.rserv);
+            free(modullist->entry[i].address.ip.lserv);
+            break;
+#endif
+        default:
+            /* nothing to do */
             break;
         }
 
@@ -96,13 +110,15 @@ static errcode
 downloadmodullist2(ems_u32* p, unsigned int num)
 {
     ems_u32* ptr;
-    int i;
+    unsigned int i;
     errcode res;
 
     T(downloadmodullist2)
     D(D_REQ, printf("DownloadDomain: Modullist, new style\n");)
     D(D_REQ, printf("  %d Eintraege:\n", p[1]);)
-    D(D_REQ, {int i; for (i=0; i<num; i++) printf("%d, ", p[i]); printf("\n");})
+    D(D_REQ, {unsigned int i;
+        for (i=0; i<num; i++) printf("%d, ", p[i]); printf("\n");}
+    )
 
 /*
  *  we do not know how the compiler will align the members of Modlist
@@ -118,6 +134,7 @@ downloadmodullist2(ems_u32* p, unsigned int num)
     ptr=p+2;
     for (i=0; i<p[1]; i++) {
         Modulclass modulclass;
+
         if (ptr+1>p+num) {
             res=Err_ArgNum;
             goto error;
@@ -226,36 +243,109 @@ downloadmodullist2(ems_u32* p, unsigned int num)
                 goto error;
             }
             break;
-        case modul_ip:
+#ifdef LOWLEVEL_IPMOD
+        case modul_ip: {
             /*
              * module_ip is for modules like SIS3316 with direct IP (ethernet)
              * connection
              * arguments are:
-             *      string address (addr:port)
-             *      string protocol (udp or tcp)
-            */
-            if (ptr+1>p+num || ptr+xdrstrlen(ptr)>p+num) {
+             *      int    number of string arguments
+             *      string ip address
+             *      string protocol ("udp" or "tcp")
+             *      string ip remote port
+             *      string ip local port
+             *   protocol and ports may be empty, the consumer should use
+             *   default values
+             */
+            int n;
+#if 0 /* not necessary because modullist is 'calloc'ed */
+            modullist->entry[i].address.ip.node=0;
+            modullist->entry[i].address.ip.protocol=0;
+            modullist->entry[i].address.ip.rserv=0;
+            modullist->entry[i].address.ip.lserv=0;
+            modullist->entry[i].address.ip.sock=0;
+#endif
+            if (ptr+1>p+num) {
+                complain("downloadmodullist/ip: no argument counter");
                 res=Err_ArgNum;
                 goto error;
             }
-            ptr=xdrstrcdup(&modullist->entry[i].address.ip.address, ptr);
+            n=*ptr++;
+
+            /* node */
+            if (n<1 || ptr+1>p+num || ptr+xdrstrlen(ptr)>p+num) {
+                complain("downloadmodullist/ip: no address given");
+                res=Err_ArgNum;
+                goto error;
+            }
+            ptr=xdrstrcdup(&modullist->entry[i].address.ip.node, ptr);
             if (!ptr) {
                 res=Err_NoMem;
                 goto error;
             }
+
+            /* protocol */
+            if (n<2) /* no more arguments */
+                goto end_modul_ip;
             if (ptr+1>p+num || ptr+xdrstrlen(ptr)>p+num) {
+                complain("downloadmodullist/ip: no valid protocol string");
                 res=Err_ArgNum;
                 goto error;
             }
-            ptr=xdrstrcdup(&modullist->entry[i].address.ip.protocol, ptr);
-            if (!ptr) {
-                res=Err_NoMem;
+            if (xdrstrclen(ptr)) {
+                ptr=xdrstrcdup(&modullist->entry[i].address.ip.protocol, ptr);
+                if (!ptr) {
+                    res=Err_NoMem;
+                    goto error;
+                }
+            } else {
+                modullist->entry[i].address.ip.protocol=0;
+            }
+
+            /* remote service */
+            if (n<3) /* no more arguments */
+                goto end_modul_ip;
+            if (ptr+1>p+num || ptr+xdrstrlen(ptr)>p+num) {
+                complain("downloadmodullist/ip: no valid rserv string");
+                res=Err_ArgNum;
                 goto error;
             }
+            if (xdrstrclen(ptr)) {
+                ptr=xdrstrcdup(&modullist->entry[i].address.ip.rserv, ptr);
+                if (!ptr) {
+                    res=Err_NoMem;
+                    goto error;
+                }
+            } else {
+                modullist->entry[i].address.ip.rserv=0;
+            }
+
+            /* local service */
+            if (n<4) /* no more arguments */
+                goto end_modul_ip;
+            if (ptr+1>p+num || ptr+xdrstrlen(ptr)>p+num) {
+                complain("downloadmodullist/ip: no valid lserv string");
+                res=Err_ArgNum;
+                goto error;
+            }
+            if (xdrstrclen(ptr)) {
+                ptr=xdrstrcdup(&modullist->entry[i].address.ip.lserv, ptr);
+                if (!ptr) {
+                    res=Err_NoMem;
+                    goto error;
+                }
+            } else {
+                modullist->entry[i].address.ip.lserv=0;
+            }
+
+            }
+end_modul_ip:
             break;
+#endif /* LOWLEVEL_IPMOD */
         default:
             printf("downloadmodullist2: modul #%d: modul_class=%d\n", i, modulclass);
 #ifdef DEFAULT_MODULE_CLASS
+            XXXX
             modullist->entry[i].modulclass=modul_none;
 #else
             free(modullist);
@@ -327,6 +417,16 @@ downloadmodullist(ems_u32* p, unsigned int num)
     errcode res;
 
     T(downloadmodullist)
+
+#if 0
+    {
+        int i;
+        printf("downloadmodullist:\n");
+        for (i=0; i<num; i++)
+            printf("[%2d] %08x %10d\n", i, p[i], p[i]);
+    }
+#endif
+
     if (modullist)
         return(Err_DomainDef);
 #ifdef READOUT_CC
@@ -348,7 +448,7 @@ downloadmodullist(ems_u32* p, unsigned int num)
 #ifdef OBJ_IS
     if (res==OK) {
         /* create dummy memberlist for IS 0 */
-        int i;
+        unsigned int i;
         if (!is_list[0]) {
             is_list[0]=calloc(1, sizeof(struct IS));
             if (!is_list[0]) {
@@ -385,7 +485,7 @@ p[0] : Domain-ID (0||1; Domain-ID is missused as version number)
 static errcode
 uploadmodullist(ems_u32* p, unsigned int num)
 {
-    int i;
+    unsigned int i;
 
     T(uploadmodullist)
     D(D_REQ, printf("UploadDomain: Modullist\n");)
@@ -448,9 +548,44 @@ uploadmodullist(ems_u32* p, unsigned int num)
             *outptr++=modullist->entry[i].address.lvd.crate;
             *outptr++=modullist->entry[i].address.lvd.mod;
             break;
-        case modul_ip:
-            outptr=outstring(outptr, modullist->entry[i].address.ip.address);
-            outptr=outstring(outptr, modullist->entry[i].address.ip.protocol);
+#ifdef LOWLEVEL_IPMOD
+        case modul_ip: {
+            int n=4;
+            if (modullist->entry[i].address.ip.lserv==0)
+                n--;
+            if (modullist->entry[i].address.ip.rserv==0)
+                n--;
+            if (modullist->entry[i].address.ip.protocol==0)
+                n--;
+            /* node is required */
+            *outptr++=n;
+            outptr=outstring(outptr, modullist->entry[i].address.ip.node);
+            if (n>1) {
+                if (modullist->entry[i].address.ip.protocol)
+                    outptr=outstring(outptr,
+                            modullist->entry[i].address.ip.protocol);
+                else
+                    *outptr++=0; /* ==empty string */
+            }
+            if (n>2) {
+                if (modullist->entry[i].address.ip.rserv)
+                    outptr=outstring(outptr,
+                            modullist->entry[i].address.ip.rserv);
+                else
+                    *outptr++=0; /* ==empty string */
+            }
+            if (n>3) {
+                if (modullist->entry[i].address.ip.lserv)
+                    outptr=outstring(outptr,
+                            modullist->entry[i].address.ip.lserv);
+                else
+                    *outptr++=0; /* ==empty string */
+            }
+            }
+            break;
+#endif /* LOWLEVEL_IPMOD */
+        default:
+            /* nothing to do */
             break;
         }
     }
@@ -462,7 +597,7 @@ deletemodullist
 p[0] : Domain-ID (belanglos)
 */
 static errcode
-    deletemodullist(ems_u32* p, unsigned int num)
+deletemodullist(__attribute__((unused)) ems_u32* p, unsigned int num)
 {
     int is;
 
@@ -516,9 +651,17 @@ dump_modent(ml_entry *entry, int verbose)
     case modul_can:
         printf(" [%d %d]", entry->address.can.bus, entry->address.can.id);
         break;
+#ifdef LOWLEVEL_IPMOD
     case modul_ip:
-        printf(" [%s %s]",
-            entry->address.ip.address, entry->address.ip.protocol);
+        printf(" [%s %s %s %s]",
+            entry->address.ip.node,
+            entry->address.ip.protocol,
+            entry->address.ip.rserv,
+            entry->address.ip.lserv);
+        break;
+#endif /* LOWLEVEL_IPMOD */
+    default:
+        /* nothing to do */
         break;
     }
 
@@ -542,7 +685,7 @@ dump_modent(ml_entry *entry, int verbose)
 plerrcode
 dump_modulelist(void)
 {
-    int i;
+    unsigned int i;
 
     if (!modullist)
         return plErr_NoDomain;
@@ -598,6 +741,23 @@ valid_module(unsigned idx, Modulclass accepted_class)
     return 1;
 }
 /*****************************************************************************/
+plerrcode
+get_modent(unsigned int idx, ml_entry **module)
+{
+    if (!modullist)
+        return plErr_NoDomain;
+    if (memberlist) {
+        if (idx==0 || idx>memberlist[0])
+            return plErr_ArgRange;
+        idx=memberlist[idx];
+    }
+    if (idx>=modullist->modnum)
+        return plErr_ArgRange;
+
+    *module=modullist->entry+idx;
+    return plOK;
+}
+/*****************************************************************************/
 /*static domobj *lookup_dom_ml(int* id, int idlen, int* remlen)*/
 static objectcommon*
 lookup_dom_ml(ems_u32* id, unsigned int idlen,
@@ -631,7 +791,8 @@ domobj dom_ml_obj={
         dom_ml_init,
         dom_ml_done,
         lookup_dom_ml,
-        dir_dom_ml
+        dir_dom_ml,
+        0
     },
     downloadmodullist,
     uploadmodullist,

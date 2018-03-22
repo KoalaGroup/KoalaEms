@@ -3,7 +3,7 @@
  * created 2007-Jul-05 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: plxsync_proc.c,v 1.2 2011/04/06 20:30:34 wuestner Exp $";
+    "$ZEL: plxsync_proc.c,v 1.4 2017/10/21 21:58:26 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -16,10 +16,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../../../objects/domain/dom_ml.h"
 #include "../../../lowlevel/sync/syncdev.h"
 #include "../../../lowlevel/devices.h"
-
-extern ems_u32* outptr;
-extern int wirbrauchen;
-extern int *memberlist;
 
 #define get_device(branch) \
     (struct sync_dev*)get_gendevice(modul_sync, (branch))

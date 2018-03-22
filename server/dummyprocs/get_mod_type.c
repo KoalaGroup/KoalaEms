@@ -13,7 +13,7 @@
 /*****************************************************************************/
 
 int get_mod_type(int addr); /* only for gcc -Wstrict-prototypes -Wmissing-prototypes */
-int get_mod_type(int addr)
+int get_mod_type(__attribute__((unused)) int addr)
 {
 return(NO_KNOWN_MODULE);
 }

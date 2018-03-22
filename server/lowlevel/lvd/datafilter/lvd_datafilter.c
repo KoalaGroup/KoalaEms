@@ -3,7 +3,7 @@
  * created 2010-Feb-03 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: lvd_datafilter.c,v 1.2 2011/04/06 20:30:26 wuestner Exp $";
+    "$ZEL: lvd_datafilter.c,v 1.3 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <sconf.h>
 #include <rcs_ids.h>
@@ -12,12 +12,12 @@ static const char* cvsid __attribute__((unused))=
 RCS_REGISTER(cvsid, "lowlevel/lvd/datafilter")
 
 /*****************************************************************************/
-int lvd_datafilter_low_printuse(FILE* outfilepath)
+int lvd_datafilter_low_printuse(__attribute__((unused)) FILE* outfilepath)
 {
     return 0;
 }
 /*****************************************************************************/
-errcode lvd_datafilter_low_init(char* arg)
+errcode lvd_datafilter_low_init(__attribute__((unused)) char* arg)
 {
     return OK;
 }

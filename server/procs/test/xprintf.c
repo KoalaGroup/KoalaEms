@@ -3,7 +3,7 @@
  * created 2013-01-17 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: xprintf.c,v 1.1 2013/01/17 22:43:45 wuestner Exp $";
+    "$ZEL: xprintf.c,v 1.2 2017/10/09 21:25:38 wuestner Exp $";
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -14,7 +14,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../procs.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
 
 RCS_REGISTER(cvsid, "procs/test")
 

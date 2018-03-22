@@ -3,7 +3,7 @@
  * created 2006-Jul-29 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: sis5100raw.c,v 1.2 2011/04/06 20:30:30 wuestner Exp $";
+    "$ZEL: sis5100raw.c,v 1.4 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -26,10 +26,6 @@ static const char* cvsid __attribute__((unused))=
 #ifdef DMALLOC
 #include dmalloc.h
 #endif
-
-extern ems_u32* outptr;
-extern int wirbrauchen;
-extern int *memberlist;
 
 #define get_camacdevice(crate) \
     (struct camac_dev*)get_gendevice(modul_camac, (crate))

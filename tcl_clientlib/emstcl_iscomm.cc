@@ -21,7 +21,7 @@
 #include <versions.hxx>
 
 VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
-"$ZEL: emstcl_iscomm.cc,v 1.26 2014/07/14 15:13:25 wuestner Exp $")
+"$ZEL: emstcl_iscomm.cc,v 1.27 2015/04/24 16:16:45 wuestner Exp $")
 #define XVERSION
 
 using namespace std;
@@ -848,17 +848,38 @@ int E_is::e_rolist_setup(int argc, const char* argv[])
             res=TCL_ERROR;
         }
         for (int j=0; (res==TCL_OK) && (j<mlc); j++) {
-            long arg;
-            if (xTclGetLong(interp, (char*)mlv[j], &arg)!=TCL_OK) {
-                res=TCL_ERROR;
-                break;
-            }
-            try {
-                ro_add_param((int)arg);
-            }catch (C_error* e) {
-                Tcl_SetResult_Err(interp, e);
-                delete e;
-                res=TCL_ERROR;
+            if (mlv[j][0]=='\'') { // it is a string
+                char* s=(char*)mlv[j];
+                char* se=s+strlen(s)-1;
+                if (*se!='\'') {
+                    ostringstream ss;
+                    ss << "Unmatched ' in " << s;
+                    Tcl_SetResult_Stream(interp, ss);
+                    res=TCL_ERROR;
+                } else {
+                    *se=0;
+                    try {
+                        ro_add_param(s+1);
+                    } catch (C_error* e) {
+                        Tcl_SetResult_Err(interp, e);
+                        delete e;
+                        res=TCL_ERROR;
+                    }
+                    *se='\'';
+                }
+            } else {
+                long arg;
+                if (xTclGetLong(interp, (char*)mlv[j], &arg)!=TCL_OK) {
+                    res=TCL_ERROR;
+                    break;
+                }
+                try {
+                    ro_add_param((int)arg);
+                }catch (C_error* e) {
+                    Tcl_SetResult_Err(interp, e);
+                    delete e;
+                    res=TCL_ERROR;
+                }
             }
         }
         Tcl_Free((char*)mlv);
@@ -929,9 +950,9 @@ int E_is::e_rolist_create(int argc, const char* argv[])
         res=e_rolist_setup(argc-5, argv+5);
     }
 
-    if (res<0) {
+    if (res!=TCL_OK) {
         delete[] trigg;
-        return TCL_ERROR;
+        return res;
     }
 
     try {

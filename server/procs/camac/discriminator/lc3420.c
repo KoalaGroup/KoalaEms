@@ -3,7 +3,7 @@
  * created 2010-07-28 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: lc3420.c,v 1.5 2015/04/06 21:33:27 wuestner Exp $";
+    "$ZEL: lc3420.c,v 1.7 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -19,8 +19,7 @@ static const char* cvsid __attribute__((unused))=
 #include "../../procprops.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
-extern int *memberlist;
+extern unsigned int *memberlist;
 
 RCS_REGISTER(cvsid, "procs/camac/discriminator")
 
@@ -133,7 +132,7 @@ plerrcode proc_lc3420_set_threshold(ems_u32* p)
     plerrcode pres=plOK;
 
     if (ip[1]<0) {
-        int i;
+        unsigned int i;
         if (memberlist) { /* iterate over memberlist */
             for (i=1; i<memberlist[0]; i++) {
                 module=&modullist->entry[memberlist[i]];
@@ -232,7 +231,7 @@ plerrcode proc_lc3420_set_width(ems_u32* p)
     plerrcode pres=plOK;
 
     if (ip[1]<0) {
-        int i;
+        unsigned int i;
         if (memberlist) { /* iterate over memberlist */
             for (i=1; i<memberlist[0]; i++) {
                 module=&modullist->entry[memberlist[i]];
@@ -329,7 +328,7 @@ plerrcode proc_lc3420_set_mask(ems_u32* p)
     plerrcode pres=plOK;
 
     if (ip[1]<0) {
-        int i;
+        unsigned int i;
         if (memberlist) { /* iterate over memberlist */
             for (i=1; i<memberlist[0]; i++) {
                 module=&modullist->entry[memberlist[i]];
@@ -421,7 +420,7 @@ plerrcode proc_lc3420_set_tqc(ems_u32* p)
     plerrcode pres=plOK;
 
     if (ip[1]<0) {
-        int i;
+        unsigned int i;
         if (memberlist) { /* iterate over memberlist */
             for (i=1; i<memberlist[0]; i++) {
                 module=&modullist->entry[memberlist[i]];

@@ -1,7 +1,7 @@
 /*
  * lowlevel/oscompat/oscompat.h
  * 
- * $ZEL: oscompat.h,v 1.5 2005/12/04 21:59:22 wuestner Exp $
+ * $ZEL: oscompat.h,v 1.6 2016/05/12 21:06:28 wuestner Exp $
  */
 
 #ifndef _oscompat_h_
@@ -47,5 +47,6 @@ void unmap_memory(mmapresc*);
 int oscompat_low_printuse(FILE* outfilepath);
 errcode oscompat_low_init(char* arg);
 errcode oscompat_low_done(void);
+int microsleep(int us);
 
 #endif

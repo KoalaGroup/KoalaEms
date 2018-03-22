@@ -1,4 +1,4 @@
-# $ZEL: setup_veds.tcl,v 1.12 2009/03/29 19:59:55 wuestner Exp $
+# $ZEL: setup_veds.tcl,v 1.13 2016/03/18 16:40:03 wuestner Exp $
 # copyright:
 # 1998 P. Wuestner; Zentrallabor fuer Elektronik; Forschungszentrum Juelich
 #
@@ -69,10 +69,20 @@ set res [ved_setup_$space eval {
   }
 ## Trigger
   if [info exists trigger] {
-    if {$global_verbose} {output_append "load trigger $trigger"}
-    if [catch {eval ved trigger create $trigger} mist] {
-      output "VED [ved name]:\n$mist" tag_red
-      return -1
+    if {[array exists trigger]==0} { ;# single variable, use idx 0
+        if {$global_verbose} {output_append "load trigger $trigger"}
+        if [catch {eval ved trigger create $trigger} mist] {
+          output "VED [ved name]:\n$mist" tag_red
+          return -1
+        }
+    } else {
+        foreach i [lsort -integer -decreasing [array names trigger]] {
+            if {$global_verbose} {output_append "load trigger $i $trigger($i)"}
+            if [catch {eval ved trigger create $i $trigger($i)} mist] {
+              output "VED [ved name]:\n$mist" tag_red
+              return -1
+            }
+        }
     }
   }
 ## LAM

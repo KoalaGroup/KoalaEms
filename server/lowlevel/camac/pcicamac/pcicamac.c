@@ -2,7 +2,7 @@
  * lowlevel/camac/pcicamac/pcicamac.c
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: pcicamac.c,v 1.32 2011/04/06 20:30:22 wuestner Exp $";
+    "$ZEL: pcicamac.c,v 1.34 2017/10/21 23:21:35 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -23,7 +23,8 @@ static const char* cvsid __attribute__((unused))=
 #include <rcs_ids.h>
 #include "../../../commu/commu.h"
 #include "../../../main/signals.h"
-#include "../../../trigger/trigger.h"
+/*#include "../../../trigger/trigger.h"*/
+#include "../../../objects/pi/readout.h"
 #include "pcicamaddr.h"
 #include "../camac.h"
 #include "../camac_init.h"
@@ -664,7 +665,7 @@ _zel_FERAreadout_kern(struct camac_dev* dev, ems_u32** bufp)
         if (res<0) {
             printf("FERAreadout: %s\n", strerror(errno));
             return -1;
-        } else if (res==buflen) {
+        } else if ((size_t)res==buflen) {
             printf("FERAreadout: buffer too short (%llu)\n",
                     (unsigned long long)buflen);
             return -1;
@@ -700,7 +701,7 @@ _zel_FERAreadout_kern(struct camac_dev* dev, ems_u32** bufp)
                         word0, ((word0&0x1fff)+1)*4,
                         (unsigned long long)res,
                         missing,
-                        trigger.eventcnt);
+                        global_evc.ev_count);
                 printf("calling READFIFO(%d)\n", missing);
                 if (ioctl(info->p, READFIFO, &missing)<0)
                     printf("READFIFO: %s\n", strerror(errno));
@@ -811,15 +812,17 @@ zel_camacdelay(struct camac_dev* dev, int delay, int* olddelay)
 /*****************************************************************************/
 #ifdef DELAYED_READ
 static int
-zel_enable_delayed_read(struct generic_dev* dev, int val)
+zel_enable_delayed_read(__attribute__((unused)) struct generic_dev* dev,
+        __attribute__((unused)) int val)
 {
     return 0;
 }
 
-static void zel_reset_delayed_read(struct generic_dev* gdev) {}
+static void zel_reset_delayed_read(
+        __attribute__((unused)) struct generic_dev* gdev) {}
 
 static int
-zel_read_delayed(struct generic_dev* gdev)
+zel_read_delayed(__attribute__((unused)) struct generic_dev* gdev)
 {
     return -1;
 }
@@ -983,7 +986,7 @@ pcicamac_get_FERA_procs(struct camac_dev* dev)
 #endif
 
 static struct camac_raw_procs*
-pcicamac_get_raw_procs(struct camac_dev* dev)
+pcicamac_get_raw_procs(__attribute__((unused)) struct camac_dev* dev)
 {
     return 0;
 }
@@ -996,7 +999,7 @@ lamhandler(union SigHdlArg arg, int signal)
 }
 /*****************************************************************************/
 static void
-stathandler(union SigHdlArg arg, int signal)
+stathandler(union SigHdlArg arg, __attribute__((unused)) int signal)
 {
     struct camac_dev* dev=(struct camac_dev*)arg.ptr;
 

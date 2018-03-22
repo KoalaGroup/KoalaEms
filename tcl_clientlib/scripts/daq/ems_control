@@ -46,7 +46,6 @@ set_options
 
 set tcl_precision 17
 
-# setup file
 set global_display [display_name]
 set global_setupfile(base) daq_control_rc
 set global_setupfile(default) ~/.$global_setupfile(base)
@@ -93,9 +92,7 @@ if {$global_setupfile(restored)!=""} {
 }
 
 # und, wenn noetig, Setup vervollstaendigen
-# set default setup variables
 correct_setup
-# use the command line args to cover the default setup variables
 use_args
 
 set maintitle $global_setup(maintitle)
@@ -107,6 +104,7 @@ wm maxsize . 10000 10000
 tk_focusFollowsMouse
 
 # proc namespacedummies is called in order to load bgerror, daq_ende and all
+#   procedures in namespaces
 namespacedummies
 
 source $global_setup(share_dir)/requestarr.tcl

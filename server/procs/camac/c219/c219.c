@@ -3,7 +3,7 @@
  * created 20.Sep.2002 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: c219.c,v 1.11 2011/04/06 20:30:30 wuestner Exp $";
+    "$ZEL: c219.c,v 1.13 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -18,10 +18,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../../procprops.h"
 
 RCS_REGISTER(cvsid, "procs/camac/c219")
-
-extern ems_u32* outptr;
-extern int wirbrauchen;
-extern int *memberlist;
 
 #define BITS 16
 /*****************************************************************************/

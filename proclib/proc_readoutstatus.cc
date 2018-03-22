@@ -18,7 +18,7 @@
 #include <versions.hxx>
 
 VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
-"$ZEL: proc_readoutstatus.cc,v 2.7 2014/07/14 15:11:54 wuestner Exp $")
+"$ZEL: proc_readoutstatus.cc,v 2.8 2016/05/10 16:24:46 wuestner Exp $")
 #define XVERSION
 
 using namespace std;
@@ -29,7 +29,7 @@ C_readoutstatus::C_readoutstatus(C_inbuf& ib, int useaux)
 {
 ib++; // errorcode
 //cerr<<ib<<endl;
-status_=(InvocStatus)ib.getint();
+status_=static_cast<InvocStatus>(ib.getint());
 ib >> eventcount_;
 if (ib)
   {
@@ -106,8 +106,7 @@ void C_readoutstatus::settime(const struct timeval& tv)
 /*****************************************************************************/
 double C_readoutstatus::evrate(const C_readoutstatus& s) const
 {
-    int diff;
-    double tdiff;
+    double diff, tdiff;
 
     if (!time_valid_ || !s.time_valid()) {
         cerr << "C_readoutstatus::evrate: schlechte Zeiten" << endl;
@@ -116,12 +115,13 @@ double C_readoutstatus::evrate(const C_readoutstatus& s) const
 
     diff=eventcount_-s.eventcount_;
     tdiff=gettime()-s.gettime();
-    return (double)diff/tdiff;
+    return diff/tdiff;
 }
 /*****************************************************************************/
 double C_readoutstatus::gettime() const
 {
-    return (double)timestamp_.tv_sec+(double)timestamp_.tv_usec/1000000.;
+    return static_cast<double>(timestamp_.tv_sec)
+        +static_cast<double>(timestamp_.tv_usec)/1000000.;
 }
 /*****************************************************************************/
 ostream& C_readoutstatus::print(ostream& os) const

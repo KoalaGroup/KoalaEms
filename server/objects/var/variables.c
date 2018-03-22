@@ -3,7 +3,7 @@
  * created 22.09.93
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: variables.c,v 1.17 2011/04/06 20:30:29 wuestner Exp $";
+    "$ZEL: variables.c,v 1.18 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -140,14 +140,15 @@ p[2] : data
 errcode WriteVariable(ems_u32* p, unsigned int num)
 {
 ems_u32 *i;
-unsigned int idx, size;
+unsigned int idx;
+unsigned int size;
 
 T(WriteVariable)
 D(D_REQ, printf("WriteVariable");)
 if ((num<2) || (num!=p[1]+2)) return(Err_ArgNum);
 D(D_REQ, printf("  index: %d\n", p[0]);)
 D(D_REQ, printf("  Anzahl: %d\n", p[1]);)
-D(D_REQ, int j; for (j=0; j<p[1]; j++) printf("  %d\n", p[j+2]);)
+D(D_REQ, unsigned int j; for (j=0; j<p[1]; j++) printf("  %d\n", p[j+2]);)
 idx=p[0];
 size=p[1];
 if (idx>=MAX_VAR) return(Err_IllVar);

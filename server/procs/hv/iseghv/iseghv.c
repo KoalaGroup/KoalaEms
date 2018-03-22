@@ -3,7 +3,7 @@
  * created 24.11.2005
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: iseghv.c,v 1.10 2011/04/06 20:30:33 wuestner Exp $";
+    "$ZEL: iseghv.c,v 1.12 2017/10/20 23:37:23 wuestner Exp $";
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,7 +16,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../../../objects/domain/dom_ml.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
 
 #define get_device(bus) \
     (struct canbus_dev*)get_gendevice(modul_can, (bus))
@@ -37,7 +36,7 @@ plerrcode proc_iseghv_nmt(ems_u32* p)
     /*int direction=0*/;
     int data_id=p[2]&0xff;
     int ext=(p[2]>>8)&1;
-    int i;
+    unsigned int i;
     plerrcode pres;
 
     msg.id=4|ext<<1;
@@ -84,7 +83,7 @@ plerrcode proc_iseghv_write(ems_u32* p)
     /*int direction=0*/;
     int data_id=p[3]&0xff;
     int ext=(p[3]>>8)&1;
-    int i;
+    unsigned int i;
     plerrcode pres;
 
     msg.id=1<<9|module_id<<3|ext<<1;
@@ -207,7 +206,7 @@ plerrcode proc_iseghv_logon(ems_u32* p)
     for (i=0; i<nread; i++) {
         struct can_msg *msg=&rmsg[i].msg;
         if (((msg->id&0x607)==0x201)&&(msg->len==3)&&(msg->data[0]==0xd8)) {
-            int idx=(msg->id>>3)&0x3f;
+            unsigned int idx=(msg->id>>3)&0x3f;
             if ((idx==p[2]) && (msg->data[0]==0xd8)) {
                 *outptr++=msg->len-1;
                 for (i=1; i<msg->len; i++)

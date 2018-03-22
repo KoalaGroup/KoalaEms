@@ -1,6 +1,12 @@
+/*
+ * lowlevel/oscompat/tsleep.c
+ * created: long long ago
+ */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: tsleep.c,v 1.4 2011/04/06 20:30:27 wuestner Exp $";
+    "$ZEL: tsleep.c,v 1.5 2016/05/12 21:06:28 wuestner Exp $";
 
+#include <errno.h>
+#include <string.h>
 #include <rcs_ids.h>
 
 RCS_REGISTER(cvsid, "lowlevel/oscompat")
@@ -26,3 +32,15 @@ void tsleep(int hunds)
     nanosleep(&rqtp, &rmtp);
 }
 #endif
+
+int
+microsleep(int us)
+{
+    struct timespec ts={0, 0};
+
+    ts.tv_nsec=us*1000;
+    if (nanosleep(&ts, 0)<0) {
+        printf("nanosleep: %s\n", strerror(errno));
+    }
+    return 0;
+}

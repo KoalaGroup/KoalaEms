@@ -3,7 +3,7 @@
  * created before 02.02.94
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: dom_datain.c,v 1.23 2015/04/06 21:35:00 wuestner Exp $";
+    "$ZEL: dom_datain.c,v 1.25 2017/10/27 21:07:54 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -57,6 +57,8 @@ static void free_datain_res(int i)
       if(datain[i].addr.driver.path)
         free(datain[i].addr.driver.path);
       break;
+    default:
+      {/* nothing to do */}
   }
   if (datain[i].bufinfo) free(datain[i].bufinfo);
   if (datain[i].addrinfo) free(datain[i].addrinfo);
@@ -73,8 +75,8 @@ T(dom_datain_init)
 for (i=0; i<MAX_DATAIN; i++)
   {
   datain[i].bufftyp= -1;
-  datain[i].bufinfo=(int*)0;
-  datain[i].addrinfo=(int*)0;
+  datain[i].bufinfo=0;
+  datain[i].addrinfo=0;
   }
 return(OK);
 }
@@ -118,19 +120,21 @@ errcode dom_datain_done()
 
 static errcode downloaddatain(ems_u32* p, unsigned int len)
 {
-int index, res, i, l;
+ems_i32 *ip=(ems_i32*)p;
+int index, res, l;
+unsigned int i;
 ems_u32 *q, *r;
-int qlen, rlen;
+unsigned int qlen, rlen;
 
 T(downloaddatain)
 D(D_REQ, {
-  int i;
+  unsigned int i;
   printf("DownloadDomain Datain(");
   for (i=0; i<len; i++) printf("%d%s", p[i], i+1<len?", ":"");
   printf(")\n");})
 if ((unsigned int)len<3) return Err_ArgNum;
 
-if (p[2]==-1)
+if (ip[2]==-1)
   {
   q=p+4;
   qlen=p[3];
@@ -150,7 +154,7 @@ index=p[0];
 if ((unsigned int) index>=MAX_DATAIN) return (Err_IllDomain);
 if (readout_active) return (Err_PIActive);
 if (datain[index].bufftyp!=-1) return (Err_DomainDef);
-if (p[2]==-1)
+if (ip[2]==-1)
   datain[index].addrtyp=p[qlen+4];
 else
   datain[index].addrtyp=p[2];
@@ -272,13 +276,13 @@ switch(datain[index].addrtyp){
   }
 datain[index].bufftyp=p[1];
 datain[index].bufinfosize=qlen;
-datain[index].bufinfo=malloc(qlen*sizeof(int));
+datain[index].bufinfo=malloc(qlen*sizeof(ems_u32));
 for (i=0; i<qlen; i++) datain[index].bufinfo[i]=q[i];
 datain[index].addrinfosize=rlen;
 #if 0
 printf("downloaddatain: addrinfosize=%d\n", datain[index].addrinfosize);
 #endif
-datain[index].addrinfo=malloc(rlen*sizeof(int));
+datain[index].addrinfo=malloc(rlen*sizeof(ems_u32));
 for (i=0; i<rlen; i++) datain[index].bufinfo[i]=r[i];
 if ((res=datain_pre_init(index, qlen, q))!=OK)
   {
@@ -294,7 +298,7 @@ else
 errcode uploaddatain(ems_u32* p, unsigned int len)
 {
     ems_u32 *help=0;
-    int i;
+    size_t i;
     unsigned int index;
 
     T(uploaddatain)

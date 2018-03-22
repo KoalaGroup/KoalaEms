@@ -1,7 +1,7 @@
 /*
  * lowlevel/lvd/lvdbus.h
  * created 10.Dec.2003 PW
- * $ZEL: lvdbus.h,v 1.47 2013/01/17 22:44:53 wuestner Exp $
+ * $ZEL: lvdbus.h,v 1.49 2017/10/20 23:21:31 wuestner Exp $
  */
 
 #ifndef _lvdbus_h_
@@ -56,10 +56,10 @@ enum contr_type {
 
 struct lvd_acard {
     struct lvd_dev *dev;
-    int addr;
+    unsigned int addr;
     ems_u32 id;      /* may be changed with force_module_id */
     ems_u32 orig_id; /* orig_id remains unchanged */
-    ems_u32 serial;
+    ems_i32 serial;
     ems_u32 mtype;
     int initialized;
     int daqmode;
@@ -88,7 +88,8 @@ struct lvd_ccard {
 };
 
 struct datafilter;
-typedef plerrcode (lvd_filterproc)(struct datafilter*, ems_u32 *data, int *len);
+typedef plerrcode (lvd_filterproc)(struct datafilter*, ems_u32 *data, int *len,
+        int *maxlen);
 struct datafilter {
     struct datafilter *next;
     void *definition;
@@ -123,7 +124,7 @@ struct lvd_dev {
 
     plerrcode (*prepare_async)(struct lvd_dev*, int bufnum, size_t bufsize);
     plerrcode (*start_async)(struct lvd_dev*, int selftrigger);
-    plerrcode (*readout_async)(struct lvd_dev*, ems_u32* buffer, int* num);
+    plerrcode (*readout_async)(struct lvd_dev*, ems_u32* buffer, int* num, int);
     plerrcode (*stop_async)(struct lvd_dev*, int selftrigger);
     plerrcode (*cleanup_async)(struct lvd_dev*);
 
@@ -156,7 +157,7 @@ struct lvd_dev {
 
     int num_acards;           /* sum of all acquisition cards */
     struct lvd_acard acards[MAXACARDS];
-    int a_pat;  /* pattern of acquisition cards */
+    ems_u32 a_pat;  /* pattern of acquisition cards */
 
     //int num_headerwords;
     //ems_u32 *headerwords;
@@ -213,7 +214,7 @@ int lvd_cratestat(struct lvd_dev*, void*, int level, int modulemask);
 int lvd_contrstat(struct lvd_dev* dev, void*, int level);
 int lvd_modstat(struct lvd_dev* dev, unsigned int addr, void*, int level);
 int lvd_controllerstat(struct lvd_dev* dev, void*, int level);
-int lvd_cardstat_acq(struct lvd_dev* dev, int addr, void*, int level, int all);
+int lvd_cardstat_acq(struct lvd_dev* dev, unsigned int addr, void*, int level, int all);
 plerrcode lvd_get_eventcount(struct lvd_dev* dev, ems_u32*);
 plerrcode lvd_force_module_id(struct lvd_dev* dev, ems_u32 addr, ems_u32 id,
     ems_u32 mask, int serial);

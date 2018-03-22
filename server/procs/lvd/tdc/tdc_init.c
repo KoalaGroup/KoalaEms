@@ -3,7 +3,7 @@
  * created 2006-05-04 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: tdc_init.c,v 1.4 2013/01/17 22:41:59 wuestner Exp $";
+    "$ZEL: tdc_init.c,v 1.6 2017/10/20 23:19:11 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -16,10 +16,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../../../lowlevel/lvd/tdc/tdc.h"
 #include "../../../lowlevel/devices.h"
 #include "../lvd_verify.h"
-
-extern ems_u32* outptr;
-extern int wirbrauchen;
-extern int *memberlist;
 
 #define get_device(branch) \
     (struct lvd_dev*)get_gendevice(modul_lvd, (branch))

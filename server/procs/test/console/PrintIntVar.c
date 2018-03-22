@@ -3,7 +3,7 @@
  * 07.09.93
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: PrintIntVar.c,v 1.6 2012/09/10 22:51:17 wuestner Exp $";
+    "$ZEL: PrintIntVar.c,v 1.7 2017/10/09 21:25:38 wuestner Exp $";
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,8 +12,6 @@ static const char* cvsid __attribute__((unused))=
 #include <rcs_ids.h>
 #include "../../../objects/var/variables.h"
 #include "../../procs.h"
-
-extern int wirbrauchen;
 
 RCS_REGISTER(cvsid, "procs/test/console")
 

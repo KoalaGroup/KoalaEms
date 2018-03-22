@@ -5,7 +5,7 @@
  * 
  */
 
-#define _BSD_SOURCE
+#define _DEFAULT_SOURCE
 
 #include "config.h"
 #include <iostream>
@@ -21,7 +21,7 @@
 #include <versions.hxx>
 
 VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
-"$ZEL: caplib.cc,v 2.13 2014/07/14 15:11:53 wuestner Exp $")
+"$ZEL: caplib.cc,v 2.14 2016/05/10 13:20:33 wuestner Exp $")
 #define XVERSION
 
 using namespace std;

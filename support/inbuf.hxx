@@ -3,7 +3,7 @@
  * 
  * created 04.02.95 PW
  * 
- * $ZEL: inbuf.hxx,v 2.20 2014/07/14 15:09:53 wuestner Exp $
+ * $ZEL: inbuf.hxx,v 2.21 2016/05/02 15:20:06 wuestner Exp $
  */
 
 #ifndef _inbuf_hxx_
@@ -56,6 +56,7 @@ class C_inbuf: public C_buf
     C_inbuf& operator>>(short&);
     C_inbuf& operator>>(unsigned short&);
     C_inbuf& operator>>(char&);
+    C_inbuf& operator>>(char*&);
     C_inbuf& operator>>(string&);
     C_inbuf& operator>>(struct timeval&);
     C_inbuf& operator>>(inbuf_manip);

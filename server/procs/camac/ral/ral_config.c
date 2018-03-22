@@ -4,7 +4,7 @@
  * 19.Jan.2001 PW: multicrate support (CAMACslot --> ModulEnt)
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: ral_config.c,v 1.7 2011/04/06 20:30:30 wuestner Exp $";
+    "$ZEL: ral_config.c,v 1.8 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -22,9 +22,6 @@ static const char* cvsid __attribute__((unused))=
 #include "ral_config.h"
 
 #define DEF_STA1 0
-
-extern int* memberlist;
-extern ems_u32* outptr;
 
 RCS_REGISTER(cvsid, "procs/camac/ral")
 
@@ -343,7 +340,8 @@ static int loadregs(ml_entry* n, int col, int which, u_int8_t* data, int len)
 plerrcode proc_RALloadtestregs(ems_u32* p)
 {
 	u_int8_t data[RAL_MAX_ROWS * 4];
-	int i, len;
+	unsigned int len;
+	unsigned int i;
 	char *tmp;
 
 	if (ral_reset_module(ModulEnt(p[1])))
@@ -356,7 +354,7 @@ plerrcode proc_RALloadtestregs(ems_u32* p)
 	    case 1:
 		memset(data, p[3] == 0 ? 0 : 0x0f, len);
 		for (i = 4; i <= p[0]; i++) {
-			int bytepos;
+			unsigned int bytepos;
 			u_int8_t bit;
 			bytepos = (p[i] / 16) * 4 + (3 - (p[i] / 4) % 4);
 			if (bytepos >= len)
@@ -417,7 +415,7 @@ int ver_proc_RALloadtestregs = 1;
 plerrcode proc_RALloaddac(ems_u32* p)
 {
 	ems_u8 data[RAL_MAX_ROWS];
-	int len;
+	unsigned int len;
 
 	if (ral_reset_module(ModulEnt(p[1])))
 		return(plErr_HW);

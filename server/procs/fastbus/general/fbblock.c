@@ -6,7 +6,7 @@
  * 04.Jun.2002 PW multi crate support                                            *
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: fbblock.c,v 1.13 2015/04/06 21:33:32 wuestner Exp $";
+    "$ZEL: fbblock.c,v 1.14 2017/10/09 21:25:37 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -25,7 +25,6 @@ static const char* cvsid __attribute__((unused))=
 
 extern ems_u32* outptr;
 extern int *memberlist;
-extern int wirbrauchen;
 
 RCS_REGISTER(cvsid, "procs/fastbus/general")
 

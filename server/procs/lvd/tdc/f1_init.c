@@ -3,7 +3,7 @@
  * created 10.Dec.2003 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: f1_init.c,v 1.4 2011/04/06 20:30:33 wuestner Exp $";
+    "$ZEL: f1_init.c,v 1.6 2017/10/20 23:19:11 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -16,10 +16,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../../../lowlevel/lvd/tdc/f1.h"
 #include "../../../lowlevel/devices.h"
 #include "../lvd_verify.h"
-
-extern ems_u32* outptr;
-extern int wirbrauchen;
-extern int *memberlist;
 
 #define get_device(branch) \
     (struct lvd_dev*)get_gendevice(modul_lvd, (branch))
@@ -151,9 +147,9 @@ plerrcode test_proc_f1_shadow(ems_u32* p)
     }
 
     wirbrauchen=1;
-    if (p[2]<0) wirbrauchen*=0x110;
-    if (p[3]<0) wirbrauchen*=8;
-    if (p[4]<0) wirbrauchen*=16;
+    if (ip[2]<0) wirbrauchen*=0x110;
+    if (ip[3]<0) wirbrauchen*=8;
+    if (ip[4]<0) wirbrauchen*=16;
     return plOK;
 }
 

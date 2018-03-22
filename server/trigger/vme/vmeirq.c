@@ -3,7 +3,7 @@
  * created: 2005-12-14 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: vmeirq.c,v 1.7 2015/04/21 16:44:35 wuestner Exp $";
+    "$ZEL: vmeirq.c,v 1.9 2017/10/21 22:40:41 wuestner Exp $";
 
 #include <stdio.h>
 
@@ -34,7 +34,7 @@ struct vmeirq_private {
 };
 
 extern ems_u32* outptr;
-extern int *memberlist;
+extern unsigned int *memberlist;
 
 RCS_REGISTER(cvsid, "trigger/vme")
 
@@ -52,14 +52,14 @@ static void
 trig_vmeirq_callback(struct vme_dev* dev, ems_u32 mask,
         int level, ems_u32 vector, void* data)
 #endif
-trig_vmeirq_callback(struct vme_dev *dev,
+trig_vmeirq_callback(__attribute__((unused)) struct vme_dev *dev,
         const struct vmeirq_callbackdata *vme_data,
         void* data)
 {
     struct triggerinfo* trinfo=(struct triggerinfo*)data;
     struct trigprocinfo* tinfo=(struct trigprocinfo*)trinfo->tinfo;
     struct vmeirq_private* priv=(struct vmeirq_private*)tinfo->private;
-    trinfo->eventcnt++;
+    trinfo->count++;
     trinfo->trigger=priv->trigger;
     trinfo->time=vme_data->time;
     trinfo->time_valid=1;
@@ -175,7 +175,7 @@ init_trig_vmeirq(ems_u32* p, struct triggerinfo* trinfo)
     priv->dev=priv->module->address.vme.dev;
     priv->dev_info=(struct vme_sis_info*)priv->dev->info;
 
-    trinfo->eventcnt=0;
+    trinfo->count=0;
 
     tinfo->insert_triggertask=insert_trig_vmeirq;
     tinfo->suspend_triggertask=remove_trig_vmeirq;

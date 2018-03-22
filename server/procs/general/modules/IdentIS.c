@@ -3,7 +3,7 @@
  * created before 04.11.94
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: IdentIS.c,v 1.6 2011/04/06 20:30:32 wuestner Exp $";
+    "$ZEL: IdentIS.c,v 1.8 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <sconf.h>
 #include <rcs_ids.h>
@@ -17,10 +17,6 @@ static const char* cvsid __attribute__((unused))=
 #error DOM_ML must be defined
 #endif
 
-extern ems_u32* outptr;
-extern int* memberlist;
-extern int wirbrauchen;
-
 RCS_REGISTER(cvsid, "procs/general/modules")
 
 /*****************************************************************************/
@@ -28,7 +24,7 @@ RCS_REGISTER(cvsid, "procs/general/modules")
   schreibt Array mit Modulindizes und -typen des aktuellen
   Instrumentierungssystemes in den Ausgabepuffer
 */
-plerrcode proc_IdentIS(ems_u32* p)
+plerrcode proc_IdentIS(__attribute__((unused)) ems_u32* p)
 {
     if (memberlist) {
         int i, anz;

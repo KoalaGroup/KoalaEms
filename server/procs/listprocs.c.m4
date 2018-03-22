@@ -3,7 +3,7 @@
  * 06.11.94      
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: listprocs.c.m4,v 1.13 2011/04/06 20:30:29 wuestner Exp $";
+    "$ZEL: listprocs.c.m4,v 1.14 2017/10/20 23:20:52 wuestner Exp $";
 
 #include "listprocs.h"
 #include "procs.h"
@@ -44,16 +44,16 @@ include(procedures)
 };
 #endif
 
-int NrOfProcs=sizeof(Proc)/sizeof(listproc);
+unsigned int NrOfProcs=sizeof(Proc)/sizeof(listproc);
 
 /*****************************************************************************/
 /*
 getlistproclist
 p[0] : Capabtyp (==Capab_listproc)
 */
-errcode getlistproclist(ems_u32* p, unsigned int num)
+errcode getlistproclist(__attribute__((unused)) ems_u32* p, unsigned int num)
 {
-register int i;
+register unsigned int i;
 
 T(getlistproclist)
 D(D_REQ, printf("GetCapabilityList(Capab_listproc)\n");)
@@ -83,9 +83,9 @@ p[0] : level (0: nur Laengen, 1: Syntax, 2: Text, ...?)
 p[1] : no. of procs
 .... : procIDs
 */
-errcode getlistprocprop(ems_u32* p, unsigned int num)
+errcode getlistprocprop(ems_u32* p, __attribute__((unused)) unsigned int num)
 {
-int i;
+unsigned int i;
 
 T(getlistprocprop)
 for (i=0; i<p[1]; i++)

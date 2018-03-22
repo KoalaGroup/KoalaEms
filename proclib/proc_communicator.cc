@@ -28,7 +28,7 @@
 #endif
 
 VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
-"$ZEL: proc_communicator.cc,v 2.11 2014/07/14 15:11:53 wuestner Exp $")
+"$ZEL: proc_communicator.cc,v 2.12 2016/05/10 16:24:46 wuestner Exp $")
 #define XVERSION
 
 int C_communicator::counter=0;
@@ -45,7 +45,7 @@ if (counter>0)
     throw new C_program_error("can not create a second communicator.");
 counter++;
 deftimeout(20);
-install_ccommback(ccallback, (void*)this);
+install_ccommback(ccallback, this);
 }
 
 /*****************************************************************************/
@@ -59,7 +59,7 @@ if (valid()) Clientcomm_done();
 
 void C_communicator::ccallback(int action, int reason, int path, void* data)
 {
-((C_communicator*)data)->ccallbackm(action, reason, path);
+reinterpret_cast<C_communicator*>(data)->ccallbackm(action, reason, path);
 }
 
 /*****************************************************************************/

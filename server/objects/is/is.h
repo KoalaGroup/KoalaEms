@@ -3,7 +3,7 @@
  * created before 03.08.94
  */
 /*
- * $ZEL: is.h,v 1.14 2009/06/05 15:06:01 wuestner Exp $
+ * $ZEL: is.h,v 1.15 2017/10/20 23:21:31 wuestner Exp $
  */
 
 #ifndef _is_h_
@@ -31,7 +31,7 @@ struct readoutlist {
 struct IS {
     int id;
     int enabled;
-    int *members;
+    unsigned int *members;
 
 #ifdef ISVARS
     ISV isvar;

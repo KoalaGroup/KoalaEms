@@ -3,7 +3,7 @@
  * created 2007-01-17 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: sync_init.c,v 1.8 2011/04/06 20:30:33 wuestner Exp $";
+    "$ZEL: sync_init.c,v 1.10 2017/10/20 23:13:15 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -16,10 +16,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../../../lowlevel/lvd/sync/sync.h"
 #include "../../../lowlevel/devices.h"
 #include "../lvd_verify.h"
-
-extern ems_u32* outptr;
-extern int wirbrauchen;
-extern int *memberlist;
 
 #define get_device(branch) \
     (struct lvd_dev*)get_gendevice(modul_lvd, (branch))

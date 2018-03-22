@@ -3,7 +3,7 @@
  * created 2010-Feb-04 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: datafilter.c,v 1.2 2011/04/06 20:30:33 wuestner Exp $";
+    "$ZEL: datafilter.c,v 1.4 2017/10/20 23:10:27 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -20,7 +20,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../../../lowlevel/devices.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
 
 #define get_device(branch) \
     ((struct lvd_dev*)get_gendevice(modul_lvd, (branch)))
@@ -31,7 +30,7 @@ RCS_REGISTER(cvsid, "procs/lvd/datafilter")
 /*
  * p[0]: argcount==0
  */
-plerrcode proc_lvd_listdatafilter(ems_u32* p)
+plerrcode proc_lvd_listdatafilter(__attribute__((unused)) ems_u32* p)
 {
     outptr+=lvd_list_datafilter(outptr);
     return plOK;

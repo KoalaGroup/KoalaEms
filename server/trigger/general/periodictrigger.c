@@ -3,7 +3,7 @@
  * created 2007-May-21 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: periodictrigger.c,v 1.5 2013/12/06 20:28:14 wuestner Exp $";
+    "$ZEL: periodictrigger.c,v 1.7 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -36,7 +36,7 @@ struct period {
 };
 
 struct private {
-    int num_periods;
+    unsigned int num_periods;
     struct period *periods;
 };
 
@@ -51,7 +51,12 @@ trig_periodic_callback(union callbackdata data)
     struct period *period=(struct period*)data.p;
     struct triggerinfo* trinfo=period->trinfo;
 
-    trinfo->eventcnt++;
+#if 0
+    printf("trig_periodic_callback: eventcnt=%d trigger=%d, local count=%d\n",
+            global_evc.ev_count, period->trigger, trinfo->count);
+#endif
+
+    trinfo->count++;
     trinfo->trigger=period->trigger;
     trinfo->cb_proc(trinfo->cb_data);
 }
@@ -61,7 +66,7 @@ suspend_trig_periodic(struct triggerinfo* trinfo)
 {
     struct trigprocinfo* tinfo=(struct trigprocinfo*)trinfo->tinfo;
     struct private* priv=(struct private*)tinfo->private;
-    int i;
+    unsigned int i;
 
 #if 1
     printf("suspend_trig_periodic\n");
@@ -82,7 +87,7 @@ remove_trig_periodic(struct triggerinfo* trinfo)
 {
     struct trigprocinfo* tinfo=(struct trigprocinfo*)trinfo->tinfo;
     struct private* priv=(struct private*)tinfo->private;
-    int i;
+    unsigned int i;
 
 #if 1
     printf("remove_trig_periodic\n");
@@ -103,7 +108,7 @@ reactivate_trig_periodic(struct triggerinfo* trinfo)
 {
     struct trigprocinfo* tinfo=(struct trigprocinfo*)trinfo->tinfo;
     struct private* priv=(struct private*)tinfo->private;
-    int i;
+    unsigned int i;
 
 #if 1
 printf("reactivate_trig_periodic\n");
@@ -128,7 +133,7 @@ insert_trig_periodic(struct triggerinfo* trinfo)
 {
     struct trigprocinfo* tinfo=(struct trigprocinfo*)trinfo->tinfo;
     struct private* priv=(struct private*)tinfo->private;
-    int i;
+    unsigned int i;
 
 #if 1
     printf("insert_trig_periodic\n");
@@ -176,7 +181,7 @@ get_trig_periodic(struct trigprocinfo* info)
 /*****************************************************************************/
 #if 1
 static void
-reset_trig_periodic(struct triggerinfo* trinfo)
+reset_trig_periodic(__attribute__((unused)) struct triggerinfo* trinfo)
 {
 /*printf("reset_trig_periodic\n");*/
     /* do nothing */
@@ -196,7 +201,7 @@ plerrcode init_trig_periodic(ems_u32* p, struct triggerinfo* trinfo)
 {
     struct trigprocinfo* tinfo=(struct trigprocinfo*)trinfo->tinfo;
     struct private* priv;
-    int i;
+    unsigned int i;
 
     if (p[0]<2)
         return plErr_ArgNum;
@@ -252,7 +257,7 @@ plerrcode init_trig_periodic(ems_u32* p, struct triggerinfo* trinfo)
             }
 
             var_get_ptr(per->var_idx, &(per->var_ptr));
-            if (per->period>=0)
+            if (per->period>0)
                 *(per->var_ptr)=per->period;
             else
                 per->period=*(per->var_ptr);
@@ -282,7 +287,7 @@ plerrcode init_trig_periodic(ems_u32* p, struct triggerinfo* trinfo)
         }
     }
 
-    trinfo->eventcnt=0;
+    trinfo->count=0;
 
     tinfo->insert_triggertask=insert_trig_periodic;
     tinfo->suspend_triggertask=suspend_trig_periodic;

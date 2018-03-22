@@ -9,7 +9,7 @@
 *                                                                             *
 *******************************************************************************/
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: notifystatus.c,v 1.6 2011/04/06 20:30:29 wuestner Exp $";
+    "$ZEL: notifystatus.c,v 1.7 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -33,7 +33,7 @@ void notifystatus(status_actions action, Object object, unsigned int size,
     ems_u32* data;
     data=(ems_u32*)malloc((size+2)*sizeof(ems_u32));
     if (data!=0) {
-        int i;
+        unsigned int i;
         data[0]=action;
         data[1]=object;
         for (i=0; i<size; i++) data[i+2]=id[i];

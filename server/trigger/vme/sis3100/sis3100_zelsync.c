@@ -3,7 +3,7 @@
  * created 2007-Mar-16 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: sis3100_zelsync.c,v 1.24 2015/04/21 16:44:35 wuestner Exp $";
+    "$ZEL: sis3100_zelsync.c,v 1.25 2016/05/12 22:00:12 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -136,8 +136,10 @@ trig_sis3100_zelsync_callback(struct vme_dev *dev,
 
     /* read latch register */
     if (dev->read_controller(dev, 1, 0x84, &latchreg)<0) {
-        printf("trig_3100_sync(%s): cannot read latch register\n", dev->pathname);
-        send_unsol_var(Unsol_RuntimeError, 3, rtErr_Trig, trinfo->eventcnt, 101);
+        printf("trig_3100_sync(%s): cannot read latch register\n",
+                dev->pathname);
+        send_unsol_var(Unsol_RuntimeError, 3, rtErr_Trig, global_evc.ev_count,
+                101);
         fatal_readout_error();
     }
     if (!(latchreg&(dat->sis3100mask<<8))) {
@@ -153,7 +155,7 @@ trig_sis3100_zelsync_callback(struct vme_dev *dev,
 //                printf("trig_3100_sync: falling edge but sr=%08x\n", sr);
                 weiter=1;
             }
-            if (evc>trinfo->eventcnt) {
+            if (evc>trinfo->count) {
 //                printf("trig_3100_sync: falling edge but evc=%d, old=%d\n",
 //                        evc, trinfo->eventcnt);
                 weiter=1;
@@ -176,26 +178,28 @@ weiter:
         trig_sis3100_dump_registers(dev, dat);
         dev->acknowledge_vmeirq(dev, dat->sis3100mask, 0);
         dev->write_a32d32(dev, dat->addr+0xc, 3);
-	send_unsol_var(Unsol_RuntimeError, 3, rtErr_Trig, trinfo->eventcnt, 102);
+	send_unsol_var(Unsol_RuntimeError, 3, rtErr_Trig, global_evc.ev_count,
+                102);
         return;
     }
 
     if (sr!=1 && !(dat->flags&0x10)) {
         printf("trig_3100_sync(%s): sr=0x%x count=%d, evnr=%d\n",
-            dev->pathname, sr, cc, trinfo->eventcnt);
+            dev->pathname, sr, cc, global_evc.ev_count);
         trig_sis3100_dump_registers(dev, dat);
-        send_unsol_var(Unsol_RuntimeError, 3, rtErr_Trig, trinfo->eventcnt, 102);
+        send_unsol_var(Unsol_RuntimeError, 3, rtErr_Trig, global_evc.ev_count,
+                102);
         fatal_readout_error();
         dev->acknowledge_vmeirq(dev, dat->sis3100mask, 0);
         dev->write_a32d32(dev, dat->addr+0xc, 3);
         return;
     }
 
-    old_evnr=trinfo->eventcnt;
+    old_evnr=trinfo->count;
     if (!(priv->flags&0x2)) {
-        dev->read_a32d32(dev, dat->addr+0x10, &trinfo->eventcnt);
+        dev->read_a32d32(dev, dat->addr+0x10, &trinfo->count);
     } else {
-        trinfo->eventcnt++;
+        trinfo->count++;
     }
 
     if (dat->flags&0x1)
@@ -207,17 +211,17 @@ weiter:
     trinfo->time_valid=1;
 
     /* this is nonsense if eventcounter wraps over */
-    if (old_evnr && trinfo->eventcnt<=old_evnr) {
+    if (old_evnr && trinfo->count<=old_evnr) {
         printf("trig_3100_sync(%s): illegal event count %d (after %d)\n",
-                dev->pathname, trinfo->eventcnt, old_evnr);
+                dev->pathname, trinfo->count, old_evnr);
         send_unsol_var(Unsol_RuntimeError, 4, rtErr_Trig, old_evnr, 103,
-                trinfo->eventcnt);
+                global_evc.ev_count);
         //fatal_readout_error();
     }
 
 #if 0
     printf("trig_sis3100_zelsync_callback: trigger=%d event %d\n",
-        trinfo->trigger, trinfo->eventcnt);
+        trinfo->trigger, trinfo->count);
     trig_sis3100_dump_registers(dev, dat);
 #endif
 
@@ -489,7 +493,7 @@ init_trig_sis3100_zelsync(ems_u32* p, struct triggerinfo* trinfo)
         }
     }
 
-    trinfo->eventcnt=0;
+    trinfo->count=0;
 
     tinfo->insert_triggertask=insert_trig_sis3100_zelsync;
     tinfo->suspend_triggertask=remove_trig_sis3100_zelsync;

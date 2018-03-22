@@ -3,7 +3,7 @@
  * created 25.Mar.2005 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: f1_reg.c,v 1.7 2011/04/06 20:30:26 wuestner Exp $";
+    "$ZEL: f1_reg.c,v 1.8 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -65,7 +65,7 @@ static int
 set_f1_addr(struct lvd_dev* dev, struct lvd_acard* acard, unsigned int f1)
 {
     struct f1_info* info=(struct f1_info*)acard->cardinfo;
-    if (info->last_f1!=f1) {
+    if (info->last_f1!=(int)f1) {
         if (lvd_i_w(dev, acard->addr, f1.f1_addr, f1)<0)
             return -1;
         info->last_f1=f1;
@@ -113,7 +113,7 @@ f1_reg_w(struct lvd_dev* dev, struct lvd_acard* acard, unsigned int f1,
 }
 /*****************************************************************************/
 int
-f1_reg_r(struct lvd_dev* dev, struct lvd_acard* acard, unsigned int f1,
+f1_reg_r(__attribute__((unused)) struct lvd_dev* dev, struct lvd_acard* acard, unsigned int f1,
     int unsigned reg, int* val)
 {
     struct f1_info* info=(struct f1_info*)acard->cardinfo;

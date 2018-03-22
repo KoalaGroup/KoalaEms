@@ -4,7 +4,7 @@
  * created 07.Nov.2002 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: frdb_multi.c,v 1.6 2015/04/06 21:33:33 wuestner Exp $";
+    "$ZEL: frdb_multi.c,v 1.7 2017/10/09 21:25:37 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -20,7 +20,6 @@ static const char* cvsid __attribute__((unused))=
 
 extern ems_u32* outptr;
 extern int *memberlist;
-extern int wirbrauchen;
 
 RCS_REGISTER(cvsid, "procs/fastbus/general")
 

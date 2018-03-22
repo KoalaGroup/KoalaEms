@@ -1,5 +1,5 @@
 # procs/general/vars/Makefile.in
-# $ZEL: Makefile.in,v 1.5 2011/10/17 22:24:05 wuestner Exp $
+# $ZEL: Makefile.in,v 1.6 2016/06/30 19:54:17 wuestner Exp $
 
 CONF = ../../../conf
 
@@ -9,7 +9,8 @@ VPATH = @srcdir@
 include $(CONF)/rules.make
 include $(CONF)/config.make
 
-cfiles = GetVar.c IncIntVar.c SetIntVar.c histo.c GetVarRange.c modvar.c
+cfiles = GetVar.c IncIntVar.c SetIntVar.c histo.c GetVarRange.c modvar.c \
+         vardelay.c
 ofiles = $(cfiles:.c=.o)
 depfiles = $(cfiles)
 

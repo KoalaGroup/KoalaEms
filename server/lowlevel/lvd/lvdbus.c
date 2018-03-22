@@ -3,7 +3,7 @@
  * created 13.Dec.2003 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: lvdbus.c,v 1.55 2013/09/24 14:08:03 wuestner Exp $";
+    "$ZEL: lvdbus.c,v 1.58 2017/10/24 17:00:09 wuestner Exp $";
 
 #define LOWLIB
 #include <sconf.h>
@@ -389,7 +389,7 @@ lvd_start(struct lvd_dev* dev, int selftrigger)
 }
 /*****************************************************************************/
 plerrcode
-lvd_stop(struct lvd_dev* dev, int selftrigger)
+lvd_stop(struct lvd_dev* dev, __attribute__((unused)) int selftrigger)
 {
     int res=0, i;
     plerrcode pres, presx;
@@ -404,7 +404,7 @@ lvd_stop(struct lvd_dev* dev, int selftrigger)
         }
     }
 
-    res|=(lvd_cc_w(dev, cr, 0)!=2);
+    res|=lvd_cc_w(dev, cr, 0);
 
     for (i=0; i<dev->num_acards; i++) {
         struct lvd_acard* acard=dev->acards+i;
@@ -721,10 +721,11 @@ printf("lvd_force_module_id: dev=%p addr=%d id=%04x mask=%04x ser=%d\n",
 }
 /*****************************************************************************/
 static plerrcode
-init_addresses(struct lvd_dev* dev, int num_ids, ems_u32* ids)
+init_addresses(struct lvd_dev* dev, unsigned int num_ids, ems_u32* ids)
 {
     ems_u32 offline, online;
-    int addr, idx=0, verbose=0;
+    unsigned int addr, idx=0;
+    int verbose=0;
 
     if (num_ids && ids[0]==(ems_u32)-1) {
         verbose=1;
@@ -733,7 +734,7 @@ init_addresses(struct lvd_dev* dev, int num_ids, ems_u32* ids)
     }
 
     if (verbose) {
-        int i;
+        unsigned int i;
         printf("init_addresses: num_ids=%d%s", num_ids, num_ids?" :":"");
         for (i=0; i<num_ids; i++)
             printf(" %d", ids[i]);
@@ -804,7 +805,8 @@ lvdbus_init(struct lvd_dev* dev, int num_ids, ems_u32* ids, int *code)
 {
     ems_u32 offline, mask;
     plerrcode pres=plErr_HW;
-    int addr, i, dummy;
+    unsigned int addr;
+    int i, dummy;
 
     printf("== lowlevel/lvd/lvdbus.c:lvdbus_init ==\n");
     print_offline(dev, "lvdbus_init A");

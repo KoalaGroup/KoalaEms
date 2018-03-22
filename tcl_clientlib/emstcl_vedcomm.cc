@@ -31,8 +31,8 @@
 #include "tcl_cxx.hxx"
 #include "versions.hxx"
 
-VERSION("2014-09-05", __FILE__, __DATE__, __TIME__,
-"$ZEL: emstcl_vedcomm.cc,v 1.51 2014/09/12 13:09:03 wuestner Exp $")
+VERSION("2016-Jan-15", __FILE__, __DATE__, __TIME__,
+"$ZEL: emstcl_vedcomm.cc,v 1.53 2016/05/02 15:32:58 wuestner Exp $")
 #define XVERSION
 
 using namespace std;
@@ -3309,6 +3309,7 @@ E_ved::e_modullist(int argc, const char* argv[])
     return res;
 }
 /*****************************************************************************/
+#if 0
 static int
 parse_ml_unspec(Tcl_Interp* interp, Modulclass modulclass,
     int mc, const char* mv[], C_modullist::ml_entry* entry)
@@ -3328,6 +3329,7 @@ parse_ml_unspec(Tcl_Interp* interp, Modulclass modulclass,
     entry->address.unspec.addr=addr;
     return TCL_OK;
 }
+#endif
 /*****************************************************************************/
 static int
 parse_ml_generic(Tcl_Interp* interp, Modulclass modulclass,
@@ -3339,13 +3341,13 @@ parse_ml_generic(Tcl_Interp* interp, Modulclass modulclass,
 }
 /*****************************************************************************/
 static int
-parse_ml_norm(Tcl_Interp* interp, Modulclass modulclass,
+parse_ml_adr2(Tcl_Interp* interp, Modulclass modulclass,
     int mc, const char* mv[], C_modullist::ml_entry* entry)
 {
     int addr, typ, crate;
     entry->modulclass=modulclass;
     if (mc!=3) {
-        Tcl_SetObjResult(interp, Tcl_NewStringObj("parse_ml_norm: 3 arguments expected",
+        Tcl_SetObjResult(interp, Tcl_NewStringObj("parse_ml_adr2: 3 arguments expected",
                 -1));
         return TCL_ERROR;
     }
@@ -3361,6 +3363,41 @@ parse_ml_norm(Tcl_Interp* interp, Modulclass modulclass,
 }
 /*****************************************************************************/
 static int
+parse_ml_ip(Tcl_Interp* interp,
+    int mc, const char* mv[], C_modullist::ml_entry* entry)
+{
+    int typ;
+
+    /* we have to set these members before any error can occur;
+       otherwise the destructor will free invalid pointers */
+    entry->modulclass=modul_ip;
+    entry->address.ip.address=0;
+    entry->address.ip.protocol=0;
+    entry->address.ip.rport=0;
+    entry->address.ip.lport=0;
+
+    if (mc<2) {
+        Tcl_SetObjResult(interp, Tcl_NewStringObj("parse_ml_ip: "
+            "expected arguments: type address [ protocol [ rport [ lport ]]]",
+            -1));
+        return TCL_ERROR;
+    }
+    if (Tcl_GetInt(interp, mv[0], &typ)!=TCL_OK)
+        return TCL_ERROR;
+
+    entry->modultype=typ;
+    entry->address.ip.address=strdup(mv[1]);
+    if (mc>2)
+        entry->address.ip.protocol=strdup(mv[2]);
+    if (mc>3)
+        entry->address.ip.rport=strdup(mv[3]);
+    if (mc>4)
+        entry->address.ip.lport=strdup(mv[4]);
+
+    return TCL_OK;
+}
+/*****************************************************************************/
+static int
 parse_mlentry(Tcl_Interp* interp, const char* mlv, C_modullist* mlist)
 {
     const char **mv;
@@ -3371,47 +3408,54 @@ parse_mlentry(Tcl_Interp* interp, const char* mlv, C_modullist* mlist)
         return TCL_ERROR;
     Modulclass modulclass=(Modulclass)findstring(interp, mv[0],
             Modulclass_names);
-    if (modulclass<0) {
-        if (mc==2) {
-            Tcl_ResetResult(interp);
-            res=parse_ml_unspec(interp, modulclass, mc, mv, &entry);
-            if (res)
-                goto error;
-        } else {
-            res=TCL_ERROR;
+
+    switch (modulclass) {
+    case modul_none:
+        entry.modulclass=modul_none;
+        break;
+    case modul_unspec_:
+        throw new C_program_error(
+            "parse_mlentry: modul_unspec no longer supported");
+#if 0
+        res=parse_ml_unspec(interp, modulclass, mc-1, mv+1, &entry);
+        if (res)
             goto error;
+#endif
+        break;
+    case modul_generic:
+        res=parse_ml_generic(interp, modulclass, mc-1, mv+1, &entry);
+        if (res)
+            goto error;
+        break;
+    case modul_camac:
+    case modul_fastbus:
+    case modul_vme:
+    case modul_lvd:
+    case modul_can:
+    case modul_caenet:
+    case modul_sync:
+    case modul_perf:
+    case modul_pcihl:
+        res=parse_ml_adr2(interp, modulclass, mc-1, mv+1, &entry);
+        if (res)
+            goto error;
+        break;
+    case modul_ip:
+        res=parse_ml_ip(interp, mc-1, mv+1, &entry);
+        if (res)
+            goto error;
+        break;
+    case modul_invalid:
+        entry.modulclass=modul_invalid;
+        break;
+    default:
+        {
+            ostringstream ss;
+            ss<<"modulclass "<<mv[0]<<" not known or not supported";
+            Tcl_SetResult_Stream(interp, ss);
         }
-    } else {
-        switch (modulclass) {
-        case modul_none:
-            entry.modulclass=modul_none;
-            break;
-        case modul_unspec:
-            res=parse_ml_unspec(interp, modulclass, mc-1, mv+1, &entry);
-            if (res)
-                goto error;
-            break;
-        case modul_generic:
-            res=parse_ml_generic(interp, modulclass, mc-1, mv+1, &entry);
-            if (res)
-                goto error;
-            break;
-        case modul_camac:
-        case modul_fastbus:
-        case modul_vme:
-        case modul_lvd:
-        case modul_can:
-        case modul_caenet:
-        case modul_sync:
-        case modul_perf:
-        case modul_pcihl:
-            res=parse_ml_norm(interp, modulclass, mc-1, mv+1, &entry);
-            if (res)
-                goto error;
-            break;
-        case modul_invalid:
-            entry.modulclass=modul_invalid;
-        }
+        res=TCL_ERROR;
+        goto error;
     }
     mlist->add(entry);
 
@@ -3447,6 +3491,13 @@ parse_modullist(Tcl_Interp* interp, int argc, const char* argv[],
                 return res;
         }
     } else { // it is a single value
+        //throw new C_program_error(
+        //    "parse_modullist: old version no longer supported");
+        Tcl_SetObjResult(interp, Tcl_NewStringObj("wrong args: we need a list",
+                -1));
+        return TCL_ERROR;
+
+#if 0
         const char* arg2[2];
         int res, i;
         if (argc&1) { // we need pairs of values
@@ -3463,6 +3514,7 @@ parse_modullist(Tcl_Interp* interp, int argc, const char* argv[],
                 return res;
             mlist->add(entry);
         }
+#endif
     }
     
     return TCL_OK;
@@ -3525,15 +3577,25 @@ int E_ved::e_modlist_create(int argc, const char* argv[])
         }
     }
 
+#if 0
     int version=0;
     for (int i=0; i<mlist.size(); i++) {
         if (mlist.modulclass(i)!=modul_unspec)
             version=1;
     }
+#else
+    /* modul_unspec does not exist any more, therefore its usage is a
+       fatal error */
+    for (int i=0; i<mlist.size(); i++) {
+        if (mlist.modulclass(i)==modul_unspec_)
+            throw new C_program_error(
+                "E_ved::e_modlist_create: modul_unspec not supported");
+    }
+#endif
 
     int res;
     try {
-        DownloadModullist(mlist, version);
+        DownloadModullist(mlist, 1 /*version*/);
         if (confmode_==asynchron) {
             confback.xid(last_xid_);
             installconfback(confback);
@@ -4279,9 +4341,9 @@ return TCL_OK;
 int E_ved::e_trigger(int argc, const char* argv[])
 //trigger
 {
-// <VED> trigger delete
-// <VED> trigger [upload]
-// <VED> trigger download proc [arg ...]
+// <VED> trigger delete [idx]
+// <VED> trigger [upload idx]
+// <VED> trigger download [idx] proc [arg ...]
 //
 int res;
 if (argc==2)
@@ -4305,145 +4367,157 @@ return res;
 }
 
 /*****************************************************************************/
-
 int E_ved::e_trig_upload(int argc, const char* argv[])
 {
-// <VED> trigger [upload]
-confbackbox confback;
-if (confmode_==asynchron)
-  {
-  if (confback.init(interp, this, argc, argv, &E_ved::f_trigger)!=TCL_OK)
-      return TCL_ERROR;
-  }
+    // <VED> trigger [upload idx]
+    confbackbox confback;
+    int res, idx=0;
 
-int res;
-if (argc>3)
-  {
-  Tcl_SetObjResult(interp, Tcl_NewStringObj("wrong # args, must be trigger [upload]", -1));
-  return TCL_ERROR;
-  }
-try
-  {
-  if (confmode_==synchron)
-    {
-    C_confirmation* conf=UploadTrigger();
-    ostringstream ss;
-    f_trigger(ss, conf, 0, 0, 0);
-    Tcl_SetResult_Stream(interp, ss);
-    delete conf;
+    if (confmode_==asynchron) {
+        if (confback.init(interp, this, argc, argv, &E_ved::f_trigger)!=TCL_OK)
+            return TCL_ERROR;
     }
-  else
-    {
-    UploadTrigger();
-    confback.xid(last_xid_);
-    installconfback(confback);
-    ostringstream ss;
-    ss << last_xid_;
-    Tcl_SetResult_Stream(interp, ss);
+
+    if (argc!=2 && argc!=4) {
+        Tcl_SetObjResult(interp, Tcl_NewStringObj("wrong # args, must be "
+                "trigger [upload idx]", -1));
+        return TCL_ERROR;
     }
-  res=TCL_OK;
-  }
-catch(C_error* e)
-  {
-  Tcl_SetResult_Err(interp, e);
-  delete e;
-  return TCL_ERROR;
-  }
-return res;
+    if (argc>3) {
+        if (Tcl_GetInt(interp, argv[3], &idx)!=TCL_OK)
+            return TCL_ERROR;
+    }
+
+    try {
+        if (confmode_==synchron) {
+            C_confirmation* conf=UploadTrigger(idx);
+            ostringstream ss;
+            f_trigger(ss, conf, 0, 0, 0);
+            Tcl_SetResult_Stream(interp, ss);
+            delete conf;
+        } else {
+            UploadTrigger(idx);
+            confback.xid(last_xid_);
+            installconfback(confback);
+            ostringstream ss;
+            ss << last_xid_;
+            Tcl_SetResult_Stream(interp, ss);
+        }
+        res=TCL_OK;
+    } catch(C_error* e) {
+        Tcl_SetResult_Err(interp, e);
+        delete e;
+        return TCL_ERROR;
+    }
+    return res;
 }
-
 /*****************************************************************************/
-
 int E_ved::e_trig_delete(int argc, const char* argv[])
 {
-// <VED> trigger delete
-int res;
-if (argc!=3)
-  {
-  Tcl_SetObjResult(interp, Tcl_NewStringObj("wrong # args, must be trigger delete", -1));
-  return TCL_ERROR;
-  }
-try
-  {
-  DeleteTrigger();
-  res=TCL_OK;
-  }
-catch(C_error* e)
-  {
-  Tcl_SetResult_Err(interp, e);
-  delete e;
-  return TCL_ERROR;
-  }
-return res;
+    // <VED> trigger delete
+    confbackbox confback;
+    int idx=0;
+
+    if (confmode_==asynchron) {
+        if (confback.init(interp, this, argc, argv, &E_ved::f_void)!=TCL_OK)
+            return TCL_ERROR;
+    }
+
+    if (argc!=3 && argc!=4) {
+        Tcl_SetObjResult(interp, Tcl_NewStringObj("wrong # args, must be "
+                "trigger delete [idx]", -1));
+        return TCL_ERROR;
+    }
+    if (argc>3) {
+        if (Tcl_GetInt(interp, argv[3], &idx)!=TCL_OK)
+                return TCL_ERROR;
+    }
+
+    try {
+        DeleteTrigger(idx);
+        if (confmode_==asynchron) {
+            confback.xid(last_xid_);
+            installconfback(confback);
+            ostringstream ss;
+            ss << last_xid_;
+            Tcl_SetResult_Stream(interp, ss);
+        }
+    } catch (C_error* e) {
+        Tcl_SetResult_Err(interp, e);
+        delete e;
+        return TCL_ERROR;
+    }
+
+    return TCL_OK;
 }
-
 /*****************************************************************************/
-
 int E_ved::e_trig_create(int argc, const char* argv[])
 {
-// <VED> trigger create proc {args}
-int res;
-if (argc<4)
-  {
-  Tcl_SetObjResult(interp, Tcl_NewStringObj("wrong # args, must be trigger create proc {args}",
-      -1));
-  return TCL_ERROR;
-  }
-long val;
-int num=argc-4;
-try
-  {
-  clear_triglist();
-  trig_set_proc(argv[3]);
-  for (int i=0; i<num; i++)
-    {
-    if (argv[i+4][0]=='\'')
-      {
-      char* s=(char*)argv[i+4];
-      char* se=s+strlen(s)-1;
-      if (*se!='\'')
-        {
-        ostringstream ss;
-        ss << "Unmatched ' in " << s;
-        Tcl_SetResult_Stream(interp, ss);
-        clear_triglist();
-        return TCL_ERROR;
-        }
-      else
-        {
-        *se=0;
-        trig_add_param(s+1);
-        *se='\'';
-        }
-      }
-    else
-      {
-      if (xTclGetLong(interp, (char*)argv[i+4], &val)!=TCL_OK)
-        {
-        return TCL_ERROR;
-        }
-      trig_add_param((int)val);
-      }
-    }
-  DownloadTrigger();
-  res=TCL_OK;
-  }
-catch(C_ptr_error* e)
-  {
-  ostringstream ss;
-  ss << "ved has no trigger procedures";
-  Tcl_SetResult_Stream(interp, ss, e);
-  delete e;
-  return TCL_ERROR;
-  }
-catch(C_error* e)
-  {
-  Tcl_SetResult_Err(interp, e);
-  delete e;
-  return TCL_ERROR;
-  }
-return res;
-}
+    // <VED> trigger create [idx] proc {args}
+    int res, n, idx;
+    long val;
 
+    if (argc<4) {
+        Tcl_SetObjResult(interp, Tcl_NewStringObj("wrong # args, must be "
+                "trigger create [idx] proc {args}", -1));
+        return TCL_ERROR;
+    }
+
+    n=3; // position of idx or proc
+    /* is argv[n] a number? */
+    if (isdigit(argv[n][0])) {
+        if (Tcl_GetInt(interp, argv[n], &idx)!=TCL_OK)
+            return TCL_ERROR;
+        n++;   /* yes, integer --> idx*/
+    } else {
+        idx=0; /* no, must be the  proc then*/
+    }
+
+    if (argc<=n) {
+        Tcl_SetObjResult(interp, Tcl_NewStringObj("wrong # args, must be "
+                "trigger create idx proc {args}", -1));
+        return TCL_ERROR;
+    }
+
+    try {
+        clear_triglist();
+        trig_set_proc(argv[n++]);   // name of trigger procedure
+        for (; n<argc; n++) {
+            if (argv[n][0]=='\'') { // it is a string
+                char* s=(char*)argv[n];
+                char* se=s+strlen(s)-1;
+                if (*se!='\'') {
+                    ostringstream ss;
+                    ss << "Unmatched ' in " << s;
+                    Tcl_SetResult_Stream(interp, ss);
+                    clear_triglist();
+                    return TCL_ERROR;
+                } else {
+                    *se=0;
+                    trig_add_param(s+1);
+                    *se='\'';
+                }
+            } else {
+                if (xTclGetLong(interp, (char*)argv[n], &val)!=TCL_OK) {
+                    return TCL_ERROR;
+                }
+                trig_add_param((int)val);
+            }
+        }
+        DownloadTrigger(idx);
+        res=TCL_OK;
+    } catch(C_ptr_error* e) {
+        ostringstream ss;
+        ss << "ved has no trigger procedures";
+        Tcl_SetResult_Stream(interp, ss, e);
+        delete e;
+        return TCL_ERROR;
+    } catch(C_error* e) {
+        Tcl_SetResult_Err(interp, e);
+        delete e;
+        return TCL_ERROR;
+    }
+    return res;
+}
 /*****************************************************************************/
 /*****************************************************************************/

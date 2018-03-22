@@ -19,7 +19,7 @@
 #include <versions.hxx>
 
 VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
-"$ZEL: proc_dataoutstatus.cc,v 2.10 2014/07/14 15:11:53 wuestner Exp $")
+"$ZEL: proc_dataoutstatus.cc,v 2.11 2016/05/10 16:24:46 wuestner Exp $")
 #define XVERSION
 
 using namespace std;
@@ -87,9 +87,12 @@ return os;
 
 ostream& operator <<(ostream& os, const C_dataoutstatus& status)
 {
-C_dataoutstatus* st;
-st=(C_dataoutstatus*)&status;
-return st->print(os); 
+// C_dataoutstatus* st;
+// st=reinterpret_cast<C_dataoutstatus*>(&status);
+// return st->print(os);
+
+C_dataoutstatus st(status);
+return st.print(os);
 }
 
 /*****************************************************************************/

@@ -3,7 +3,7 @@
  * created: 1993-Jan-10
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: dom_event.c,v 1.10 2011/04/06 20:30:29 wuestner Exp $";
+    "$ZEL: dom_event.c,v 1.11 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -62,7 +62,8 @@ domevobj dom_ev_obj={
     {
         0,0,
         /*(lookupfunc)*/lookup_dom_ev,
-        dir_dom_ev
+        dir_dom_ev,
+        0
     },
     notimpl,  /* download */
     get_last_databuf,

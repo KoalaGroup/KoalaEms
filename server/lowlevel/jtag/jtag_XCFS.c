@@ -3,7 +3,7 @@
  * created 2006-Aug-25 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: jtag_XCFS.c,v 1.5 2011/04/06 20:30:24 wuestner Exp $";
+    "$ZEL: jtag_XCFS.c,v 1.6 2017/10/22 22:12:39 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -270,7 +270,8 @@ jtag_read_XCFS(struct jtag_chip* chip, ems_u8* data, ems_u32* usercode)
     u_int32_t dout, size, ret;
     int i;
 
-    int chipid=(chip->chipdata->vendor_id<<1)|(chip->chipdata->part_id<<12)|1;
+    unsigned int chipid=
+            (chip->chipdata->vendor_id<<1)|(chip->chipdata->part_id<<12)|1;
 
     printf("reading device %s\n", chip->chipdata->name);
 printf("NOT READING!\n");

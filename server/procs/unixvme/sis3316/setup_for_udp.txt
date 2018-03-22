@@ -1,0 +1,117 @@
+multimodule setup for UDP
+
+0x00000010
+request grant
+
+0x0000003C
+External Veto/Gate Delay register
+
+0x00000040
+Programmable ADC Clock: Oscillator I2C register
+sis3316_clock "-1 2" //  250 MHz sample clock
+
+0x00000050
+ADC Sample Clock distribution control register
+sis3316_clock_distribution "x 0" // Onboard programmable Oscillator
+sis3316_clock_distribution "x 1" // VXS Clock from Backplane
+sis3316_clock_distribution "x 2" // External Clock from FP-LVDS Bus Connector
+sis3316_clock_distribution "x 3" // External Clock from NIM Connector
+--> use '0' for first module; '2' for all others
+
+0x00000058
+FP-Bus control register
+  first module:
+enable clock, status and control; set clock to onbord oscillator
+sis3316_fb_control "x 0x13" ;# first module
+enable status only
+sis3316_fb_control "x 0x02" ;# all other modules
+
+0x0000005C
+NIM-IN Control/Status register
+
+0x00000060
+Acquisition control/status register
+bit 4: FP-Bus-In Control 1 as Trigger Enable
+bit 6: FP-Bus-In Control 2 Enable
+bit 7: FP-Bus-In Sample Control Enable
+bit 8: External Trigger function as Trigger Enable
+bit : 
+bit 15: External Trigger Disable with internal Busy select
+bit : 
+bit : 
+bit : 
+bit : 
+
+
+
+0x00000070
+LEMO Out ?CO? Select register
+
+0x00000074
+LEMO Out ?TO? Select register
+
+0x00000078
+LEMO Out ?UO? Select register
+
+0x0000007C
+Internal Trigger Feedback Select register
+
+0x000000B8
+Prescaler output pulse divider register (possible use for output to UO)
+
+0x01004
+ADC Gain/Termination Control register ch1-ch4
+
+0x01008
+ADC Offset (DAC) Control register
+
+0x1108 0x2108 0x3108 0x4108
+ADC Offset (DAC) Readback registers
+
+0x01010
+Event Configuration register ch1-ch4
+
+0x01014
+Channel Header ID register
+
+0x01018
+End Address Threshold register ch1-ch4
+
+0x0101C
+Active Trigger Gate Window Length register
+
+0x01020
+Raw Data Buffer Configuration register
+
+0x01024
+Pileup Configuration register
+
+0x01028
+Pre Trigger Delay register
+
+0x01030
+Data Format Configuration register
+
+0x01034
+MAW Test Buffer Configuration register
+
+0x01038
+Internal Trigger Delay Configuration register
+
+0x0103C
+Internal Gate Length Configuration register (Coincidence)
+
+0x01040
+FIR Trigger Setup Ch1
+
+0x01044
+Trigger Threshold Ch1
+
+0x01048
+High Energy Trigger Threshold Ch1
+
+0x01080..0x010EC
+
+0x01100..0x0113C
+
+

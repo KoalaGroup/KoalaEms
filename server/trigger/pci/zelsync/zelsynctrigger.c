@@ -3,7 +3,7 @@
  * created 02.10.96 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: zelsynctrigger.c,v 1.27 2011/08/13 20:24:03 wuestner Exp $";
+    "$ZEL: zelsynctrigger.c,v 1.29 2017/10/21 22:37:36 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -67,8 +67,8 @@ typedef enum {
 struct private {
     sync_mode mode;
     int master;
-    int conversiontime;
-    int fcatime;
+    unsigned int conversiontime;
+    unsigned int fcatime;
     int flags;
     int softtrigg;
     int testcontrolvar;
@@ -216,20 +216,24 @@ if (text)
   if (pci_trigdata.state&2) printf("GO ");
   if (pci_trigdata.state&4) printf("T4LATCH ");
   if (pci_trigdata.state&8) printf("TAW_ENA ");
-  if (pci_trigdata.state&&0x70) printf("AUX_OUT(%d) ", (pci_trigdata.state&0x70)>>4);
+  if (pci_trigdata.state&&0x70) printf("AUX_OUT(%d) ",
+        (pci_trigdata.state&0x70)>>4);
   if (pci_trigdata.state&0x80) printf("AUX0_RES_TRIG ");
-  if (pci_trigdata.state&0x700) printf("Int_Ena_AUX(%d) ", (pci_trigdata.state&0x700)>>8);
+  if (pci_trigdata.state&0x700) printf("Int_Ena_AUX(%d) ",
+        (pci_trigdata.state&0x700)>>8);
   if (pci_trigdata.state&0x800) printf("Int_Ena_EOC ");
   if (pci_trigdata.state&0x1000) printf("Int_Ena_SI ");
   if (pci_trigdata.state&0x2000) printf("Int_Ena_TRIG ");
   if (pci_trigdata.state&0x4000) printf("Int_Ena_GAP ");
   if (pci_trigdata.state&0x8000) printf("GSI(obsolete) ");
-  if (pci_trigdata.state&0xf0000) printf("Trigger(%d) ", (pci_trigdata.state&0xf0000)>>16);
+  if (pci_trigdata.state&0xf0000) printf("Trigger(%d) ",
+        (pci_trigdata.state&0xf0000)>>16);
   if (pci_trigdata.state&0x100000) printf("GO_RING ");
   if (pci_trigdata.state&0x200000) printf("VETO ");
   if (pci_trigdata.state&0x400000) printf("SI ");
   if (pci_trigdata.state&0x800000) printf("INH ");
-  if (pci_trigdata.state&0x7000000) printf("AUX_IN(%d) ", (pci_trigdata.state&0x7000000)>>24);
+  if (pci_trigdata.state&0x7000000) printf("AUX_IN(%d) ",
+        (pci_trigdata.state&0x7000000)>>24);
   if (pci_trigdata.state&0x8000000) printf("EOC ");
   if (pci_trigdata.state&0x10000000) printf("SI_RING ");
   if (pci_trigdata.state&0x40000000) printf("GAP ");
@@ -248,14 +252,15 @@ if (text)
 }
 /*****************************************************************************/
 static void
-fatal(struct triggerinfo* trinfo, int code, unsigned int num, ...)
+fatal(__attribute__((unused)) struct triggerinfo* trinfo, int code,
+        unsigned int num, ...)
 {
     ems_u32 msg[16];
     va_list ap;
-    int i;
+    unsigned int i;
 
     msg[0]=rtErr_Trig;
-    msg[1]=trinfo->eventcnt;
+    msg[1]=global_evc.ev_count;
     msg[2]=code;
     va_start(ap, num);
     for (i=0; i<num; i++) {
@@ -404,13 +409,15 @@ static plerrcode inittest(int var, struct synctestcontrol** control)
         if (vsize!=sizeof(struct synctestcontrol)/sizeof(int)) {
             printf("variable %d for testcontrol: size=%d; %lld expected\n",
                 var, vsize,
-                (unsigned long long)(sizeof(struct synctestcontrol)/sizeof(int)));
+                (unsigned long long)(sizeof(struct synctestcontrol)/
+                        sizeof(int)));
             *outptr++=var;
             return plErr_IllVarSize;
         }
     } else if(res==plErr_NoVar) {
         struct synctestcontrol* c;
-        if ((res=var_create(var, sizeof(struct synctestcontrol)/sizeof(int)))!=plOK) {
+        if ((res=var_create(var, sizeof(struct synctestcontrol)/sizeof(int)))
+                !=plOK) {
             printf("cannot create variable %d for testcontrol\n", var);
             *outptr++=var;
             return res;
@@ -424,7 +431,7 @@ static plerrcode inittest(int var, struct synctestcontrol** control)
 }
 #endif
 /*****************************************************************************/
-static void sighndlr(union SigHdlArg arg, int sig)
+static void sighndlr(union SigHdlArg arg, __attribute__((unused)) int sig)
 {
     struct trigprocinfo* tinfo=(struct trigprocinfo*)arg.ptr;
     struct private* priv=(struct private*)tinfo->private;
@@ -461,7 +468,7 @@ get_trig_zelsync(struct triggerinfo* trinfo)
     unsigned int trigger;
 
     if (priv->softtrigg) {
-        trinfo->eventcnt++;
+        trinfo->count++;
         return priv->softtrigg;
     }
 
@@ -472,13 +479,16 @@ trigprofdata.t[0]+=trigprofdata.s0;
 
     switch (priv->mode) {
     case sync_signal: {
-        int res, got;
+        unsigned int got;
+        int res;
 
         if (!priv->sigtrig) {
             if ((priv->testdata && priv->testdata->set_aux_out) &&
                     ((priv->base[SYNC_CSR]&SYNC_GET_TDT_RING)==0)) {
-                priv->base[SYNC_SSCR]=(priv->testdata->set_aux_out&7)<<4;  /* setzen */
-                priv->base[SYNC_SSCR]=(priv->testdata->set_aux_out&7)<<20; /* gleich wieder zurueck */
+                /* setzen */
+                priv->base[SYNC_SSCR]=(priv->testdata->set_aux_out&7)<<4;
+                /* gleich wieder zurueck */
+                priv->base[SYNC_SSCR]=(priv->testdata->set_aux_out&7)<<20;
             }
             return(0);
         }
@@ -497,15 +507,19 @@ trigprofdata.t[0]+=trigprofdata.s0;
         if ((priv->pci_trigdata.mbx&SYNC_MBX_EOC)==0) {
             printf("got signal; but mbx is %08x (%s)\n",priv->pci_trigdata.mbx,
                     getbits(priv->pci_trigdata.mbx));
-            fatal(trinfo, 2, 2, priv->pci_trigdata.mbx, priv->pci_trigdata.state);
+            fatal(trinfo, 2, 2, priv->pci_trigdata.mbx,
+                    priv->pci_trigdata.state);
             return(0);
         }
         if ((priv->pci_trigdata.state&SYNC_GET_EOC)==0) {
-            printf("got signal; but stat is %08x (%s)\n", priv->pci_trigdata.state,
+            printf("got signal; but stat is %08x (%s)\n",
+                    priv->pci_trigdata.state,
                     getbits(priv->pci_trigdata.state));
-            printf("got: %08x %08x %08x\n", priv->pci_trigdata.mbx, priv->pci_trigdata.state,
+            printf("got: %08x %08x %08x\n", priv->pci_trigdata.mbx,
+                    priv->pci_trigdata.state,
                     priv->pci_trigdata.evc);
-            fatal(trinfo, 3, 2, priv->pci_trigdata.mbx, priv->pci_trigdata.state);
+            fatal(trinfo, 3, 2, priv->pci_trigdata.mbx,
+                    priv->pci_trigdata.state);
             return(0);
         }
     }
@@ -545,14 +559,16 @@ trigprofdata.t[0]+=trigprofdata.s0;
         priv->pci_trigdata.reje=priv->base[SYNC_REJE];
         i=0;
         while ((i<3)
-                && ((priv->pci_trigdata.tgap[i++]=priv->base[SYNC_TGAP])&SYNC_GAP_MORE));
+                && ((priv->pci_trigdata.tgap[i++]=
+                                    priv->base[SYNC_TGAP])&SYNC_GAP_MORE));
     }
     break;
     case sync_select: {
         int got;
         int SYNC_MBX_flag;
 
-        got=read(priv->info->path, (char*)&priv->pci_trigdata, sizeof(struct trigstatus));
+        got=read(priv->info->path, (char*)&priv->pci_trigdata,
+                sizeof(struct trigstatus));
         /*printf("nach read: "); decode_zelsync_status(base[SYNC_CSR]);*/
         if (got!=sizeof(struct trigstatus)) {
             printf("read trigstatus: got=%d: %s\n", got, strerror(errno));
@@ -583,7 +599,8 @@ trigprofdata.t[0]+=trigprofdata.s0;
                 printf("cc=%d\n", cc);
             } else {
                 statusprint(priv->pci_trigdata.state, "no EOC or no INH");
-                fatal(trinfo, 9, 2, priv->pci_trigdata.mbx, priv->pci_trigdata.state);
+                fatal(trinfo, 9, 2, priv->pci_trigdata.mbx,
+                        priv->pci_trigdata.state);
                 return(0);
             }
         }
@@ -591,10 +608,12 @@ trigprofdata.t[0]+=trigprofdata.s0;
     break;
     }
 
-    if (trinfo->eventcnt!=priv->pci_trigdata.evc) {
-        printf("zelsynctrigger: eventcnt: %d ==> %d\n", trinfo->eventcnt, priv->pci_trigdata.evc);
+    if (trinfo->count!=priv->pci_trigdata.evc) {
+        printf("zelsynctrigger: eventcnt: %d ==> %d\n",
+                trinfo->count, priv->pci_trigdata.evc);
         statusprint(priv->pci_trigdata.state, 0);
-        fatal(trinfo, 6, 3, priv->pci_trigdata.mbx, priv->pci_trigdata.state, priv->pci_trigdata.evc);
+        fatal(trinfo, 6, 3, priv->pci_trigdata.mbx, priv->pci_trigdata.state,
+                priv->pci_trigdata.evc);
         /* eventcnt=priv->pci_trigdata.evc; */
         return(0);
     }
@@ -610,12 +629,12 @@ trigprofdata.t[0]+=trigprofdata.s0;
         fatal(trinfo, 8, 2, priv->pci_trigdata.mbx, priv->pci_trigdata.state);
         return(0);
     }
-    trinfo->eventcnt++;
+    trinfo->count++;
 
     if (priv->testdata && priv->testdata->warp_id) {
-        if (trinfo->eventcnt%priv->testdata->warp_id==0) {
+        if (trinfo->count%priv->testdata->warp_id==0) {
             trigger+=16;
-            printf("trigger set to %d (ev=%d)\n", trigger, trinfo->eventcnt);
+            printf("trigger set to %d (ev=%d)\n", trigger, trinfo->count);
         }
     }
     return trigger;
@@ -660,11 +679,12 @@ reset_trig_zelsync(struct triggerinfo* trinfo)
 
 #ifdef SYNCSTATIST
     {
-        int tdt=priv->pci_trigdata.tdt; /* !!! tdt belongs to the previous event */
-        int ldt=priv->pci_trigdata.ldt;
+        /* !!! tdt belongs to the previous event */
+        unsigned int tdt=priv->pci_trigdata.tdt;
+        unsigned int ldt=priv->pci_trigdata.ldt;
 
         priv->zelsyncrejected+=priv->pci_trigdata.reje;
-        if (trinfo->eventcnt>2) {
+        if (trinfo->count>2) {
             priv->lsyncstat.entries++;
             if (ldt>priv->lsyncstat.max)
                 priv->lsyncstat.max=ldt;
@@ -684,7 +704,7 @@ reset_trig_zelsync(struct triggerinfo* trinfo)
                 int i, weiter;
                 priv->tsyncstat.entries++;
                 if (tdt==0)
-                    printf("ev. %d: tdt=0\n", trinfo->eventcnt);
+                    printf("ev. %d: tdt=0\n", trinfo->count);
                 if (tdt>priv->tsyncstat.max)
                     priv->tsyncstat.max=tdt;
                 if (tdt<priv->tsyncstat.min)
@@ -702,7 +722,7 @@ reset_trig_zelsync(struct triggerinfo* trinfo)
                 weiter=1;
                 while (weiter && (i<3)
                         && ((priv->pci_trigdata.tgap[i]&SYNC_GAP_INVAL)==0)) {
-                    int gap=priv->pci_trigdata.tgap[i]&0xffff;
+                    unsigned int gap=priv->pci_trigdata.tgap[i]&0xffff;
                     priv->gsyncstat.entries++;
                     if (gap>priv->gsyncstat.max)
                         priv->gsyncstat.max=gap;
@@ -842,7 +862,7 @@ plerrcode init_trig_zelsync(ems_u32* p, struct triggerinfo* trinfo)
         priv->testdata=0;
         priv->softtrigg=0;
     }
-    trinfo->eventcnt=0;
+    trinfo->count=0;
 
 #ifdef SYNCSTATIST
     if ((pres=initstatistic(trinfo))!=plOK)

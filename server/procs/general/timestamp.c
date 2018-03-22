@@ -3,7 +3,7 @@
  * created 04.11.94   
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: timestamp.c,v 1.11 2011/04/06 20:30:32 wuestner Exp $";
+    "$ZEL: timestamp.c,v 1.13 2017/10/09 21:25:37 wuestner Exp $";
 
 #include <sconf.h>
 
@@ -19,7 +19,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../../trigger/trigger.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
 
 RCS_REGISTER(cvsid, "procs/general")
 
@@ -91,6 +90,7 @@ char name_proc_Timestamp[]="Timestamp";
 int ver_proc_Timestamp=1;
 
 /*****************************************************************************/
+#if 0 /* more work needed to make it compatible multiple triggers */
 /*
  * p[0]: argcount==0|1
  * [p[1]: 0: sec/usec (default) 1: sec/nsec]
@@ -126,5 +126,6 @@ plerrcode test_proc_Triggertime(ems_u32* p)
     return plErr_NotImpl;
 #endif
 }
+#endif
 /*****************************************************************************/
 /*****************************************************************************/

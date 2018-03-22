@@ -9,7 +9,7 @@
  * response.c: before 1995-02-01
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: camac_basic.c,v 1.11 2015/04/06 21:33:22 wuestner Exp $";
+    "$ZEL: camac_basic.c,v 1.13 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -22,10 +22,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../procs.h"
 #include "../procprops.h"
 #include "../../objects/domain/dom_ml.h"
-
-extern ems_u32* outptr;
-extern int wirbrauchen;
-extern int *memberlist;
 
 RCS_REGISTER(cvsid, "procs/camac")
 

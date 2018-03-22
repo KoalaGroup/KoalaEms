@@ -3,7 +3,7 @@
  * created 27.12.94 MiZi/PeWue/MaWo
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: fb_lc1881_read.c,v 1.22 2015/04/06 21:33:31 wuestner Exp $";
+    "$ZEL: fb_lc1881_read.c,v 1.23 2017/10/09 21:25:37 wuestner Exp $";
 
 #include <config.h>
 #include <errno.h>
@@ -31,7 +31,7 @@ static const char* cvsid __attribute__((unused))=
 
 extern ems_u32* outptr;
 extern int *memberlist;
-extern int wirbrauchen;
+
 #if PERFSPECT
 extern int perfbedarf;
 #endif

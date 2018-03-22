@@ -3,7 +3,7 @@
  * created before 30.05.94
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: dom_dataout.c,v 1.36 2015/04/06 21:35:00 wuestner Exp $";
+    "$ZEL: dom_dataout.c,v 1.37 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -88,10 +88,10 @@ errcode dom_dataout_done()
     T(dom_dataout_done)
 #ifdef DATAOUT_MULTI
     for (i=0; i<MAX_DATAOUT; i++) {
-        if (dataout[i].bufftyp!=-1) {
+        if (dataout[i].bufftyp!=InOut_Invalid) {
             remove_dataout(i);  /*Fehler abfangen!!!*/
             free_dataout_res(i);
-            dataout[i].bufftyp= -1;
+            dataout[i].bufftyp=InOut_Invalid;
         }
     }
 #endif
@@ -102,7 +102,8 @@ static void
 downloaddataout_dump(ems_u32* p, unsigned int len)
 {
     ems_u32 *q;
-    int i;
+    ems_i32 *ip=(ems_i32*)p;
+    unsigned int i;
 
     printf("downloaddataout_dump: p=%p len=%u\n", p, len);
     for (i=0; i<len; i++) {
@@ -110,7 +111,7 @@ downloaddataout_dump(ems_u32* p, unsigned int len)
     }
     printf("\n");
 
-    if (p[2]==-1) {
+    if (ip[2]==-1) {
         printf("new version\n");
         printf("index=%d\n", p[0]);
         printf("io type=%d\n", p[1]);
@@ -158,12 +159,13 @@ static errcode downloaddataout(ems_u32* p, unsigned int len)
 {
     int res;
     ems_u32 *q, *r, *s=0;
-    int qlen, rlen, slen;
+    ems_i32 *ip=(ems_i32*)p;
+    unsigned int qlen, rlen, slen;
     unsigned int index;
 
     T(downloaddataout)
     D(D_REQ, {
-        int i;
+        unsigned int i;
         printf("DownloadDomain Dataout(");
         for (i=0; i<len; i++) printf("%d%s", p[i], i+1<len?", ":"");
         printf(")\n");}
@@ -176,7 +178,7 @@ static errcode downloaddataout(ems_u32* p, unsigned int len)
 #ifdef DATAOUT_MULTI
     if ((unsigned int)len<5)
         return Err_ArgNum;
-    if (p[2]==-1) { /* newer protocol version */
+    if (ip[2]==-1) { /* newer protocol version */
         q=p+4;
         qlen=p[3];
         if (len<qlen+6) {
@@ -212,7 +214,7 @@ static errcode downloaddataout(ems_u32* p, unsigned int len)
     dataout[index].inout_args=0;
     dataout[index].address_arg_num=0;
     dataout[index].address_args=0;
-    if (p[2]==-1) {
+    if (ip[2]==-1) {
         /* Buffersize und Prioritaet muessen da sein */
         if (qlen<2)
             return Err_ArgNum;
@@ -220,7 +222,7 @@ static errcode downloaddataout(ems_u32* p, unsigned int len)
         dataout[index].wieviel=q[1];
         dataout[index].addrtyp=p[qlen+4];
         if (qlen>2) {
-            int i;
+            unsigned int i;
             dataout[index].inout_args=(int*)malloc((qlen-2)*sizeof(int));
             if (dataout[index].inout_args==0)
                 return Err_NoMem;
@@ -342,7 +344,7 @@ static errcode downloaddataout(ems_u32* p, unsigned int len)
     }
 
     if (slen) {
-        int i;
+        unsigned int i;
         dataout[index].address_args=(int*)malloc(slen*sizeof(int));
         if (dataout[index].address_args==0)
             return Err_NoMem;

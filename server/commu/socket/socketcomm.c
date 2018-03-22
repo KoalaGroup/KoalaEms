@@ -3,7 +3,7 @@
  * created long before 22.08.96
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: socketcomm.c,v 1.29 2011/04/06 20:30:21 wuestner Exp $";
+    "$ZEL: socketcomm.c,v 1.30 2016/11/26 01:18:16 wuestner Exp $";
 
 #include <sconf.h>
 #include <config.h>
@@ -578,7 +578,9 @@ int send_data(ems_u32* buf, unsigned int len)
 	 (errno==EINTR)
 #endif
 	 )continue;
-      printf("send: %d, errno=%s\n",weg, strerror(errno));
+      printf("send_data:send: %d, errno=%s\n",weg, strerror(errno));
+      printf("send_data: buf=%p len=%u restlen=%u socket=%d",
+        buf, len, restlen, ns);
       return(-1);
     }
   }

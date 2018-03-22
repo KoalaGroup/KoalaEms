@@ -8,7 +8,7 @@
  * created Feb. 2006
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: peakpci.c,v 1.3 2011/04/06 20:30:22 wuestner Exp $";
+    "$ZEL: peakpci.c,v 1.4 2017/10/21 23:33:44 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -128,7 +128,7 @@ peakpci_read_(struct canbus_dev* dev, struct can_rd_msg *msg,
     struct can_peakpci_info* info=(struct can_peakpci_info*)dev->info;
     TPCANRdMsg buf;
     struct timeval now, diff;
-    int id=msg->msg.id;
+    unsigned int id=msg->msg.id;
 
     gettimeofday(&now, 0);
     tvdiff(stop, &now, &diff);
@@ -157,7 +157,7 @@ peakpci_read_(struct canbus_dev* dev, struct can_rd_msg *msg,
                 printf("peakpci_read: %s\n", strerror(errno));
                 return plErr_System;
             }
-            if ((id>=0)&&(id!=buf.Msg.ID)) {
+            if (id!=buf.Msg.ID) {
                 peakpci_unexpected_message(dev, &buf, 1, "peakpci_read_");
             } else {
                 int i;
@@ -266,7 +266,8 @@ peakpci_write_read_bulk(struct canbus_dev* dev,
 }
 /*****************************************************************************/
 static void
-peakpci_message(int p, enum select_types selected, union callbackdata cbdata)
+peakpci_message(int p, __attribute__((unused)) enum select_types selected,
+        union callbackdata cbdata)
 {
     struct generic_dev* gendev=(struct generic_dev*)cbdata.p;
     struct canbus_dev* dev=(struct canbus_dev*)gendev;

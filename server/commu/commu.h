@@ -1,7 +1,7 @@
 /*
  * commu/commu.h
  * 
- * $ZEL: commu.h,v 1.10 2011/04/12 21:07:10 wuestner Exp $
+ * $ZEL: commu.h,v 1.11 2017/10/20 23:21:31 wuestner Exp $
  */
 
 #ifndef _commu_h_
@@ -16,8 +16,8 @@
 
 #define complain(fmt, arg...)           \
     do {                                \
-        char s[4096];                   \
-        snprintf(s, 4096, fmt, ## arg); \
+        char s[8192];                   \
+        snprintf(s, 8192, fmt, ## arg); \
         printf("%s\n", s);              \
         send_unsol_text(s, 0);          \
     } while (0)
@@ -35,9 +35,11 @@ int send_unsol_patience(int code, unsigned int num, ...);
 int send_unsol_text(const char *text, ...);
 int send_unsol_text2(const char *text, ...);
 int send_unsol_do_filename(int do_idx, char *name);
+#if 0
 int send_unsol_alarm_0(int severity, struct timeval,
         int i_counter, ems_u32 *i_vector,
         int s_counter, const char **s_vector);
+#endif
 
 void select_command(int, enum select_types, union callbackdata);
 Request wait_indication(ems_u32** reqbuf, unsigned int* size);

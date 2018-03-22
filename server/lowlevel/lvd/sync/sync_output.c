@@ -3,7 +3,7 @@
  * created 2006-Feb-07 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: sync_output.c,v 1.18 2013/01/17 22:44:54 wuestner Exp $";
+    "$ZEL: sync_output.c,v 1.19 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -78,7 +78,8 @@ lvd_stop_osynch(struct lvd_dev* dev, struct lvd_acard* acard)
 }
 /*****************************************************************************/
 static int
-lvd_clear_osynch(struct lvd_dev* dev, struct lvd_acard* acard)
+lvd_clear_osynch(__attribute__((unused)) struct lvd_dev* dev,
+        __attribute__((unused)) struct lvd_acard* acard)
 {
     return 0;
 }
@@ -344,7 +345,7 @@ lvd_syncoutput_sram_get(struct lvd_dev* dev, int idx, unsigned int addr,
 }
 /*****************************************************************************/
 static plerrcode
-sram_check1(struct lvd_dev* dev, int idx, int val)
+sram_check1(struct lvd_dev* dev, int idx, unsigned int val)
 {
     ems_u32 rval;
     int i;
@@ -373,7 +374,7 @@ static plerrcode
 sram_check2(struct lvd_dev* dev, int idx)
 {
     ems_u32 rval;
-    int i;
+    unsigned int i;
 
     if (lvd_i_w(dev, idx, osync.sr_addr, 0)<0)
         return plErr_System;
@@ -400,12 +401,13 @@ static plerrcode
 sram_check3(struct lvd_dev* dev, int idx)
 {
     ems_u32 rval;
-    int i;
+    unsigned int i;
+    int ii;
 
-    for (i=65535; i>=0; i--) {
-        if (lvd_i_w(dev, idx, osync.sr_addr, i)<0)
+    for (ii=65535; ii>=0; ii--) {
+        if (lvd_i_w(dev, idx, osync.sr_addr, ii)<0)
             return plErr_System;
-        if (lvd_i_w(dev, idx, osync.sr_data, 65535-i)<0)
+        if (lvd_i_w(dev, idx, osync.sr_data, 65535-ii)<0)
             return plErr_System;
     }
 
@@ -441,7 +443,7 @@ sram_check4(struct lvd_dev* dev, int idx)
             return plErr_System;
         if (lvd_i_r(dev, idx, osync.sr_data, &rval)<0)
             return plErr_System;
-        if (rval!=i) {
+        if (rval!=(unsigned)i) {
             printf("sram_check4: addr=0x%04x: 0x%04x ==> 0x%04x\n", i,
                     i, rval);
             return plErr_HW;
@@ -453,8 +455,8 @@ sram_check4(struct lvd_dev* dev, int idx)
 plerrcode
 lvd_syncoutput_sram_check(struct lvd_dev* dev, int idx)
 {
-    int vals[]={0, 0xffff, 0xaaaa, 0x5555};
-    int i;
+    unsigned int vals[]={0, 0xffff, 0xaaaa, 0x5555};
+    unsigned int i;
     plerrcode pres;
 
     for (i=0; i<sizeof(vals)/sizeof(int); i++) {
@@ -664,7 +666,8 @@ dump_bsy_tmo(struct lvd_dev* dev, int addr, void *xp)
 }
 /*****************************************************************************/
 static int
-dump_softinfo(struct lvd_dev* dev, struct lvd_acard* acard, void *xp)
+dump_softinfo(__attribute__((unused)) struct lvd_dev* dev,
+        struct lvd_acard* acard, void *xp)
 {
     xprintf(xp, "  daq_mode  =0x%04x\n", acard->daqmode);
     return 0;
@@ -717,14 +720,16 @@ lvd_cardstat_synch_output(struct lvd_dev* dev, struct lvd_acard* acard,
 }
 /*****************************************************************************/
 static void
-lvd_osync_acard_free(struct lvd_dev* dev, struct lvd_acard* acard)
+lvd_osync_acard_free(__attribute__((unused)) struct lvd_dev* dev,
+        struct lvd_acard* acard)
 {
     free(acard->cardinfo);
     acard->cardinfo=0;
 }
 /*****************************************************************************/
 int
-lvd_osync_acard_init(struct lvd_dev* dev, struct lvd_acard* acard)
+lvd_osync_acard_init(__attribute__((unused)) struct lvd_dev* dev,
+        struct lvd_acard* acard)
 {
     struct osynch_info *info;
 

@@ -1,4 +1,4 @@
-# $ZEL: start.tcl,v 1.19 2009/05/25 17:11:06 wuestner Exp $
+# $ZEL: start.tcl,v 1.21 2017/11/08 00:17:20 wuestner Exp $
 # copyright: 1998, 1999
 #   Peter Wuestner; Zentrallabor fuer Elektronik; Forschungszentrum Juelich
 #
@@ -82,6 +82,13 @@ proc start_button {} {
   set global_daq(starttime) [clock format $global_daq(_starttime) -format $clockformat]
   set global_daq(stoptime) {}
   output "Start of run $global_daq(run_nr) complete" tag_green
+
+  epics_put runnr $global_daq(run_nr) none
+  epics_put eventnr 0 none
+  epics_put eventrate 0 none
+  epics_put datarate 0 none
+  epics_put filesize 0 none
+
   start_status_loop
 }
 
@@ -141,6 +148,13 @@ proc auto_restart {ved do_idx reason} {
   set global_daq(starttime) [clock format $global_daq(_starttime) -format $clockformat]
   set global_daq(stoptime) {}
   output "Restart complete" tag_green
+
+  epics_put runnr $global_daq(run_nr) none
+  epics_put eventnr 0 none
+  epics_put eventrate 0 none
+  epics_put datarate 0 none
+  epics_put filesize 0 none
+
   start_status_loop
 }
 

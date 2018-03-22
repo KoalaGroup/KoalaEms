@@ -2,7 +2,7 @@
  * trigger/pci/zelfera/zelferatrigger.c
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: zelferatrigger.c,v 1.12 2011/04/06 20:30:36 wuestner Exp $";
+    "$ZEL: zelferatrigger.c,v 1.14 2017/10/21 22:21:27 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -69,12 +69,12 @@ get_trig_zelfera(struct triggerinfo* trinfo)
 	}
 #endif
 
-	trinfo->eventcnt++;
+	trinfo->count++;
 	return 1;
 }
 
 static void
-reset_trig_zelfera(struct triggerinfo* trinfo)
+reset_trig_zelfera(__attribute__((unused)) struct triggerinfo* trinfo)
 {
 #if 1
     printf("reset_trig_zelfera\n");
@@ -132,7 +132,7 @@ init_trig_zelfera(ems_u32* p, struct triggerinfo* trinfo)
         tinfo->reset_trigger=reset_trig_zelfera;
         tinfo->done_trigger=done_trig_zelfera;
 
-	trinfo->eventcnt = 0;
+	trinfo->count = 0;
 	return plOK;
 }
 

@@ -1,13 +1,18 @@
 /*
  * lowlevel/lvd/vertex/vertex.h
- * $ZEL: vertex.h,v 1.27 2013/01/17 22:44:55 wuestner Exp $
+ * $ZEL: vertex.h,v 1.28 2017/02/14 09:42:55 trusov Exp $
  * created 2005-Feb-25 PW
  */
 
 #ifndef _vertex_h_
 #define _vertex_h_
 
+#include "emsctypes.h"
 #include "../lvdbus.h"
+
+ems_u32     get_ignore_va_check(void);
+void        set_ignore_va_check(ems_u32 v);
+
 plerrcode   lvd_vertex_start_init_mode(struct lvd_dev* dev, int addr);
 plerrcode   lvd_vertex_module_start(struct lvd_dev* dev, int addr);
 plerrcode   lvd_vertex_module_stop(struct lvd_dev* dev, int addr);
@@ -24,8 +29,8 @@ plerrcode   lvd_vertex_exec_seq_func(struct lvd_dev* dev, int addr, int unit, em
 plerrcode   lvd_vertex_seq_halt(struct lvd_dev* dev, int addr, int unit, ems_u32 value);
 plerrcode   lvd_vertex_info_ro_par_set(struct lvd_dev* dev, int addr, int unit, 
 				       ems_u32 len, ems_u32* par);
-int         lvd_vertex_count_chips(struct lvd_dev* dev, int addr, int idx,
-                int maxchips);
+int         lvd_vertex_count_chips(struct lvd_dev* dev, int addr, int idx, int maxchips);
+
 plerrcode   lvd_vertex_chip_info(struct lvd_dev* dev, int addr,
                 ems_u32* chipargs);
 plerrcode   lvd_vertex_load_vata(struct lvd_dev* dev, int addr, int unit,

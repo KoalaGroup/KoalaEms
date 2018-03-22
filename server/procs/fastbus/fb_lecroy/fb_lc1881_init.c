@@ -18,7 +18,7 @@
  * 03.06.2002 PW multi crate support
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: fb_lc1881_init.c,v 1.16 2011/04/06 20:30:31 wuestner Exp $";
+    "$ZEL: fb_lc1881_init.c,v 1.17 2017/10/09 21:25:37 wuestner Exp $";
 
 #include <math.h>
 #include <utime.h>
@@ -51,7 +51,6 @@ static const char* cvsid __attribute__((unused))=
 
 extern ems_u32* outptr;
 extern int *memberlist;
-extern int wirbrauchen;
 
 #define FB_BUFBEG 0
 #define FB_BUFEND 0

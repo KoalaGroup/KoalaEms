@@ -3,7 +3,7 @@
  * created 25.Jun.2005 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: lvdtrigger_async.c,v 1.19 2015/04/21 16:42:10 wuestner Exp $";
+    "$ZEL: lvdtrigger_async.c,v 1.21 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -38,7 +38,7 @@ struct private {
 };
 
 extern ems_u32* outptr;
-extern int *memberlist;
+extern unsigned int *memberlist;
 
 RCS_REGISTER(cvsid, "trigger/pci/lvd")
 
@@ -217,7 +217,7 @@ get_trig_pcilvd_async(struct triggerinfo* trinfo)
 #endif
 /*****************************************************************************/
 static void
-reset_trig_pcilvd_async(struct triggerinfo* trinfo)
+reset_trig_pcilvd_async(__attribute__((unused)) struct triggerinfo* trinfo)
 {
 /*
     nothing to be done because irq is auto-acknowledged
@@ -301,7 +301,7 @@ init_trig_pcilvd_async(ems_u32* p, struct triggerinfo* trinfo)
         pp++;
     }
 
-    trinfo->eventcnt=0;
+    trinfo->count=0;
 
     tinfo->insert_triggertask=insert_trig_pcilvd_async;
     tinfo->suspend_triggertask=suspend_trig_pcilvd_async;

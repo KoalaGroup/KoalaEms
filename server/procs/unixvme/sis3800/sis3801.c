@@ -3,7 +3,7 @@
  * created 24.Jan.2001 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: sis3801.c,v 1.10 2015/04/06 21:33:38 wuestner Exp $";
+    "$ZEL: sis3801.c,v 1.12 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -22,8 +22,7 @@ static const char* cvsid __attribute__((unused))=
 #include "../../../trigger/trigger.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
-extern int *memberlist;
+extern unsigned int *memberlist;
 
 #define lumis 21
 static int lumi[lumis];
@@ -37,7 +36,8 @@ RCS_REGISTER(cvsid, "procs/unixvme/sis3800")
  */
 plerrcode proc_sis3801init(ems_u32* p)
 {
-int i, res;
+unsigned int i;
+int res;
 
 for (i=1; i<=p[0]; i++)
   {
@@ -81,7 +81,7 @@ return plOK;
 
 plerrcode test_proc_sis3801init(ems_u32* p)
 {
-int i;
+unsigned int i;
 
 for (i=1; i<=p[0]; i++)
   {
@@ -107,7 +107,7 @@ plerrcode proc_sis3801ShadowInit(ems_u32* p)
 {
     ems_u64 *var;
     ems_u32 *var_;
-    int i;
+    unsigned int i;
 
     for (i=2; i<=p[0]; i++) {
         ml_entry* module=ModulEnt(p[i]);
@@ -148,7 +148,7 @@ plerrcode proc_sis3801ShadowInit(ems_u32* p)
 plerrcode test_proc_sis3801ShadowInit(ems_u32* p)
 {
     unsigned int vsize;
-    int i;
+    unsigned int i;
     plerrcode pcode;
 
     for (i=2; i<=p[0]; i++) {
@@ -193,7 +193,7 @@ int ver_proc_sis3801ShadowInit = 1;
  */
 plerrcode proc_sis3801read(ems_u32* p)
 {
-int i;
+unsigned int i;
 
 for (i=1; i<=p[0]; i++)
   {
@@ -233,7 +233,7 @@ return plOK;
 
 plerrcode test_proc_sis3801read(ems_u32* p)
 {
-int i;
+unsigned int i;
 for (i=1; i<=p[0]; i++)
   {
   ml_entry* module;
@@ -255,7 +255,7 @@ int ver_proc_sis3801read = 1;
  */
 plerrcode proc_sis3801clock(ems_u32* p)
 {
-int i;
+unsigned int i;
 
 for (i=1; i<=p[0]; i++)
   {
@@ -269,7 +269,7 @@ return plOK;
 
 plerrcode test_proc_sis3801clock(ems_u32* p)
 {
-int i;
+unsigned int i;
 for (i=1; i<=p[0]; i++)
   {
   ml_entry* module;
@@ -298,7 +298,8 @@ plerrcode proc_sis3801ShadowUpdate(ems_u32* p)
 {
     ems_u32 tmp[65], *var_;
     ems_u64 *var;
-    int res, i, j;
+    unsigned int i, j;
+    int res;
 
     var_get_ptr(p[1], &var_);
     var=(ems_u64*)var_;
@@ -351,8 +352,9 @@ plerrcode test_proc_sis3801ShadowUpdate(ems_u32* p)
 {
     ems_u32 mtypes[]={SIS_3801, 0};
     unsigned int vsize;
-    int nr_modules, nr_channels, res, i;
+    unsigned int nr_modules, nr_channels, i;
     plerrcode pcode=plOK;
+    int res;
 
     if ((p[0]<1) && (p[0]>2))
         return plErr_ArgNum;
@@ -414,7 +416,7 @@ int ver_proc_sis3801ShadowUpdate = 1;
 plerrcode proc_sis3801ShadowClear(ems_u32* p)
 {
     ems_u32 tmp[65], *var;
-    int i;
+    unsigned int i;
 
     var_get_ptr(p[1], &var);
 
@@ -448,8 +450,9 @@ plerrcode test_proc_sis3801ShadowClear(ems_u32* p)
 {
     ems_u32 mtypes[]={SIS_3801, 0};
     unsigned int vsize;
-    int nr_modules, nr_channels, res;
+    unsigned int nr_modules, nr_channels;
     plerrcode pcode=plOK;
+    int res;
 
     if ((p[0]<1) && (p[0]>2))
         return plErr_ArgNum;

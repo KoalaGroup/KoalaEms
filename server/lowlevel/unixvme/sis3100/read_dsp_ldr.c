@@ -3,7 +3,7 @@
  * PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: read_dsp_ldr.c,v 1.5 2011/04/06 20:30:28 wuestner Exp $";
+    "$ZEL: read_dsp_ldr.c,v 1.6 2017/10/22 23:51:25 wuestner Exp $";
 
 #define _GNU_SOURCE
 
@@ -42,12 +42,12 @@ read_dsp_ldr(int p, const char* codepath, u_int8_t** code,
         struct code_info* info)
 {
     struct stat stat;
-    int arrsize;
+    unsigned int arrsize;
     FILE* fp;
     u_int8_t* code_;
     struct opaque_info* info_;
     size_t size;
-    int lc, i;
+    unsigned int lc, i;
 
     info->free=0;
 

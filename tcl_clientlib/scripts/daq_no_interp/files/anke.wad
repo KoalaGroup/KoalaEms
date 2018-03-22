@@ -1,6 +1,0 @@
-set setupfile(fera)   {fera.wad}
-set setupfile(sfi)    {sfi.wad}
-set setupfile(mwpc)   {mwpc.wad}
-set setupfile(vme)    {vme.wad}
-set setupfile(scaler) {scaler.wad}
-set setupfile(em)     {em.wad}

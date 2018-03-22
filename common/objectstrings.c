@@ -3,7 +3,7 @@
  * created 2006-Feb-05 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: objectstrings.c,v 2.6 2011/04/07 14:07:08 wuestner Exp $";
+    "$ZEL: objectstrings.c,v 2.7 2016/05/02 15:08:58 wuestner Exp $";
 
 #include "objecttypes.h"
 #include "rcs_ids.h"
@@ -23,6 +23,7 @@ const char* Modulclass_names[]={
     "caenet",
     "sync",
     "pcihl",
+    "ip",
     "invalid",
     0,
 };

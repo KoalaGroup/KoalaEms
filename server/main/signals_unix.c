@@ -2,7 +2,7 @@
  * main/signals_unix.c
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: signals_unix.c,v 1.15 2014/09/10 15:28:59 wuestner Exp $";
+    "$ZEL: signals_unix.c,v 1.16 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -217,7 +217,7 @@ printf("signalhandler for sig %d removed\n", sig);
     return 0;
 }
 /*****************************************************************************/
-static void ende(int sig){
+static void ende(__attribute__((unused)) int sig){
   if(breakproc)(*breakproc)();
 #ifndef GO32
   exit(0);

@@ -4,7 +4,7 @@
  * 22.May.2002 PW rewritten for multiple crates
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: fbsingle.c,v 1.7 2015/04/06 21:33:32 wuestner Exp $";
+    "$ZEL: fbsingle.c,v 1.8 2017/10/09 21:25:37 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -17,7 +17,6 @@ static const char* cvsid __attribute__((unused))=
 
 extern ems_u32* outptr;
 extern int* memberlist;
-extern int wirbrauchen;
 
 RCS_REGISTER(cvsid, "procs/fastbus/general")
 

@@ -3,7 +3,7 @@
  * created      14.04.97
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: do_dummy.c,v 1.8 2011/04/06 20:30:22 wuestner Exp $";
+    "$ZEL: do_dummy.c,v 1.9 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -38,12 +38,12 @@ dataout_cl[idx].do_status=Do_neverstarted;
 return OK;
 }
 /*****************************************************************************/
-static void do_dummy_cleanup(int idx)
+static void do_dummy_cleanup(__attribute__((unused)) int idx)
 {
 T(dataout/cluster/do_dummy.c:do_dummy_cleanup)
 }
 /*****************************************************************************/
-static void do_dummy_freeze(int do_idx)
+static void do_dummy_freeze(__attribute__((unused)) int do_idx)
 {}
 /*****************************************************************************/
 static void do_dummy_advertise(int idx, struct Cluster* cl)
@@ -68,6 +68,7 @@ static struct do_procs dummy_procs={
   do_dummy_cleanup,
   /*wind*/ do_NotImp_err_ii,
   /*status*/ 0,
+  /*filename*/ 0,
   };
 /*****************************************************************************/
 errcode do_dummy_init(int do_idx)

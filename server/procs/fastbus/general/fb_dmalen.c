@@ -2,7 +2,7 @@
  * procs/fastbus/general/fb_dmalen.c
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: fb_dmalen.c,v 1.3 2011/04/06 20:30:32 wuestner Exp $";
+    "$ZEL: fb_dmalen.c,v 1.4 2017/10/09 21:25:37 wuestner Exp $";
 
 #include <sconf.h>
 #include <stdlib.h>
@@ -13,7 +13,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../../procs.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
 
 #define get_fbdevice(crate) \
     (struct fastbus_dev*)get_gendevice(modul_fastbus, (crate))

@@ -3,7 +3,7 @@
  * created 20.Jan.2004 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: sis1100_lvd_read_single.c,v 1.38 2012/09/12 14:56:03 wuestner Exp $";
+    "$ZEL: sis1100_lvd_read_single.c,v 1.41 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -20,14 +20,13 @@ static const char* cvsid __attribute__((unused))=
 #include <emsctypes.h>
 #include <modultypes.h>
 #include "conststrings.h"
-#include "../../../trigger/trigger.h"
+#include "../../../objects/pi/readout.h"
 #include "../../../commu/commu.h"
 #include "dev/pci/sis1100_var.h"
 #include "sis1100_lvd.h"
 #include "sis1100_lvd_read.h"
 #include "../lvd_map.h"
 #include "../lvd_access.h"
-//#include "../tdc/f1.h"
 
 #ifdef DMALLOC
 #include <dmalloc.h>
@@ -37,182 +36,107 @@ RCS_REGISTER(cvsid, "lowlevel/lvd/sis1100")
 
 #define ofs(what, elem) ((size_t)&(((what*)0)->elem))
 
-static int errorcount;
-//static ems_u32 word_store[16];
-static int stored_words;
-
 /*****************************************************************************/
 plerrcode
-sis1100_lvd_prepare_single(struct lvd_dev* dev)
+sis1100_lvd_prepare_single(__attribute__((unused)) struct lvd_dev* dev)
 {
     return plOK;
 }
 /*****************************************************************************/
 plerrcode
-sis1100_lvd_cleanup_single(struct lvd_dev* dev)
+sis1100_lvd_cleanup_single(__attribute__((unused)) struct lvd_dev* dev)
 {
     return plOK;
 }
 /*****************************************************************************/
-#if 0
-static int
-sis1100_lvd_readout_transient_errors(struct lvd_dev* dev, ems_u32 status,
-        int verbose)
-{
-    ems_u32 sr, pat;
-
-    if (verbose) {
-        printf("printing crate status because of readout errors\n");
-        lvd_cratestat(dev, 2, -1);
-    }
-    if (status&0x40) {
-        int addr;
-        /* read error pattern */
-        lvd_ib_r(dev, error, &pat);
-        if (verbose)
-            printf("error pattern: 0x%x\n", pat);
-        for (addr=0; addr<16; addr++) {
-            if ((1<<addr)&pat) {
-                int idx=lvd_find_acard(dev, addr);
-                struct lvd_acard *acard=dev->acards+idx;
-
-                if (idx<0) {
-                    printf("program error in sis1100_lvd_readout_single: "
-                        "nonexistent card at address 0x%x\n", addr);
-                    goto error;
-                }
-                if (acard->clear_card) {
-                    if (acard->clear_card(dev, acard)<0)
-                        goto error;
-                }
-            }
-        }
-    }
-    lvd_cc_w(dev, ctrl, LVD_SYNC_RES);
-    printf("sis1100_lvd_readout_single: LVD_SYNC_RES for crate %s at event %d "
-            "executed\n",
-            dev->pathname, trigger.eventcnt);
-
-    if (lvd_cc_w(dev, sr, status)<0) {
-        printf("sis1100_lvd_readout_single: error clearing status bits\n");
-        goto error;
-    }
-    if (lvd_cc_r(dev, sr, &sr)<0) {
-        printf("sis1100_lvd_readout_single: error reading status\n");
-        goto error;
-    }
-    if (sr&0x40c0) {
-        printf("sis1100_lvd_readout_single: status after clear: 0x%04x\n", sr);
-        goto error;
-    }
-
-    return 0;
-
-error:
-    if (!verbose) {
-        printf("printing crate status because of readout errors after "
-                "recovery\n");
-        lvd_cratestat(dev, 2, -1);
-    }
-    return 1;
-}
-#endif
-/*****************************************************************************/
+/*
+ * read_one_fragment reads one fragment of an LVDS event.
+ * maxnum is the size of the buffer, num returns the number of words read.
+ * frag indicates the first fragment (frag==0) or following fragments.
+ * It is possible that we have to wait a little bit for following fragments.
+ */
 static plerrcode
-read_header(int p, ems_u32 *headbuf, int frag)
+read_one_fragment(int p, ems_u32 *buffer, unsigned int maxnum, int *num, int frag)
 {
     struct sis1100_vme_block_req breq;
+    struct timeval start={0, 0}, now;
+    unsigned int len, again;
 
-    breq.size=4;
-    breq.fifo=1;
-    breq.num=3; /* size of header */
-    breq.am=-1;
-    breq.addr=ofs(struct lvd_bus1100, prim_controller.cc.ro_data);
-    breq.data=(u_int8_t*)headbuf;
-    breq.error=0;
-    if (ioctl(p, SIS3100_VME_BLOCK_READ, &breq)) {
-        complain("lvd_readout_single: read header: %s", strerror(errno));
-        return plErr_System;
+    if (maxnum<3) {
+        complain("lvd_readout_single: no space for header");
+        return plErr_Overflow;
     }
 
-    if (breq.error==0x209) { /* fifo empty */
-        struct timeval start, now;
-        //printf("read_header: error==0x209 frag=%d\n", frag);
-        if (frag==0) { /* should never happen */
-            complain("lvd_readout_single: first fragment but no data");
-                return plErr_HW;
+// printf("read_one_fragment: buffer=%p maxnum=%x\n", buffer, maxnum);
+    do {
+        again=0;
+        breq.size=4;
+        breq.fifo=1;
+        breq.num=3; /* size of header */
+        breq.am=-1;
+        breq.addr=ofs(struct lvd_bus1100, prim_controller.cc.ro_data);
+        breq.data=(u_int8_t*)buffer;
+        breq.error=0;
+// printf("read header:\n");
+// printf("breq.num =        %08lx\n", breq.num);
+// printf("breq.addr=        %08x\n", breq.addr);
+// printf("breq.data=%p\n", breq.data);
+        if (ioctl(p, SIS3100_VME_BLOCK_READ, &breq)) {
+            complain("lvd_readout_single: read header: %s", strerror(errno));
+            return plErr_System;
         }
-        gettimeofday(&start, 0);
-        while (breq.error==0x209) {
-            gettimeofday(&now, 0);
-            if (now.tv_sec-start.tv_sec>1) { /* one or two seconds */
-                complain("lvd_readout_single: timeout");
+        if (breq.error==0x209) { /* fifo empty */
+            if (frag==0) { /* first fragment */
+                complain("lvd_readout_single: first fragment but no data");
                 return plErr_HW;
-            }
-            breq.size=4;
-            breq.fifo=1;
-            breq.num=3;
-            breq.am=-1;
-            breq.addr=ofs(struct lvd_bus1100, prim_controller.cc.ro_data);
-            breq.data=(u_int8_t*)headbuf;
-            breq.error=0;
-            if (ioctl(p, SIS3100_VME_BLOCK_READ, &breq)) {
-                complain("lvd_readout_single: read header: %s",
-                        strerror(errno));
-                return plErr_System;
-            }
+            } else {
+                if (start.tv_sec) {
+                    gettimeofday(&now, 0);
+                    if (now.tv_sec-start.tv_sec>1) { /* one or two seconds */
+                        complain("lvd_readout_single: timeout");
+                        return plErr_HW;
+                    }
+                } else {
+                    gettimeofday(&start, 0);
+                }
+                again=1;
+           }
         }
-    }
-
-#if 0
-    if (breq.error || breq.num!=3) {
-        complain("lvd_readout_single: header: error=0x%x num=%llu,frag=%d ev=%d",
-            breq.error, (unsigned long long)breq.num,
-            frag, trigger.eventcnt);
-        return plErr_HW;
-    }
-#else
-    if (breq.error || breq.num<3 || breq.num>19) {
-        complain("lvd_readout_single: header: error=0x%x num=%llu,frag=%d ev=%d",
-            breq.error, (unsigned long long)breq.num,
-            frag, trigger.eventcnt);
-        return plErr_HW;
-    } else if (breq.num>3) {
-        stored_words=breq.num-3;
-    } /* else: OK */
-
-#endif
+    } while (again);
 
     /* check header consistency */
-#if 0
-    printf("[ev=%d] head: %08x %08x %08x\n", trigger.eventcnt,
-            headbuf[0], headbuf[1], headbuf[2]);
-#endif
-    if ((headbuf[0]&LVD_HEADBIT)!=LVD_HEADBIT) {
-        complain("lvd_readout_single: illegal header 0x%08x", headbuf[0]);
+    if ((buffer[0]&LVD_HEADBIT)!=LVD_HEADBIT) {
+        complain("lvd_readout_single: illegal header 0x%08x", buffer[0]);
         return plErr_HW;
     }
-    return plOK;
-}
-/*****************************************************************************/
-static plerrcode
-read_data(int p, ems_u32 *databuf, int len, int frag)
-{
-    struct sis1100_vme_block_req breq;
 
-    if (stored_words) {
-        databuf+=stored_words;
-        len-=stored_words;
+    /*  OK, here we have the header, now we can read the data */
+    len=(buffer[0]&LVD_FIFO_MASK)/4-3; /* subtract size of header */
+    if (!len) { /* nothing to read */
+        return plOK;
     }
+    if (len>maxnum) {
+        complain("lvd_readout_single: no space for %d additional words; "
+                " remaining space: %d words",
+                len, maxnum);
+        return plErr_Overflow;
+    }
+    maxnum-=3;
+    *num=3;
+    buffer+=3;
 
     breq.size=4;
     breq.fifo=1;
     breq.num=len;
     breq.am=-1;
     breq.addr=ofs(struct lvd_bus1100, prim_controller.cc.ro_data);
-    breq.data=(u_int8_t*)databuf;
+    breq.data=(u_int8_t*)buffer;
     breq.error=0;
 
+// printf("read data:\n");
+// printf("breq.num =        %08lx\n", breq.num);
+// printf("breq.addr=        %08x\n", breq.addr);
+// printf("breq.data=%p\n", breq.data);
     if (ioctl(p, SIS3100_VME_BLOCK_READ, &breq)) {
         complain("lvd_readout_single: read data: %s", strerror(errno));
         return plErr_System;
@@ -227,50 +151,8 @@ read_data(int p, ems_u32 *databuf, int len, int frag)
             (long long)breq.num, len);
         return plErr_HW;
     }
+
     return plOK;
-}
-/*****************************************************************************/
-/*
- * headbuf   : destination for the header
- * databuf   : destination for the data
- * maxdatalen: maximim number of data words to read
- * datalen   : actual number of data words read
- */
-static plerrcode
-read_one_fragment(int p, ems_u32 *headbuf, ems_u32 *databuf,
-    int maxdatalen, int *datalen, int frag)
-{
-    plerrcode pres;
-    int len;
-
-    /* sanity check only, must never be true */
-    if (maxdatalen<=0) {
-        complain("lvd_readout_single: strange length requested: %d",
-                maxdatalen);
-        return plErr_Program;
-    }
-
-    stored_words=0;
-    if ((pres=read_header(p, headbuf, frag))!=plOK)
-        return pres;
-
-    len=(headbuf[0]&LVD_FIFO_MASK)/4-3; /* subtract size of header */
-    if (!len) { /* nothing to read */
-        *datalen=0;
-        return plOK;
-    }
-    if (len>maxdatalen) {
-        complain("lvd_readout_single: no space for %lld additional words; "
-                " remaining space: %d words",
-                (long long)len, maxdatalen);
-        return plErr_Overflow;
-    }
-
-    if ((pres=read_data(p, databuf, len, frag))!=plOK)
-        return pres;
-    *datalen=len;
-    
-    return pres;
 }
 /*****************************************************************************/
 /*
@@ -305,70 +187,63 @@ sis1100_lvd_readout_single(struct lvd_dev* dev, ems_u32* buffer, int* len,
 {
     struct lvd_sis1100_info *info=(struct lvd_sis1100_info*)dev->info;
     struct lvd_sis1100_link *link=info->A;
-    //struct datafilter *filter;
     plerrcode pres=plOK;
-    int fragments_complete=0, fragment=0;
-    ems_u32 headbuffer[3]; /* for fragmented events */
-    ems_u32 *headbuf=buffer, *databuf=buffer+3; /* three words for header */
-    int maxlen=*len-3, num=3;                   /* three words for header */
-    int xnum=0;
+    int incomplete;
+    int num=0, maxnum=*len;
+    int frag=0;
     DEFINE_LVDTRACE(trace);
 
+// printf("sis1100_lvd_readout_single: buffer=%p len=%x\n", buffer, *len);
     lvd_settrace(dev, &trace, 0);
 
-    while (!fragments_complete) {
+    do {
+        int xnum;
+
         /* read one fragment */
-        pres=read_one_fragment(link->p_remote, headbuf, databuf, maxlen, &xnum,
-                fragment);
+        pres=read_one_fragment(link->p_remote, buffer, maxnum, &xnum, frag);
         if (pres!=plOK) {
             if (pres==plErr_Overflow) {
                 complain("lvd_readout_single: %d available words "
                         "and %d words read so far in %d fragment%s",
-                        *len-3, xnum, fragment, fragment==1?"":"s");
+                        maxnum, num, frag, frag==1?"":"s");
             }
             goto error;
         }
+        incomplete=buffer[0]&LVD_FRAGMENTED;
+
+        if (dev->datafilter) {
+            /*
+             * Filter can modify data and data size.
+             * After adding data *num has to be increased and *maxnum decreased.
+             * After removing data *num has to be decreased and *maxnum
+             * increased.
+             * The event header has to be corrected too.
+             * It is not allowed to remove the event header.
+             * Of course *num must not go below 3 (event header) and *maxnum
+             * must not become negative.
+             */
+            struct datafilter *filter=dev->datafilter;
+            while (filter) {
+                pres=filter->filter(filter, buffer, &xnum, &maxnum);
+                if (pres!=plOK)
+                    goto error;
+                filter=filter->next;
+            }
+        }
+
+        if (dev->parseflags) {
+            /* Parser is not allowed to modify data. */
+            if (sis1100_lvd_parse_event(dev, buffer, xnum)) {
+                printf("error from sis1100_lvd_parse_event\n");
+                pres=plErr_Program;
+                goto error;
+            }
+        }
 
         num+=xnum;
-        maxlen-=xnum;
-
-        if (!(headbuf[0]&LVD_FRAGMENTED)) { /* event complete */
-            fragments_complete=1;
-        } else {                        /* fragmented */
-complain("fragmented events are currently not supported!");
-pres=plErr_Overflow;
-goto error;
-            headbuf=headbuffer;
-            databuf+=xnum;
-            //printf("[%2d] fragment %d incomplete\n",
-            //        trigger.eventcnt, fragment);
-        }
-        fragment++;
-    } 
-
-#if 0
-    /* DON'T correct header! */
-    buffer[0]=0x80000000|(num*4);
-    But now fragmented events cannot be used.
-    Fuer fragmentierte Events koennte man einen Superhaeder einfuehren, der
-    28 Bit fuer die Laenge hat, aber keine Zeiterweitrung
-#endif
-
-#if 0
-temporarily disabled because of unclear logic
-filter should receive and return the actual length explicitely
-it must not use buffer[0]&LVD_FIFO_MASK because of possible overflow
-
-    filter=dev->datafilter;
-    while (filter) {
-        pres=filter->filter(filter, buffer, len);
-        if (pres!=plOK)
-            goto error;
-        filter=filter->next;
-    }
-#endif
-
-    *len=num;
+        maxnum-=xnum;
+        buffer+=xnum;
+    } while (incomplete);
 
     ///* clear error flags (but not handshake flag) */
     //lvd_cc_w(dev, sr, sr_clear);
@@ -379,16 +254,16 @@ it must not use buffer[0]&LVD_FIFO_MASK because of possible overflow
     }
 
     /* toggle the LEDs every 1024 events */
-    if ((trigger.eventcnt&0x3ff)==0) {
+    if ((global_evc.ev_count&0x3ff)==0) {
         ems_u32 cr;
         info->mcread(dev, 0, ofs(struct lvd_reg, cr), &cr);
-        cr=(cr&~0x18)|(((trigger.eventcnt>>10)&3)<<3);
+        cr=(cr&~0x18)|(((global_evc.ev_count>>10)&3)<<3);
         info->mcwrite(dev, 0, ofs(struct lvd_reg, cr), cr);
     }
 
 #if 0
-temporarily disabled because of unclear logic
-see filter
+//temporarily disabled because of unclear logic
+//see filter
 
     if (dev->parseflags) {
         if (sis1100_lvd_parse_event(dev, buffer, *len)) {
@@ -401,7 +276,7 @@ see filter
 
 error:
     lvd_settrace(dev, 0, trace);
-//printf("[ev=%d] fragment=%d event complete\n", trigger.eventcnt, fragment);
+//printf("[ev=%d] fragment=%d event complete\n", trigger.eventcnt, frag);
     return pres;
 }
 /*****************************************************************************/
@@ -415,8 +290,6 @@ sis1100_lvd_start_single(struct lvd_dev* dev, int selftrigger)
 #if 1
     printf("sis1100_lvd_start_single\n");
 #endif
-    errorcount=0;
-    stored_words=0;
 
     if ((pres=lvd_start(dev, selftrigger))!=plOK) {
         printf("sis1100_lvd_start_single: lvd_start failed, pres=%s\n",

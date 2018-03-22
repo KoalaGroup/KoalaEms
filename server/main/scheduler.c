@@ -2,7 +2,7 @@
  * main/scheduler.c
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: scheduler.c,v 1.11 2014/09/10 15:28:59 wuestner Exp $";
+    "$ZEL: scheduler.c,v 1.12 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -389,14 +389,14 @@ if (res>0)
 }
 
 static void
-select_waitproc(union callbackdata arg)
+select_waitproc(__attribute__((unused)) union callbackdata arg)
 {
     T(select_waitproc)
     select_proc((struct timeval*)0);
 }
 
 static void
-select_pollproc(union callbackdata arg)
+select_pollproc(__attribute__((unused)) union callbackdata arg)
 {
     struct timeval to;
     T(select_pollproc)

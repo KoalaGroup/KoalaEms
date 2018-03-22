@@ -3,7 +3,7 @@
  * created 11.Jan.2006 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: sis3100rw.c,v 1.8 2015/04/06 21:33:35 wuestner Exp $";
+    "$ZEL: sis3100rw.c,v 1.10 2017/10/09 21:09:24 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -22,7 +22,6 @@ static const char* cvsid __attribute__((unused))=
 #endif
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
 
 #define get_vmedevice(crate) \
     (struct vme_dev*)get_gendevice(modul_vme, (crate))
@@ -53,12 +52,17 @@ plerrcode proc_sis3100_read(ems_u32* p)
 
 plerrcode test_proc_sis3100_read(ems_u32* p)
 {
+    plerrcode pres;
+
     if (p[0]!=3)
         return plErr_ArgNum;
     if (p[2]>1)
         return plErr_ArgRange;
+
+    pres=find_vme_odevice(p[1], (struct vme_dev**)0);
+
     wirbrauchen=1;
-    return plOK;
+    return pres;
 }
 /*****************************************************************************/
 char name_proc_sis3100_write[] = "sis3100_write";
@@ -82,12 +86,20 @@ plerrcode proc_sis3100_write(ems_u32* p)
 
 plerrcode test_proc_sis3100_write(ems_u32* p)
 {
+    plerrcode pres;
+
     if (p[0]!=4)
         return plErr_ArgNum;
     if (p[2]>1)
         return plErr_ArgRange;
+
+printf("sis3100_write: p[0]=%d p[1]=%d p[2]=%d\n",
+        p[0], p[1], p[2]);
+
+    pres=find_vme_odevice(p[1], (struct vme_dev**)0);
+
     wirbrauchen=0;
-    return plOK;
+    return pres;
 }
 /*****************************************************************************/
 char name_proc_sis3100_ack[] = "sis3100_ack";
@@ -112,12 +124,17 @@ plerrcode proc_sis3100_ack(ems_u32* p)
 
 plerrcode test_proc_sis3100_ack(ems_u32* p)
 {
+    plerrcode pres;
+
     if (p[0]!=2)
         return plErr_ArgNum;
     if (p[2]>0xff)
         return plErr_ArgRange;
+
+    pres=find_vme_odevice(p[1], (struct vme_dev**)0);
+
     wirbrauchen=2;
-    return plOK;
+    return pres;
 }
 /*****************************************************************************/
 char name_proc_sis3100_front_io[] = "sis3100_front_io";
@@ -144,14 +161,19 @@ plerrcode proc_sis3100_front_io(ems_u32* p)
 
 plerrcode test_proc_sis3100_front_io(ems_u32* p)
 {
+    plerrcode pres;
+
     if (p[0]!=3 && p[0]!=4)
         return plErr_ArgNum;
     if (p[2]>1)
         return plErr_ArgRange;
     if (p[3]>1)
         return plErr_ArgRange;
+
+    pres=find_vme_odevice(p[1], (struct vme_dev**)0);
+
     wirbrauchen=1;
-    return plOK;
+    return pres;
 }
 /*****************************************************************************/
 char name_proc_sis3100_front_setup[] = "sis3100_front_setup";
@@ -177,12 +199,17 @@ plerrcode proc_sis3100_front_setup(ems_u32* p)
 
 plerrcode test_proc_sis3100_front_setup(ems_u32* p)
 {
+    plerrcode pres;
+
     if (p[0]!=2 && p[0]!=3)
         return plErr_ArgNum;
     if (p[2]>1)
         return plErr_ArgRange;
+
+    pres=find_vme_odevice(p[1], (struct vme_dev**)0);
+
     wirbrauchen=1;
-    return plOK;
+    return pres;
 }
 /*****************************************************************************/
 /*****************************************************************************/

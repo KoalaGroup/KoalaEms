@@ -2,10 +2,10 @@
  * camac/nofera/lc4300B.c
  * 
  * created: 2010-dec-15 PW
- * $ZEL: lc4300b.c,v 1.6 2015/04/06 21:33:28 wuestner Exp $
+ * $ZEL: lc4300b.c,v 1.8 2017/10/20 23:20:52 wuestner Exp $
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: lc4300b.c,v 1.6 2015/04/06 21:33:28 wuestner Exp $";
+    "$ZEL: lc4300b.c,v 1.8 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -18,9 +18,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../../procs.h"
 #include "../../procprops.h"
 #include "../camac_verify.h"
-
-extern ems_u32* outptr;
-extern int *memberlist, wirbrauchen;
 
 RCS_REGISTER(cvsid, "procs/camac/nofera")
 

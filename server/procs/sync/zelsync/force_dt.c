@@ -4,7 +4,7 @@
  * created: 13.Jul.2001 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: force_dt.c,v 1.8 2011/04/06 20:30:34 wuestner Exp $";
+    "$ZEL: force_dt.c,v 1.10 2017/10/21 21:59:18 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -19,7 +19,6 @@ static const char* cvsid __attribute__((unused))=
 #endif
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
 
 RCS_REGISTER(cvsid, "procs/sync/zelsync")
 
@@ -31,7 +30,7 @@ RCS_REGISTER(cvsid, "procs/sync/zelsync")
  */
 plerrcode proc_force_dt(ems_u32* p)
 {
-volatile int counter;
+volatile unsigned int counter;
 while ((counter=syncmod_read(p[1], 4/*SYNC_TMC*/))<p[2]);
 *outptr++=counter;
 return plOK;
@@ -57,7 +56,7 @@ int ver_proc_force_dt=1;
 plerrcode proc_force_dt_var(ems_u32* p)
 {
 #ifdef OBJ_VAR
-volatile int counter;
+volatile unsigned int counter;
 while ((counter=syncmod_read(p[1], 4/*SYNC_TMC*/))<p[2]);
 *outptr++=counter;
 #endif

@@ -3,7 +3,7 @@
  * created 24.Jan.2001 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: sis3600.c,v 1.12 2015/04/06 21:33:37 wuestner Exp $";
+    "$ZEL: sis3600.c,v 1.14 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -18,8 +18,7 @@ static const char* cvsid __attribute__((unused))=
 #include "../vme_verify.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
-extern int *memberlist;
+extern unsigned int *memberlist;
 
 RCS_REGISTER(cvsid, "procs/unixvme/sis3100")
 
@@ -33,7 +32,8 @@ static int lumi[lumis];
  */
 plerrcode proc_sis3600init(ems_u32* p)
 {
-int i, res;
+unsigned int i;
+int res;
 
 for (i=1; i<=p[0]; i++)
   {
@@ -78,7 +78,7 @@ return plOK;
 
 plerrcode test_proc_sis3600init(ems_u32* p)
 {
-int i;
+unsigned int i;
 
 for (i=1; i<=p[0]; i++)
   {
@@ -101,7 +101,7 @@ int ver_proc_sis3600init = 1;
  */
 plerrcode proc_sis3600read(ems_u32* p)
 {
-    int i;
+    unsigned int i;
 
     *outptr++=p[0];
     for (i=1; i<=p[0]; i++) {
@@ -132,7 +132,7 @@ plerrcode proc_sis3600read(ems_u32* p)
 
 plerrcode test_proc_sis3600read(ems_u32* p)
 {
-int i;
+unsigned int i;
 for (i=1; i<=p[0]; i++)
   {
   ml_entry* module;
@@ -154,7 +154,7 @@ int ver_proc_sis3600read = 1;
  */
 plerrcode proc_sis3600clock(ems_u32* p)
 {
-int i;
+unsigned int i;
 
 for (i=1; i<=p[0]; i++)
   {
@@ -168,7 +168,7 @@ return plOK;
 
 plerrcode test_proc_sis3600clock(ems_u32* p)
 {
-int i;
+unsigned int i;
 for (i=1; i<=p[0]; i++)
   {
   ml_entry* module;

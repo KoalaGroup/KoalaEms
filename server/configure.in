@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_REVISION($ZEL: configure.in,v 1.13 2011/04/06 20:30:21 wuestner Exp $)
+AC_REVISION($ZEL: configure.in,v 1.15 2017/10/27 21:02:57 wuestner Exp $)
 
 AC_INIT(objects/ved/ved.c)
 
@@ -98,6 +98,32 @@ else
 	AC_C_BIGENDIAN
 fi
 AC_SUBST(AR)
+
+dnl in ubuntu ar needs an 'U' as additional flag
+dnl in newer debian versions (>=9) too
+AC_MSG_CHECKING(weather we have to disable deterministic mode of ar)
+ar_deterministic=no
+dnl if /etc/os-release does not exist we probably have an older system
+dnl without idiotic deterministic mode as default
+if test -f /etc/os-release ; then
+    dnl os-release sets ID and VERSION_ID (and some more)
+    . /etc/os-release
+    if test $ID = ubuntu ; then
+        dnl I do not know which versions are affected
+        ar_deterministic=yes
+    elif test $ID = debian ; then
+        if test $VERSION_ID -gt 8 ; then
+            ar_deterministic=yes
+        fi
+    fi
+fi
+AC_MSG_RESULT($ar_deterministic)
+ARFLAGS=cr
+if test $ar_deterministic = yes ; then
+    ARFLAGS=${ARFLAGS}U
+fi
+AC_SUBST(ARFLAGS)
+
 
 AC_MSG_CHECKING(ob der Compiler "volatile" kennt)
 AC_TRY_COMPILE(,[

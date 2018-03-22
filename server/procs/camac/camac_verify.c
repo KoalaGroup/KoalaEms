@@ -3,7 +3,7 @@
  * created 06.Sep.2002 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: camac_verify.c,v 1.2 2011/04/06 20:30:30 wuestner Exp $";
+    "$ZEL: camac_verify.c,v 1.3 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -21,7 +21,8 @@ RCS_REGISTER(cvsid, "procs/camac")
 /*
  * checking whether one modulue of the memberlist has the correct type
  */
-plerrcode test_proc_camac1(int* list, int idx, ems_u32* module_types)
+plerrcode test_proc_camac1(unsigned int* list, unsigned int idx,
+        ems_u32* module_types)
 {
     int res;
     ml_entry* module;
@@ -56,7 +57,7 @@ plerrcode test_proc_camac1(int* list, int idx, ems_u32* module_types)
 /*
  * checking whether all modulues of IS have the correct type
  */
-plerrcode test_proc_camac(int* list, ems_u32* module_types)
+plerrcode test_proc_camac(unsigned int* list, ems_u32* module_types)
 {
     int i, res;
 

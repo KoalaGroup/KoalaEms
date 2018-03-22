@@ -3,7 +3,7 @@
  * created 28.12.94 MaWo/PeWue
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: fb_lc1877_read.c,v 1.25 2015/04/06 21:33:30 wuestner Exp $";
+    "$ZEL: fb_lc1877_read.c,v 1.26 2017/10/09 21:25:37 wuestner Exp $";
 
 #include <config.h>
 #include <errno.h>
@@ -28,7 +28,6 @@ static const char* cvsid __attribute__((unused))=
 
 extern ems_u32* outptr;
 extern int *memberlist;
-extern int wirbrauchen;
 
 RCS_REGISTER(cvsid, "procs/fastbus/fb_lecroy")
 

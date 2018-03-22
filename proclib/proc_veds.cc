@@ -19,7 +19,7 @@
 #include <versions.hxx>
 
 VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
-"$ZEL: proc_veds.cc,v 2.8 2014/07/14 15:11:54 wuestner Exp $")
+"$ZEL: proc_veds.cc,v 2.9 2016/05/10 16:24:46 wuestner Exp $")
 #define XVERSION
 
 C_veds veds;
@@ -157,7 +157,7 @@ void C_veds::changeprior(C_VED* ved, int offs)
 C_VED::VED_prior prior;
 prior=getprior(ved);
 remove(ved);
-prior=(C_VED::VED_prior)(prior+offs);
+prior=static_cast<C_VED::VED_prior>(prior+offs);
 add(ved, prior);
 }
 
@@ -260,12 +260,13 @@ for (; idx<list_idx; idx++) list[idx].ved->SetUnsol(val);
 
 int C_veds::GetReadoutStatus(ems_u32* mineventcount, ems_u32* maxeventcount)
 {
+const InvocStatus Invoc_10=static_cast<InvocStatus>(-10);
 static InvocStatus matrix[5][5]=
-  {{Invoc_error,      Invoc_error,      Invoc_error,      Invoc_error,      Invoc_error},
-   {Invoc_error,    Invoc_alldone, (InvocStatus)-10, (InvocStatus)-10,     Invoc_active},
-   {Invoc_error, (InvocStatus)-10,    Invoc_stopped, (InvocStatus)-10, (InvocStatus)-10},
-   {Invoc_error, (InvocStatus)-10, (InvocStatus)-10,  Invoc_notactive, (InvocStatus)-10},
-   {Invoc_error,     Invoc_active, (InvocStatus)-10, (InvocStatus)-10,     Invoc_active}};
+  {{Invoc_error, Invoc_error,   Invoc_error,   Invoc_error,     Invoc_error},
+   {Invoc_error, Invoc_alldone, Invoc_10,      Invoc_10,        Invoc_active},
+   {Invoc_error, Invoc_10,      Invoc_stopped, Invoc_10,        Invoc_10},
+   {Invoc_error, Invoc_10,      Invoc_10,      Invoc_notactive, Invoc_10},
+   {Invoc_error, Invoc_active,  Invoc_10,      Invoc_10,        Invoc_active}};
 ems_u32 count;
 int res;
 InvocStatus status;

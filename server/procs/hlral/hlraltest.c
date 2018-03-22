@@ -2,7 +2,7 @@
  * procs/hlral/hlraltest.c
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: hlraltest.c,v 1.4 2011/04/06 20:30:33 wuestner Exp $";
+    "$ZEL: hlraltest.c,v 1.5 2017/10/09 21:25:37 wuestner Exp $";
 
 #include <sys/types.h>
 #include <cdefs.h>
@@ -21,7 +21,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../procs.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
 
 RCS_REGISTER(cvsid, "procs/hlral")
 

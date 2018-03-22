@@ -3,7 +3,7 @@
  * created 2009-Jan-29 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: sis1100_lvd_read.c,v 1.16 2011/04/06 20:30:26 wuestner Exp $";
+    "$ZEL: sis1100_lvd_read.c,v 1.19 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -38,17 +38,19 @@ sis1100_lvd_parse_time(struct lvd_dev* dev, ems_u32 h1)
 static int
 sis1100_lvd_parse_header(struct lvd_dev* dev, ems_u32* event, int size)
 {
-    const int max=80;
-    char ss[max];
+//    const int max=80;
+//    char ss[max];
 #if 0
     ems_u32 eventsize, eventtime, eventcnt;
 #endif
 
     if (size<3) {
+#if 0 /* more work needed to make it compatible multiple triggers */
         snprintf(ss, max, "lvd_parse_header, ev=%u: event too short: %d words",
-                trigger.eventcnt, size);
+                global_evc.ev_count, size);
         printf("%s\n", ss);
         send_unsol_text(ss, 0);
+#endif
         return -1;
     }
 #if 0
@@ -114,17 +116,10 @@ sis1100_lvd_print_statist(struct lvd_dev* dev, struct timeval tv1)
             (new->blocks-old->blocks)/tdiff,
             tdiff/(new->blocks-old->blocks));
 
-    printf("  %llu eeeeeeee_events, %.4g/s\n",
-            (unsigned long long)new->eeeeeeee_events,
-            (new->eeeeeeee_events-old->eeeeeeee_events)/tdiff);
+    printf("  %llu fragments, %.4g/s\n",
+            (unsigned long long)new->fragments,
+            (new->fragments-old->fragments)/tdiff);
 
-    printf("  %llu splitted_events, %.4g/s\n",
-            (unsigned long long)new->splitted_events,
-            (new->splitted_events-old->splitted_events)/tdiff);
-
-    //printf("  av. event size: %.4g\n",
-    //        (double)(new->sum_evsize-old->sum_evsize)/
-    //        (double)(new->num_ev-old->num_ev));
     printf("  av. event size: %.4g\n",
             (double)(new->words-old->words)/
             (double)(new->events-old->events));
@@ -141,7 +136,7 @@ sis1100_lvd_print_statist(struct lvd_dev* dev, struct timeval tv1)
 #define LO(x) ((x)&0xffffffffUL)
 
 int
-sis1100_lvd_statist(struct lvd_dev* dev, ems_u32 flags, ems_u32 *ptr)
+sis1100_lvd_statist(struct lvd_dev* dev, __attribute__((unused)) ems_u32 flags, ems_u32 *ptr)
 {
     struct lvd_sis1100_info* info=(struct lvd_sis1100_info*)dev->info;
     struct ra_statist *st=&info->ra.statist;
@@ -155,11 +150,8 @@ sis1100_lvd_statist(struct lvd_dev* dev, ems_u32 flags, ems_u32 *ptr)
     *ptr++=HI(st->events);
     *ptr++=LO(st->events);
 
-    *ptr++=HI(st->eeeeeeee_events);
-    *ptr++=LO(st->eeeeeeee_events);
-
-    *ptr++=HI(st->splitted_events);
-    *ptr++=LO(st->splitted_events);
+    *ptr++=HI(st->fragments);
+    *ptr++=LO(st->fragments);
 
     *ptr++=HI(st->words);
     *ptr++=LO(st->words);

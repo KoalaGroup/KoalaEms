@@ -4,7 +4,7 @@
  * 02.Aug.2001 PW: multicrate support
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: fsc_FERA.c,v 1.8 2011/04/06 20:30:30 wuestner Exp $";
+    "$ZEL: fsc_FERA.c,v 1.9 2017/10/20 23:20:52 wuestner Exp $";
 
 /* FERA-System fuer Readout initialisieren,
   Daten aus einem Setup-Feld verwenden */
@@ -23,9 +23,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../../procprops.h"
 #include "../camac_verify.h"
 #include "fera.h"
-
-extern ems_u32* outptr;
-extern int* memberlist;
 
 RCS_REGISTER(cvsid, "procs/camac/fera")
 
@@ -75,7 +72,7 @@ plerrcode test_proc_FERAsetup(ems_u32* p)
     ems_u32 modFSC[]={FSC, 0};
     ems_u32 modMEM[]={FERA_MEM_4302, 0};
     ems_u32 modDRV[]={FERA_DRV_4301, 0};
-    int i;
+    unsigned int i;
     ems_u32* data = p+4;
     plerrcode pres;
 

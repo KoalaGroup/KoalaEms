@@ -12,7 +12,7 @@
  *                                        S.Trusov
   ************************************************************************/            
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: RCardProcs.c,v 1.16 2011/04/06 20:30:34 wuestner Exp $";
+    "$ZEL: RCardProcs.c,v 1.17 2017/10/09 21:25:38 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -30,7 +30,6 @@ static const char* cvsid __attribute__((unused))=
 #include <stdio.h>
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
 extern Modlist *modullist;
 extern int *memberlist;
 

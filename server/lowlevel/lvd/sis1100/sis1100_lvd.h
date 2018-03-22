@@ -1,7 +1,7 @@
 /*
  * lowlevel/lvd/sis1100/sis1100_lvd.h
  * created 10.Dec.2003 PW
- * $ZEL: sis1100_lvd.h,v 1.21 2013/01/17 22:44:54 wuestner Exp $
+ * $ZEL: sis1100_lvd.h,v 1.23 2017/10/20 23:21:31 wuestner Exp $
  */
 
 #ifndef _sis1100_lvd_h_
@@ -42,11 +42,9 @@ struct lvd_irq_callback {
 struct ra_statist {
     ems_u64 blocks;
     ems_u64 events;
-    ems_u64 eeeeeeee_events;
-    ems_u64 splitted_events;
+    ems_u64 fragments;
     ems_u64 words;
     int max_evsize;
-    //ems_u64 sum_evsize, num_ev;
 };
 struct fragmentcollector {
     int hsize;      /* length part of header */
@@ -56,7 +54,7 @@ struct fragmentcollector {
 struct ra /* read_async*/ {
     ems_u32* _dma_buf; /* real dma_buf (for 'free') */
     ems_u32*  dma_buf; /* page aligned dma_buf */
-    int dma_size;      /* size of each part of dma_buf (in 32-bit-words) */
+    unsigned int dma_size;      /* size of each part of dma_buf (in 32-bit-words) */
     int dma_num;       /* number of dma_buf parts */
     int dma_oldblock;  /* last block received */
     int dma_newblock;  /* block announced by IRQ procedure */
@@ -64,7 +62,9 @@ struct ra /* read_async*/ {
     int activeblock;   /* only for sanity check */
 
     /* partially received event */
+#if 0
     struct fragmentcollector fragment;
+#endif
     struct fragmentcollector event;
 
     /* following items are for statistics only */

@@ -3,7 +3,7 @@
  * created: 2007-Mar-20 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: a1303.c,v 1.7 2011/04/06 20:30:22 wuestner Exp $";
+    "$ZEL: a1303.c,v 1.8 2017/10/22 20:50:39 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -36,7 +36,7 @@ RCS_REGISTER(cvsid, "lowlevel/caenet/a1303")
 
 /*****************************************************************************/
 static plerrcode
-a1303_buffer(struct caenet_dev* dev, ems_u8** buf)
+a1303_buffer(__attribute__((unused)) struct caenet_dev* dev, ems_u8** buf)
 {
     if (!buffer_)
         buffer_=malloc(CAENET_BLOCKSIZE);

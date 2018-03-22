@@ -3,7 +3,7 @@
  * created 2009-Nov-10 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: trigger.c,v 1.6 2013/01/17 22:44:55 wuestner Exp $";
+    "$ZEL: trigger.c,v 1.7 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -41,10 +41,10 @@ RCS_REGISTER(cvsid, "lowlevel/lvd/trigger")
 
 /*****************************************************************************/
 static plerrcode
-access_trigfun(struct lvd_dev* dev, struct lvd_acard *acard, ems_u32 *val,
+access_trigfun(__attribute__((unused)) struct lvd_dev* dev, struct lvd_acard *acard, ems_u32 *val,
     int idx,
     plerrcode (**funlist)(struct lvd_acard*, ems_u32*, int),
-    int numfun, const char *txt)
+    int numfun, __attribute__((unused)) const char *txt)
 {
     struct trig_info *info=(struct trig_info*)acard->cardinfo;
 
@@ -214,7 +214,7 @@ lvd_trig_write_pi(struct lvd_dev* dev, int addr,
 }
 /*****************************************************************************/
 static plerrcode
-lvd_trig0_rmid(struct lvd_acard *acard, ems_u32* IDs, int xxx)
+lvd_trig0_rmid(struct lvd_acard *acard, ems_u32* IDs, __attribute__((unused)) int xxx)
 {
     int res=0, idx=*IDs, i;
     if (idx<0) {
@@ -258,7 +258,7 @@ lvd_trig_get_sync(struct lvd_dev* dev, int addr, ems_u32* pattern)
 }
 /*****************************************************************************/
 static plerrcode
-lvd_trig0_set_ena(struct lvd_acard *acard, ems_u32 *pattern, int xxx)
+lvd_trig0_set_ena(struct lvd_acard *acard, ems_u32 *pattern, __attribute__((unused)) int xxx)
 {
     return lvd_i_w(acard->dev, acard->addr, trig.tx_ena, *pattern)
             ?plErr_HW:plOK;
@@ -292,7 +292,7 @@ lvd_trig_get_ena(struct lvd_dev* dev, int addr, ems_u32* pattern)
 }
 /*****************************************************************************/
 static int
-lvd_start_trig(struct lvd_dev* dev, struct lvd_acard* acard)
+lvd_start_trig(__attribute__((unused)) struct lvd_dev* dev, struct lvd_acard* acard)
 {
     int res;
 
@@ -301,7 +301,7 @@ lvd_start_trig(struct lvd_dev* dev, struct lvd_acard* acard)
 }
 /*****************************************************************************/
 static int
-lvd_stop_trig(struct lvd_dev* dev, struct lvd_acard* acard)
+lvd_stop_trig(__attribute__((unused)) struct lvd_dev* dev, struct lvd_acard* acard)
 {
     int res;
 
@@ -321,7 +321,7 @@ lvd_clear_trig(struct lvd_dev* dev, struct lvd_acard* acard)
 /*****************************************************************************/
 /* initialize one trig card */
 static plerrcode
-lvd_trigX_init(struct lvd_acard* acard, ems_u32 *mode, int xxx)
+lvd_trigX_init(struct lvd_acard* acard, ems_u32 *mode, __attribute__((unused)) int xxx)
 {
     int res=0, addr=acard->addr;
 
@@ -362,7 +362,7 @@ lvd_trig_init(struct lvd_dev* dev, int addr, int daqmode)
 /*****************************************************************************/
 /*****************************************************************************/
 static int
-dump_ident(struct lvd_acard *acard, struct trig_info *info, void *xp)
+dump_ident(struct lvd_acard *acard, __attribute__((unused)) struct trig_info *info, void *xp)
 {
     ems_u32 val;
     int res, a=0;
@@ -379,7 +379,7 @@ dump_ident(struct lvd_acard *acard, struct trig_info *info, void *xp)
 }
 /*****************************************************************************/
 static int
-dump_serial(struct lvd_acard *acard, struct trig_info *info, void *xp)
+dump_serial(struct lvd_acard *acard, __attribute__((unused)) struct trig_info *info, void *xp)
 {
     ems_u32 val;
     int res, a=2;
@@ -411,7 +411,7 @@ static void decode_cr(ems_u32 cr, void *xp)
 }
 /*****************************************************************************/
 static int
-dump_cr(struct lvd_acard *acard, struct trig_info *info, void *xp)
+dump_cr(struct lvd_acard *acard, __attribute__((unused)) struct trig_info *info, void *xp)
 {
     ems_u32 cr;
     int res, a=0xc;
@@ -429,7 +429,7 @@ dump_cr(struct lvd_acard *acard, struct trig_info *info, void *xp)
 }
 /*****************************************************************************/
 static int
-dump_cr_saved(struct lvd_acard *acard, struct trig_info *info, void *xp)
+dump_cr_saved(struct lvd_acard *acard, __attribute__((unused)) struct trig_info *info, void *xp)
 {
     if (!acard->initialized)
         return 0;
@@ -440,7 +440,7 @@ dump_cr_saved(struct lvd_acard *acard, struct trig_info *info, void *xp)
 }
 /*****************************************************************************/
 static int
-dump_sr(struct lvd_acard *acard, struct trig_info *info, void *xp)
+dump_sr(struct lvd_acard *acard, __attribute__((unused)) struct trig_info *info, void *xp)
 {
     ems_u32 val;
     int res, a=0xe;
@@ -456,7 +456,7 @@ dump_sr(struct lvd_acard *acard, struct trig_info *info, void *xp)
 }
 /*****************************************************************************/
 static int
-dump_rx_sync(struct lvd_acard *acard, struct trig_info *info, void *xp)
+dump_rx_sync(struct lvd_acard *acard, __attribute__((unused)) struct trig_info *info, void *xp)
 {
     ems_u32 val;
     int res, a=0x1c;
@@ -472,7 +472,7 @@ dump_rx_sync(struct lvd_acard *acard, struct trig_info *info, void *xp)
 }
 /*****************************************************************************/
 static int
-dump_fw_ver(struct lvd_acard *acard, struct trig_info *info, void *xp)
+dump_fw_ver(struct lvd_acard *acard, __attribute__((unused)) struct trig_info *info, void *xp)
 {
     ems_u32 val;
     int res, a=0x1a;
@@ -489,7 +489,7 @@ dump_fw_ver(struct lvd_acard *acard, struct trig_info *info, void *xp)
 }
 /*****************************************************************************/
 static int
-dump_rm_id(struct lvd_acard *acard, struct trig_info *info, void *xp)
+dump_rm_id(struct lvd_acard *acard, __attribute__((unused)) struct trig_info *info, void *xp)
 {
     ems_u32 val;
     int res, a=0x1e, i;
@@ -512,7 +512,7 @@ dump_rm_id(struct lvd_acard *acard, struct trig_info *info, void *xp)
 }
 /*****************************************************************************/
 static int
-dump_tx_ena(struct lvd_acard *acard, struct trig_info *info, void *xp)
+dump_tx_ena(struct lvd_acard *acard, __attribute__((unused)) struct trig_info *info, void *xp)
 {
     ems_u32 val;
     int res, a=0x44;
@@ -528,7 +528,7 @@ dump_tx_ena(struct lvd_acard *acard, struct trig_info *info, void *xp)
 }
 /*****************************************************************************/
 static int
-dump_port_status(struct lvd_acard *acard, struct trig_info *info, int port,
+dump_port_status(struct lvd_acard *acard, __attribute__((unused)) struct trig_info *info, int port,
     void *xp)
 {
     struct i2c_addr i2c;
@@ -570,7 +570,7 @@ dump_ports_status(struct lvd_acard *acard, struct trig_info *info, void *xp)
 }
 /*****************************************************************************/
 static int
-lvd_cardstat_trig(struct lvd_dev* dev, struct lvd_acard* acard, void *xp,
+lvd_cardstat_trig(__attribute__((unused)) struct lvd_dev* dev, struct lvd_acard* acard, void *xp,
     int level)
 {
     struct trig_info *info=(struct trig_info*)acard->cardinfo;
@@ -620,14 +620,14 @@ lvd_cardstat_trig(struct lvd_dev* dev, struct lvd_acard* acard, void *xp,
 }
 /*****************************************************************************/
 static void
-lvd_trig_acard_free(struct lvd_dev* dev, struct lvd_acard* acard)
+lvd_trig_acard_free(__attribute__((unused)) struct lvd_dev* dev, struct lvd_acard* acard)
 {
     free(acard->cardinfo);
     acard->cardinfo=0;
 }
 /*****************************************************************************/
 int
-lvd_trig_acard_init(struct lvd_dev* dev, struct lvd_acard* acard)
+lvd_trig_acard_init(__attribute__((unused)) struct lvd_dev* dev, struct lvd_acard* acard)
 {
     struct trig_info *info;
 

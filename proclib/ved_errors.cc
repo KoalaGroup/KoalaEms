@@ -18,7 +18,7 @@
 #include <versions.hxx>
 
 VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
-"$ZEL: ved_errors.cc,v 2.14 2014/07/14 15:11:54 wuestner Exp $")
+"$ZEL: ved_errors.cc,v 2.16 2017/10/21 18:54:59 wuestner Exp $")
 #define XVERSION
 
 // Auswertung einer Fehlermeldung in einer Confirmation.
@@ -119,7 +119,7 @@ C_ved_error::C_ved_error(const C_VED* ved, C_confirmation* confi)
 {
 errdat=new C_error_data;
 errdat->typ=req_err;
-errdat->code.ems_err=(EMSerrcode)confi->buffer(0);
+errdat->code.ems_err=static_cast<EMSerrcode>(confi->buffer(0));
 if (confi) errdat->conf=*confi;
 delete confi;
 if (ved) errdat->vedname=ved->name();
@@ -131,7 +131,7 @@ C_ved_error::C_ved_error(const C_VED* ved, const C_confirmation* confi)
 {
 errdat=new C_error_data;
 errdat->typ=req_err;
-errdat->code.ems_err=(EMSerrcode)confi->buffer(0);
+errdat->code.ems_err=static_cast<EMSerrcode>(confi->buffer(0));
 if (confi) errdat->conf=*confi;
 if (ved) errdat->vedname=ved->name();
 }
@@ -143,7 +143,7 @@ C_ved_error::C_ved_error(const C_VED* ved, C_confirmation* confi, ostringstream&
 errdat=new C_error_data;
 errdat->init_str=ss.str();
 errdat->typ=req_err;
-errdat->code.ems_err=(EMSerrcode)confi->buffer(0);
+errdat->code.ems_err=static_cast<EMSerrcode>(confi->buffer(0));
 if (confi) errdat->conf=*confi;
 delete confi;
 if (ved) errdat->vedname=ved->name();
@@ -158,7 +158,7 @@ if (ved) errdat->vedname=ved->name();
 // errdat->init_str=s;
 // delete[] s;
 // errdat->typ=req_err;
-// errdat->code.ems_err=(EMSerrcode)confi->buffer(0);
+// errdat->code.ems_err=static_cast<EMSerrcode>(confi->buffer(0));
 // if (confi) errdat->conf=*confi;
 // if (ved) errdat->vedname=ved->name();
 // }
@@ -170,7 +170,7 @@ C_ved_error::C_ved_error(const C_VED* ved, C_confirmation* confi, string s)
 errdat=new C_error_data;
 errdat->init_str=s;
 errdat->typ=req_err;
-errdat->code.ems_err=(EMSerrcode)confi->buffer(0);
+errdat->code.ems_err=static_cast<EMSerrcode>(confi->buffer(0));
 if (confi) errdat->conf=*confi;
 delete confi;
 if (ved) errdat->vedname=ved->name();
@@ -183,7 +183,7 @@ if (ved) errdat->vedname=ved->name();
 // errdat=new C_error_data;
 // errdat->init_str=s;
 // errdat->typ=req_err;
-// errdat->code.ems_err=(EMSerrcode)confi->buffer(0);
+// errdat->code.ems_err=static_cast<EMSerrcode>(confi->buffer(0));
 // if (confi) errdat->conf=*confi;
 // if (ved) errdat->vedname=ved->name();
 // }
@@ -271,7 +271,7 @@ if (errdat->error_str=="")
       //cerr << "C_ved_error::errstr() unvollstaendig?" << endl;
       if (errdat->conf.valid()==0) return("Error in C_ved_error: conf not valid");
       if (errdat->init_str!="") ss << errdat->init_str << ": ";
-      printerror(ss, errdat->conf.request(), (ems_u32*)errdat->conf.buffer(),
+      printerror(ss, errdat->conf.request(), reinterpret_cast<ems_u32*>(errdat->conf.buffer()),
           errdat->conf.size());
 #ifdef NO_ANSI_CXX
       char* s;
@@ -314,7 +314,7 @@ printplerror(stringstream &s, ems_u32* buf, unsigned int errlen, unsigned int le
     pos=3;
     if (err==plErr_RecursiveCall) {
         printvorspann(s, level);
-        s << "in procedure " << procno << ": " << PL_errstr((plerrcode)err)
+        s << "in procedure " << procno << ": " << PL_errstr(static_cast<plerrcode>(err))
                 << endl;
         printplerror(s, buf+3, errlen, level+1);
         pos+=buf[2];
@@ -335,7 +335,7 @@ printplerror(stringstream &s, ems_u32* buf, unsigned int errlen, unsigned int le
         }
         printvorspann(s, level);
         s << "in procedure " << procno << ": Error: "
-                << PL_errstr((plerrcode)err) << endl;
+                << PL_errstr(static_cast<plerrcode>(err)) << endl;
     }
     if (errlen) {
         unsigned int i;
@@ -348,7 +348,7 @@ printplerror(stringstream &s, ems_u32* buf, unsigned int errlen, unsigned int le
 /*****************************************************************************/
 void C_ved_error::printerror(stringstream& s, int typ, ems_u32* buf, int size) const
 {
-s << endl << R_errstr((errcode)buf[0]) << endl;
+s << endl << R_errstr(static_cast<errcode>(buf[0])) << endl;
 switch(buf[0])
   {
   case Err_BadProcList:
@@ -361,7 +361,9 @@ switch(buf[0])
       weiter= buf+3;
       }
     else
+      {
       weiter= buf+1;
+      }
       printplerror(s, weiter, size-(weiter-buf), 0);
     }
     break;
@@ -372,7 +374,7 @@ switch(buf[0])
     break;
   case Err_ExecProcList:
     s << " in procedure " << buf[size-2] << ": Error: "
-        << PL_errstr((plerrcode)buf[size-1]) << endl;
+        << PL_errstr(static_cast<plerrcode>(buf[size-1])) << endl;
     if (size>3)
       {
       int i;
@@ -383,7 +385,7 @@ switch(buf[0])
     }
     break;
   case Err_TrigProc:
-    s << " " << PL_errstr((plerrcode)buf[size-1]) << endl;
+    s << " " << PL_errstr(static_cast<plerrcode>(buf[size-1])) << endl;
     if (size>2)
       {
       int i;

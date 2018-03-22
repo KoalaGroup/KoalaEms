@@ -3,7 +3,7 @@
  * created before 13.10.94
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: server.c,v 1.40 2011/10/26 14:11:41 wuestner Exp $";
+    "$ZEL: server.c,v 1.41 2017/10/20 23:21:31 wuestner Exp $";
 
 #define _main_c_
 #include <sconf.h>
@@ -98,7 +98,8 @@ static char *helpline[]= {
 static void
 printuse(FILE* outfilepath)
 {
-    register int i, res;
+    unsigned int i;
+    int res;
 
     for (i=0; i<sizeof(helpline)/sizeof(helpline[0]); i++)
         fprintf(outfilepath, "%s", helpline[i]);
@@ -381,7 +382,7 @@ D(D_REQ,printf("Ready for requests\n");)
 }
 /*****************************************************************************/
 errcode
-ResetVED(int* p, int size)
+ResetVED(__attribute__((unused)) int* p, int size)
 {
     errcode res, rr;
 

@@ -3,7 +3,7 @@
  * created 22.10.93
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: dramstrigger.c,v 1.7 2011/04/06 20:30:35 wuestner Exp $";
+    "$ZEL: dramstrigger.c,v 1.8 2016/05/12 22:00:12 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -45,7 +45,7 @@ get_trig_drams(struct triggerinfo* trinfo)
 
     dev->CAMACread(dev, &priv->addr, &val);
     if ((val&3)==2) {
-        trinfo->eventcnt++;
+        trinfo->count++;
         return 1;
     }
     return 0;
@@ -77,7 +77,7 @@ plerrcode init_trig_drams(ems_u32* p, struct triggerinfo* trinfo)
     priv->dev=modullist->entry[p[1]].address.camac.dev;
     priv->addr=priv->dev->CAMACaddr(modullist->entry[p[1]].address.camac.slot,
             0, 0);
-    trinfo->eventcnt=0;
+    trinfo->count=0;
 
     tinfo->get_trigger=get_trig_drams;
     tinfo->reset_trigger=reset_trig_drams;

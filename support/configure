@@ -3033,17 +3033,17 @@ if test "${enable_C11+set}" = set; then :
 fi
 
 
-CXX_ANSI=0
+CXX_ANSI=1
 if test "$GXX" = yes ; then
     CXXFLAGS="-D__STD_STRICT_ANSI -ansi"
-    CXXFLAGS="$CXXFLAGS -Wall -Woverloaded-virtual"
+    CXXFLAGS="$CXXFLAGS -Wall -Woverloaded-virtual -Wsign-promo"
     CXXFLAGS="$CXXFLAGS -Wold-style-cast -Wmissing-declarations"
     if test "$enable_debug" = yes ; then
         CXXFLAGS="$CXXFLAGS -g"
     else
         CXXFLAGS="$CXXFLAGS -O2"
     fi
-    if test "$enable_C11" = yes ; then
+    if test "$enable_C11" != no ; then
         CXXFLAGS="$CXXFLAGS -std=c++11"
     fi
     WERROR="-Werror"

@@ -24,7 +24,7 @@
 #include "proc_is.hxx"
 
 VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
-"$ZEL: proc_plist.cc,v 2.19 2014/07/14 15:11:54 wuestner Exp $")
+"$ZEL: proc_plist.cc,v 2.20 2016/05/10 16:24:46 wuestner Exp $")
 #define XVERSION
 
 #undef PROCDEBUG
@@ -75,7 +75,7 @@ if (is)
   ss<<" IS >"<<is->name()<<"<";
 else
   ss<<" IS0";
-ss<<" ("<<(void*)this<<")"<<ends;
+ss<<" ("<<reinterpret_cast<const void*>(this)<<")"<<ends;
 string st=ss.str();
 return st;
 }

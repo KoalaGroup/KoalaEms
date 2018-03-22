@@ -3,7 +3,7 @@
  * created before 30.05.94
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: domain.c,v 1.16 2011/04/06 20:30:29 wuestner Exp $";
+    "$ZEL: domain.c,v 1.17 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -236,7 +236,7 @@ errcode res;
 T(DeleteDomain)
 if (num<2) return(Err_ArgNum);
 D(D_REQ,
-  int i;
+  unsigned int i;
   printf("DeleteDomain(");
   for (i=0; i<num; i++) printf("%d%s", p[i], i+1<num?", ":")\n");
   )
@@ -284,9 +284,10 @@ domobj dom_obj={
   {
     0,0,
     /*(lookupfunc)*/lookup_dom,
-    dir_dom
+    dir_dom,
+    0
   },
-  0,0,0
+  0, 0, 0
 };
 /*****************************************************************************/
 /*****************************************************************************/

@@ -17,7 +17,7 @@
 #include <versions.hxx>
 
 VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
-"$ZEL: proc_conf.cc,v 2.9 2014/07/14 15:11:53 wuestner Exp $")
+"$ZEL: proc_conf.cc,v 2.10 2016/05/10 16:24:46 wuestner Exp $")
 #define XVERSION
 
 using namespace std;
@@ -178,7 +178,7 @@ int size=conf->size;
 os << "Body:" << endl << hex << setiosflags(ios::showbase);
 for (int i=0; i<size; i++)
   {
-  os << (unsigned int)buffer[i];
+  os << /*(unsigned int)*/buffer[i];
   if (i+1<size) os << ' ';
   }
 os << endl << dec << resetiosflags(ios::showbase);
@@ -196,7 +196,7 @@ os << "  client : " << header->client << endl;
 os << "  ved    : " << header->ved << endl;
 os << "  reqtype: " << header->type.reqtype << endl;
 os << "  flags  : " << hex << setiosflags(ios::showbase)
-    << (unsigned int)header->flags
+    << /*(unsigned int)*/header->flags
     << dec << resetiosflags(ios::showbase) <<  endl;
 os << "  xid    : " << header->transid << endl;
 return os;

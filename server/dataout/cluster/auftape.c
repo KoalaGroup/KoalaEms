@@ -4,7 +4,7 @@
  * created 28.04.1997
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: auftape.c,v 1.13 2011/04/06 20:30:21 wuestner Exp $";
+    "$ZEL: auftape.c,v 1.14 2017/10/21 22:53:03 wuestner Exp $";
 
 #include <errno.h>
 #include <stdio.h>
@@ -338,9 +338,11 @@ switch (code)
       res=-1;
       }
     else
+      {
       res=scsi_load_unload(scsi_var, message.data[1]/*load*/,
           message.data[2]/*immediate*/);
       printf("scsi_load_unload returns %d\n", res);
+      }
     break;
   case hndlcode_Prevent_Allow:
     if (message.size!=2)
@@ -349,8 +351,10 @@ switch (code)
       res=-1;
       }
     else
+      {
       res=scsi_prevent_allow(scsi_var, message.data[1]/*prevent*/);
       printf("scsi_prevent_allow returns %d\n", res);
+      }
     break;
   case hndlcode_Erase:
     /* XXX dataout does not know anything about extend */
@@ -401,7 +405,7 @@ switch (code)
   }
 if (res<0)
   {
-  int i;
+  unsigned int i;
   for (i=0; i<sizeof(scsi_error_info)/4; i++)
       *out++=((int*)&(scsi_var->scsi_error))[i];
   }

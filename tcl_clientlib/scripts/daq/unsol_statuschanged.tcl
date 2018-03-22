@@ -1,4 +1,4 @@
-# $ZEL: unsol_statuschanged.tcl,v 1.11 2011/04/12 22:50:15 wuestner Exp $
+# $ZEL: unsol_statuschanged.tcl,v 1.13 2017/11/08 00:17:20 wuestner Exp $
 # copyright 2000
 #   Peter Wuestner; Zentrallabor fuer Elektronik; Forschungszentrum Juelich
 #
@@ -100,12 +100,12 @@ proc unsol_statuschanged {space v h d} {
         }
         6 {
             # Object_do
-            #puts "obj_do_changed $action_name"
             if {$action==11} {
                 #display_do_filename $v [lindex $d 2] [lrange $d 3 end]
                 output "filename: [lrange $d 3 end]" tag_blue
                 xdr2string [lrange $d 3 end] name
                 set global_daq(filename) $name
+                epics_put_ved $v filename [file tail $name] none
             } else {
                 obj_do_changed $v [lindex $d 2] $action
             }

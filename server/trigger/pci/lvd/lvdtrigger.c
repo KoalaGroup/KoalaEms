@@ -3,7 +3,7 @@
  * created 19.Jan.2004 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: lvdtrigger.c,v 1.30 2015/04/21 16:42:10 wuestner Exp $";
+    "$ZEL: lvdtrigger.c,v 1.31 2016/05/12 22:00:12 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -82,27 +82,27 @@ trig_pcilvd_callback(struct lvd_dev *dev,
     lvd_cc_r(dev, sr, &status);
     if (!(status&LVD_MSR_DATA_AV)) {
         dev->acknowledge_lvdirq(dev, dat->mask);
-        printf("trig_pcilvd_callback(%s): no data, event %d\n",
-                dev->pathname, trinfo->eventcnt);
+        printf("trig_pcilvd_callback(%s): no data, event %d, local count %d\n",
+                dev->pathname, global_evc.ev_count, trinfo->count);
         return;
     }
 }
 
     if (!(priv->flags&0x2)) {
 #if 1
-        lvd_cc_r(dev, event_nr, &trinfo->eventcnt);
+        lvd_cc_r(dev, event_nr, &trinfo->count);
 #else
         {
             ems_u32 evc;
             lvd_cc_r(dev, event_nr, &evc);
             if (evc!=trinfo->eventcnt+1) {
-                printf("evc: %d --> %d\n", trinfo->eventcnt, evc);
+                printf("evc: %d --> %d\n", trinfo->count, evc);
             }
-            trinfo->eventcnt=evc;
+            trinfo->count=evc;
         }
 #endif
     } else {
-        trinfo->eventcnt++;
+        trinfo->count++;
     }
 
     trinfo->cb_proc(trinfo->cb_data);
@@ -133,7 +133,8 @@ suspend_trig_pcilvd(struct triggerinfo* trinfo)
     int i;
 
 #if 1
-    printf("suspend_trig_pcilvd, evc=%d\n", trinfo->eventcnt);
+    printf("suspend_trig_pcilvd, event=%d local count=%d\n",
+            global_evc.ev_count, trinfo->count);
 #endif
     for (i=0; i<priv->numbranches; i++) {
         struct lvd_dev* dev=priv->data[i].dev;
@@ -150,7 +151,8 @@ reactivate_trig_pcilvd(struct triggerinfo* trinfo)
     int i;
 
 #if 1
-    printf("reactivate_trig_pcilvd, evc=%d\n", trinfo->eventcnt);
+    printf("reactivate_trig_pcilvd, event=%d local count=%d\n",
+            global_evc.ev_count, trinfo->count);
 #endif
     for (i=0; i<priv->numbranches; i++) {
         struct lvd_dev* dev=priv->data[i].dev;
@@ -347,7 +349,7 @@ init_trig_pcilvd(ems_u32* p, struct triggerinfo* trinfo)
         pp+=2;
     }
 
-    trinfo->eventcnt=0;
+    trinfo->count=0;
 
     tinfo->insert_triggertask=insert_trig_pcilvd;
     tinfo->suspend_triggertask=suspend_trig_pcilvd; /* suspend==remove?? */

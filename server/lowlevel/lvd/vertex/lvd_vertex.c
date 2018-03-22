@@ -3,7 +3,7 @@
  * created 2005-Feb-25 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: lvd_vertex.c,v 1.5 2011/08/03 15:20:51 trusov Exp $";
+    "$ZEL: lvd_vertex.c,v 1.6 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -29,12 +29,12 @@ static const char* cvsid __attribute__((unused))=
 RCS_REGISTER(cvsid, "lowlevel/lvd/vertex")
 
 /*****************************************************************************/
-int lvd_vertex_low_printuse(FILE* outfilepath)
+int lvd_vertex_low_printuse(__attribute__((unused)) FILE* outfilepath)
 {
     return 0;
 }
 /*****************************************************************************/
-errcode lvd_vertex_low_init(char* arg)
+errcode lvd_vertex_low_init(__attribute__((unused)) char* arg)
 {
     lvdbus_register_cardtype(ZEL_LVD_ADC_VERTEX, lvd_vertex_acard_init);
     lvdbus_register_cardtype(ZEL_LVD_ADC_VERTEXM3, lvd_vertex_acard_init);

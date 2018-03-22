@@ -3,7 +3,7 @@
  * created 2009-Oct-21 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: lvd_i2c.c,v 1.2 2011/04/06 20:30:25 wuestner Exp $";
+    "$ZEL: lvd_i2c.c,v 1.3 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -498,8 +498,8 @@ lvd_i2c_read(struct lvd_dev* dev, int port, int region, int addr, int num,
 #endif
 
 plerrcode
-lvd_i2c_write(struct lvd_dev* dev, int port, int region, int addr, int num,
-        ems_u32 *data)
+lvd_i2c_write(__attribute__((unused)) struct lvd_dev* dev, __attribute__((unused)) int port, __attribute__((unused)) int region, __attribute__((unused)) int addr, __attribute__((unused)) int num,
+        __attribute__((unused)) ems_u32 *data)
 {
     printf("lvd_i2c_write is not implemented\n");
     return plErr_NoSuchProc;

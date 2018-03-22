@@ -3,7 +3,7 @@
  * created: 25.Jan.2001 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: vme_simple.c,v 1.11 2015/04/06 21:33:33 wuestner Exp $";
+    "$ZEL: vme_simple.c,v 1.13 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -16,14 +16,13 @@ static const char* cvsid __attribute__((unused))=
 #include "../../lowlevel/devices.h"
 
 extern ems_u32 *outptr;
-extern int* memberlist;
-extern int wirbrauchen;
+extern unsigned int* memberlist;
 
 RCS_REGISTER(cvsid, "procs/unixvme")
 
 /*****************************************************************************/
 static plerrcode
-test_vmeparm(ems_u32* p, int n)
+test_vmeparm(ems_u32* p, unsigned int n)
 {
     if (p[0]!=n) return(plErr_ArgNum);
     if (!valid_module(p[1], modul_vme)) return plErr_ArgRange;

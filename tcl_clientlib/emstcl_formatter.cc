@@ -19,8 +19,8 @@
 #include "tcl_cxx.hxx"
 #include <versions.hxx>
 
-VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
-"$ZEL: emstcl_formatter.cc,v 1.23 2014/07/14 15:13:25 wuestner Exp $")
+VERSION("2016-Jan-15", __FILE__, __DATE__, __TIME__,
+"$ZEL: emstcl_formatter.cc,v 1.25 2016/05/02 15:33:21 wuestner Exp $")
 #define XVERSION
 
 using namespace std;
@@ -498,9 +498,8 @@ E_ved::ff_modullist(ostringstream& ss, const C_modullist* mlist, int version)
             case modul_none:
                 ss<<'{'<<"none"<<'}';
                 break;
-            case modul_unspec:
-                ss<<'{'<<"unspec"<<' '<<entry.modultype<<' '
-                    <<entry.address.unspec.addr<<'}';
+            case modul_unspec_:
+                ss<<"obsolete class unspec";
                 break;
             case modul_generic:
                 break;
@@ -517,6 +516,24 @@ E_ved::ff_modullist(ostringstream& ss, const C_modullist* mlist, int version)
                     <<entry.modultype<<' '<<entry.address.adr2.addr<<' '
                     <<entry.address.adr2.crate<<'}';
                 break;
+            case modul_ip:
+                ss<<'{'<<Modulclass_names[entry.modulclass]<<' '
+                    <<entry.modultype<<' ';
+                ss<<entry.address.ip.address;
+                if (entry.address.ip.protocol)
+                    ss<<' '<<entry.address.ip.protocol;
+                else
+                    ss<<" {}";
+                if (entry.address.ip.rport)
+                    ss<<' '<<entry.address.ip.rport;
+                else
+                    ss<<" {}";
+                if (entry.address.ip.lport)
+                    ss<<' '<<entry.address.ip.lport;
+                else
+                    ss<<" {}";
+                ss<<'}';
+                break;
             case modul_invalid:
                 ss<<'{'<<"invalid_"<<(int)entry.modulclass<<'}';
             }
@@ -524,10 +541,9 @@ E_ved::ff_modullist(ostringstream& ss, const C_modullist* mlist, int version)
     } else {
         ss << hex << setiosflags(ios::showbase);
         for (int i=0; i<n; i++) {
-            const C_modullist::ml_entry& entry=mlist->get(i);
             if (i>0)
                 ss << ' ';
-            ss<<'{'<<entry.address.unspec.addr<<' '<<entry.modultype<<'}';
+            ss<<"obsolete class unspec";
         }
     }
 }

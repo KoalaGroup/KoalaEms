@@ -2,7 +2,7 @@
  * procs/fastbus/fb_lecroy/fb_lc1881_read_seq.c
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: fb_lc1881_read_seq.c,v 1.10 2011/04/06 20:30:31 wuestner Exp $";
+    "$ZEL: fb_lc1881_read_seq.c,v 1.11 2017/10/09 21:25:37 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -32,7 +32,7 @@ static const ems_u32 mist=0x0815;
 
 extern ems_u32* outptr;
 extern int *memberlist;
-extern int wirbrauchen;
+
 #if PERFSPECT
 extern int perfbedarf;
 #endif

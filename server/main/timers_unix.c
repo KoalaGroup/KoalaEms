@@ -2,7 +2,7 @@
  * main/timers_unix.c
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: timers_unix.c,v 1.8 2014/09/10 15:28:59 wuestner Exp $";
+    "$ZEL: timers_unix.c,v 1.9 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -212,7 +212,7 @@ remove_timer(timeoutresc* resc)
 }
 
 static void
-timer_handler(int sig)
+timer_handler(__attribute__((unused)) int sig)
 {
   struct timeval t;
   struct timezone z;

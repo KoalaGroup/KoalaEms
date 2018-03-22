@@ -3,7 +3,7 @@
  * created 13.Dec.2003 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: lvd_dumpstatus.c,v 1.24 2013/01/17 22:44:53 wuestner Exp $";
+    "$ZEL: lvd_dumpstatus.c,v 1.25 2017/10/20 23:21:31 wuestner Exp $";
 
 #define LOWLIB
 #include <sconf.h>
@@ -25,7 +25,7 @@ RCS_REGISTER(cvsid, "lowlevel/lvd")
 
 /*****************************************************************************/
 int
-lvd_cardstat_acq(struct lvd_dev* dev, int addr, void *xp, int level, int all)
+lvd_cardstat_acq(struct lvd_dev* dev, unsigned int addr, void *xp, int level, int all)
 {
     int i=0;
 

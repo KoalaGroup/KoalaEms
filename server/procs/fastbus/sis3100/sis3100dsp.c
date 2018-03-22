@@ -3,7 +3,7 @@
  * created 2004-03-25 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: sis3100dsp.c,v 1.4 2011/04/06 20:30:32 wuestner Exp $";
+    "$ZEL: sis3100dsp.c,v 1.5 2017/10/09 21:25:37 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -29,7 +29,6 @@ static const char* cvsid __attribute__((unused))=
 #endif
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
 extern int *memberlist;
 
 #define get_fbdevice(crate) \

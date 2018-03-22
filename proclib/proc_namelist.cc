@@ -13,7 +13,7 @@
 #include <versions.hxx>
 
 VERSION("Jun 12 1998", __FILE__, __DATE__, __TIME__,
-"$ZEL: proc_namelist.cc,v 2.5 2005/02/22 17:44:33 wuestner Exp $")
+"$ZEL: proc_namelist.cc,v 2.6 2016/05/10 16:24:46 wuestner Exp $")
 #define XVERSION
 
 /*****************************************************************************/
@@ -25,7 +25,7 @@ C_namelist::C_namelist(C_confirmation* conf)
     size_=conf->buffer(1);
     list_=new int[size_];
     for (int i=0; i<size_; i++)
-        list_[i]=(Object)conf->buffer(2+i);
+        list_[i]=static_cast<Object>(conf->buffer(2+i));
 }
 /*****************************************************************************/
 C_namelist::~C_namelist()

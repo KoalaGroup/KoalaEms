@@ -3,7 +3,7 @@
  * created: 20.10.99 AM
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: VMEpoll.c,v 1.11 2015/04/21 16:44:35 wuestner Exp $";
+    "$ZEL: VMEpoll.c,v 1.13 2017/10/21 22:39:50 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -26,15 +26,15 @@ static const char* cvsid __attribute__((unused))=
 struct private {
     int trigger;
     int offset;
-    int mask;
+    unsigned int mask;
     int mode;
-    int invert;
+    unsigned int invert;
     struct vme_dev* dev;
     ml_entry* module;
 };
 
 extern ems_u32* outptr;
-extern int *memberlist;
+extern unsigned int *memberlist;
 
 RCS_REGISTER(cvsid, "trigger/vme")
 
@@ -72,14 +72,14 @@ static int get_trig_VMEpoll(struct triggerinfo* trinfo)
 #endif
 
     if ((temp & priv->mask)==priv->invert) {
-        trinfo->eventcnt++;
+        trinfo->count++;
         return priv->trigger;
     }
 
     return 0;
 }
 /*****************************************************************************/
-static void reset_trig_VMEpoll(struct triggerinfo* trinfo)
+static void reset_trig_VMEpoll(__attribute__((unused)) struct triggerinfo* trinfo)
 {}
 /*****************************************************************************/
 /*
@@ -123,7 +123,7 @@ plerrcode init_trig_VMEpoll(ems_u32* p, struct triggerinfo* trinfo)
     priv->module=ModulEnt(p[2]);
     priv->dev=priv->module->address.vme.dev;
 
-    trinfo->eventcnt=0;	
+    trinfo->count=0;	
   
     tinfo->get_trigger=get_trig_VMEpoll;
     tinfo->reset_trigger=reset_trig_VMEpoll;

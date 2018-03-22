@@ -3,7 +3,7 @@
  * created before 03.03.94
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: vonundzuvar.c,v 1.8 2011/04/06 20:30:32 wuestner Exp $";
+    "$ZEL: vonundzuvar.c,v 1.9 2017/10/09 21:25:37 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -15,7 +15,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../../proclist.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
 
 RCS_REGISTER(cvsid, "procs/general/struct")
 

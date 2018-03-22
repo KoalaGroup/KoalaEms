@@ -3,7 +3,7 @@
  * created 23.10.96 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: syncmod.c,v 1.10 2011/04/06 20:30:28 wuestner Exp $";
+    "$ZEL: syncmod.c,v 1.11 2017/10/22 22:46:36 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -27,16 +27,16 @@ RCS_REGISTER(cvsid, "lowlevel/sync/pci_zel")
 /*****************************************************************************/
 
 static struct syncmod_info* infos=0;
-static int numinfo=0;
+static unsigned int numinfo=0;
 
 /*****************************************************************************/
-int sync_pci_zel_low_printuse(FILE* outfilepath)
+int sync_pci_zel_low_printuse(__attribute__((unused)) FILE* outfilepath)
 {
     /* nothing to configure */
     return 0;
 }
 /*****************************************************************************/
-errcode sync_pci_zel_low_init(char* arg)
+errcode sync_pci_zel_low_init(__attribute__((unused)) char* arg)
 {
     T(pci_syncmod_low_init)
     /*infos=0;*/
@@ -62,7 +62,7 @@ errcode sync_pci_zel_low_done()
 /*****************************************************************************/
 plerrcode syncmod_attach(char* path, int* id)
 {
-    int i;
+    unsigned int i;
 
     T(syncmod_attach)
     for (i=0; i<numinfo; i++) {

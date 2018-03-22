@@ -1,6 +1,7 @@
+/GNUmakefile.osk/1.1/Wed Jul 18 16:12:33 2001//
+/Makefile.in/1.4/Sun Feb 12 21:30:31 2006//
+/VMEpoll.c/1.13/Sat Oct 21 22:39:50 2017//
+/trigprocs.config/1.2/Tue Dec 20 14:18:49 2005//
+/vmeirq.c/1.9/Sat Oct 21 22:40:41 2017//
 D/sis3100////
-/GNUmakefile.osk/1.1/Tue May  3 09:11:34 2011//
-/Makefile.in/1.4/Tue May  3 09:11:34 2011//
-/VMEpoll.c/1.10/Tue May  3 09:11:34 2011//
-/trigprocs.config/1.2/Tue May  3 09:11:34 2011//
-/vmeirq.c/1.6/Tue May  3 09:11:34 2011//
+D/sis3316////

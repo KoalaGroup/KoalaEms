@@ -1,5 +1,5 @@
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: sched.c,v 1.5 2011/04/06 20:30:33 wuestner Exp $";
+    "$ZEL: sched.c,v 1.6 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <stdlib.h>
 #include <errorcodes.h>
@@ -12,13 +12,13 @@ static const char* cvsid __attribute__((unused))=
 
 RCS_REGISTER(cvsid, "procs/internals/sched")
 
-plerrcode proc_PrintTasks(ems_u32* p)
+plerrcode proc_PrintTasks(__attribute__((unused)) ems_u32* p)
 {
   sched_print_tasks();
   return(plOK);
 }
 
-plerrcode test_proc_PrintTasks(ems_u32* p)
+plerrcode test_proc_PrintTasks(__attribute__((unused)) ems_u32* p)
 {
   return(plOK);
 }

@@ -15,7 +15,7 @@
 #include <versions.hxx>
 
 VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
-"$ZEL: proc_is.cc,v 2.16 2014/07/14 15:11:54 wuestner Exp $")
+"$ZEL: proc_is.cc,v 2.18 2017/10/21 18:54:34 wuestner Exp $")
 #define XVERSION
 
 using namespace std;
@@ -65,8 +65,8 @@ C_instr_system::C_instr_system(C_VED* ved, int idx, openmode mode,
 /*****************************************************************************/
 C_instr_system::C_instr_system(C_VED* ved, int idx, openmode mode)
 :ved(ved), ved_id(ved->ved_id()), idx(idx), confmode_(ved->confmode_),
-    proclist("proc_is.cc:61 (proclist)", ved, this, ved->capab_proc_list),
-    readoutlist("proc_is.cc:62 (readoutlist)", ved, this, ved->capab_proc_list)
+    proclist("proc_is.cc:68 (proclist)", ved, this, ved->capab_proc_list),
+    readoutlist("proc_is.cc:69 (readoutlist)", ved, this, ved->capab_proc_list)
 {
 // cout<<"C_instr_system::C_instr_system(this="<<(void*)this<<", idx="<<idx<<")"
 //     <<endl;
@@ -81,7 +81,7 @@ C_instr_system::C_instr_system(C_VED* ved, int idx, openmode mode)
         int num=ib.getint();
         int found=0;
         for (int i=0; !found && (i<num); i++) {
-            if ((int)ib.getint()==idx)
+            if (static_cast<int>(ib.getint())==idx)
                 found=1;
         }
         if (!found) {
@@ -431,7 +431,7 @@ if (confmode_==synchron)
   C_confirmation* conf=ved->GetConf(xid);
   if (conf->buffer(0)!=OK)
       throw new C_ved_error(ved, conf, "Error in GetISStatus");
-  const ems_u32* b=(ems_u32*)conf->buffer();
+  const ems_u32* b=reinterpret_cast<ems_u32*>(conf->buffer());
   C_isstatus* status=new C_isstatus(b[1], b[2], b[3], b[4], b+5);
   delete conf;
   return status;
@@ -511,7 +511,9 @@ if (confmode_==synchron)
   return(memberlist);
   }
 else
+  {
   last_xid_=xid;
+  }
   return 0;
 }
 

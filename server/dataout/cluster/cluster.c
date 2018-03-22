@@ -3,7 +3,7 @@
  * created 10.04.97 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: cluster.c,v 1.24 2011/08/18 22:30:42 wuestner Exp $";
+    "$ZEL: cluster.c,v 1.26 2017/10/25 21:14:28 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -60,7 +60,7 @@ static const char* cvsid __attribute__((unused))=
 struct Cluster* clusters;
 
 int cluster_num;  /* maximum number of allowed clusters */
-int cluster_max;  /* maximum data words allowed in clusters */
+size_t cluster_max;  /* maximum data words allowed in clusters */
 
 static int _initialized=0;
 
@@ -103,7 +103,7 @@ printuse_clusters(FILE* outfilepath)
         "[:alloc=malloc|shm]"
 #endif
         "[:lockdir=<dir for TSM lock>]"
-        "\n    defaults: clnum#%d clsize#%d evsize#%d"
+        "\n    defaults: clnum#%d clsize#%ju evsize#%zu"
 
 #if !defined(LOWLEVELBUFFER)
 #ifdef CLUSTER_MALLOC
@@ -114,7 +114,7 @@ printuse_clusters(FILE* outfilepath)
 #endif /* LOWLEVELBUFFER */
 
         "\n",
-        CLUSTER_NUM, CLUSTER_MAX, event_max);
+        CLUSTER_NUM, (intmax_t)CLUSTER_MAX, event_max);
     return 1;
 }
 /*****************************************************************************/
@@ -219,7 +219,7 @@ printf("daq_lock_link=%s tsm_lock_link=%s\n", daq_lock_link, tsm_lock_link);
 #ifdef READOUT_CC
     if (cluster_max<event_max) {
         printf("clusters_init: minimum size for clusters: "
-            "%d (==event_max) (not %d)\n",
+            "%zu (==event_max) (not %zu)\n",
             event_max, cluster_max);
         return Err_ArgRange;
     }
@@ -282,7 +282,8 @@ printf("clusters_reset: set _initialized to 0\n");
 #ifdef READOUT_CC
 struct Cluster* clusters_create(size_t size, const char* text)
 #else
-struct Cluster* clusters_create(size_t size, int di_idx, const char* text)
+struct Cluster* clusters_create(size_t size, __attribute__((unused)) int di_idx,
+        const char* text)
 #endif
 {
     struct Cluster* cluster;

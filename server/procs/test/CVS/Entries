@@ -1,21 +1,21 @@
+/GNUmakefile.osk/1.5/Mon Mar 17 21:28:17 1997//
+/Makefile.in/1.10/Thu Jan 17 22:43:45 2013//
+/chstdout.c/1.12/Mon Oct  9 21:25:38 2017//
+/debuglevel.c/1.8/Fri Oct 20 23:20:52 2017//
+/delay.c/1.10/Thu Jun 30 21:53:33 2016//
+/error.c/1.10/Fri Oct 20 23:20:52 2017//
+/exit.c/1.8/Fri Oct 20 23:20:52 2017//
+/maxevcount.c/1.10/Wed Oct 25 21:13:02 2017//
+/onreadouterror.c/1.8/Wed Oct 25 21:13:02 2017//
+/printevent.c/1.12/Fri Oct 20 23:20:52 2017//
+/procedures.config/1.17/Thu Jun 30 21:53:33 2016//
+/random.c/1.16/Wed Oct 25 21:10:01 2017//
+/readoutprior.c/1.6/Fri Oct 20 23:20:52 2017//
+/select_statist.c/1.8/Fri Oct 20 23:20:52 2017//
+/unsol.c/1.19/Wed Oct 25 21:13:02 2017//
+/xprintf.c/1.2/Mon Oct  9 21:25:38 2017//
 D/console////
 D/daten////
 D/delayedread////
 D/real////
 D/vicraw////
-/GNUmakefile.osk/1.5/Tue May  3 09:11:34 2011//
-/Makefile.in/1.10/Thu Jul  4 13:54:02 2013//
-/chstdout.c/1.11/Tue May  3 09:11:34 2011//
-/debuglevel.c/1.7/Tue May  3 09:11:34 2011//
-/delay.c/1.9/Tue May  3 09:11:34 2011//
-/error.c/1.9/Tue May  3 09:11:34 2011//
-/exit.c/1.7/Tue May  3 09:11:34 2011//
-/maxevcount.c/1.8/Tue May  3 09:11:34 2011//
-/onreadouterror.c/1.7/Tue May  3 09:11:34 2011//
-/printevent.c/1.10/Tue May  3 09:11:34 2011//
-/procedures.config/1.16/Thu Jul  4 13:54:02 2013//
-/random.c/1.14/Tue May  3 09:11:34 2011//
-/readoutprior.c/1.5/Tue May  3 09:11:34 2011//
-/select_statist.c/1.7/Tue May  3 09:11:34 2011//
-/unsol.c/1.16/Tue May  3 09:11:34 2011//
-/xprintf.c/1.1/Thu Jan 17 22:43:45 2013//

@@ -3,15 +3,13 @@
  * created 2011-10-17 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: modvar.c,v 1.1 2011/10/17 22:24:05 wuestner Exp $";
+    "$ZEL: modvar.c,v 1.3 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <errorcodes.h>
 #include <rcs_ids.h>
 #include "../../procs.h"
 #include "../../procprops.h"
 #include "../../../objects/var/variables.h"
-
-extern int wirbrauchen;
 
 RCS_REGISTER(cvsid, "procs/general/vars")
 
@@ -26,11 +24,12 @@ RCS_REGISTER(cvsid, "procs/general/vars")
 
 plerrcode proc_var_bitselect(ems_u32* p)
 {
+    ems_i32 *ip=(ems_i32*)p;
     ems_u32 v=var_list[p[1]].var.val;
-    if (p[2]>0)
-        v>>=p[2];
-    else if (p[2]<0)
-        v<<=-p[2];
+    if (ip[2]>0)
+        v>>=ip[2];
+    else if (ip[2]<0)
+        v<<=-ip[2];
     v&=p[3];
     var_list[p[1]].var.val=v;
     return plOK;

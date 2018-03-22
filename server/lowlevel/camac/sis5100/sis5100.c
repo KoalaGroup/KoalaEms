@@ -3,7 +3,7 @@
  * created: 05.Apr.2004 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: sis5100.c,v 1.20 2011/04/06 20:30:22 wuestner Exp $";
+    "$ZEL: sis5100.c,v 1.21 2017/10/21 23:12:04 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -403,7 +403,8 @@ sis5100_CAMAClams(struct camac_dev* dev, ems_u32* val)
 #endif
 /*****************************************************************************/
 static int
-sis5100_CAMACenable_lams(struct camac_dev* dev, int idx)
+sis5100_CAMACenable_lams(__attribute__((unused)) struct camac_dev* dev,
+        __attribute__((unused)) int idx)
 {
 /*
     info->lammask |= 1<<(idx-1);
@@ -412,7 +413,8 @@ sis5100_CAMACenable_lams(struct camac_dev* dev, int idx)
 }
 /*****************************************************************************/
 static int
-sis5100_CAMACdisable_lams(struct camac_dev* dev, int idx)
+sis5100_CAMACdisable_lams(__attribute__((unused)) struct camac_dev* dev,
+        __attribute__((unused)) int idx)
 {
 /*
     info->lammask &= ~(1<<(idx-1));
@@ -575,16 +577,18 @@ sis5100_camacdelay(struct camac_dev* dev, int delay, int* olddelay)
 /*****************************************************************************/
 #ifdef DELAYED_READ
 static int
-sis5100_enable_delayed_read(struct generic_dev* dev, int val)
+sis5100_enable_delayed_read(__attribute__((unused)) struct generic_dev* dev,
+        __attribute__((unused)) int val)
 {
     return 0;
 }
 
-static void sis5100_reset_delayed_read(struct generic_dev* gdev)
+static void sis5100_reset_delayed_read(
+        __attribute__((unused)) struct generic_dev* gdev)
 {}
 
 static int
-sis5100_read_delayed(struct generic_dev* gdev)
+sis5100_read_delayed(__attribute__((unused)) struct generic_dev* gdev)
 {
     return -1;
 }
@@ -717,21 +721,22 @@ static struct camac_raw_procs sis5100_raw_procs={
 };
 
 static struct camac_raw_procs*
-sis5100_get_raw_procs(struct camac_dev* dev)
+sis5100_get_raw_procs(__attribute__((unused)) struct camac_dev* dev)
 {
     return &sis5100_raw_procs;
 }
 
 #ifdef ZELFERA
 static struct FERA_procs*
-sis5100_get_FERA_procs(struct camac_dev* dev)
+sis5100_get_FERA_procs(__attribute__((unused)) struct camac_dev* dev)
 {
     return 0;
 }
 #endif
 /*****************************************************************************/
 static void
-sis5100_camacirq(struct camac_dev* dev, struct sis1100_irq_get* get)
+sis5100_camacirq(__attribute__((unused)) struct camac_dev* dev,
+        __attribute__((unused)) struct sis1100_irq_get* get)
 {
     printf("SIS5100 IRQ (not yet implemeted)\n");
 }
@@ -804,7 +809,8 @@ sis5100_link_up_down(struct camac_dev* dev, struct sis1100_irq_get* get)
 }
 /*****************************************************************************/
 static void
-sis5100_irq(int p, enum select_types selected, union callbackdata data)
+sis5100_irq(int p, __attribute__((unused)) enum select_types selected,
+        union callbackdata data)
 {
     struct generic_dev* gendev=(struct generic_dev*)data.p;
     struct camac_dev* dev=(struct camac_dev*)gendev;
@@ -876,7 +882,8 @@ static errcode done_sis5100(struct generic_dev* gdev)
     return OK;
 }
 /*****************************************************************************/
-errcode camac_init_sis5100(struct camac_dev* dev, char* rawmempart)
+errcode camac_init_sis5100(struct camac_dev* dev,
+        __attribute__((unused)) char* rawmempart)
 {
     struct camac_sis5100_info* info;
     struct sis1100_irq_ctl ctl;

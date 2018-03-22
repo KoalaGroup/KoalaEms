@@ -3,7 +3,7 @@
  * created 30.Sep.2003 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: sis1100trigger.c,v 1.15 2011/04/06 20:30:36 wuestner Exp $";
+    "$ZEL: sis1100trigger.c,v 1.17 2017/10/21 22:15:02 wuestner Exp $";
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -79,7 +79,7 @@ static char* getbits(unsigned int v)
 }
 #endif
 /*****************************************************************************/
-static void sighndlr(union SigHdlArg arg, int sig)
+static void sighndlr(union SigHdlArg arg, __attribute__((unused)) int sig)
 {
     struct trigprocinfo* tinfo=(struct trigprocinfo*)arg.ptr;
     struct private* priv=(struct private*)tinfo->private;
@@ -131,7 +131,7 @@ get_trig_sis1100(struct triggerinfo* trinfo)
     switch (priv->mode) {
     case trigg_signal:
         if (!priv->got_sig) return 0;
-        /* nobreak */
+        /* fallthrough */
     case trigg_poll: {
         get.irq_mask=priv->mask;
         res=ioctl(priv->p, SIS1100_IRQ_GET, &get);
@@ -149,8 +149,8 @@ get_trig_sis1100(struct triggerinfo* trinfo)
  */
         if (got!=sizeof(struct sis1100_irq_get)) {
             printf("read trigstatus: got=%d: %s\n", got, strerror(errno));
-            send_unsol_var(Unsol_RuntimeError, 4, rtErr_Trig, trinfo->eventcnt,
-                    5, errno);
+            send_unsol_var(Unsol_RuntimeError, 4, rtErr_Trig,
+                    global_evc.ev_count, 5, errno);
             fatal_readout_error();
             return 0;
         }
@@ -162,7 +162,8 @@ get_trig_sis1100(struct triggerinfo* trinfo)
     res=ioctl(priv->p, SIS1100_CTRL_READ, &reg);
     if (res<0) {
         printf("ioctl(SIS1100_CTRL_READ): %s\n", strerror(errno));
-        send_unsol_var(Unsol_RuntimeError, 4, rtErr_Trig, trinfo->eventcnt, 6, errno);
+        send_unsol_var(Unsol_RuntimeError, 4, rtErr_Trig,
+                global_evc.ev_count, 6, errno);
         fatal_readout_error();
         return 0;
     }
@@ -178,7 +179,7 @@ get_trig_sis1100(struct triggerinfo* trinfo)
         v=0x00000100;
         ioctl(priv->p, SIS1100_FRONT_IO, &v);
         */
-        trinfo->eventcnt++;
+        trinfo->count++;
     }
     if (get.remote_status) {
         printf("Link is %s\n", get.remote_status<0?"down":"up");
@@ -276,7 +277,7 @@ plerrcode init_trig_sis1100(ems_u32* p, struct triggerinfo* trinfo)
     priv->mode=(trigg_mode)pp[0];
     priv->mask=pp[1]<<16;
 
-    trinfo->eventcnt=0;
+    trinfo->count=0;
 
     priv->p=open(priv->device, O_RDWR, 0);
     if (priv->p<0) {

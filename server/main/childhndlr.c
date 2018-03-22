@@ -7,7 +7,7 @@
 *                                                                             *
 ******************************************************************************/
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: childhndlr.c,v 1.5 2011/04/06 20:30:28 wuestner Exp $";
+    "$ZEL: childhndlr.c,v 1.6 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -39,7 +39,7 @@ RCS_REGISTER(cvsid, "main")
 
 /*****************************************************************************/
 void
-child_dispatcher(int sig)
+child_dispatcher(__attribute__((unused)) int sig)
 {
     pid_t pid;
     int status, idx;

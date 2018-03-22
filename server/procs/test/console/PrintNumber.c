@@ -3,7 +3,7 @@
  * created (before?) 21.01.93
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: PrintNumber.c,v 1.7 2011/04/06 20:30:34 wuestner Exp $";
+    "$ZEL: PrintNumber.c,v 1.8 2017/10/09 21:25:38 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -11,8 +11,6 @@ static const char* cvsid __attribute__((unused))=
 #include <errorcodes.h>
 #include <rcs_ids.h>
 #include "../../procs.h"
-
-extern int wirbrauchen;
 
 RCS_REGISTER(cvsid, "procs/test/console")
 

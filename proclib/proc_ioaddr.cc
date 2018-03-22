@@ -24,7 +24,7 @@
 #include <versions.hxx>
 
 VERSION("2014-09-07", __FILE__, __DATE__, __TIME__,
-"$ZEL: proc_ioaddr.cc,v 2.17 2014/09/07 00:43:39 wuestner Exp $")
+"$ZEL: proc_ioaddr.cc,v 2.18 2016/05/10 16:24:46 wuestner Exp $")
 #define XVERSION
 
 using namespace std;
@@ -53,7 +53,7 @@ delete[] args;
 void C_io_addr::pruefen() const
 {
 cerr << "C_io_addr:" << endl;
-cerr << "  direction=" << (int)direction << endl;
+cerr << "  direction=" << static_cast<int>(direction) << endl;
 cerr << "  forcelists_=" << forcelists_ << "; uselists()=" << uselists() << endl; 
 }
 
@@ -84,7 +84,7 @@ C_io_addr* C_io_addr::create(io_direction direction, C_inbuf& ib, bool lists)
     // the number of arguments after IOAddr is fixed for each addr type
     //
 
-    addrtype=(IOAddr)ib.getint();
+    addrtype=static_cast<IOAddr>(ib.getint());
 
 switch (addrtype)
   {
@@ -289,13 +289,13 @@ C_io_addr_socket::C_io_addr_socket(io_direction direction, int host, int port)
 unsigned int C_io_addr_socket::get_iaddr(const char* hostname)
 {
 unsigned int iaddr;
-iaddr=inet_addr((char*)hostname);
+iaddr=inet_addr(const_cast<char*>(hostname));
 if (iaddr==(unsigned int)INADDR_NONE)
   {
   struct hostent *ent;
-  ent=gethostbyname((char*)hostname);
+  ent=gethostbyname(const_cast<char*>(hostname));
   if (ent!=0)
-    iaddr=*(unsigned int*)(ent->h_addr_list[0]);
+    iaddr=*reinterpret_cast<unsigned int*>(ent->h_addr_list[0]);
   else
     {
     ostringstream ss;

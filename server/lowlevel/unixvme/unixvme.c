@@ -3,7 +3,7 @@
  * created 23.Jan.2001 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: unixvme.c,v 1.17 2011/04/06 20:30:28 wuestner Exp $";
+    "$ZEL: unixvme.c,v 1.19 2017/10/22 22:47:47 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -26,6 +26,12 @@ static const char* cvsid __attribute__((unused))=
 #endif
 #ifdef UNIXVME_SIS3100
 #include "sis3100/vme_sis.h"
+#endif
+#ifdef UNIXVME_SIS3100_UDP
+#include "sis3100_udp/vme_sis_udp.h"
+#endif
+#ifdef UNIXVME_SIS3153
+#include "sis3153usb/vme_sis_usb.h"
 #endif
 
 #ifdef DMALLOC
@@ -56,13 +62,27 @@ struct vme_init vme_init[]= {
 #ifdef UNIXVME_SIS3100
     {vme_sis3100, vme_init_sis3100, "sis3100"},
 #endif
+#ifdef UNIXVME_SIS3100_UDP
+    {vme_sis3100_udp, vme_init_sis3100_udp, "sis3100_udp"},
+#endif
+#ifdef UNIXVME_SIS3151_USB
+    {vme_sis3151_usb, vme_init_sis3153_usb, "sis3153_usb"},
+#endif
     {vme_none, 0, ""}
 };
 
+/*
+ * unixvme_low_init parses the given vme device description (arg)
+ * and calles the appropriate initialisation procedure.
+ * 'arg' is the string gigen in the command line as "-l:vmep=<vmedev>".
+ * vmedev is "<vmetype>;<vmepath>"
+ * vmetype is interpreted here, vmepath is used in the called procedure.
+ * More than one vme device can be given, they are separated by ','
+ */
 errcode unixvme_low_init(char* arg)
 {
     char *vmepath, *help;
-    int i, j, n;
+    unsigned int i, j, n;
     errcode res;
 
     T(unixvme_init)

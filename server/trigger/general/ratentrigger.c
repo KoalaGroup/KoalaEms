@@ -3,7 +3,7 @@
  * created: 30.03.1998 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: ratentrigger.c,v 1.13 2011/04/06 20:30:36 wuestner Exp $";
+    "$ZEL: ratentrigger.c,v 1.15 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -80,7 +80,7 @@ get_trig_rate(struct triggerinfo* trinfo)
     diff=(float)(sec-priv->startsec)+(float)(usec-priv->startusec)/1000000.;
     soll=diff*priv->rate;
     if (soll>priv->count) {
-        trinfo->eventcnt++;
+        trinfo->count++;
         priv->count++;
         return(priv->trigger);
     } else {
@@ -89,7 +89,7 @@ get_trig_rate(struct triggerinfo* trinfo)
 }
 /*****************************************************************************/
 static void
-reset_trig_rate(struct triggerinfo* trinfo)
+reset_trig_rate(__attribute__((unused)) struct triggerinfo* trinfo)
 {}
 /*****************************************************************************/
 plerrcode
@@ -130,7 +130,7 @@ init_trig_rate(ems_u32* p, struct triggerinfo* trinfo)
     } else {
         priv->xrate=0;
     }
-    trinfo->eventcnt=0;
+    trinfo->count=0;
     priv->count=0;
     gettime(&priv->startsec, &priv->startusec);
 

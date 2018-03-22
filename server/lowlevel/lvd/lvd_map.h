@@ -1,6 +1,6 @@
 /*
  * lvd_map.h
- * $ZEL: lvd_map.h,v 1.36 2013/09/24 14:08:03 wuestner Exp $
+ * $ZEL: lvd_map.h,v 1.37 2016/05/10 20:46:27 wuestner Exp $
  * created 21.Aug.2003 (as f1_map.h)
  */
 
@@ -58,14 +58,17 @@ enum lvd_cardid {
 /* ========================== CMASTER Card ================================== */
 
 /* maximum size of the data FIFO of all controllers */
-#define LVD_FIFO_SIZE  0x00400000
+/*
+ * F1  System Controller SN. 0-3:   4 kB
+ *                       SN. 4..:  32 kB
+ * GPX System Controller:         128 kB
+ * GTP System Controller:         256 kB
+ */
+#define LVD_FIFO_SIZE  0x00040000
 #define LVD_FIFO_MASK (LVD_FIFO_SIZE-1)
 #define LVD_FRAGMENTED 0x40000000
 #define LVD_TRIGGERED  0x20000000
 #define LVD_HEADBIT    0x80000000
-#if 0
-#define LVD_HEADMASK  (~(LVD_FIFO_MASK|LVD_FRAGMENTED|LVD_TRIGGERED)|LVD_HEADBIT)
-#endif
 #if (LVD_FIFO_SIZE&LVD_FIFO_MASK)
 #error LVD FIFO SIZE is not a power of 2
 #endif

@@ -3,7 +3,7 @@
  * created before 03.08.94
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: is.c,v 1.29 2011/04/06 20:30:29 wuestner Exp $";
+    "$ZEL: is.c,v 1.30 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -112,7 +112,8 @@ errcode is_done(void)
 }
 /*****************************************************************************/
 
-errcode is_getnamelist(ems_u32* p, unsigned int num)
+errcode is_getnamelist(__attribute__((unused)) ems_u32* p,
+    __attribute__((unused)) unsigned int num)
 {
 int i, j;
 
@@ -216,7 +217,7 @@ p[2] : addr
 errcode DownloadISModulList(ems_u32* p, unsigned int num)
 {
     ems_u32 idx;
-    int i;
+    unsigned int i;
     unsigned int len;
 
     T(DownloadISModulList)
@@ -241,7 +242,8 @@ errcode DownloadISModulList(ems_u32* p, unsigned int num)
         if (p[i+1]>=modullist->modnum) return Err_ArgRange;
     }
     if (is_list[idx]->members) free(is_list[idx]->members);
-    if (!(is_list[idx]->members=(int*)calloc(len, sizeof(int))))
+    if (!(is_list[idx]->members=
+            (unsigned int*)calloc(len, sizeof(unsigned int))))
         return Err_NoMem;
     for (i=0; i<len; i++) is_list[idx]->members[i]=p[i+1];
     notifystatus(status_action_change, Object_is, 1, &idx);
@@ -256,7 +258,7 @@ p[0] : IS-index
 #ifdef DOM_ML
 errcode UploadISModulList(ems_u32* p, unsigned int num)
 {
-int *ptr;
+unsigned int *ptr;
 int i, len;
 
 T(UploadISModulList)
@@ -266,13 +268,12 @@ D(D_REQ, printf("  index: %d\n", p[0]);)
 if (p[0]>=MAX_IS) return(Err_IllIS);
 if (!is_list[p[0]]) return(Err_NoIS);
 ptr=is_list[p[0]]->members;
-if (ptr==(int*)0)
+if (ptr==0) {
   *outptr++=0;
-else
-  {
+} else {
   len=ptr[0];
   for (i=0; i<=len; i++) *outptr++=ptr[i];
-  }
+}
 return(OK);
 }/* UploadISModulList */
 #endif
@@ -290,9 +291,9 @@ if (num!=1) return(Err_ArgNum);
 D(D_REQ, printf("  index: %d\n", p[0]);)
 if (p[0]>=MAX_IS) return(Err_IllIS);
 if (!is_list[p[0]]) return(Err_NoIS);
-if (is_list[p[0]]->members==(int*)0) return(Err_NoISModulList);
+if (is_list[p[0]]->members==0) return(Err_NoISModulList);
 free(is_list[p[0]]->members);
-is_list[p[0]]->members=(int*)0;
+is_list[p[0]]->members=0;
 notifystatus(status_action_change, Object_is, 1, p);
 return(OK);
 }/* DeleteISModulList */
@@ -435,8 +436,8 @@ errcode DownloadReadoutList(ems_u32* p, unsigned int num)
     struct IS *is;
     struct readoutlist *readoutlist;
     ems_u32 idx, *list, *tlist;
-    int listlen, priority, i;
-    unsigned int numtrig;
+    unsigned int listlen, priority;
+    unsigned int numtrig, i;
 
     if (num<2)
         return Err_ArgNum;
@@ -565,7 +566,7 @@ p[1...] : list of trigger pattern
 errcode DeleteReadoutList(ems_u32* p, unsigned int num)
 {
     struct IS* is;
-    int i;
+    unsigned int i;
 
     T(DeleteReadoutList)
     D(D_REQ, printf("DeleteReadoutList\n");)

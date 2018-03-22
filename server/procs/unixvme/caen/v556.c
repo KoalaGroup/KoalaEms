@@ -3,7 +3,7 @@
  * created 07.Oct.2003 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: v556.c,v 1.7 2011/04/06 20:30:35 wuestner Exp $";
+    "$ZEL: v556.c,v 1.9 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -18,8 +18,7 @@ static const char* cvsid __attribute__((unused))=
 #include "../vme_verify.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
-extern int *memberlist;
+extern unsigned int *memberlist;
 
 RCS_REGISTER(cvsid, "procs/unixvme/caen")
 
@@ -99,7 +98,7 @@ plerrcode test_proc_v556init(ems_u32* p)
 {
     plerrcode res;
     ems_u32 mtypes[]={CAEN_V556, 0};
-    int i, j;
+    unsigned int i, j;
 
     if ((res=test_proc_vme(memberlist, mtypes))!=plOK) return res;
     if (p[0]!=3*memberlist[0]) return plErr_ArgNum;
@@ -118,10 +117,11 @@ int ver_proc_v556init = 1;
 /*
  * p[0]: argcount==0
  */
-plerrcode proc_v556read(ems_u32* p)
+plerrcode proc_v556read(__attribute__((unused)) ems_u32* p)
 {
-    int i, res, n;
+    int res, n;
     ems_u32* help;
+    unsigned int i;
 
 /* Readout can take place at least 13 us after trigger. This is not enforced
    inside this procedure */

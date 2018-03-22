@@ -1,7 +1,7 @@
 /*
  * lvdsync_pulser.c
  * 2009-Jun-13 PW
- * $ZEL$
+ * $ZEL: lvdsync_pulser.c,v 1.1 2016/05/12 20:34:44 wuestner Exp $
  */
 
 #include <stdio.h>

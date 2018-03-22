@@ -3,7 +3,7 @@
  * created: 22.09.93
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: dataout.c,v 1.17 2011/04/06 20:30:29 wuestner Exp $";
+    "$ZEL: dataout.c,v 1.18 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -40,7 +40,7 @@ return(done_dataout_handler());
  * p[0]: DO-Index
  * p[1]: wieviel
  */
-errcode WindDataout(ems_u32* p, int num)
+errcode WindDataout(ems_u32* p, unsigned int num)
 {
 T(WindDataout)
 if (num!=2) return(Err_ArgNum);
@@ -61,7 +61,7 @@ return(windtape(p[0], (int)p[1]));
  * p[2]: Number of following data
  * p[3...]: data to be written
  */
-errcode WriteDataout(ems_u32* p, int num)
+errcode WriteDataout(ems_u32* p, unsigned int num)
 {
 T(WriteDataout)
 if ((num<3)||(p[2]!=num-3)) return(Err_ArgNum);
@@ -74,7 +74,7 @@ return(writeoutput(p[0], (int)p[1], p+2));
 
 /*****************************************************************************/
 
-errcode GetDataoutStatus(ems_u32* p, int num)
+errcode GetDataoutStatus(ems_u32* p, unsigned int num)
 {
 int format;
 T(GetDataoutStatus)
@@ -87,7 +87,7 @@ return(getoutputstatus(p[0], format));
 
 /*****************************************************************************/
 
-errcode EnableDataout(ems_u32* p, int num)
+errcode EnableDataout(ems_u32* p, unsigned int num)
 {
 errcode res;
 T(EnableDataout)
@@ -99,7 +99,7 @@ return(res);
 
 /*****************************************************************************/
 
-errcode DisableDataout(ems_u32* p, int num)
+errcode DisableDataout(ems_u32* p, unsigned int num)
 {
 errcode res;
 T(DisableDataout)
@@ -113,9 +113,9 @@ return(res);
 /*
  * p[0...]: list of dataouts to be waited for (not yet implemented)
  */
-plerrcode flush_dataout(ems_u32* p, int num)
+plerrcode flush_dataout(ems_u32* p, unsigned int num)
 {
-    int i;
+    unsigned int i;
 
     T(flush_dataout)
     for (i=0; i<num; i++) {

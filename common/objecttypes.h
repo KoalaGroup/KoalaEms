@@ -3,7 +3,7 @@
  * created before 03.05.93
  */
 
-/* $ZEL: objecttypes.h,v 2.25 2015/04/24 20:55:39 wuestner Exp $ */
+/* $ZEL: objecttypes.h,v 2.26 2017/10/21 18:56:50 wuestner Exp $ */
 
 #ifndef _objecttypes_h_
 #define _objecttypes_h_
@@ -41,8 +41,8 @@ typedef enum
   } Capabtyp;
 
 typedef enum {
-    InOut_Ringbuffer, InOut_Stream, InOut_Cluster, InOut_Filebuffer,
-    InOut_Selected_Events, InOut_Opaque, InOut_MQTT
+    InOut_Invalid=-1, InOut_Ringbuffer, InOut_Stream, InOut_Cluster,
+    InOut_Filebuffer, InOut_Selected_Events, InOut_Opaque, InOut_MQTT
 } InOutTyp;
 
 typedef enum
@@ -77,9 +77,8 @@ typedef enum{
  * modul_unspec must not be used any longer,
  * therefore remaned to modul_unspec_
  */
-/* Change modul_unspec_ back to modul_unspec, By Yong 16.10.2017 */
 enum Modulclass {
-    modul_none, modul_unspec, modul_generic, modul_camac,
+    modul_none, modul_unspec_, modul_generic, modul_camac,
     modul_fastbus, modul_vme, modul_lvd, modul_perf, modul_can, modul_caenet,
     modul_sync, modul_pcihl, modul_ip, modul_invalid
 };

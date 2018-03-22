@@ -1,0 +1,29 @@
+# lowlevel/unixvme/sis3100_udp/Makefile.in
+# created 2016-01-21 PeWue
+# $ZEL: Makefile.in,v 1.1 2016/02/29 17:32:29 wuestner Exp $
+
+CONF = ../../../conf
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+@SET_MAKE@
+
+include $(CONF)/rules.make
+include $(CONF)/config.make
+
+cfiles = vme_sis_udp.c
+ofiles = $(cfiles:.c=.o)
+depfiles = $(cfiles)
+
+CFLAGS += $(VMEFLAGS)
+
+lib = ../../libll.a
+
+all: $(lib)
+
+$(lib): $(lib)($(ofiles))
+	$(RANLIB) $@
+
+depend: xdepend
+
+.PHONY: depend

@@ -2,7 +2,7 @@
  * procs/listprocs.h.m4
  * created: 06.02.1999 PW
  */
-/* $Id: procs.h.m4,v 1.5 2006/02/23 18:37:55 wuestner Exp $ */
+/* $Id: procs.h.m4,v 1.7 2017/10/20 23:20:52 wuestner Exp $ */
 
 #ifndef _procs_h_
 #define _procs_h_
@@ -11,6 +11,9 @@
 #include <emsctypes.h>
 
 /*****************************************************************************/
+
+extern ems_u32* outptr;
+extern unsigned int *memberlist;
 
 define(`proc',`plerrcode proc_$1(ems_u32*);
 plerrcode test_proc_$1(ems_u32*);
@@ -26,6 +29,7 @@ include(procedures)
 /* defined in procs/proclist.c */
 extern int perfbedarf;
 extern char* perfnames[];
+extern ssize_t wirbrauchen; /* defined in proclist.c */
 
 /*****************************************************************************/
 /*****************************************************************************/

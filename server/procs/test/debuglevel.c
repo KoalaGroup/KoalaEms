@@ -8,7 +8,7 @@
 *                                                                             *
 ******************************************************************************/
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: debuglevel.c,v 1.7 2011/04/06 20:30:34 wuestner Exp $";
+    "$ZEL: debuglevel.c,v 1.8 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <errorcodes.h>
 #include <sconf.h>
@@ -25,7 +25,7 @@ RCS_REGISTER(cvsid, "procs/test")
 /*
 GetDebugMask
 */
-plerrcode proc_GetDebugMask(ems_u32* p)
+plerrcode proc_GetDebugMask(__attribute__((unused)) ems_u32* p)
 {
 #ifdef DEBUG
 *outptr++=debug;
@@ -94,7 +94,7 @@ int ver_proc_SetDebugMask=1;
 /*
 GetVerboseFlag
 */
-plerrcode proc_GetVerboseFlag(ems_u32* p)
+plerrcode proc_GetVerboseFlag(__attribute__((unused)) ems_u32* p)
 {
 #ifdef DEBUG
 *outptr++=verbose;

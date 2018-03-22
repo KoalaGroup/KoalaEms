@@ -3,7 +3,7 @@
  * created: 2006-Nov-19 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: runnr.c,v 1.4 2011/04/06 20:30:32 wuestner Exp $";
+    "$ZEL: runnr.c,v 1.6 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -16,7 +16,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../../objects/ved/ved.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
 
 RCS_REGISTER(cvsid, "procs/general")
 
@@ -42,7 +41,7 @@ plerrcode test_proc_set_runnr(ems_u32* p)
 char name_proc_set_runnr[]="set_runnr";
 int ver_proc_set_runnr=1;
 /*****************************************************************************/
-plerrcode proc_get_runnr(ems_u32* p)
+plerrcode proc_get_runnr(__attribute__((unused)) ems_u32* p)
 {
     *outptr++=ved_globals.runnr;
     return plOK;

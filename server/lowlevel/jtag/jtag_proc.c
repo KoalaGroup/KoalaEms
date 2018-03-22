@@ -3,7 +3,7 @@
  * created 2006-Jul-06 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: jtag_proc.c,v 1.6 2011/04/06 20:30:24 wuestner Exp $";
+    "$ZEL: jtag_proc.c,v 1.7 2017/10/22 22:09:36 wuestner Exp $";
 
 /*
  * This file contains the procedures declared in jtag_proc.h.
@@ -39,7 +39,9 @@ RCS_REGISTER(cvsid, "lowlevel/jtag")
 
 /****************************************************************************/
 plerrcode
-jtag_trace(struct generic_dev* dev, ems_u32 on, ems_u32* old)
+jtag_trace(__attribute__((unused)) struct generic_dev* dev,
+        __attribute__((unused)) ems_u32 on,
+        __attribute__((unused)) ems_u32* old)
 {
 #ifdef JTAG_DEBUG
     *old=jtag_traced;
@@ -215,7 +217,8 @@ static plerrcode
 jtag_init_chain(struct jtag_chain* chain, struct generic_dev* dev,
         int ci, int addr)
 {
-    int i, bits, chain_valid;
+    int ii, bits, chain_valid;
+    unsigned int i;
     ems_u32* ids;
     plerrcode pres;
 
@@ -267,8 +270,8 @@ jtag_init_chain(struct jtag_chain* chain, struct generic_dev* dev,
         chip->after_c_bits=bits;
         bits+=chip->chipdata->ir_len;
     }
-    for (i=chain->num_chips-1, bits=0; i>=0; i--) {
-        struct jtag_chip* chip=chain->chips+i;
+    for (ii=chain->num_chips-1, bits=0; ii>=0; ii--) {
+        struct jtag_chip* chip=chain->chips+ii;
         chip->pre_c_bits=bits;
         bits+=chip->chipdata->ir_len;
     }
@@ -280,7 +283,7 @@ jtag_init_chain(struct jtag_chain* chain, struct generic_dev* dev,
 static void
 jtag_dump_chain(struct jtag_chain* chain)
 {
-    int i;
+    unsigned int i;
 
     for (i=0; i<chain->num_chips; i++) {
         struct jtag_chip* chip=chain->chips+i;
@@ -322,7 +325,8 @@ jtag_check(struct generic_dev* dev, int ci, int addr)
 {
     struct jtag_chain chain;
     plerrcode pres=plOK;
-    int i, res, irlen;
+    unsigned int i;
+    int res, irlen;
 
     if ((pres=jtag_init_chain(&chain, dev, ci, addr))!=plOK)
         goto error;
@@ -340,7 +344,7 @@ jtag_check(struct generic_dev* dev, int ci, int addr)
         return plErr_HW;
     }
     res=jtag_datalen(&chain);
-    if (res!=chain.num_chips) {
+    if (res<0 || (unsigned)res!=chain.num_chips) {
         printf("jtag_check: datalen is %d, not %d\n", res, chain.num_chips);
         return plErr_HW;
     }

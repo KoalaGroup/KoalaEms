@@ -3,7 +3,7 @@
  * created 12.Aug.2005 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: jtag_lowinit.c,v 1.2 2011/04/06 20:30:24 wuestner Exp $";
+    "$ZEL: jtag_lowinit.c,v 1.3 2017/10/22 22:09:36 wuestner Exp $";
 
 #include <sconf.h>
 #include <stdlib.h>
@@ -596,7 +596,7 @@ jtag_init_dev(struct generic_dev* dev, struct jtag_dev* jdev, int ci, int addr)
 #endif
 /****************************************************************************/
 static int
-jtag_read_ids(struct jtag_chain* chain, ems_u32** IDs, int* IDnum)
+jtag_read_ids(struct jtag_chain* chain, ems_u32** IDs, unsigned int* IDnum)
 {
     ems_u32* ids=0;
     ems_u32 id;

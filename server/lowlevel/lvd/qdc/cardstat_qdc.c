@@ -3,7 +3,7 @@
  * created 2012-Sep-11 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: cardstat_qdc.c,v 1.2 2013/01/17 22:44:54 wuestner Exp $";
+    "$ZEL: cardstat_qdc.c,v 1.4 2017/10/22 22:30:50 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -22,7 +22,8 @@ RCS_REGISTER(cvsid, "lowlevel/lvd/qdc")
 
 /*****************************************************************************/
 static int
-dump_ident(struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_ident(struct lvd_acard *acard,
+        __attribute__((unused)) struct qdc_info *info, void *xp)
 {
     ems_u32 val;
     int res, a=0;
@@ -39,7 +40,8 @@ dump_ident(struct lvd_acard *acard, struct qdc_info *info, void *xp)
 }
 /*****************************************************************************/
 static int
-dump_serial(struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_serial(struct lvd_acard *acard,
+        __attribute__((unused)) struct qdc_info *info, void *xp)
 {
     ems_u32 val;
     int res, a=2;
@@ -281,7 +283,8 @@ decode_cr(ems_u32 cr, void *xp)
 }
 /*****************************************************************************/
 static int
-dump_cr(struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_cr(struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info,
+        void *xp)
 {
     ems_u32 cr;
     int res, a=0xc;
@@ -299,7 +302,8 @@ dump_cr(struct lvd_acard *acard, struct qdc_info *info, void *xp)
 }
 /*****************************************************************************/
 static int
-dump_cr_saved(struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_cr_saved(struct lvd_acard *acard,
+        __attribute__((unused)) struct qdc_info *info, void *xp)
 {
     if (!acard->initialized)
         return 0;
@@ -310,7 +314,8 @@ dump_cr_saved(struct lvd_acard *acard, struct qdc_info *info, void *xp)
 }
 /*****************************************************************************/
 static int
-dump_sr(struct lvd_acard *acard, struct qdc_info *info, void *xp)
+dump_sr(struct lvd_acard *acard, __attribute__((unused)) struct qdc_info *info,
+        void *xp)
 {
     ems_u32 val;
     int res, a=0xe;
@@ -656,6 +661,7 @@ dump_qthreshold(struct lvd_acard *acard, struct qdc_info *info, void *xp)
             return -1;
         }
         valid=0xffff;
+        break;
     case 6:
     case 7:
         res|=lvd_qdc_cr_sel(acard, QDC_CR_BL_QTH);
@@ -750,7 +756,8 @@ dump_bline_adjust(struct lvd_acard *acard, struct qdc_info *info, void *xp)
 }
 /*****************************************************************************/
 int
-lvd_cardstat_qdc(struct lvd_dev* dev, struct lvd_acard* acard, void *xp,
+lvd_cardstat_qdc(__attribute__((unused)) struct lvd_dev* dev,
+        struct lvd_acard* acard, void *xp,
     int level)
 {
     struct qdc_info *info=(struct qdc_info*)acard->cardinfo;

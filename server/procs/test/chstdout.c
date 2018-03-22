@@ -3,7 +3,7 @@
  * created before 25.10.96
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: chstdout.c,v 1.11 2011/04/06 20:30:34 wuestner Exp $";
+    "$ZEL: chstdout.c,v 1.12 2017/10/09 21:25:38 wuestner Exp $";
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,7 +30,6 @@ static const char* cvsid __attribute__((unused))=
 #endif
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
 
 static int oldout= -1, olderr= -1, dummy;
 

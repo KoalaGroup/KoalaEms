@@ -3,7 +3,7 @@
  * created 2009-Nov-10 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: trig.c,v 1.6 2011/04/15 19:51:00 wuestner Exp $";
+    "$ZEL: trig.c,v 1.8 2017/10/20 23:20:01 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -17,10 +17,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../../../lowlevel/lvd/trigger/trigger.h"
 #include "../../../lowlevel/devices.h"
 #include "../lvd_verify.h"
-
-extern ems_u32* outptr;
-extern int wirbrauchen;
-extern int *memberlist;
 
 RCS_REGISTER(cvsid, "procs/lvd/trigger")
 
@@ -45,7 +41,7 @@ plerrcode test_proc_lvd_trig_init(ems_u32* p)
 
     if (p[0]!=3)
         return plErr_ArgNum;
-    if ((pres=find_lvd_odevice(p[1], &dev))!=plOK)
+    if ((pres=_find_lvd_odevice(p[1], &dev))!=plOK)
         return pres;
 
     wirbrauchen=0;
@@ -83,7 +79,7 @@ plerrcode test_proc_lvd_trig_ena(ems_u32* p)
 
     if (p[0]!=2 && p[0]!=3)
         return plErr_ArgNum;
-    if ((pres=find_lvd_odevice(p[1], &dev))!=plOK)
+    if ((pres=_find_lvd_odevice(p[1], &dev))!=plOK)
         return pres;
 
     wirbrauchen=p[0]==3?0:1;
@@ -116,7 +112,7 @@ plerrcode test_proc_lvd_trig_sync(ems_u32* p)
 
     if (p[0]!=2)
         return plErr_ArgNum;
-    if ((pres=find_lvd_odevice(p[1], &dev))!=plOK)
+    if ((pres=_find_lvd_odevice(p[1], &dev))!=plOK)
         return pres;
 
     wirbrauchen=0;
@@ -150,7 +146,7 @@ plerrcode test_proc_lvd_trig_rmid(ems_u32* p)
 
     if (p[0]!=3)
         return plErr_ArgNum;
-    if ((pres=find_lvd_odevice(p[1], &dev))!=plOK)
+    if ((pres=_find_lvd_odevice(p[1], &dev))!=plOK)
         return pres;
 
     wirbrauchen=1;
@@ -186,7 +182,7 @@ plerrcode test_proc_lvd_trig_mem_write(ems_u32* p)
 
     if (p[0]<5)
         return plErr_ArgNum;
-    if ((pres=find_lvd_odevice(p[1], &dev))!=plOK)
+    if ((pres=_find_lvd_odevice(p[1], &dev))!=plOK)
         return pres;
     if (p[3]>1)
         return plErr_ArgRange;
@@ -242,7 +238,7 @@ plerrcode test_proc_lvd_trig_mem_read(ems_u32* p)
 
     if (p[0]!=5)
         return plErr_ArgNum;
-    if ((pres=find_lvd_odevice(p[1], &dev))!=plOK)
+    if ((pres=_find_lvd_odevice(p[1], &dev))!=plOK)
         return pres;
     if (p[3]>1)
         return plErr_ArgRange;
@@ -282,7 +278,7 @@ plerrcode test_proc_lvd_trig_pi_write(ems_u32* p)
 
     if (p[0]<3)
         return plErr_ArgNum;
-    if ((pres=find_lvd_odevice(p[1], &dev))!=plOK)
+    if ((pres=_find_lvd_odevice(p[1], &dev))!=plOK)
         return pres;
     if (p[3]>65536)
         return plErr_ArgRange;
@@ -325,7 +321,7 @@ plerrcode test_proc_lvd_trig_pi_read(ems_u32* p)
 
     if (p[0]!=4)
         return plErr_ArgNum;
-    if ((pres=find_lvd_odevice(p[1], &dev))!=plOK)
+    if ((pres=_find_lvd_odevice(p[1], &dev))!=plOK)
         return pres;
     if (p[3]>65536)
         return plErr_ArgRange;

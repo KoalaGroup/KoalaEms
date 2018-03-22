@@ -4,7 +4,7 @@
  * 13.Jul.2002 fgets() instead of gets()
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: InputString.c,v 1.8 2011/04/06 20:30:34 wuestner Exp $";
+    "$ZEL: InputString.c,v 1.10 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <stdio.h>
 #include <errorcodes.h>
@@ -13,13 +13,12 @@ static const char* cvsid __attribute__((unused))=
 #include "../../procs.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
 
 RCS_REGISTER(cvsid, "procs/test/console")
 
 /*****************************************************************************/
 
-plerrcode proc_InputString(ems_u32* p)
+plerrcode proc_InputString(__attribute__((unused)) ems_u32* p)
 {
     char buf[256];
 

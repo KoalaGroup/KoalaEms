@@ -32,8 +32,8 @@
 #include "compat.h"
 #include <versions.hxx>
 
-VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
-"$ZEL: proc_ved.cc,v 2.42 2014/07/14 15:11:54 wuestner Exp $")
+VERSION("2016-Jan-15", __FILE__, __DATE__, __TIME__,
+"$ZEL: proc_ved.cc,v 2.44 2016/05/02 15:28:43 wuestner Exp $")
 #define XVERSION
 
 const C_VED::VED_prior C_VED::NO_prior=0;     // auxiliary System
@@ -59,8 +59,8 @@ C_VED::C_VED(const string& name, C_VED::VED_prior prior)
     if (!communication.valid())
         communication.init();
 
-    ved=(ems_u32)OpenVED(name.c_str());
-    if (ved==(ems_u32)-1) {
+    ved=static_cast<ems_u32>(OpenVED(name.c_str()));
+    if (ved==static_cast<ems_u32>(-1)) {
         ostringstream s;
         s << "Can't open VED \"" << name <<"\"";
         throw new C_ems_error(EMS_errno, s);
@@ -71,10 +71,12 @@ C_VED::C_VED(const string& name, C_VED::VED_prior prior)
     try {
         int req[1]={0};
         if ((xid=::GetNameList(ved, 1, req))==-1)
-            throw new C_ved_error((C_VED*)0, EMS_errno, "Can't request namelist");
+            throw new C_ved_error(static_cast<C_VED*>(0), EMS_errno,
+                    "Can't request namelist");
         conf=GetConf(xid);
         if (conf->buffer(0)!=OK)
-            throw new C_ved_error((C_VED*)0, conf, "Error in GetNamelist null");
+            throw new C_ved_error(static_cast<C_VED*>(0), conf,
+                    "Error in GetNamelist null");
         namelist=new C_namelist(conf);
     } catch (C_error* e) {
         cout << "GetNameList(0): "<<*e<<endl;
@@ -84,11 +86,11 @@ C_VED::C_VED(const string& name, C_VED::VED_prior prior)
         int req[2]={Object_domain, 0};
     try {
             if ((xid=::GetNameList(ved, 2, req))==-1)
-                throw new C_ved_error((C_VED*)0, EMS_errno,
+                throw new C_ved_error(static_cast<C_VED*>(0), EMS_errno,
                         "Can't request namelist(Object_domain)");
             conf=GetConf(xid);
             if (conf->buffer(0)!=OK)
-                    throw new C_ved_error((C_VED*)0, conf,
+                    throw new C_ved_error(static_cast<C_VED*>(0), conf,
                     "Error in GetNamelist(Object_domain)");
             namelist_dom=new C_namelist(conf);
         } catch (C_error* e) {
@@ -100,11 +102,11 @@ C_VED::C_VED(const string& name, C_VED::VED_prior prior)
         int req[2]={Object_pi, 0};
         try {
             if ((xid=::GetNameList(ved, 2, req))==-1)
-                throw new C_ved_error((C_VED*)0, EMS_errno,
+                throw new C_ved_error(static_cast<C_VED*>(0), EMS_errno,
                         "Can't request namelist(Object_pi)");
             conf=GetConf(xid);
             if (conf->buffer(0)!=OK)
-            throw new C_ved_error((C_VED*)0, conf,
+            throw new C_ved_error(static_cast<C_VED*>(0), conf,
                     "Error in GetNamelist(Object_pi)");
             namelist_pi=new C_namelist(conf);
         } catch (C_error* e) {
@@ -243,7 +245,7 @@ else
 void C_VED::WriteVariable(int idx, ems_i32 val)
 {
     int xid;
-    xid=::WriteVariable(ved, idx, 1, (ems_u32*)&val);
+    xid=::WriteVariable(ved, idx, 1, reinterpret_cast<ems_u32*>(&val));
     if (confmode_==synchron) {
         C_confirmation* conf;
         conf=GetConf(xid);
@@ -258,7 +260,7 @@ void C_VED::WriteVariable(int idx, ems_i32 val)
 void C_VED::WriteVariable(int idx, ems_i32* source, int size)
 {
     int xid;
-    xid=::WriteVariable(ved, idx, size, (ems_u32*)source);
+    xid=::WriteVariable(ved, idx, size, reinterpret_cast<ems_u32*>(source));
     if (confmode_==synchron) {
         C_confirmation* conf;
         conf=GetConf(xid);
@@ -469,7 +471,7 @@ if (confmode_==synchron)
   conf=GetConf(xid);
   if (conf->buffer(0)!=OK)
       throw new C_ved_error(this, conf, "Error in GetReadoutStatus");
-  status=(InvocStatus)conf->buffer(1);
+  status=static_cast<InvocStatus>(conf->buffer(1));
   if (eventcount) *eventcount=conf->buffer(2);
   delete conf;
   return(status);
@@ -477,7 +479,7 @@ if (confmode_==synchron)
 else
   {
   last_xid_=xid;
-  return (InvocStatus)0;
+  return static_cast<InvocStatus>(0);
   }
 }
 
@@ -910,7 +912,7 @@ int C_VED::loadcaplist(Capabtyp typ, C_capability_list** capab_list)
     C_confirmation* conf;
 
     if ((xid=::GetCapabilityList(ved, typ))==-1)
-        throw new C_ved_error((C_VED*)0, EMS_errno,
+        throw new C_ved_error(static_cast<C_VED*>(0), EMS_errno,
             "Can't request list of capabilities");
     conf=GetConf(xid);
     if ((res=conf->buffer(0))!=OK) {
@@ -934,10 +936,11 @@ int C_VED::loadcaplist(Capabtyp typ, C_capability_list** capab_list)
             delete conf;
             delete *capab_list;
             *capab_list=0;
-            throw new C_ved_error((C_VED*)0, errno,
+            throw new C_ved_error(static_cast<C_VED*>(0), errno,
                 "Can't store capability list");
         }
-        p=(ems_i32*)extractstring(s, (ems_u32*)p);
+        p=reinterpret_cast<ems_i32*>((extractstring(s,
+                reinterpret_cast<ems_u32*>(const_cast<ems_i32*>(p)))));
         ver=*(p++);
         (*capab_list)->add(s, idx, ver);
     }
@@ -960,7 +963,8 @@ void C_VED::delete_is(C_instr_system* is)
     int i;
     for (i=0; (i<num_is) && (islist[i]!=is); i++);
     if (i==num_is) {
-        cerr<<"C_VED::delete_is: is "<<(void*)is<<" not found"<<endl;
+        cerr<<"C_VED::delete_is: is "<<reinterpret_cast<void*>(is)
+            <<" not found"<<endl;
         return;
     }
     for (int j=i; j<num_is-1; j++)
@@ -1359,7 +1363,7 @@ else
   strcpy(hname, hostname);
 host=gethostbyname(hname);
 if (host!=0)
-  addr= *(int*)(host->h_addr_list[0]);
+  addr= *reinterpret_cast<int*>(host->h_addr_list[0]);
 else
   {
   addr=inet_addr(hname);
@@ -1490,7 +1494,7 @@ void C_VED::WriteDataout(int id, int size, const char* s)
     ob << space_(x);
     p1=s; n=size; m=0;
     while (n) {
-        p2=(const char*)memchr(p1, '\n', n);
+        p2=reinterpret_cast<const char*>(memchr(p1, '\n', n));
         if (p2) {
             l=p2-p1;
             ob<<put(p1, l);
@@ -1571,7 +1575,7 @@ C_isstatus* C_VED::ISStatus(int idx)
             throw new C_ved_error(this, conf, "Error in GetISStatus");
         const ems_i32* b=conf->buffer();
         C_isstatus* status=new C_isstatus(b[1], b[2], b[3], b[4],
-                (const ems_u32*)(b+5));
+                reinterpret_cast<const ems_u32*>(b+5));
         delete conf;
         return status;
     } else {
@@ -1776,6 +1780,7 @@ C_VED::DownloadModullist(const C_modullist& mlist, int version)
     C_outbuf b;
     int i;
 
+#if 0
     if (version==0) {
         for (i=0; i<mlist.size(); i++) {
             if (mlist.modulclass(i)!=modul_unspec) {
@@ -1785,28 +1790,38 @@ C_VED::DownloadModullist(const C_modullist& mlist, int version)
             }
         }
     }
+#endif
 
     switch (version) {
     case 0:
+        throw new C_program_error(
+            "DownloadModullist: old version no longer supported");
+#if 0
         b<<mlist.size();
         for (i=0; i<mlist.size(); i++) {
             const C_modullist::ml_entry& entry=mlist.get(i);
             b<<entry.address.unspec.addr;
             b<<entry.modultype;
         }
+#endif
         break;
     case 1:
         b<<mlist.size();
         for (i=0; i<mlist.size(); i++) {
+            int n;
             const C_modullist::ml_entry& entry=mlist.get(i);
             b<<entry.modultype;
             b<<entry.modulclass;
             switch (entry.modulclass) {
             case modul_none:
                 break;
-            case modul_unspec:
+            case modul_unspec_:
+                throw new C_program_error(
+                    "DownloadModullist: modul_unspec not supported");
+#if 0
                 b<<entry.address.unspec.addr;
                 break;
+#endif
             case modul_generic:
                 throw new C_program_error("C_VED::DownloadModullist: "
                         "modul_generic not allowed");
@@ -1825,6 +1840,24 @@ C_VED::DownloadModullist(const C_modullist& mlist, int version)
             case modul_pcihl:
                 throw new C_program_error("C_VED::DownloadModullist: "
                         "modul_pcihl not allowed");
+            case modul_ip:
+                n=4;
+                if (entry.address.ip.lport==0)
+                    n--;
+                if (entry.address.ip.rport==0)
+                    n--;
+                if (entry.address.ip.protocol==0)
+                    n--;
+                /* address is required */
+                b<<n;
+                b<<entry.address.ip.address;
+                if (n>1)
+                    b<<entry.address.ip.protocol;
+                if (n>2)
+                    b<<entry.address.ip.rport;
+                if (n>3)
+                    b<<entry.address.ip.lport;
+                break;
             case modul_invalid:
                 throw new C_program_error("C_VED::DownloadModullist: "
                         "modul_invalid not allowed");
@@ -2059,7 +2092,7 @@ va_end(vl);
 
 /*****************************************************************************/
 
-void C_VED::DownloadTrigger(const char* proc, int argnum, ...)
+void C_VED::DownloadTrigger(int idx, const char* proc, int argnum, ...)
 {
 va_list vl;
 int i, iproc, xid;
@@ -2084,7 +2117,7 @@ va_start(vl, argnum);
 for (i=0; i<argnum; i++) domain[i+2]=va_arg(vl, int);
 va_end(vl);
 
-xid=DownloadDomain(ved, Dom_Trigger, 0, argnum+2, domain);
+xid=DownloadDomain(ved, Dom_Trigger, idx, argnum+2, domain);
 delete[] domain;
 
 if (xid==-1)
@@ -2104,7 +2137,7 @@ else
 
 /*****************************************************************************/
 
-void C_VED::DownloadTrigger(const char* proc, int* args,
+void C_VED::DownloadTrigger(int idx, const char* proc, int* args,
     int argnum)
 {
 int i, iproc, xid;
@@ -2127,7 +2160,7 @@ domain[1]=argnum;
 
 for (i=0; i<argnum; i++) domain[i+2]=args[i];
 
-xid=DownloadDomain(ved, Dom_Trigger, 0, argnum+2, domain);
+xid=DownloadDomain(ved, Dom_Trigger, idx, argnum+2, domain);
 delete[] domain;
 
 if (xid==-1)
@@ -2147,7 +2180,7 @@ else
 
 /*****************************************************************************/
 
-void C_VED::DownloadTrigger()
+void C_VED::DownloadTrigger(int idx)
 {
 int xid;
 ems_u32* list;
@@ -2155,7 +2188,7 @@ int listsize;
 
 triglist->getlist(&list, &listsize);
 
-xid=DownloadDomain(ved, Dom_Trigger, 0, listsize-1, list+1);
+xid=DownloadDomain(ved, Dom_Trigger, idx, listsize-1, list+1);
 triglist->clear();
 if (xid==-1)
     throw new C_ved_error(this, EMS_errno, "Can't download trigger procedure");
@@ -2174,11 +2207,11 @@ else
 
 /*****************************************************************************/
 
-C_confirmation* C_VED::UploadTrigger()
+C_confirmation* C_VED::UploadTrigger(int idx)
 {
 int xid;
 
-xid=UploadDomain(ved, Dom_Trigger, 0);
+xid=UploadDomain(ved, Dom_Trigger, idx);
 
 if (xid==-1)
     throw new C_ved_error(this, EMS_errno, "Can't upload trigger procedure");
@@ -2199,12 +2232,15 @@ else
 }
 
 /*****************************************************************************/
-
-void C_VED::DeleteTrigger()
+/*!
+ * Deletes a trigger procedure
+ * @param[in] idx index of the trigger procedure to be deleted.
+ */
+void C_VED::DeleteTrigger(int idx)
 {
 int xid;
 
-xid=DeleteDomain(ved, Dom_Trigger, 0);
+xid=DeleteDomain(ved, Dom_Trigger, idx);
 
 if (xid==-1)
     throw new C_ved_error(this, EMS_errno, "Can't delete trigger procedure");

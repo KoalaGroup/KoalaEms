@@ -2,7 +2,7 @@
  * dataout/cluster/cluster.h
  * created      10.04.97
  * 
- * $ZEL: cluster.h,v 1.12 2011/08/18 22:30:42 wuestner Exp $
+ * $ZEL: cluster.h,v 1.13 2017/10/09 20:49:50 wuestner Exp $
  */
 
 #ifndef _cluster_h_
@@ -96,7 +96,9 @@ struct Cluster {
 #define HEADSIZE (sizeof(struct Cluster)/sizeof(ems_u32))
 
 extern struct Cluster* clusters;
-extern int cluster_max;
+extern int cluster_num; /* in cluster.c definiert */
+extern size_t cluster_max; /* in cluster.c definiert */
+extern struct Cluster* last_deposited_cluster;
 
 errcode clusters_init(char*);
 errcode clusters_reset(void);

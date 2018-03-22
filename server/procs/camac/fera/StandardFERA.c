@@ -3,7 +3,7 @@
  * created before 27.07.94
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: StandardFERA.c,v 1.16 2011/04/06 20:30:30 wuestner Exp $";
+    "$ZEL: StandardFERA.c,v 1.17 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -18,9 +18,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../../procprops.h"
 #include "../camac_verify.h"
 #include "fera.h"
-
-extern ems_u32* outptr;
-extern int* memberlist;
 
 #define MAXVSN 20
 
@@ -67,7 +64,7 @@ plerrcode proc_StandardFERAsetup(ems_u32* p)
 
 /*****************************************************************************/
 
-plerrcode proc_StandardFERAmesspeds(ems_u32* p){
+plerrcode proc_StandardFERAmesspeds(__attribute__((unused)) ems_u32* p){
 /* in memberlist: M, DRV, mod... */
 #ifdef OSK
     int sig;
@@ -107,7 +104,7 @@ plerrcode proc_StandardFERAmesspeds(ems_u32* p){
      (im Ausgabefeld ab outptr) */
     do {
         ems_u32 count;
-        int eventsnow;
+        unsigned int eventsnow;
 
         /* warte auf Memory, read out */
 #ifdef OSK
@@ -185,7 +182,8 @@ plerrcode test_proc_StandardFERAsetup(ems_u32* p)
 {
     ems_u32 modMEM[]={FERA_MEM_4302, 0};
     ems_u32 modDRV[]={FERA_DRV_4301, 0};
-    int i,datause= *p;
+    int datause= *p;
+    unsigned int i;
     plerrcode pres;
     if (!memberlist) return(plErr_NoISModulList);
     if (*memberlist<3) return(plErr_BadISModList);
@@ -228,7 +226,7 @@ plerrcode test_proc_StandardFERAsetup(ems_u32* p)
 
 plerrcode test_proc_StandardFERAmesspeds(ems_u32* p)
 {
-    int i;
+    unsigned int i;
     if (*p) return(plErr_ArgNum);
     if (!memberlist) return(plErr_NoISModulList);
     if (*memberlist<3) return(plErr_BadISModList);

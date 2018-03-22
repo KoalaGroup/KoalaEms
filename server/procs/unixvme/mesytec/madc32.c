@@ -1,9 +1,9 @@
 /*
  * procs/unixvme/mesytec/madc32.c
- * created 30.09,2011 h.xu
+ * created 2011-07-05 h.xu
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: madc32.c,v 1.1 2011/07/05 15:22:04 huagen Exp $";
+    "$ZEL: madc32.c,v 1.7 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -19,21 +19,14 @@ static const char* cvsid __attribute__((unused))=
 #include "../../../objects/var/variables.h"
 #include "../../../lowlevel/unixvme/vme.h"
 #include "../../../lowlevel/devices.h"
-#include "../../../lowlevel/unixvme/sis3100/vme_sis.h"
 /*#include "../../../lowlevel/perfspect/perfspect.h"*/
 #include "../../../trigger/trigger.h"
 #include "../../procs.h"
 #include "../vme_verify.h"
-
-#include <unistd.h>
-
-#include "dev/pci/sis1100_var.h"
-//#include "sis3100_vme_calls.h"
-
+#include "mesytec_common.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
-extern int *memberlist;
+extern unsigned int *memberlist;
 
 RCS_REGISTER(cvsid, "procs/unixvme/mesytec")
 
@@ -44,12 +37,12 @@ RCS_REGISTER(cvsid, "procs/unixvme/mesytec")
  */
 /*
  // Address registers
+ *0x0000..0x0400: data fifo (1026 words)
  *0x6000: address_source
  *0x6002: address_reg
  *0x6004: module_id
  *0x6008: soft_reset
  *0x600E: firmware_revision
-
  // IRQ(ROACK)
  *0x6010: irq_level
  *0x6012: irq_vector
@@ -58,7 +51,6 @@ RCS_REGISTER(cvsid, "procs/unixvme/mesytec")
  *0x6018: irq_threshold
  *0x601A: Max_transfer_data
  *0x601C: Withdraw IRQ
-
  // MCST CBLT
  *0x6020: cblt_mcst_control
  *0x6022: cblt_address
@@ -72,7 +64,6 @@ RCS_REGISTER(cvsid, "procs/unixvme/mesytec")
  *0x603A: start_acq
  *0x603C: fifo_reset
  *0x603E: data_ready
-
  // Operation mode
  *0x6040: bank_operation
  *0x6042: adc_resolution
@@ -80,15 +71,12 @@ RCS_REGISTER(cvsid, "procs/unixvme/mesytec")
  *0x6046: adc_override
  *0x6048: slc_off
  *0x604A: skip_oorange
- *0x604C: Ignore Thresholds
-
  // Gate generator
  *0x6050: hold_delay0
  *0x6052: hold_delay1
  *0x6054: hold_width0
  *0x6056: hold_width1
  *0x6058: use_gg
-
  // IO
  *0x6060: input_range
  *0x6062: ECL_term
@@ -98,8 +86,8 @@ RCS_REGISTER(cvsid, "procs/unixvme/mesytec")
  *0x606A: NIM_gat1_osc
  *0x606C: NIM_fc_reset
  *0x606E: NIM_busy
+ // Testpulser
  *0x6070: pulser_status
-
  // MRC
  *0x6080: rc_busno
  *0x6082: rc_modnum
@@ -107,7 +95,6 @@ RCS_REGISTER(cvsid, "procs/unixvme/mesytec")
  *0x6086: rc_adr
  *0x6088: rc_dat
  *0x608A: send return status
-
  // CTRA
  *0x6090: Reset_ctr_ab
  *0x6092: evctr_lo
@@ -116,7 +103,6 @@ RCS_REGISTER(cvsid, "procs/unixvme/mesytec")
  *0x6098: ts_divisor
  *0x609C: ts_counter_lo
  *0x609E: ts_counter_hi
-
  // CRTB
  *0x60A0: adc_busy_time_lo
  *0x60A2: adc_busy_time_hi
@@ -126,561 +112,62 @@ RCS_REGISTER(cvsid, "procs/unixvme/mesytec")
  *0x60AA: time_1
  *0x60AC: time_2
  *0x60AE: stop_ctr
- *
  */
 
-//static ems_u32 mtypes[]={mesytec_madc32, 0};
+#define ANY 0x0815
 
 /*****************************************************************************/
 /*
- * p[0]: argcount==1
- * p[1]: address source
-*/
-/*
- * 0: from board coder 
- * 1: from address_reg
- * 
-*/
-
-plerrcode proc_madc32address_reg_set(ems_u32* p)
-{
-    int i, res;
-     
-    for(i=memberlist[0];i>0;i--){
-    ml_entry* module=ModulEnt(i);
-    struct vme_dev* dev=module->address.vme.dev;
-    ems_u32 addr=module->address.vme.addr;
-
-    res=dev->write_a32d16(dev, addr+0x6000, p[1]);
-    if (res!=2) return plErr_System;
-
-    res=dev->write_a32d16(dev, addr+0x6002, p[2]);
-    if (res!=2) return plErr_System;
-    }
-    
-    return plOK;
-}
-
-plerrcode test_proc_madc32address_reg_set(ems_u32* p)
-{
-    if (p[0]!=1)
-        return plErr_ArgNum;
-   wirbrauchen=0;
-    return plOK;
-}
-
-char name_proc_madc32address_reg_set[] = "madc32address_reg_set";
-int ver_proc_madc32address_reg_set = 1;
-
-
-/*****************************************************************************/
-/*
- * p[0]: argcount==1
- * p[1]: module id
-*/
-/*
- * 0xFF: if value = FF, the 8 high bits of base address are used (board coder) 
- * 
-*/
-
-plerrcode proc_madc32address_reg_stat(ems_u32* p)
-{
-    int i, res;
-    ems_u16 mod_id, add_source, add_reg, fm_rev; 
-    for(i=memberlist[0];i>0;i--){
-    ml_entry* module=ModulEnt(i);
-    struct vme_dev* dev=module->address.vme.dev;
-    ems_u32 addr=module->address.vme.addr;
-
-       res=dev->read_a32d16(dev,addr+0x6000,&add_source);        
-       printf("proc_madc32add_source: address source is :%d\n",add_source);
-       printf("0: from board coder; 1: from address_registor\n");
-       if (res!=2) return plErr_System;
-
-       res=dev->read_a32d16(dev,addr+0x6002,&add_reg);        
-       printf("proc_madc32add_registor: address registor is :%d\n",add_reg);
-       printf("0: from board coder; 1: from address_registor\n");
-       if (res!=2) return plErr_System;
-
-       res=dev->read_a32d16(dev,addr+0x6004,&mod_id);        
-       printf("proc_madc32module_id: module_id is :%d\n",mod_id);
-       printf("value = 0xFF means the 8 high bits of base address are used (board coder)\n");
-       if (res!=2) return plErr_System;
-
-       res=dev->read_a32d16(dev,addr+0x600E,&fm_rev);        
-       printf("proc_madc32firmware_rev: firmware revision is :%d\n",fm_rev);
-       if (res!=2) return plErr_System;
-
-    }
-    
-    return plOK;
-}
-
-plerrcode test_proc_madc32address_reg_stat(ems_u32* p)
-{
-    if (p[0] || p[0]>6)
-        return plErr_ArgNum;
-   wirbrauchen=0;
-    return plOK;
-}
-
-char name_proc_madc32address_reg_stat[] = "madc32address_reg_stat";
-int ver_proc_madc32address_reg_stat = 1;
-
-/*****************************************************************************/
-/*
- * p[0]: argcount==1
- * p[1]: marking_type
- */
-/*
- * 0: event counter 
- * 1: time stamp
- * 2: extended time stamp( now also for independent bank operation)
-*/
-
-plerrcode proc_madc32marking_type(ems_u32* p)
-{
-    int i, res;
-	ems_u16 type;
-
-   printf("memberlist[0] is %d\n",memberlist[0]);
-    for(i=memberlist[0];i>0;i--){
-    ml_entry* module=ModulEnt(i);
-    struct vme_dev* dev=module->address.vme.dev;
-    ems_u32 addr=module->address.vme.addr;
-
-    res=dev->write_a32d16(dev, addr+0x6038, p[1]);
-    if (res!=2) return plErr_System;
-
-    res=dev->read_a32d16(dev, addr+0x6038, &type);
-    printf("The event marking type is : %d\n", type);
-    printf("0: event counter; 1: time stamp; 2: extended time stamp (also for independent bank operation)\n");
-    if (res!=2) return plErr_System;
-
-    }
-    return plOK;
-}
-
-plerrcode test_proc_madc32marking_type(ems_u32* p)
-{
-    if (p[0]!=1)
-        return plErr_ArgNum;
-   wirbrauchen=0;
-    return plOK;
-}
-
-char name_proc_madc32marking_type[] = "madc32marking_type";
-int ver_proc_madc32marking_type = 1;
-
-/*****************************************************************************/
-/*
- * p[0]: argcount==1
- * p[1]: bank mode set register
- */
-/*
- * 0: b00 banks connected
- * 1: b01 operate banks independent
- * 2: b11 toggle mode for zero dead time (use with internal gate generators enabled)
-*/
-plerrcode proc_madc32bankset(ems_u32* p)
-{
-  int i, res;
-  ems_u16 bank;
-  for(i=memberlist[0];i>0;i--){
-    ml_entry* module=ModulEnt(i);
-    struct vme_dev* dev=module->address.vme.dev;
-    ems_u32 addr=module->address.vme.addr;
-    
-    res=dev->write_a32d16(dev, addr+0x6040, p[1]);
-    if (res!=2)
-        return plErr_System;
-
-       res=dev->read_a32d16(dev,addr+0x6040,&bank);        
-       printf("proc_madc32bankset: ADC bank operation is :%d\n",bank);
-       printf("0: connected; 1: independt; 2: joggle\n");
-       if(res!=2) return plErr_System; 
-  }
-    return plOK;
-}
-
-plerrcode test_proc_madc32bankset(ems_u32* p)
-{
-    if (p[0]!=1)
-        return plErr_ArgNum;
-
-    wirbrauchen=0;
-    return plOK;
-}
-
-char name_proc_madc32bankset[] = "madc32bankset";
-int ver_proc_madc32bankset = 1;
-
-/*****************************************************************************/
-/*
- * p[0]: argcount==1
- * p[1]: bit set register
- */
-/*
- * 0: 2k(800ns conversion time)
- * 1: 4k(1.6us conversion time)
- * 2: 4k hires(3.2us conversion time)
- * 3: 8k(6.4us conversion time)
- * 4: 8k hires(12.5us conv. time)
-*/
-plerrcode proc_madc32bitset(ems_u32* p)
-{
-  int i, res;
-  for(i=memberlist[0];i>0;i--){
-    ml_entry* module=ModulEnt(i);
-    struct vme_dev* dev=module->address.vme.dev;
-    ems_u32 addr=module->address.vme.addr;
-    
-    res=dev->write_a32d16(dev, addr+0x6042, p[1]);
-    if (res!=2)
-        return plErr_System;
-  }
-    return plOK;
-}
-
-plerrcode test_proc_madc32bitset(ems_u32* p)
-{
-    if (p[0]!=1)
-        return plErr_ArgNum;
-
-    wirbrauchen=0;
-    return plOK;
-}
-
-char name_proc_madc32bitset[] = "madc32bitset";
-int ver_proc_madc32bitset = 1;
-
-/*****************************************************************************/
-/*
- * p[0]: argcount==1
- * p[1]: range set register 2
- */
-/*
- * 0: 4V 
- * 1: 10V
- * 2: 8V
-*/
-
-plerrcode proc_madc32rangeset(ems_u32* p)
-{
-    int i, res;
-
-   printf("memberlist[0] is %d\n",memberlist[0]);
-    for(i=memberlist[0];i>0;i--){
-    ml_entry* module=ModulEnt(i);
-    struct vme_dev* dev=module->address.vme.dev;
-    ems_u32 addr=module->address.vme.addr;
-
-    res=dev->write_a32d16(dev, addr+0x6060, p[1]);
-    if (res!=2) return plErr_System;
-    }
-    return plOK;
-}
-
-plerrcode test_proc_madc32rangeset(ems_u32* p)
-{
-    if (p[0]!=1)
-        return plErr_ArgNum;
-   wirbrauchen=0;
-    return plOK;
-}
-
-char name_proc_madc32rangeset[] = "madc32rangeset";
-int ver_proc_madc32rangeset = 1;
-
-/*****************************************************************************/
-/*
- * p[0]: argcount==1
- * p[1]: ECL_gate1_osc
- */
-/*
- * 0: gate1 input
- * 1: oscillator input (also set 0x6096!!)
-*/
-
-plerrcode proc_madc32ECL_gate1_osc(ems_u32* p)
-{
-    int i, res;
-	ems_u16 ecl_gate;
-
-   printf("memberlist[0] is %d\n",memberlist[0]);
-    for(i=memberlist[0];i>0;i--){
-    ml_entry* module=ModulEnt(i);
-    struct vme_dev* dev=module->address.vme.dev;
-    ems_u32 addr=module->address.vme.addr;
-
-    res=dev->write_a32d16(dev, addr+0x6064, p[1]);
-    if (res!=2) return plErr_System;
-
-	res=dev->read_a32d16(dev, addr+0x6064, &ecl_gate);
-	if (res!=2) return plErr_System;
-	printf("proc_madc32ECL_gate1_osc: input is %d\n", ecl_gate);
-    printf("0: gate1 input; 1: oscillator input\n");
-    }
-    return plOK;
-}
-
-plerrcode test_proc_madc32ECL_gate1_osc(ems_u32* p)
-{
-    if (p[0]!=1)
-        return plErr_ArgNum;
-   wirbrauchen=0;
-    return plOK;
-}
-
-char name_proc_madc32ECL_gate1_osc[] = "madc32ECL_gate1_osc";
-int ver_proc_madc32ECL_gate1_osc = 1;
-
-/*****************************************************************************/
-/*
- * p[0]: argcount==1
- * p[1]: ECL_fc_res
- */
-/*
- * 0: fast clear input
- * 1: reset time stamp oscillator input 
-*/
-
-plerrcode proc_madc32ECL_fc_res(ems_u32* p)
-{
-    int i, res;
-	ems_u16 fc_res;
-
-   printf("memberlist[0] is %d\n",memberlist[0]);
-    for(i=memberlist[0];i>0;i--){
-    ml_entry* module=ModulEnt(i);
-    struct vme_dev* dev=module->address.vme.dev;
-    ems_u32 addr=module->address.vme.addr;
-
-    res=dev->write_a32d16(dev, addr+0x6066, p[1]);
-    if (res!=2) return plErr_System;
-
-	res=dev->read_a32d16(dev, addr+0x6066, &fc_res);
-	if (res!=2) return plErr_System;
-	printf("proc_madc32ECL_fc_res: input is %d\n", fc_res);
-    printf("0: fast clear input; 1: reset time stamp oscillator input\n");
-    }
-    return plOK;
-}
-
-plerrcode test_proc_madc32ECL_fc_res(ems_u32* p)
-{
-    if (p[0]!=1)
-        return plErr_ArgNum;
-   wirbrauchen=0;
-    return plOK;
-}
-
-char name_proc_madc32ECL_fc_res[] = "madc32ECL_fc_res";
-int ver_proc_madc32ECL_fc_res = 1;
-
-/*****************************************************************************/
-/*
- * p[0]: argcount==1
- * p[1]: NIM_gate1_osc
- */
-/*
- * 0: gate1 input
- * 1: oscillator input (also set 0x6096!!)
-*/
-
-plerrcode proc_madc32NIM_gate1_osc(ems_u32* p)
-{
-    int i, res;
-	ems_u16 NIM_gate;
-
-   printf("memberlist[0] is %d\n",memberlist[0]);
-    for(i=memberlist[0];i>0;i--){
-    ml_entry* module=ModulEnt(i);
-    struct vme_dev* dev=module->address.vme.dev;
-    ems_u32 addr=module->address.vme.addr;
-
-    res=dev->write_a32d16(dev, addr+0x606A, p[1]);
-    if (res!=2) return plErr_System;
-
-	res=dev->read_a32d16(dev, addr+0x606A, &NIM_gate);
-	if (res!=2) return plErr_System;
-	printf("proc_madc32NIM_gate1_osc: input is %d\n", NIM_gate);
-    printf("0: gate1 input; 1: oscillator input\n");
-    }
-    return plOK;
-}
-
-plerrcode test_proc_madc32NIM_gate1_osc(ems_u32* p)
-{
-    if (p[0]!=1)
-        return plErr_ArgNum;
-   wirbrauchen=0;
-    return plOK;
-}
-
-char name_proc_madc32NIM_gate1_osc[] = "madc32NIM_gate1_osc";
-int ver_proc_madc32NIM_gate1_osc = 1;
-
-/*****************************************************************************/
-/*
- * p[0]: argcount==1
- * p[1]: NIM_fc_res
- */
-/*
- * 0: fast clear input
- * 1: reset time stamp oscillator input 
-*/
-
-plerrcode proc_madc32NIM_fc_res(ems_u32* p)
-{
-    int i, res;
-	ems_u16 fc_res;
-
-   printf("memberlist[0] is %d\n",memberlist[0]);
-    for(i=memberlist[0];i>0;i--){
-    ml_entry* module=ModulEnt(i);
-    struct vme_dev* dev=module->address.vme.dev;
-    ems_u32 addr=module->address.vme.addr;
-
-    res=dev->write_a32d16(dev, addr+0x606C, p[1]);
-    if (res!=2) return plErr_System;
-
-	res=dev->read_a32d16(dev, addr+0x606C, &fc_res);
-	if (res!=2) return plErr_System;
-	printf("proc_madc32NIM_fc_res: input is %d\n", fc_res);
-    printf("0: fast clear input; 1: reset time stamp oscillator input\n");
-    }
-    return plOK;
-}
-
-plerrcode test_proc_madc32NIM_fc_res(ems_u32* p)
-{
-    if (p[0]!=1)
-        return plErr_ArgNum;
-   wirbrauchen=0;
-    return plOK;
-}
-
-char name_proc_madc32NIM_fc_res[] = "madc32NIM_fc_res";
-int ver_proc_madc32NIM_fc_res = 1;
-
-
-
-/*****************************************************************************/
-/*
- * p[0]: argcount ==0
- */
-plerrcode proc_madc32fiforeset(ems_u32* p)
-{   int i, res;
-//	ems_u16 fifo;
-    for(i=memberlist[0];i>0;i--){
-    ml_entry* module=ModulEnt(i);
-    struct vme_dev* dev=module->address.vme.dev;
-    ems_u32 addr=module->address.vme.addr;
-
-/**********************************************************/
-/*modify the address from 603C to 6034 for debug purpose*/
-    //   res=dev->write_a32d16(dev,addr+0x603C,p[1]);
-       res=dev->write_a32d16(dev,addr+0x6034,p[1]);
-       if(res!=2) return plErr_System;
-
-/**********************************************************/
-/*modify the address from 603C to 6034 for debug purpose*/
-//		res=dev->read_a32d16(dev,addr+0x603C,&fifo);
-//		res=dev->read_a32d16(dev,addr+0x6034,&fifo);
-//        if(res!=2) return plErr_System;
-//        printf("proc_madc32fiforeset: the fifo registor is: %d\n",fifo);
-        
-      }
-    return plOK;
-}
-
-plerrcode test_proc_madc32fiforeset(ems_u32* p)
-{
-    if (p[0])
-        return plErr_ArgNum;
-
-    wirbrauchen=0;
-    return plOK;
-}
-
-char name_proc_madc32fiforeset[] = "madc32fiforeset";
-int ver_proc_madc32fiforeset = 1;
-
-/*****************************************************************************/
-/*
- * p[0]: argcount ==0
- */
-plerrcode proc_madc32multievent(ems_u32* p)
-{   int i, res;
-	ems_u16 fifo;
-    for(i=memberlist[0];i>0;i--){
-    ml_entry* module=ModulEnt(i);
-    struct vme_dev* dev=module->address.vme.dev;
-    ems_u32 addr=module->address.vme.addr;
-
-       res=dev->write_a32d16(dev,addr+0x6036,p[1]);
-       if(res!=2) return plErr_System;
-
-		res=dev->read_a32d16(dev,addr+0x6036,&fifo);
-        if(res!=2) return plErr_System;
-        printf("proc_madc32multievent: the multievent mode is: %d\n",fifo);
-        printf("0: no(clear events, allows new conversion; 1=yes, unlimited transfer; 3=yes, but MADS transfers limited by amount of data\n");
-      }
-    return plOK;
-}
-
-plerrcode test_proc_madc32multievent(ems_u32* p)
-{
-    if (p[0])
-        return plErr_ArgNum;
-
-    wirbrauchen=0;
-    return plOK;
-}
-
-char name_proc_madc32multievent[] = "madc32multievent";
-int ver_proc_madc32multievent = 1;
-
-
-/*****************************************************************************/
-/*
- * p[0]: argcount==0/1 
+ * p[0]: argcount==0/1
+ * [p[1]: index of module; -1: all modules of intrumentation system]
  */
 
-static plerrcode madc32reset_module(int idx)
+static plerrcode
+madc32reset_module(int idx)
 {
     ml_entry* module=ModulEnt(idx);
     struct vme_dev* dev=module->address.vme.dev;
     ems_u32 addr=module->address.vme.addr;
+//    ems_u16 stat;
     int res, i;
-    ems_u16 range,bit;
-#if 0
-       res=dev->write_a32d16(dev,addr+0x603C,0);
+
+    // reset module and start to be readout//
+       res=dev->write_a32d16(dev,addr+0x603A,0x0); 
+       printf("proc_madc32reset: stop acq!\n");
        if(res!=2) return plErr_System;
 
-       res=dev->write_a32d16(dev,addr+0x6034,0);
+       res=dev->write_a32d16(dev,addr+0x6036,0x0); 
+       printf("proc_madc32reset: Single event readout!\n");
+       if(res!=2) return plErr_System;
+ 
+       res=dev->write_a32d16(dev,addr+0x6012,0x0);
+       printf("proc_madc32reset: set IRQ Vector to 0!\n");
+       if(res!=2) return plErr_System;
+
+       res=dev->write_a32d16(dev,addr+0x6010,0x1);
+       printf("proc_madc32reset: set IRQ level to 1!\n");
+       if(res!=2) return plErr_System;
+
+       res=dev->write_a32d16(dev,addr+0x6034,0x0);
+       printf("proc_madc32reset: Reset fifo!\n");
+       if(res!=2) return plErr_System;
+
+       res=dev->write_a32d16(dev,addr+0x6044,0x1);
+       printf("proc_madc32reset: Set bit resolution as 4k!\n");
        if(res!=2) return plErr_System;
 
        res=dev->write_a32d16(dev,addr+0x603A,0x1); 
-        if(res!=2) return plErr_System;
-#endif
-
-       res=dev->read_a32d16(dev,addr+0x6060,&range); 
-       printf("proc_madc32reset: ADC input range :%d\n",range);
-       if(res!=2) return plErr_System; 
-
-       res=dev->read_a32d16(dev,addr+0x6042,&bit);        
-       printf("proc_madc32reset: ADC bit resolution :%d\n",bit);
-       if(res!=2) return plErr_System; 
-
+       printf("proc_madc32reset:start_acq!\n");
+       if(res!=2) return plErr_System;
 
     // check amnesia and write GEO address if necessary//
     printf("read addr 0x%x offs 0x600e\n", addr);
 
+
     // clear threshold memory //
     for (i=0; i<32; i++) {
-        res=dev->write_a32d16(dev, addr+0x4000+2*i, 0x0);
+        res=dev->write_a32d16(dev, addr+0x4000+2*i, 0);
+//printf("madc32reset: clear threshold memory!\n");
         if (res!=2) return plErr_System;
     }
     return plOK;
@@ -688,12 +175,14 @@ static plerrcode madc32reset_module(int idx)
 
 plerrcode proc_madc32reset(ems_u32* p)
 {
+    ems_i32 *ip=(ems_i32*)p;
     int i, pres=plOK;
-
-    if (p[0] && (p[1]>-1)) {
+    if (p[0] && (ip[1]>-1)) {
         pres=madc32reset_module(p[1]);
+//printf("proc_madc32reset is OK4\n");
     } else {
         for (i=memberlist[0]; i>0; i--) {
+//printf("proc_madc32reset: OK44\n");
             pres=madc32reset_module(i);
             if (pres!=plOK)
                 break;
@@ -704,10 +193,25 @@ plerrcode proc_madc32reset(ems_u32* p)
 
 plerrcode test_proc_madc32reset(ems_u32* p)
 {
+#if 0
+    plerrcode res;
+#endif
+ 
     if ((p[0]!=0) && (p[0]!=1))
         return plErr_ArgNum;
- 
+  //   printf("test_proc_madc32reset: OK6\n");
+  //   printf("memberlist=%p, mtypes=%p\n",memberlist,mtypes);
+#if 0
+    if ((res=test_proc_vme(memberlist, mtypes))!=plOK) {
+        printf("test_proc_madc32reset: test_proc_vme failed!,return res=%d\n",res);
+        return res;
+    }
+#endif
+  //   printf("test_proc_v792reset  OK7\n");
+  //   printf("res is: %d\n",res);
+
     wirbrauchen=0;
+//printf("test_proc_madc32reset  OK8\n");
     return plOK;
 }
 
@@ -716,344 +220,89 @@ int ver_proc_madc32reset = 1;
 
 /*****************************************************************************/
 /*
- * p[0]: argcount==1
- * p[1]: level (level==0, IRQ off, priority 1..7)
- * p[2]: vector (IRQ return value, default 0)
- * p[3]: IRQ_threshold (default 1, max 8120)
- * p[4]: max_transfer_data(default 1,max 2047,usually the same or higher value used in irq_threshold)
- * p[5]: withdraw irq (default 1, withdraw IRQ when data empty)
- */
-plerrcode proc_madc32irq_set(ems_u32* p)
-{
-  // ems_u16 level, vector, irq_thr, max_data, withdraw_irq;
-   int i, res;
-   for(i=0; i<memberlist[0];i++)
-	{
-    ml_entry* module=ModulEnt(i);
-    struct vme_dev* dev=module->address.vme.dev;
-    ems_u32 addr=module->address.vme.addr;
-    
-    if (p[0]>1) {
-    res=dev->write_a32d16(dev, addr+0x6010, p[1]); /* level */
-    if (res!=2)        return plErr_System;
-    }
-
-    if (p[0]>2) {
-        res=dev->write_a32d16(dev, addr+0x6012, p[2]); /* vector */
-        if (res!=2)     return plErr_System;
-    }
-    if (p[0]>3) {
-        res=dev->write_a32d16(dev, addr+0x6018, p[3]); /* irq_threshold */
-        if (res!=2)     return plErr_System;
-    }
-    if (p[0]>4) {
-        res=dev->write_a32d16(dev, addr+0x601A, p[4]); /* max_transfer_data */
-        if (res!=2)     return plErr_System;
-    }   
-    if (p[0]>5) {
-        res=dev->write_a32d16(dev, addr+0x601C, p[5]); /* withdraw IRQ */
-        if (res!=2)     return plErr_System;
-    }     
-	}
-
-    return plOK;
-}
-
-plerrcode test_proc_madc32irq_set(ems_u32* p)
-{
-    if (p[0]<2 || p[0]>6)
-        return plErr_ArgNum;
-
-    wirbrauchen=0;
-    return plOK;
-}
-
-char name_proc_madc32irq_set[] = "madc32irq_set";
-int ver_proc_madc32irq_set = 1;
-
-/*****************************************************************************/
-/*
- * p[0]: argcount==1
- * p[1]: level (level==0, IRQ off, priority 1..7)
- * p[2]: vector (IRQ return value, default 0)
- * p[3]: IRQ_threshold (default 1, max 8120)
- * p[4]: max_transfer_data(default 1,max 2047,usually the same or higher value used in irq_threshold)
- * p[5]: withdraw irq (default 1, withdraw IRQ when data empty)
- */
-plerrcode proc_madc32irq_stat(ems_u32* p)
-{
-   ems_u16 level, vector, irq_thr, max_data, withdraw_irq;
-   	
-    ml_entry* module=ModulEnt(0);
-    struct vme_dev* dev=module->address.vme.dev;
-    ems_u32 addr=module->address.vme.addr;
-    int res;
-    
-    res=dev->read_a32d16(dev, addr+0x6010, &level); /* level */
-    printf("proc_madc32irq_stat: IRQ level is %d\n",level);
-    if (res!=2)        return plErr_System;
-   
-    res=dev->read_a32d16(dev, addr+0x6012, &vector); /* vector */
-    printf("proc_madc32irq_stat: IRQ vector is %d\n",vector);
-    if (res!=2)     return plErr_System;
-
-    res=dev->read_a32d16(dev, addr+0x6018, &irq_thr); /* irq_threshold */
-    printf("proc_madc32irq_stat: IRQ threshold is %d\n",irq_thr);
-    if (res!=2)     return plErr_System;
-  
-    res=dev->read_a32d16(dev, addr+0x601A, &max_data); /* max_transfer_data */
-    printf("proc_madc32irq_stat: max_transfer_data is %d\n",max_data);
-    if (res!=2)     return plErr_System;
-
-    res=dev->read_a32d16(dev, addr+0x601C, &withdraw_irq); /* withdraw IRQ */
-    printf("proc_madc32irq_stat: withdraw_irq is %d\n",withdraw_irq);
-    if (res!=2)     return plErr_System;       
-	
-
-    return plOK;
-}
-
-plerrcode test_proc_madc32irq_stat(ems_u32* p)
-{
-    if (p[0] || p[0]>6)
-        return plErr_ArgNum;
-
-    wirbrauchen=0;
-    return plOK;
-}
-
-char name_proc_madc32irq_stat[] = "madc32irq_stat";
-int ver_proc_madc32irq_stat = 1;
-
-
-/*****************************************************************************/
-/*
  * p[0]: argcount==0
  */
-plerrcode proc_madc32read_irq(ems_u32* p)
+plerrcode proc_madc32read_one(__attribute__((unused)) ems_u32* p)
 {
-    int i, res;
+    unsigned int i;
+    int res;
 
     *outptr++=memberlist[0];
     for (i=1; i<=memberlist[0]; i++) {
         ml_entry* module=ModulEnt(i);
         struct vme_dev* dev=module->address.vme.dev;
         ems_u32 addr=module->address.vme.addr;
-        ems_u32 data,level=(ems_u32)1;
-        ems_u32 *help, vector,error;
+        ems_u32 data, *help;
         ems_u16 datalength;
-       help=outptr++;
-
-     res = dev->irq_ack(dev,level,&vector,&error);   
-
-   /*Ready for IRQ triggered readout loop?*/
-
-   //   if(status==1){
-       res=dev->read_a32d16(dev,addr+0x6030,&datalength);
-      if(res!=2) return plErr_System;
-       printf("datalength is:%d\n",datalength);
-       if(datalength>0){    
-        for(i=0;i<datalength;i++)  {     
-           res=dev->read_a32d32(dev,addr,&data);
-         if (res!=4){
-             *help=outptr-help-1;
-             return plErr_System;
-             }
-         if((data&0x7000000)!=0x60000000&&(data&0x7000000)!=0x40000000)
-          {
-            *outptr++=data;
-           }
-//          printf("the no %d data is:0x%d\n",i,data);
-     } 
-}
-
-/*
-      do{
-          res=dev->read_a32d32(dev,addr,&data);
-          if(res!=4){
-          *help=outptr-help-1;
-           return plErr_System;
-
-}
-         if((data&0x70000000)!=0x60000000&&(data&0x70000000)!=0x40000000){
-         *outptr++=data;
-}
-         printf("the data is:0x%d\n",data);
-
-}while((data&0x70000000)!=0x60000000);
-*/
-       *help=outptr-help-1;
-
-       res=dev->write_a32d16(dev,addr+0x6034,0);
-//       printf("readout the buffer until Buserror emited!\n");
-       if(res!=2) return plErr_System;
-    } 
-    return plOK;
-}
-
-
-plerrcode test_proc_madc32read_irq(ems_u32* p)
-{
-    if (p[0])
-        return plErr_ArgNum;
-
-    wirbrauchen=memberlist[0]*34*32;
-    return plOK;
-}
-
-char name_proc_madc32read_irq[] = "madc32read_irq";
-int ver_proc_madc32read_irq = 1;
-
-
-/*****************************************************************************/
-/*
- * p[0]: argcount==1
- * p[1]: ts_sources
- */
-/*
- * 0: VME internally
- * 1: external source
-*/
-
-plerrcode proc_madc32ts_source(ems_u32* p)
-{
-    int i, res;
-    ems_u16 ts;
-
-   printf("memberlist[0] is %d\n",memberlist[0]);
-    for(i=memberlist[0];i>0;i--){
-    ml_entry* module=ModulEnt(i);
-    struct vme_dev* dev=module->address.vme.dev;
-    ems_u32 addr=module->address.vme.addr;
-
-    res=dev->write_a32d16(dev, addr+0x6096, p[1]);
-    if (res!=2) return plErr_System;
-
-	res=dev->read_a32d16(dev, addr+0x6096, &ts);
-	if (res!=2) return plErr_System;
-	printf("proc_madc32ts_source: input is %d\n", ts);
-    printf("0: VME internal; 1: external source\n");
-    }
-    return plOK;
-}
-
-plerrcode test_proc_madc32ts_source(ems_u32* p)
-{
-    if (p[0]!=1)
-        return plErr_ArgNum;
-   wirbrauchen=0;
-    return plOK;
-}
-
-char name_proc_madc32ts_source[] = "madc32ts_source";
-int ver_proc_madc32ts_source = 1;
-
-/*****************************************************************************/
-/*
- * p[0]: argcount==0
- */
-plerrcode proc_madc32read_one(ems_u32* p)
-{
-    int i, res;
-
-    *outptr++=memberlist[0];
-    for (i=1; i<=memberlist[0]; i++) 
-   {
-        ml_entry* module=ModulEnt(i);
-        struct vme_dev* dev=module->address.vme.dev;
-        ems_u32 addr=module->address.vme.addr;
-        ems_u32 data;
-        ems_u32 *help;
-        ems_u16 datalength;
-        ems_u16 status;
 
         help=outptr++;
-   
- //      res=dev->read_a32d16(dev,addr+0x603E,&status); 
- //      printf("proc_madc32read_one: status of data :%d\n",status);
- //      if(res!=2) return plErr_System; 
 /*
-        do {
-            res=dev->read_a32d32(dev, addr, &data);
+       res=dev->write_a32d16(dev,addr+0x603A,0x0); 
+       printf("proc_madc32read_one: stop acq!\n");
+       if(res!=2) return plErr_System;
 
+       res=dev->write_a32d16(dev,addr+0x6036,0x0); 
+       printf("proc_madc32read_one: Single event readout!\n");
+       if(res!=2) return plErr_System;
+ 
+       res=dev->write_a32d16(dev,addr+0x6012,0x0);
+       printf("proc_madc32read_one: set IRQ Vector to 0!\n");
+       if(res!=2) return plErr_System;
+
+       res=dev->write_a32d16(dev,addr+0x6010,0x1);
+       printf("proc_madc32read_one: set IRQ level to 1!\n");
+       if(res!=2) return plErr_System;
+
+       res=dev->write_a32d16(dev,addr+0x6034,0x0);
+       printf("proc_madc32read_one: Reset fifo!\n");
+       if(res!=2) return plErr_System;
+
+       res=dev->write_a32d16(dev,addr+0x603A,0x1); 
+       printf("proc_madc32read_one: start_acq!\n");
+       if(res!=2) return plErr_System;
+*/
+
+       res=dev->read_a32d16(dev,addr+0x6030,&datalength);
+      if(res!=2) return plErr_System;
+       printf("datalength is:0x%d\n",datalength);
+
+        /* read until code==4 (trailer) */
+        do {
+printf("proc_madc32read_one: start to read_1!\n");
+            res=dev->read_a32d32(dev, addr, &data);
+printf("proc_madc32read_one: res1 is %d\n", res);
+printf("data is:0x%d\n",data);
             if (res!=4) {
                 *help=outptr-help-1;
-                continue;
-              //  return plErr_System;
-            }
-            
-            if ((data&0x7000000)!=0x6000000&&(data&0X7000000)!=0X0000022) { 
-//valid word 
-                // printf("v792read_one: valid word is coming\n");          
-// if((data&0X7000000)!=0X0000001&&(data&0X7000000)!=0X0000022)                   
-                 *outptr++=data;
-            } else {
-                continue;
+                return plErr_System;
             }
             *outptr++=data;
+           printf("data is:0x%d\n",data);
+
         } while ((data&0x7000000)!=0x4000000);
         *help=outptr-help-1;
 
-        // read until code==6 (invalid word) and discard data 
-        do {
-            res=dev->read_a32d32(dev, addr, &data);
-            if (res!=4) {
-                return plErr_System;
-            }
-        } while ((data&0x7000000)!=0x6000000);
-*/
-
-
-	/*readout triggered by checking the register status */ 
-       // usleep(12000);
-  do{ 
-      res=dev->read_a32d16(dev,addr+0x603E,&status);        
-       if(res!=2) return plErr_System; 
-     //  printf("proc_madc32read_one: status of data :%d\n",status);
-    //  if(status!=0) goto TOBEREAD;
-    } while(status==0);
-
-//printf("proc_madc32read_one: status of data :%d\n",status);
-//TOBEREAD:
-      if(status!=0)
-      {
-         res=dev->read_a32d16(dev,addr+0x6030,&datalength);
-         if(res!=2) return plErr_System;
-       // printf("datalength is:%d\n",datalength);
-
-        for(i=0;i<datalength;i++)  
-          {     
-            res=dev->read_a32d32(dev,addr,&data);
-            if (res!=4)
-             {
-              *help=outptr-help-1;
-              return plErr_System;
-             }
-            if((data&0x7000000)!=0x60000000&&(data&0x7000000)!=0x40000000)
-              {
-               *outptr++=data;
-              }
-           //  printf("the no %d data is:0x%d\n",i,data);
-           } 
-       } 
-
-  //  }//  else continue;
-  
-       *help=outptr-help-1;
-/****************************************************************************/
-/* comment out reset for debug purpose on 20131126**************************/
-
-       res=dev->write_a32d16(dev,addr+0x6034,0);
+       res=dev->write_a32d16(dev,addr+0x6034,0x0);
+       printf("proc_madc32read_one: readout reset!\n");
        if(res!=2) return plErr_System;
+
+        /* read until code==6 (invalid word) and discard data */
+
     }
-     return plOK;
+    return plOK;
 }
 
 plerrcode test_proc_madc32read_one(ems_u32* p)
 {
+#if 0
+    plerrcode res;
+#endif
     if (p[0])
         return plErr_ArgNum;
-
+#if 0
+    if ((res=test_proc_vme(memberlist, mtypes))!=plOK)
+        return res;
+#endif
     wirbrauchen=memberlist[0]*34*32;
 // printf("test_proc_madc32read_one: skipped\n");
     return plOK;
@@ -1062,95 +311,691 @@ plerrcode test_proc_madc32read_one(ems_u32* p)
 char name_proc_madc32read_one[] = "madc32read_one";
 int ver_proc_madc32read_one = 1;
 
-
 /*****************************************************************************/
 /*
- * p[0]: argcount==0
+ * p[0]: argcount==3
+ * p[1]: module idx (or -1 for all mxdc32 of this IS)
+ * p[2]: offset
+ * [p[3]: value (16 bit)]
  */
-plerrcode proc_madc32read_multi(ems_u32* p)
+plerrcode
+proc_madc32_reg(ems_u32* p)
 {
-//printf("proc_madc32read_multi: start to readout\n");
-    int i, res;
+    ems_u32 mtypes[]={mesytec_madc32, 0};
+    ems_i32 *ip=(ems_i32*)p;
+    plerrcode pres;
+    int res;
 
-    *outptr++=memberlist[0];
-    for (i=1; i<=memberlist[0]; i++) {
-        ml_entry* module=ModulEnt(i);
+    if (ip[1]<0) {
+        pres=for_each_mxdc_member(p, mtypes, proc_madc32_reg);
+    } else {
+        ml_entry* module=ModulEnt(p[1]);
         struct vme_dev* dev=module->address.vme.dev;
         ems_u32 addr=module->address.vme.addr;
-        ems_u32 data, *help;
-        ems_u16 status;
 
-        help=outptr++;
+        pres=plOK;
 
-       res=dev->write_a32d16(dev,addr+0x603A,0x0); 
-       printf("proc_madc32read_multi: stop acq!\n");
-       if(res!=2) return plErr_System;
-
-       res=dev->write_a32d16(dev,addr+0x6090,3);
-       printf("proc_madc32read_multi: Reset all counters!\n");
-       if(res!=2) return plErr_System;
-
-       res=dev->write_a32d16(dev,addr+0x6036,2);
-       printf("proc_madc32read_multi: multievent!\n");
-       if(res!=2) return plErr_System;
-
-       res=dev->write_a32d16(dev,addr+0x603c,0);
-       printf("proc_madc32read_multi: Fifo_reset!\n");
-       if(res!=2) return plErr_System;
-
-       res=dev->write_a32d16(dev,addr+0x6034,0);
-       printf("proc_madc32read_multi: readout reset!\n");
-       if(res!=2) return plErr_System;
-
-       res=dev->write_a32d16(dev,addr+0x603A,0x1); 
-       printf("proc_madc32read_multi: start acq!\n");
-       if(res!=2) return plErr_System;
-
-       res=dev->read_a32d16(dev,addr+0x603E,&status); 
-       printf("proc_madc32read_one: status of data :%d\n",status);
-       if(res!=2) return plErr_System; 
-        /* read until code==4 (trailer) */
-  if(!(status & 0x1)) {
-/*     printf("***** v1290readout: id=%1d not ready, status=0x%1x\n", */
-/* 	   memberidx-1, status); */
-    return 1;
-  }
-
-      for (i=0;i<1024;i++){
-            res=dev->read_a32d32(dev, addr+4*i, &data);
-            if (res!=4) {
-                *help=outptr-help-1;
+        if (p[0]>2) {
+            res=dev->write_a32d16(dev, addr+p[2], p[3]);
+            if (res!=2) {
+                complain("madc32_reg(%04x, %04x): res=%d errno=%s",
+                        p[2], p[3],
+                        res, strerror(errno));
                 return plErr_System;
             }
-            *outptr++=data;
-           printf("data is:0x%08X\n",data);
-
+        } else {
+            ems_u16 val;
+            res=dev->read_a32d16(dev, addr+p[2], &val);
+            if (res!=2) {
+                complain("madc32_reg(%04x): res=%d errno=%s",
+                        p[2],
+                        res, strerror(errno));
+                return plErr_System;
+            }
+            *outptr++=val;
         }
-// while ((data&0x7000000)!=0x4000000);
-        *help=outptr-help-1;
-
-       res=dev->write_a32d16(dev,addr+0x6034,0x0);
-       printf("proc_madc32read_multi: readout reset!\n");
-       if(res!=2) return plErr_System;
-
     }
-    return plOK;
+
+    return pres;
 }
 
-plerrcode test_proc_madc32read_multi(ems_u32* p)
+plerrcode test_proc_madc32_reg(ems_u32* p)
 {
-#if 0
-    plerrcode res;
-#endif
-    if (p[0])
+    ems_u32 mtypes[]={mesytec_madc32, 0};
+    ems_i32 *ip=(ems_i32*)p;
+    ml_entry* module;
+
+    if (p[0]!=2 && p[0]!=3) {
+        complain("madc32_reg: illegal # of arguments: %d", p[0]);
         return plErr_ArgNum;
-    wirbrauchen=memberlist[0]*34*32;
+    }
+
+    if (ip[1]>=0) {
+        if (!valid_module(p[1], modul_vme)) {
+            complain("madc32_reg: p[1](==%u): no valid VME module", p[1]);
+            return plErr_ArgRange;
+        }
+        module=ModulEnt(p[1]);
+        if (!is_mesytecvme(module, mtypes)) {
+            complain("mxdc32_irq: p[1](==%u): no mesytec mxdc32", p[1]);
+            return plErr_BadModTyp;
+        }
+    }
+
+    wirbrauchen=ip[1]>=0?1:nr_mxdc_modules(mtypes);
     return plOK;
 }
 
-char name_proc_madc32read_multi[] = "madc32read_multi";
-int ver_proc_madc32read_multi = 1;
+char name_proc_madc32_reg[] = "madc32_reg";
+int ver_proc_madc32_reg = 1;
+/*****************************************************************************/
+/*
+ * p[0]: argcount==7
+ * p[1]: module idx (or -1 for all madc32 of this IS)
+ * p[2]: module ID
+ *         -1: the default should be used
+ *         !!! use madc32_id to set usefull IDs
+ *         >=0: ID is used for the first module and incremented for each
+ *              following module
+ * p[3]: resolution (0..4) (-1: don't change the default)
+ * p[4]: input_range (0..2) (-1: don't change the default)
+ * p[5]: marking_type (0: event counter  1: time stamp  3: extended time stamp)
+ * p[6]: sliding_scale off
+ * p[7]: bank_operation (0..2)
+ * p[8]: skip_oorange (0|1) (-1: don't change the default)
+ */
+
+plerrcode
+proc_madc32_init(ems_u32* p)
+{
+    ems_u32 mtypes[]={mesytec_madc32, 0};
+    ems_i32 *ip=(ems_i32*)p;
+    ems_u16 val;
+    plerrcode pres;
+    int res, i;
+
+printf("proc_madc32_init: p[1]=%d, idx=%d\n", ip[1], mxdc_member_idx());
+
+    if (ip[1]<0) {
+        pres=for_each_mxdc_member(p, mtypes, proc_madc32_init);
+    } else {
+        ml_entry* module=ModulEnt(p[1]);
+        struct vme_dev* dev=module->address.vme.dev;
+        ems_u32 addr=module->address.vme.addr;
+        ems_u16 module_id, marking_type;
+
+        pres=plOK;
+
+        /* read firmware revision */
+        res=dev->read_a32d16(dev, addr+0x600e, &val);
+        if (res!=2) {
+            complain("madc32_init: firmware revision: res=%d errno=%s",
+                    res, strerror(errno));
+            return plErr_System;
+        }
+        printf("madc32(%08x): fw=%02x.%02x\n", addr, (val>>8)&0xff, val&0xff);
+
+        /* soft reset (there is no hard reset) */
+        res=dev->write_a32d16(dev, addr+0x6008, 1);
+        if (res!=2) {
+            complain("madc32_init: soft reset: res=%d errno=%s",
+                    res, strerror(errno));
+            return plErr_System;
+        }
+
+        /* disable readout */
+        res=dev->write_a32d16(dev, addr+0x603a, 0);
+        if (res!=2) {
+            complain("madc32_init: disable readout: res=%d errno=%s",
+                    res, strerror(errno));
+            return plErr_System;
+        }
+
+        /* clear threshold memory */
+        for (i=0; i<32; i++) {
+            res=dev->write_a32d16(dev, addr+0x4000+2*i, 0);
+            if (res!=2) {
+                complain("madc32_init: clear thresholds: res=%d errno=%s",
+                        res, strerror(errno));
+                return plErr_System;
+            }
+        }
+
+        /* set module ID */
+        if (ip[2]<0 || ip[2]==0xff) {
+            res=dev->write_a32d16(dev, addr+0x6004, 0xff);
+            if (res!=2) {
+                complain("madc32_init: set module ID: res=%d errno=%s",
+                        res, strerror(errno));
+                return plErr_System;
+            }
+            module_id=(addr>>24)&0xff;
+        } else {
+            module_id=ip[2];
+            if (mxdc_member_idx()>=0)
+                module_id+=mxdc_member_idx();
+            res=dev->write_a32d16(dev, addr+0x6004, module_id);
+            if (res!=2) {
+                complain("madc32_init: set module ID: res=%d errno=%s",
+                        res, strerror(errno));
+                return plErr_System;
+            }
+        }
+
+        /* set resolution */
+        if (ip[3]>=0) {
+            res=dev->write_a32d16(dev, addr+0x6042, p[3]);
+            if (res!=2) {
+                complain("madc32_init: set resolution: res=%d errno=%s",
+                        res, strerror(errno));
+                return plErr_System;
+            }
+        }
+
+        /* set input range */
+        if (ip[4]>=0) {
+            res=dev->write_a32d16(dev, addr+0x6060, p[4]);
+            if (res!=2) {
+                complain("madc32_init: set input range: res=%d errno=%s",
+                        res, strerror(errno));
+                return plErr_System;
+            }
+        }
+
+        /* set marking type */
+        marking_type=p[5];
+        res=dev->write_a32d16(dev, addr+0x6038, marking_type);
+        if (res!=2) {
+            complain("madc32_init: set marking type: res=%d errno=%s",
+                    res, strerror(errno));
+            return plErr_System;
+        }
+
+        /* set sliding scale */
+        res=dev->write_a32d16(dev, addr+0x6048, p[6]);
+        if (res!=2) {
+            complain("madc32_init: set sliding scale: res=%d errno=%s",
+                    res, strerror(errno));
+            return plErr_System;
+        }
+
+        /* set bank operation */
+        res=dev->write_a32d16(dev, addr+0x6040, p[7]);
+        if (res!=2) {
+            complain("madc32_init: set bank operation: res=%d errno=%s",
+                    res, strerror(errno));
+            return plErr_System;
+        }
+
+        /* set skip_oorange */
+        if (ip[8]>=0) {
+            res=dev->write_a32d16(dev, addr+0x604a, p[8]);
+            if (res!=2) {
+                complain("madc32_init: set skip_oorange: res=%d errno=%s",
+                        res, strerror(errno));
+                return plErr_System;
+            }
+        }
+
+        mxdc32_init_private(module, module_id, marking_type, -1);
+    }
+
+    return pres;
+}
+
+plerrcode test_proc_madc32_init(ems_u32* p)
+{
+    ems_i32 *ip=(ems_i32*)p;
+    ml_entry* module;
+
+    if (p[0]!=8) {
+        complain("madc32_init: illegal # of arguments: %d", p[0]);
+        return plErr_ArgNum;
+    }
+
+    if (ip[1]>=0) {
+        if (!valid_module(p[1], modul_vme)) {
+            complain("madc32_init: p[1](==%u): no valid VME module", p[1]);
+            return plErr_ArgRange;
+        }
+        module=ModulEnt(p[1]);
+        if (module->modultype!=mesytec_madc32) {
+            complain("madc32_init: p[1](==%u): no mesytec madc32", p[1]);
+            return plErr_BadModTyp;
+        }
+    }
+
+    wirbrauchen=0;
+    return plOK;
+}
+
+char name_proc_madc32_init[] = "madc32_init";
+int ver_proc_madc32_init = 1;
+/*****************************************************************************/
+/*
+ * p[0]: argcount==3 or 33
+ * p[1]: module idx (or -1 for all madc32 of this IS)
+ *
+ * A (with p[0]==3):
+ * p[2]: channel (-1 for all channels)
+ * p[3]: threshold (0x1FFF to disable the channel)
+ *
+ * B (with p[0]==33)
+ * p[2..33]: threshold[0..31]
+ */
+
+plerrcode
+proc_madc32_threshold(ems_u32* p)
+{
+    ems_u32 mtypes[]={mesytec_madc32, 0};
+    ems_i32 *ip=(ems_i32*)p;
+    plerrcode pres;
+
+    if (ip[1]<0) {
+        pres=for_each_mxdc_member(p, mtypes, proc_mxdc32_threshold);
+    } else {
+        pres=proc_mxdc32_threshold(p);
+    }
+
+    return pres;
+}
+
+plerrcode test_proc_madc32_threshold(ems_u32* p)
+{
+    ems_i32 *ip=(ems_i32*)p;
+    ml_entry* module;
+
+    if (p[0]!=3 && p[0]!=33) {
+        complain("madc32_threshold: illegal # of arguments: %d", p[0]);
+        return plErr_ArgNum;
+    }
+
+    if (ip[1]>=0) {
+        if (!valid_module(p[1], modul_vme)) {
+            complain("madc32_threshold: p[1](==%u): no valid VME module", p[1]);
+            return plErr_ArgRange;
+        }
+        module=ModulEnt(p[1]);
+        if (module->modultype!=mesytec_madc32) {
+            complain("madc32_threshold: p[1](==%u): no mesytec madc32", p[1]);
+            return plErr_BadModTyp;
+        }
+    }
+
+    wirbrauchen=0;
+    return plOK;
+}
+
+char name_proc_madc32_threshold[] = "madc32_threshold";
+int ver_proc_madc32_threshold = 1;
+/*****************************************************************************/
+/*
+ * p[0]: argcount==2 or 5
+ * p[1]: module idx (or -1 for all madc32 of this IS)
+ * p[2]: bank (-1 for both)
+ * [p[3]: delay
+ *  p[4]: width
+ * ]
+ */
+plerrcode
+proc_madc32_gate(ems_u32* p)
+{
+    ems_u32 mtypes[]={mesytec_madc32, 0};
+    ems_i32 *ip=(ems_i32*)p;
+    plerrcode pres;
+    int res;
+
+    if (ip[1]<0) {
+        pres=for_each_mxdc_member(p, mtypes, proc_madc32_gate);
+    } else {
+        ml_entry* module=ModulEnt(p[1]);
+        struct vme_dev* dev=module->address.vme.dev;
+        ems_u32 addr=module->address.vme.addr;
+        ems_u16 use_gg, bankpattern;
+
+        pres=plOK;
+
+        bankpattern=ip[2]<0?3:p[2]+1; /* -1 --> b11, 0 --> b01, 1 --> b10 */
+
+        /* read old use_gg */
+        if (ip[2]>=0) { /* only one gate changed, we need the current value */
+            res=dev->read_a32d16(dev, addr+0x6058, &use_gg);
+            if (res!=2) {
+                complain("madc32_gate: read use_gg: res=%d errno=%s",
+                        res, strerror(errno));
+                return plErr_System;
+            }
+        } else {
+            use_gg=0; /* no old value needed */
+        }
+
+        /* calculate new use_gg */
+        if (p[0]<3) { /* disable gate(s) */
+            use_gg&=!bankpattern;
+        } else {      /* enable gate(s) */
+            use_gg|=bankpattern;
+            if (bankpattern&1) {
+                res=dev->write_a32d16(dev, addr+0x6050, p[3]);
+                if (res!=2) {
+                    complain("madc32_gate: res=%d errno=%s",
+                            res, strerror(errno));
+                    return plErr_System;
+                }
+                res=dev->write_a32d16(dev, addr+0x6054, p[4]);
+                if (res!=2) {
+                    complain("madc32_gate: res=%d errno=%s",
+                            res, strerror(errno));
+                    return plErr_System;
+                }
+            }
+            if (bankpattern&2) {
+                res=dev->write_a32d16(dev, addr+0x6052, p[3]);
+                if (res!=2) {
+                    complain("madc32_gate: res=%d errno=%s",
+                            res, strerror(errno));
+                    return plErr_System;
+                }
+                res=dev->write_a32d16(dev, addr+0x6056, p[4]);
+                if (res!=2) {
+                    complain("madc32_gate: res=%d errno=%s",
+                            res, strerror(errno));
+                    return plErr_System;
+                }
+            }
+        }
+
+        res=dev->write_a32d16(dev, addr+0x6058, use_gg);
+        if (res!=2) {
+            complain("madc32_gate: write use_gg: res=%d errno=%s",
+                    res, strerror(errno));
+            return plErr_System;
+        }
+    }
+
+    return pres;
+}
+
+plerrcode test_proc_madc32_gate(ems_u32* p)
+{
+    ems_i32 *ip=(ems_i32*)p;
+    ml_entry* module;
+
+    if (p[0]!=2 && p[0]!=4) {
+        complain("madc32_gate: illegal # of arguments: %d", p[0]);
+        return plErr_ArgNum;
+    }
+
+    if (ip[1]>=0) {
+        if (!valid_module(p[1], modul_vme)) {
+            complain("madc32_gate: p[1](==%u): no valid VME module", p[1]);
+            return plErr_ArgRange;
+        }
+        module=ModulEnt(p[1]);
+        if (module->modultype!=mesytec_madc32) {
+            complain("madc32_gate: p[1](==%u): no mesytec madc32", p[1]);
+            return plErr_BadModTyp;
+        }
+    }
+
+    wirbrauchen=0;
+    return plOK;
+}
+
+char name_proc_madc32_gate[] = "madc32_gate";
+int ver_proc_madc32_gate = 1;
+/*****************************************************************************/
+/*
+ * p[0]: argcount==2
+ * p[1]: module idx (or -1 for all madc32 of this IS)
+ * p[2]: val
+ */
+
+plerrcode
+proc_madc32_nimbusy(ems_u32* p)
+{
+    ems_u32 mtypes[]={mesytec_madc32, 0};
+    ems_i32 *ip=(ems_i32*)p;
+    plerrcode pres;
+
+    if (ip[1]<0) {
+        pres=for_each_mxdc_member(p, mtypes, proc_mxdc32_nimbusy);
+    } else {
+        pres=proc_mxdc32_nimbusy(p);
+    }
+
+    return pres;
+}
+
+plerrcode test_proc_madc32_nimbusy(ems_u32* p)
+{
+    ems_i32 *ip=(ems_i32*)p;
+    ml_entry* module;
+
+    if (p[0]!=2) {
+        complain("madc32_nimbusy: illegal # of arguments: %d", p[0]);
+        return plErr_ArgNum;
+    }
+
+    if (ip[1]>=0) {
+        if (!valid_module(p[1], modul_vme)) {
+            complain("madc32_nimbusy: p[1](==%u): no valid VME module", p[1]);
+            return plErr_ArgRange;
+        }
+        module=ModulEnt(p[1]);
+        if (module->modultype!=mesytec_madc32) {
+            complain("madc32_nimbusy: p[1](==%u): no mesytec madc32", p[1]);
+            return plErr_BadModTyp;
+        }
+    }
+
+    wirbrauchen=0;
+    return plOK;
+}
+
+char name_proc_madc32_nimbusy[] = "madc32_nimbusy";
+int ver_proc_madc32_nimbusy = 1;
+/*****************************************************************************/
+/*
+ * p[0]: argcount==1
+ * p[1]: module idx
+ */
+
+plerrcode
+proc_madc32_status(ems_u32* p)
+{
+    ml_entry* module=ModulEnt(p[1]);
+    struct vme_dev* dev=module->address.vme.dev;
+    ems_u32 addr=module->address.vme.addr;
+    ems_u16 val;
+    int res;
+
+    /* firmware revision */
+    res=dev->read_a32d16(dev, addr+0x600e, &val);
+    if (res!=2) {
+        complain("madc32_status: firmware revision: res=%d errno=%s",
+                res, strerror(errno));
+        return plErr_System;
+    }
+    printf("madc32(%08x): fw=%04x\n", addr, val);
+
+    dev->read_a32d16(dev, addr+0x6000, &val);
+    printf("6000 addr source   : %04x\n", val);
+
+    dev->read_a32d16(dev, addr+0x6002, &val);
+    printf("6002 addr reg      : %04x\n", val);
+
+    dev->read_a32d16(dev, addr+0x6010, &val);
+    printf("6010 irq level     : %04x\n", val);
+
+    dev->read_a32d16(dev, addr+0x6012, &val);
+    printf("6012 irq vector    : %04x\n", val);
+
+    dev->read_a32d16(dev, addr+0x6018, &val);
+    printf("6018 irq threshold : %04x\n", val);
+
+    dev->read_a32d16(dev, addr+0x601a, &val);
+    printf("601a max trans data: %04x\n", val);
+
+    dev->read_a32d16(dev, addr+0x601c, &val);
+    printf("601c withdraw irq  : %04x\n", val);
+
+    dev->read_a32d16(dev, addr+0x6020, &val);
+    printf("6020 cblt control  : %04x\n", val);
+
+    dev->read_a32d16(dev, addr+0x6022, &val);
+    printf("6022 cblt address  : %04x\n", val);
+
+    dev->read_a32d16(dev, addr+0x6024, &val);
+    printf("6024 mcst address  : %04x\n", val);
+
+    dev->read_a32d16(dev, addr+0x6030, &val);
+    printf("6030 buff data len : %04x\n", val);
+
+    dev->read_a32d16(dev, addr+0x6032, &val);
+    printf("6032 data len form : %04x\n", val);
+
+    dev->read_a32d16(dev, addr+0x6036, &val);
+    printf("6036 multievent    : %04x\n", val);
+
+    dev->read_a32d16(dev, addr+0x6038, &val);
+    printf("6038 marking type  : %04x\n", val);
+
+    dev->read_a32d16(dev, addr+0x603a, &val);
+    printf("603a start acq     : %04x\n", val);
+
+    dev->read_a32d16(dev, addr+0x603e, &val);
+    printf("603e data ready    : %04x\n", val);
+
+    dev->read_a32d16(dev, addr+0x6040, &val);
+    printf("6040 bank operation: %04x\n", val);
+
+    dev->read_a32d16(dev, addr+0x6042, &val);
+    printf("6042 resolution    : %04x\n", val);
+
+    dev->read_a32d16(dev, addr+0x6044, &val);
+    printf("6044 output format : %04x\n", val);
+
+    dev->read_a32d16(dev, addr+0x6046, &val);
+    printf("6046 override      : %04x\n", val);
+
+    dev->read_a32d16(dev, addr+0x6048, &val);
+    printf("6048 slc off       : %04x\n", val);
+
+    dev->read_a32d16(dev, addr+0x604a, &val);
+    printf("604a skip oorange  : %04x\n", val);
+
+    dev->read_a32d16(dev, addr+0x6050, &val);
+    printf("6050 hold delay0   : %04x\n", val);
+
+    dev->read_a32d16(dev, addr+0x6052, &val);
+    printf("6052 hold delay1   : %04x\n", val);
+
+    dev->read_a32d16(dev, addr+0x6054, &val);
+    printf("6054 hold width0   : %04x\n", val);
+
+    dev->read_a32d16(dev, addr+0x6056, &val);
+    printf("6056 hold width1   : %04x\n", val);
+
+    dev->read_a32d16(dev, addr+0x6058, &val);
+    printf("6058 use gg        : %04x\n", val);
+
+    dev->read_a32d16(dev, addr+0x6060, &val);
+    printf("6060 input range   : %04x\n", val);
+
+    dev->read_a32d16(dev, addr+0x6062, &val);
+    printf("6062 ecl term      : %04x\n", val);
+
+    dev->read_a32d16(dev, addr+0x6064, &val);
+    printf("6064 ecl gate1 osc : %04x\n", val);
+
+    dev->read_a32d16(dev, addr+0x6066, &val);
+    printf("6066 ecl fc res    : %04x\n", val);
+
+    dev->read_a32d16(dev, addr+0x6068, &val);
+    printf("6068 ecl busy      : %04x\n", val);
+
+    dev->read_a32d16(dev, addr+0x606a, &val);
+    printf("606a nim gat1 osc  : %04x\n", val);
+
+    dev->read_a32d16(dev, addr+0x606c, &val);
+    printf("606c nim fc reset  : %04x\n", val);
+
+    dev->read_a32d16(dev, addr+0x606e, &val);
+    printf("606e nim busy      : %04x\n", val);
+
+    dev->read_a32d16(dev, addr+0x6070, &val);
+    printf("6070, pulser status : %04x\n", val);
+
+    /* counters A */
+    dev->read_a32d16(dev, addr+0x6090, &val);
+    printf("6090 reset ctr ab  : %04x\n", val);
+
+    dev->read_a32d16(dev, addr+0x6092, &val);
+    printf("6092 evctr lo      : %04x\n", val);
+    dev->read_a32d16(dev, addr+0x6094, &val);
+    printf("6094 evctr hi      : %04x\n", val);
+
+    dev->read_a32d16(dev, addr+0x6096, &val);
+    printf("6096 ts sources    : %04x\n", val);
+
+    dev->read_a32d16(dev, addr+0x6098, &val);
+    printf("6098 ts divisor    : %04x\n", val);
+
+    dev->read_a32d16(dev, addr+0x609c, &val);
+    printf("609c ts counter lo : %04x\n", val);
+    dev->read_a32d16(dev, addr+0x609e, &val);
+    printf("609e ts counter hi : %04x\n", val);
+
+    /* counters B */
+    dev->read_a32d16(dev, addr+0x60a0, &val);
+    printf("60a0 adc bysy time lo: %04x\n", val);
+    dev->read_a32d16(dev, addr+0x60a2, &val);
+    printf("60a2 adc bysy time hi: %04x\n", val);
+
+    dev->read_a32d16(dev, addr+0x60a4, &val);
+    printf("60a4 gate1 time lo : %04x\n", val);
+    dev->read_a32d16(dev, addr+0x60a6, &val);
+    printf("60a6 gate1 time hi : %04x\n", val);
+
+    dev->read_a32d16(dev, addr+0x60a8, &val);
+    printf("60a8 time 0        : %04x\n", val);
+    dev->read_a32d16(dev, addr+0x60aa, &val);
+    printf("60aa time 1        : %04x\n", val);
+    dev->read_a32d16(dev, addr+0x60ac, &val);
+    printf("60ac time 2        : %04x\n", val);
+
+    dev->read_a32d16(dev, addr+0x60ae, &val);
+    printf("60ae stop ctr: %04x\n", val);
 
 
+    return plOK;
+}
 
+plerrcode test_proc_madc32_status(ems_u32* p)
+{
+    ml_entry* module;
 
+    if (p[0]!=1) {
+        complain("madc32_status: illegal # of arguments: %d", p[0]);
+        return plErr_ArgNum;
+    }
+
+    if (!valid_module(p[1], modul_vme)) {
+        complain("madc32_status: p[1](==%u): no valid VME module", p[1]);
+        return plErr_ArgRange;
+    }
+
+    module=ModulEnt(p[1]);
+    if (module->modultype!=mesytec_madc32) {
+        complain("madc32_status: p[1](==%u): no mesytec madc32", p[1]);
+        return plErr_BadModTyp;
+    }
+
+    wirbrauchen=0;
+    return plOK;
+}
+
+char name_proc_madc32_status[] = "madc32_status";
+int ver_proc_madc32_status = 1;
+/*****************************************************************************/
+/*****************************************************************************/

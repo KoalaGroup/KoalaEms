@@ -2,7 +2,7 @@
  * dataout/cluster/clusterpool.c
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: clusterpool.c,v 1.7 2011/04/13 20:04:13 wuestner Exp $";
+    "$ZEL: clusterpool.c,v 1.8 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -205,7 +205,7 @@ alloc_clusterpool_malloc(size_t size)
 }
 /*****************************************************************************/
 static errcode
-alloc_clusterpool_lowbuf(size_t size)
+alloc_clusterpool_lowbuf(__attribute__((unused)) size_t size)
 {
 #ifdef LOWLEVELBUFFER
     if (size>lowbuf_dataoutbuffersize()*sizeof(int)) {
@@ -477,7 +477,7 @@ find_free_block(size_t size)
 }
 /*****************************************************************************/
 void*
-alloc_cluster(size_t size, const char* text)
+alloc_cluster(size_t size, __attribute__((unused)) const char* text)
 {
     struct ctrl *c;
     void* cluster;

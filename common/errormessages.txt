@@ -1,0 +1,42 @@
+in commu/command_interp.c:wait_command
+
+    outbuf[0]=DoRequest[typ](msg, size);
+
+in procs/commands.c:DoCommand
+
+    if ((res=test_proclist(p, len, &limit))!=OK) return(res);
+    return(scan_proclist(p));
+
+in procs/proclist.c:test_proclist
+
+    res=Proc[*p].test_proc(p+1);
+    *help++=i+1;
+    *help++=(int)res;
+    *help=outptr-help-1;
+    return(Err_BadProcList)
+
+in procs/proclist.c:scan_proclist
+
+    *outptr++=num-i;
+    *outptr++=res;
+    return(Err_ExecProcList);
+
+
+in case of Err_BadProcList (from test_proclist)
+
+x[0]: return value of DoCommand/test_proclist/scan_proclist (errcode)
+      should be Err_BadProcList (==31)
+x[1]: index of procedure (starting with 1)
+x[2]: plerrcode
+x[3]: number of following words
+x[4..]: output of test procedure
+
+
+in case of Err_ExecProcList (from scan_proclist)
+
+x[0]: return value of DoCommand/test_proclist/scan_proclist (errcode)
+      should be Err_ExecProcList (==32)
+...   output of all executed procedures
+x[n-1] index of procedure (starting with 1)
+x[n]   plerrcode
+

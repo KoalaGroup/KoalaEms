@@ -1,4 +1,4 @@
-# $ZEL: update_status.tcl,v 1.19 2009/04/01 16:29:58 wuestner Exp $
+# $ZEL: update_status.tcl,v 1.20 2017/11/08 00:17:20 wuestner Exp $
 # copyright:
 # 1998 P. Wuestner; Zentrallabor fuer Elektronik; Forschungszentrum Juelich
 #
@@ -21,9 +21,13 @@ proc got_ro_status {ved args} {
     set rate [expr ($ev-$old)*1000./$global_status_loop(delay)]
     set global_rostatvar_rate_$ved $rate
     append text " [format {(%.1f ev/s)} $rate]"
+    epics_put_ved $ved eventrate $rate rate
+  } else {
+    epics_put_ved $ved eventrate 0 none
   }
   set global_rostatvar_${ved}(ro) $text
   set global_rostatvar_num_${ved}(ro) $ev  
+  epics_put_ved $ved eventnr $ev none
 
   update idletasks
 
@@ -66,6 +70,13 @@ proc check_auto_restart {ved idx MBytes} {
     # is a event rate threshold given and are we below this?
     if {[$space eval info exists rate_threshold_for_restart]} {
         set threshold [$space eval set rate_threshold_for_restart]
+	if {[$space eval info exists rate_source_for_restart]} {
+		set rved [$space eval set rate_source_for_restart]
+		global global_rostatvar_rate_$rved
+		set rate [set global_rostatvar_rate_$rved]
+	} else {
+		set rate [set global_rostatvar_rate_$ved]
+	}
         set rate [set global_rostatvar_rate_$ved]
         #output "threshold=$threshold rate=$rate"
         if {$rate>$threshold} {
@@ -138,7 +149,13 @@ proc got_do_status {ved idx autoreset args} {
     set flushing [string equal $stat "flushing"]
     if {$running || $flushing} {
         set old [set global_rostatvar_num_${ved}($idx)]
-        set MBrate [expr ($words-$old)/(262.144*$global_status_loop(delay))] ;# [expr ($words-$old)*4000./$global_status_loop(delay)/1048576.0]
+        set rate [expr 1000.*($words-$old)/$global_status_loop(delay)]
+# if {[string equal $ved ved_ebj2]} {
+# output "rate: ved=$ved words=$words old=$old delay=$global_status_loop(delay) rate=$rate" tag_red
+# }
+        # [expr ($words-$old)*4000./$global_status_loop(delay)/1048576.0]
+        set MBrate [expr ($words-$old)/(262.144*$global_status_loop(delay))]
+# output "MBrate ved=$ved $MBrate" tag_red
         append text " [format {(%.3f MB/s; %d MB)} $MBrate $MBytes]"
     }
     set global_rostatvar_${ved}($idx) $text
@@ -154,6 +171,10 @@ proc got_do_status {ved idx autoreset args} {
 
     if {$running} {
         file_size_handler $ved $idx $MBytes
+        epics_put_ved $ved filesize [expr $words*4] size
+        epics_put_ved $ved datarate [expr $rate*4] rate
+    } else {
+        epics_put_ved $ved datarate 0 none
     }
 
     if {!$autoreset} {

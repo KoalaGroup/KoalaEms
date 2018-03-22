@@ -1,0 +1,26 @@
+sis3316_readout data format for non-interleaved readout:
+
+number of modules
+
+for number_of_modules {
+
+    number of words for one module
+
+    for_up_to_16_channels { // no channel counter!
+        number of words for one channel
+
+        raw channel data
+        ...
+    }
+
+}
+
+sis3316_readout data format for interleaved readout:
+
+-1 (to distinguish the format from non-interleaved readout)
+number of channels (for all modules (mixed))
+for_each_channel {
+    number of words
+    channeldata (channelID and moduleID are in the data)
+}
+

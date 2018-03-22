@@ -3,7 +3,7 @@
  * created 2005-Mar-14 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: lvd_read_async.c,v 1.15 2011/04/06 20:30:33 wuestner Exp $";
+    "$ZEL: lvd_read_async.c,v 1.18 2017/10/20 22:54:38 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -15,10 +15,7 @@ static const char* cvsid __attribute__((unused))=
 #include "../../lowlevel/lvd/lvdbus.h"
 /*#include "../../lowlevel/lvd/f1/f1.h"*/
 #include "../../lowlevel/devices.h"
-
-extern ems_u32* outptr;
-extern int wirbrauchen;
-extern int *memberlist;
+#include "../../objects/pi/readout.h"
 
 #define get_device(crate) \
     (struct lvd_dev*)get_gendevice(modul_lvd, (crate))
@@ -29,6 +26,14 @@ RCS_REGISTER(cvsid, "procs/lvd")
 /*
  * p[0]: argcount==1
  * p[1]: crate
+ * [p[2]: num (maximum number of words to read)]
+ */
+/*
+ * Subevents generated using "lvd_read_async" contain multiple LVDS events.
+ * There is (unlike other procedures) no leading word indicating the number
+ * of the following ebvents.
+ * This means that lvd_read_async cannot be combined with other procedures
+ * in the same subevent! (It would not be possible to parse the generated data.)
  */
 plerrcode proc_lvd_read_async(ems_u32* p)
 {
@@ -36,7 +41,8 @@ plerrcode proc_lvd_read_async(ems_u32* p)
     int num;
     plerrcode pres;
 
-    if ((pres=dev->readout_async(dev, outptr, &num))==plOK)
+    pres=dev->readout_async(dev, outptr, &num, p[0]>1?p[2]:event_max);
+    if (pres==plOK)
         outptr+=num;
 
     return pres;
@@ -46,13 +52,25 @@ plerrcode test_proc_lvd_read_async(ems_u32* p)
 {
     plerrcode pres;
 
-    if (p[0]!=1)
+    if (p[0]<1 || p[0]>2)
         return plErr_ArgNum;
 
     if ((pres=find_odevice(modul_lvd, p[1], 0))!=plOK)
         return pres;
 
-    wirbrauchen=-1;
+    if (p[0]>1) {
+        wirbrauchen=p[2];
+    } else {
+        /*
+         * It is very unlikely that this procedure is combined with other
+         * procedures. Therefore we claim the whole event buffer.
+         * If this is not true the maximum has to be given explicitely.
+         *
+         * lvd_read_async can not limit the amount of data; it will just fail
+         * if the data read exceed the given maximum.
+         */
+        wirbrauchen=event_max;
+    }
     return plOK;
 }
 

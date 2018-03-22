@@ -3,7 +3,7 @@
  * created 11.Sep.2002 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: v729a.c,v 1.6 2011/04/06 20:30:35 wuestner Exp $";
+    "$ZEL: v729a.c,v 1.8 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -18,8 +18,7 @@ static const char* cvsid __attribute__((unused))=
 #include "../vme_verify.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
-extern int *memberlist;
+extern unsigned int *memberlist;
 
 RCS_REGISTER(cvsid, "procs/unixvme/caen")
 
@@ -56,7 +55,7 @@ RCS_REGISTER(cvsid, "procs/unixvme/caen")
 /*
  * p[0]: argcount==0
  */
-plerrcode proc_v729reset(ems_u32* p)
+plerrcode proc_v729reset(__attribute__((unused)) ems_u32* p)
 {
     int i, res;
 
@@ -89,7 +88,7 @@ int ver_proc_v729reset = 1;
 /*
  * p[0]: argcount==0
  */
-plerrcode proc_v729stop(ems_u32* p)
+plerrcode proc_v729stop(__attribute__((unused)) ems_u32* p)
 {
     int i, res;
 
@@ -124,7 +123,7 @@ int ver_proc_v729stop = 1;
 /*
  * p[0]: argcount==0
  */
-plerrcode proc_v729acqmode(ems_u32* p)
+plerrcode proc_v729acqmode(__attribute__((unused)) ems_u32* p)
 {
     int i, res;
 
@@ -199,9 +198,10 @@ int ver_proc_v729offsets = 1;
 /*
  * p[0]: argcount==0
  */
-plerrcode proc_v729read(ems_u32* p)
+plerrcode proc_v729read(__attribute__((unused)) ems_u32* p)
 {
-    int i, res;
+    unsigned int i;
+    int res;
 
     *outptr++=memberlist[0];
     for (i=1; i<=memberlist[0]; i++) {
@@ -292,7 +292,8 @@ plerrcode test_proc_v729read(ems_u32* p)
     plerrcode pres;
     ems_u32 mtypes[]={CAEN_V729A, 0};
     ems_u16 data;
-    int i, res;
+    unsigned int i;
+    int res;
 
     if (p[0]) return plErr_ArgNum;
     if ((pres=test_proc_vme(memberlist, mtypes))!=plOK) return pres;
@@ -320,9 +321,10 @@ int ver_proc_v729read = 1;
 /*
  * p[0]: argcount==0
  */
-plerrcode proc_v729status(ems_u32* p)
+plerrcode proc_v729status(__attribute__((unused)) ems_u32* p)
 {
-    int i, res;
+    unsigned int i;
+    int res;
 
     for (i=1; i<=memberlist[0]; i++) {
         ml_entry* module=ModulEnt(i);
@@ -358,7 +360,8 @@ int ver_proc_v729status = 1;
  */
 plerrcode proc_v729samples(ems_u32* p)
 {
-    int i, res;
+    unsigned int i;
+    int res;
 
     for (i=1; i<=memberlist[0]; i++) {
         ml_entry* module=ModulEnt(i);
@@ -392,7 +395,8 @@ int ver_proc_v729samples = 1;
  */
 plerrcode proc_v729clb(ems_u32* p)
 {
-    int i, res, cbl=p[1];
+    unsigned int i;
+    int res, cbl=p[1];
     int obae=0, obaf=1;
     
     for (i=1; i<=memberlist[0]; i++) {
@@ -435,9 +439,10 @@ int ver_proc_v729clb = 1;
 /*
  * p[0]: argcount==0
  */
-plerrcode proc_v729pread(ems_u32* p)
+plerrcode proc_v729pread(__attribute__((unused)) ems_u32* p)
 {
-    int i, res;
+    unsigned int i;
+    int res;
 
     *outptr++=memberlist[0];
     for (i=1; i<=memberlist[0]; i++) {
@@ -529,7 +534,8 @@ plerrcode test_proc_v729pread(ems_u32* p)
     plerrcode pres;
     ems_u32 mtypes[]={CAEN_V729A, 0};
     ems_u16 data;
-    int i, res;
+    unsigned int i;
+    int res;
 
     if (p[0]) return plErr_ArgNum;
     if ((pres=test_proc_vme(memberlist, mtypes))!=plOK) return pres;
@@ -555,9 +561,10 @@ char name_proc_v729pread[] = "v729pread";
 int ver_proc_v729pread = 1;
 
 /************************************************************/
-plerrcode proc_v729prread(ems_u32* p)
+plerrcode proc_v729prread(__attribute__((unused)) ems_u32* p)
 {
-    int i, res;
+    unsigned int i;
+    int res;
 
     *outptr++=memberlist[0];
     for (i=1; i<=memberlist[0]; i++) {
@@ -649,7 +656,8 @@ plerrcode test_proc_v729prread(ems_u32* p)
     plerrcode pres;
     ems_u32 mtypes[]={CAEN_V729A, 0};
     ems_u16 data;
-    int i, res;
+    unsigned int i;
+    int res;
 
     if (p[0]) return plErr_ArgNum;
     if ((pres=test_proc_vme(memberlist, mtypes))!=plOK) return pres;

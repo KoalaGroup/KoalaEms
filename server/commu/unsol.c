@@ -3,7 +3,7 @@
  * created: 2009-Aug-23 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: unsol.c,v 1.6 2011/04/12 22:40:45 wuestner Exp $";
+    "$ZEL: unsol.c,v 1.7 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -74,7 +74,7 @@ send_unsol_var(UnsolMsg type, unsigned int num, ...)
 {
     ems_u32* msg=0;
     va_list ap;
-    int i;
+    unsigned int i;
 
     if (num) {
         if (!(msg=get_msg_buf(num)))
@@ -94,7 +94,7 @@ send_unsol_warning(int code, unsigned int num, ...)
 {
     ems_u32* msg;
     va_list ap;
-    int i;
+    unsigned int i;
 
     if (!(msg=get_msg_buf(num+2)))
         return -1;
@@ -114,7 +114,7 @@ send_unsol_patience(int code, unsigned int num, ...)
 {
     ems_u32* msg;
     va_list ap;
-    int i;
+    unsigned int i;
 
     if (!(msg=get_msg_buf(num+2)))
         return -1;
@@ -251,6 +251,7 @@ send_unsol_do_filename(int do_idx, char *name)
     return send_unsolicited(Unsol_StatusChanged , msg, 3+xlen);
 }
 /*****************************************************************************/
+#if 0
 int send_unsol_alarm_0(int severity, struct timeval tv,
         int i_counter, ems_u32 *i_vector,
         int s_counter, const char **s_vector)
@@ -258,5 +259,6 @@ int send_unsol_alarm_0(int severity, struct timeval tv,
     /* to be implemented later */
     return -1;
 }
+#endif
 /*****************************************************************************/
 /*****************************************************************************/

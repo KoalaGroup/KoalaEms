@@ -3,7 +3,7 @@
  * created 10.Oct.2003 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: v462.c,v 1.4 2011/04/06 20:30:35 wuestner Exp $";
+    "$ZEL: v462.c,v 1.7 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -19,8 +19,7 @@ static const char* cvsid __attribute__((unused))=
 #include "../vme_verify.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
-extern int *memberlist;
+extern unsigned int *memberlist;
 
 RCS_REGISTER(cvsid, "procs/unixvme/caen")
 
@@ -168,7 +167,7 @@ plerrcode test_proc_v462init2(ems_u32* p)
     if (p[0]!=3)
         return plErr_ArgNum;
     module=ModulEnt(p[1]);
-    if ((test_proc_vmemodule(module, mtypes))!=plOK)
+    if ((res=test_proc_vmemodule(module, mtypes))!=plOK)
         return res;
     for (i=0; i<2; i++) {
         if (ip[i+2]>99999999) {
@@ -187,9 +186,10 @@ int ver_proc_v462init2 = 2;
 /*
  * p[0]: argcount==0
  */
-plerrcode proc_v462status(ems_u32* p)
+plerrcode proc_v462status(__attribute__((unused)) ems_u32* p)
 {
-    int i, res;
+    unsigned int i;
+    int res;
 
     for (i=1; i<=memberlist[0]; i++) {
         ml_entry* module=ModulEnt(i);
@@ -225,7 +225,8 @@ int ver_proc_v462status = 1;
  */
 plerrcode proc_v462trigger(ems_u32* p)
 {
-    int i, res;
+    unsigned int i;
+    int res;
 
     p++; /* skip argcount */
     for (i=1; i<=memberlist[0]; i++) {

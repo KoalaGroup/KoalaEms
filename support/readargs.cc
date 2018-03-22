@@ -20,7 +20,7 @@
 #include "readargs.hxx"
 
 VERSION("2008-Nov-15", __FILE__, __DATE__, __TIME__,
-"$ZEL: readargs.cc,v 2.33 2013/07/30 12:30:38 wuestner Exp $")
+"$ZEL: readargs.cc,v 2.34 2017/10/21 18:31:29 wuestner Exp $")
 #define XVERSION
 
 using namespace std;
@@ -2011,8 +2011,9 @@ C_intoption::convert(const char* s, C_readargs::argtype argt)
         delete[] vals;
         vals=help;
     }
-    void* res=ss>>resetiosflags(ios::basefield)>>vals[multi_ist];
-    if (!res||(ss>>dummy)) {
+    ss>>resetiosflags(ios::basefield)>>vals[multi_ist];
+    bool res=ss.fail();
+    if (res||(ss>>dummy)) {
         cerr<<"cannot convert \""<<s<<"\" to integer ("<<::flag(this)<<")."<<endl;
         return -1;
     } else {

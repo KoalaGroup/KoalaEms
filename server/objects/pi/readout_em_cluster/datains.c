@@ -3,7 +3,7 @@
  * created      23.03.97
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: datains.c,v 1.14 2015/04/21 16:11:07 wuestner Exp $";
+    "$ZEL: datains.c,v 1.15 2016/06/21 09:07:51 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -80,9 +80,11 @@ switch (datain[idx].bufftyp)
       case Addr_Socket:
         res=di_stream_sock_init(idx, qlen, q);
         break;
+#if 0
       case Addr_LocalSocket:
         res=di_stream_lsock_init(idx, qlen, q);
         break;
+#endif
       case Addr_File:
       case Addr_Tape:
       case Addr_Null:

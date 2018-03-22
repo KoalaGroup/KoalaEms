@@ -1,4 +1,4 @@
-# $ZEL: scaler_decoder.tcl,v 1.11 2011/11/26 23:58:47 wuestner Exp $
+# $ZEL: scaler_decoder.tcl,v 1.12 2016/10/11 21:38:34 wuestner Exp $
 # copyright 1998 2006
 #   P. Wuestner; Zentralinstitut fuer Elektronik; Forschungszentrum Juelich
 #
@@ -52,6 +52,49 @@ proc got_ScalerU32 {idx offs num jetzt rest} {
   return 0
 }
 
+# got_list_of_lists_u32 parses a list of integer lists
+# first word is the number of lists (==modules)
+# each list is preceded by its word count (==number of channels)
+# the argument num is ignored
+
+proc got_list_of_lists_u32 {idx offs num jetzt rest} {
+    upvar $rest list
+    global global_timestamp
+    global scaler_time
+    global scaler_time_last
+    global scaler_cont
+    global scaler_cont_last
+
+    if {[llength $list]<1} {
+        output "got_list_of_lists_u32: need at least one word"
+        return -1
+    }
+    set num_lists [lindex $list 0]
+    set list [lrange $list 1 end]
+    for {set i 0} {$i<$num_lists} {incr i} {
+        if {[llength $list]<1} {
+            output "got_list_of_lists_u32: need at least one word for list $i"
+            return -1
+        }
+        set words [lindex $list 0]
+        set list [lrange $list 1 end]
+        if {[llength $list]<$words} {
+            output "got_list_of_lists_u32: expected $words words for list $i"
+            output "got only [llength $list] words: $list"
+            return -1
+        }
+        for {set j 0} {$j<$words} {incr j} {
+            set scaler_cont_last($offs) $scaler_cont($offs)
+            set scaler_cont($offs) [lindex $list $j]
+            set scaler_time_last($offs) $scaler_time($offs)
+            set scaler_time($offs) $global_timestamp
+            incr offs
+        }
+        set list [lrange $list $words end]
+    }
+    return 0
+}
+
 # num has to be a multiple of 32!
 # remark:
 # in an older version (ikplab01:/usr/local/ems/lib.old/... there was a
@@ -70,7 +113,7 @@ proc got_ScalerU32 {idx offs num jetzt rest} {
 # The problem should be solved at server level but we can have a dirty
 # workaround here:
 # Because of the resets a real overflow is unlikely to occur, we can 
-# just ignore the upper 32 bit of the value (whitch are wrong).
+# just ignore the upper 32 bit of the value (which are wrong).
 
 proc got_sis3800ShadowUpdate {idx offs num jetzt rest} {
     upvar $rest list

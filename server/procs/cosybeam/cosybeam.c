@@ -4,7 +4,7 @@
  * created 06.Aug.2001 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: cosybeam.c,v 1.5 2011/04/06 20:30:30 wuestner Exp $";
+    "$ZEL: cosybeam.c,v 1.6 2017/10/09 21:25:37 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -15,7 +15,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../procprops.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
 
 RCS_REGISTER(cvsid, "procs/cosybeam")
 

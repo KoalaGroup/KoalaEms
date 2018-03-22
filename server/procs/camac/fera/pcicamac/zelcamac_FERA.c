@@ -2,7 +2,7 @@
  * procs/camac/fera/pcicamac/zelcamac_FERA.c
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: zelcamac_FERA.c,v 1.13 2011/04/06 20:30:30 wuestner Exp $";
+    "$ZEL: zelcamac_FERA.c,v 1.14 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <errorcodes.h>
 #include <modultypes.h>
@@ -11,8 +11,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../../../../objects/domain/dom_ml.h"
 #include "../../../procs.h"
 #include "../fera.h"
-extern int* memberlist;
-extern ems_u32* outptr;
 
 RCS_REGISTER(cvsid, "procs/camac/fera/pcicamac")
 
@@ -27,7 +25,8 @@ RCS_REGISTER(cvsid, "procs/camac/fera/pcicamac")
  */
 plerrcode proc_FERAsetupZEL(ems_u32* p)
 {
-	int i, vsn;
+	int vsn;
+	unsigned int i;
         struct camac_dev* dev=get_camac_device(p[1]);
         ems_u32* data;
         struct FERA_procs* FERA_procs=dev->get_FERA_procs(dev);
@@ -49,14 +48,14 @@ plerrcode proc_FERAsetupZEL(ems_u32* p)
 plerrcode test_proc_FERAsetupZEL(ems_u32* p)
 {
         struct camac_dev* dev;
-	int i;
+	unsigned int i;
         plerrcode pres;
 	ems_u32* data = p+5;
 
 	if (p[0]<4)
             return plErr_ArgNum;
 
-        if ((pres=find_camac_odevice(p[1], &dev))!=plOK)
+        if ((pres=_find_camac_odevice(p[1], &dev))!=plOK)
             return pres;
         if (dev->get_FERA_procs(dev)==0) {
             printf("FERAsetupZEL: device %s does not support FERA\n",
@@ -113,7 +112,7 @@ plerrcode test_proc_FERAdmasize(ems_u32* p)
 	if (p[0]!=2)
             return plErr_ArgNum;
 
-        if ((pres=find_camac_odevice(p[1], &dev))!=plOK)
+        if ((pres=_find_camac_odevice(p[1], &dev))!=plOK)
             return pres;
         if (dev->get_FERA_procs(dev)==0) {
             printf("FERAdmasize: device %s does not support FERA\n",
@@ -152,7 +151,7 @@ plerrcode test_proc_FERAreadoutZEL(ems_u32* p)
 	if (p[0]!=1)
             return plErr_ArgNum;
 
-        if ((pres=find_camac_odevice(p[1], &dev))!=plOK)
+        if ((pres=_find_camac_odevice(p[1], &dev))!=plOK)
             return pres;
         if (dev->get_FERA_procs(dev)==0) {
             printf("FERAreadoutZEL: device %s does not support FERA\n",
@@ -187,7 +186,7 @@ plerrcode test_proc_FERAgateZEL(ems_u32* p)
 	if (p[0]!=1)
             return plErr_ArgNum;
 
-        if ((pres=find_camac_odevice(p[1], &dev))!=plOK)
+        if ((pres=_find_camac_odevice(p[1], &dev))!=plOK)
             return pres;
         if (dev->get_FERA_procs(dev)==0) {
             printf("FERAgateZEL: device %s does not support FERA\n",
@@ -222,7 +221,7 @@ plerrcode test_proc_FERAstatusZEL(ems_u32* p)
 	if (p[0]!=1)
             return plErr_ArgNum;
 
-        if ((pres=find_camac_odevice(p[1], &dev))!=plOK)
+        if ((pres=_find_camac_odevice(p[1], &dev))!=plOK)
             return pres;
         if (dev->get_FERA_procs(dev)==0) {
             printf("FERAstatusZEL: device %s does not support FERA\n",

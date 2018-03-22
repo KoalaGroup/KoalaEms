@@ -2,7 +2,7 @@
  * commu/command_interp.c
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: command_interp.c,v 1.12 2011/04/06 20:30:21 wuestner Exp $";
+    "$ZEL: command_interp.c,v 1.13 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -61,8 +61,8 @@ static void poll_command(callbackdata dummy)
 #endif
 /*****************************************************************************/
 
-void select_command(int path, enum select_types selected,
-        union callbackdata dummy)
+void select_command(__attribute__((unused)) int path, enum select_types selected,
+        __attribute__((unused)) union callbackdata dummy)
 {
 ems_u32 *msg;
 unsigned int size;

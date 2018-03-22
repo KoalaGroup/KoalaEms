@@ -3,7 +3,7 @@
  * created 25.02.97 
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: MakeVar.c,v 1.4 2011/04/06 20:30:32 wuestner Exp $";
+    "$ZEL: MakeVar.c,v 1.5 2017/10/09 21:25:37 wuestner Exp $";
 
 #include <errorcodes.h>
 #include <rcs_ids.h>
@@ -11,7 +11,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../../procprops.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
 
 RCS_REGISTER(cvsid, "procs/general/vars")
 

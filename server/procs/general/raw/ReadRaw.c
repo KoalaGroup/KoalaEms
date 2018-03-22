@@ -4,7 +4,7 @@
  * created 04.11.94 or before
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: ReadRaw.c,v 1.7 2011/04/06 20:30:32 wuestner Exp $";
+    "$ZEL: ReadRaw.c,v 1.8 2017/10/09 21:25:37 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -21,7 +21,6 @@ static const char* cvsid __attribute__((unused))=
 #endif
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
 
 RCS_REGISTER(cvsid, "procs/general/raw")
 

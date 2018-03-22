@@ -3,7 +3,7 @@
  * created 2007-02-06
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: lvd_sync_statist.c,v 1.16 2011/04/06 20:30:25 wuestner Exp $";
+    "$ZEL: lvd_sync_statist.c,v 1.17 2016/05/12 20:37:40 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -343,7 +343,9 @@ lvd_get_sync_statist(struct lvd_dev *dev, ems_u32 *p, int *num,
 
     p0=p;
     *p++=flags;
+#if 0 /* more work needed to make it compatible multiple triggers */
     *p++=trigger.eventcnt;
+#endif
     *p++=now.tv_sec;
     *p++=now.tv_usec;
     p+=put_64(p, statist->num_all.accepted);
@@ -549,8 +551,8 @@ check_integrity(struct lvd_dev* dev, ems_u32* event, int size)
 {
     struct lvd_sync_statistic *statist=
             (struct lvd_sync_statistic*)dev->sync_statist;
-    const int max=80;
-    char ss[max];
+//    const int max=80;
+//    char ss[max];
     int i;
     int num_tdt=0;
     int num_rejected=0;
@@ -578,13 +580,15 @@ check_integrity(struct lvd_dev* dev, ems_u32* event, int size)
         case ZEL_LVD_MSYNCH:
             if (d&0x04000000) {
                 if (d&0x0bf00000) {
+#if 0 /* more work needed to make it compatible multiple triggers */
                     if (!(dev->parseflags&lvd_parse_ignore_errors_sync)) {
                         snprintf(ss, max, "lvd synch, ev=%u: illegal tdt 0x%08x",
                             trigger.eventcnt, d);
                         printf("%s\n", ss);
                         send_unsol_text(ss, 0);
                     }
-                    return -1;
+ #endif
+                   return -1;
                 }
                 num_tdt++;
             } else {
@@ -603,13 +607,15 @@ check_integrity(struct lvd_dev* dev, ems_u32* event, int size)
                     pat_delayed|=trig;
                     break;
                 case 3:
+#if 0 /* more work needed to make it compatible multiple triggers */
                     if (!(dev->parseflags&lvd_parse_ignore_errors_sync)) {
                         snprintf(ss, max, "lvd_sync: illegal del/rej in event %d: 0x%08x",
                             trigger.eventcnt, d);
                         printf("%s\n", ss);
                         send_unsol_text(ss, 0);
                     }
-                    return -1;
+#endif
+                   return -1;
                 }
             }
             break;
@@ -618,12 +624,14 @@ check_integrity(struct lvd_dev* dev, ems_u32* event, int size)
                 /* ignored */
             } else {         /* ldt */
                 if (d&0x30000) { /* error or timeout */
-                    if (!(dev->parseflags&lvd_parse_ignore_errors_sync)) {
+#if 0 /* more work needed to make it compatible multiple triggers */
+                   if (!(dev->parseflags&lvd_parse_ignore_errors_sync)) {
                         snprintf(ss, max, "lvd_sync: errorflag in event %d: 0x%08x",
                             trigger.eventcnt, d);
                         printf("%s\n", ss);
                         send_unsol_text(ss, 0);
                     }
+#endif
                     return -1;
                 }
             }

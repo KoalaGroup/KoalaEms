@@ -3,7 +3,7 @@
  * created before 25.11.94
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: readout.c,v 1.57 2011/04/06 20:30:29 wuestner Exp $";
+    "$ZEL: readout.c,v 1.60 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <stdlib.h>
 #include <string.h>
@@ -42,20 +42,21 @@ extern int readout_prior;
 #endif
 
 extern ems_u32* outptr;
-extern int *memberlist;
+extern unsigned int *memberlist; /* defined in procs/proclist.c */
 #ifdef ISVARS
 extern ISV *isvar;
 #endif
 #ifdef MAXEVCOUNT
-int maxevcount=MAXEVCOUNT;
-int maxevinc=0;
+unsigned int maxevcount=MAXEVCOUNT;
+unsigned int maxevinc=0;
 #endif
 
 RCS_REGISTER(cvsid, "objects/pi/readout_cc")
 
 int suspended;
 int suspensions;
-int wirhaben; /* used in dataout/cluster/cl_interface.c also */
+/* used in dataout/cluster/cl_interface.c also, declared in procs/proclist.h */
+size_t wirhaben;
 int inside_readout;
 
 /*****************************************************************************/
@@ -63,7 +64,7 @@ int inside_readout;
 typedef struct {
     int isidx;
     int isid;
-    int *members;
+    unsigned int *members;
 #ifdef ISVARS
 #ifdef OPTIMIERT
 xxxxxxxxxxx geht (noch) nicht xxxxxxxxxxxx
@@ -101,7 +102,8 @@ pi_readout_init(void)
 
     T(pi_readout_init)
     readout_active=Invoc_notactive;
-    trigger.eventcnt=0;
+//    trigger.eventcnt=0;
+    global_evc.ev_count=0;
     onreadouterror=0;
     for(i=0; i<MAX_TRIGGER; i++){
         readoutinfo[i]=(isreadoutinfo*)0;
@@ -134,7 +136,7 @@ pi_readout_done(void)
  p[0] : id (ignoriert)
  */
 static errcode
-createreadout(ems_u32* p, unsigned int num)
+createreadout(__attribute__((unused)) ems_u32* p, unsigned int num)
 {
     T(createreadout)
 
@@ -148,7 +150,7 @@ createreadout(ems_u32* p, unsigned int num)
  p[0] : id (ignoriert)
  */
 static errcode
-deletereadout(ems_u32* p, unsigned int num)
+deletereadout(__attribute__((unused)) ems_u32* p, unsigned int num)
 {
     T(deletereadout)
 
@@ -167,7 +169,7 @@ static errcode
 getreadoutattr(ems_u32* p, unsigned int num)
 {
     T(getreadoutattr)
-    D(D_REQ, {int i; printf("getreadoutattr(num=%d, ", num);
+    D(D_REQ, {unsigned int i; printf("getreadoutattr(num=%d, ", num);
         for (i=0; i<num; i++) printf("%d%s", p[i], i+1<num?", ":"");
         printf(")\n");}
     )
@@ -176,7 +178,8 @@ getreadoutattr(ems_u32* p, unsigned int num)
         return Err_ArgNum;
 
     *outptr++=readout_active;
-    *outptr++=trigger.eventcnt;
+//    *outptr++=trigger.eventcnt;
+    *outptr++=global_evc.ev_count;
     if (num>1) {
         *outptr++=p[1];
         switch (p[1]) {
@@ -257,7 +260,7 @@ getreadoutparams
 p[0] : id (ignoriert)
 */
 static errcode
-getreadoutparams(ems_u32* p, unsigned int num)
+getreadoutparams(__attribute__((unused)) ems_u32* p, unsigned int num)
 {
     if (num!=1)
         return Err_ArgNum;
@@ -273,6 +276,7 @@ getreadoutparams(ems_u32* p, unsigned int num)
 static errcode
 resetreadout(ems_u32* p, unsigned int num)
 {
+    struct triginfo *info;
     errcode res;
 
     T(resetreadout)
@@ -289,13 +293,29 @@ resetreadout(ems_u32* p, unsigned int num)
             return Err_ArgNum;
     }
 
-    remove_trigger_task(&trigger);
+    info=triginfo;
+    while (info) {
+        remove_trigger_task(info->trinfo);
+        info=info->next;
+    }
+
     suspended=0;
     suspensions=0;
     perfspect_set_state(perfspect_state_inactive);
-    if ((res=done_trigger(&trigger)))
+
+    res=OK;
+    info=triginfo;
+    while (info) {
+        errcode xres;
+        xres=done_trigger(info->trinfo);
+        if (res==OK) /* record the first error only */
+            res=xres;
+        info=info->next;
+    }
+    if (res!=OK)
         return res;
-    if ((res=stop_dataouts()))
+
+    if ((res=stop_dataouts())!=OK)
         return res;
     D(D_REQ, printf("readout stopped!!\n");)
     readout_active=Invoc_notactive;
@@ -323,8 +343,13 @@ stopreadout(ems_u32* p, unsigned int num)
             return Err_ArgNum;
     }
     printf("stopreadout: suspended=%d\n", suspended);
-    if (!suspended)
-        suspend_trigger_task(&trigger);
+    if (!suspended) {
+        struct triginfo *info=triginfo;
+        while (info) {
+            suspend_trigger_task(info->trinfo);
+            info=info->next;
+        }
+    }
     readout_active=Invoc_stopped;
     {
         ems_u32 obj[]={Invocation_readout, 0};
@@ -353,8 +378,13 @@ resumereadout(ems_u32* p, unsigned int num)
             return Err_ArgNum;
     }
 
-    if (!suspended)
-        reactivate_trigger_task(&trigger);
+    if (!suspended) {
+        struct triginfo *info;
+        while (info) {
+            reactivate_trigger_task(info->trinfo);
+            info=info->next;
+        }
+    }
     readout_active=Invoc_active;
     {
         ems_u32 obj[]={Invocation_readout, 0};
@@ -366,6 +396,7 @@ resumereadout(ems_u32* p, unsigned int num)
 void
 fatal_readout_error()
 {
+    struct triginfo *info;
     T(readout_cc/readout.c:fatal_readout_error)
 
     printf("== %s Fatal readout error!! ==\n", nowstr());
@@ -374,7 +405,11 @@ fatal_readout_error()
         return;
     }
 
-    remove_trigger_task(&trigger);
+    info=triginfo;
+    while (info) {
+        remove_trigger_task(info->trinfo);
+        info=info->next;
+    }
 
     readout_active=Invoc_error;
     {
@@ -387,8 +422,9 @@ static
 void read_out(ems_u32 trig)
 {
     isreadoutinfo *ptr;
-    int cnt;
+    struct triginfo *info;
     ems_u32* current_trig_ptr;
+    int cnt;
 
     if (trig>=MAX_TRIGGER) {
         char ss[265];
@@ -409,10 +445,10 @@ void read_out(ems_u32 trig)
         ems_u32 buf[3];
         printf("readout.c:read_out: "
                 "next_databuf=0, eventcnt=%d, buffer_free=%d\n", 
-                    trigger.eventcnt, buffer_free);
+                global_evc.ev_count, buffer_free);
         buf[0]=rtErr_Other;
         buf[1]=buffer_free;
-        buf[2]=trigger.eventcnt;
+        buf[2]=global_evc.ev_count;
         send_unsolicited(Unsol_RuntimeError, buf, 2);
         fatal_readout_error();
         return;
@@ -423,7 +459,7 @@ void read_out(ems_u32 trig)
 
     add_used_trigger(trig);
 
-    *outptr++=trigger.eventcnt;
+    *outptr++=global_evc.ev_count;
     current_trig_ptr=outptr;
     *outptr++=trig;
     *outptr++=cnt;
@@ -432,7 +468,7 @@ void read_out(ems_u32 trig)
     perfspect_set_state(perfspect_state_active);
     perfspect_eventstart();
     DV(D_TRIG, printf("Event No. %d, Trigger %d, lese %d IS aus\n",
-            trigger.eventcnt, trig, cnt);)
+            global_evc.ev_count, trig, cnt);)
 
     while(cnt--) {
         ems_u32* help;
@@ -453,7 +489,7 @@ void read_out(ems_u32 trig)
             if(onreadouterror<=1){
                 ems_u32 *buf;
                 unsigned int anz;
-                int i;
+                unsigned int i;
                 anz=outptr-help-1;
                 buf=(ems_u32*)calloc(anz+5, sizeof(ems_u32));
                 if (!buf) { /* passiert hoffentlich nie */
@@ -467,7 +503,7 @@ void read_out(ems_u32 trig)
 	            return;
                 }
                 buf[0]=rtErr_ExecProcList;
-                buf[1]=trigger.eventcnt;
+                buf[1]=global_evc.ev_count;
                 buf[2]=res;
                 buf[3]=(ptr-1)->isid;
                 buf[4]=trig;
@@ -491,7 +527,13 @@ void read_out(ems_u32 trig)
     }
     inside_readout=0;
     perfspect_set_state(perfspect_state_inactive);
-    reset_trigger(&trigger);
+
+    info=triginfo;
+    while (info) {
+        reset_trigger(info->trinfo);
+        info=info->next;
+    }
+
     PROFILE_END(PROF_RO);
     if (event_invalid)
         *current_trig_ptr|=0x80000000;
@@ -505,8 +547,81 @@ void read_out(ems_u32 trig)
     flush_databuf(outptr);
 }
 /*****************************************************************************/
-static void doreadout(void* dummy)
+static void
+suspend_trigger_tasks(void)
 {
+    struct triginfo *info=triginfo;
+
+    while (info) {
+        suspend_trigger_task(info->trinfo);
+        info=info->next;
+    }
+}
+/*****************************************************************************/
+static void doreadout(void*);
+
+static errcode
+init_triggers(void)
+{
+    struct triginfo *info=triginfo;
+    errcode res=OK;
+
+    while (info) {
+        errcode xres;
+        xres=init_trigger(info->trinfo, info->proc, info->param);
+        info->trinfo->cb_proc=doreadout;
+        info->trinfo->cb_data=info->trinfo;
+        if (res==OK)
+            res=xres;
+
+            //4711 muss alles wieder abbauen!
+        info=info->next;
+    }
+    return res;
+}
+/*****************************************************************************/
+static errcode
+insert_trigger_tasks(void)
+{
+    struct triginfo *info=triginfo;
+    errcode res=OK;
+
+    while (info) {
+        errcode xres;
+        xres=insert_trigger_task(info->trinfo);
+        if (res==OK)
+            res=xres;
+        info=info->next;
+    }
+    return res;
+}
+/*****************************************************************************/
+static void
+reactivate_trigger_tasks(void)
+{
+    struct triginfo *info=triginfo;
+
+    while (info) {
+        reactivate_trigger_task(info->trinfo);
+        info=info->next;
+    }
+}
+/*****************************************************************************/
+
+static void doreadout(void *cb_data)
+{
+    struct triggerinfo *trinfo=(struct triggerinfo*)cb_data;
+
+    /*
+     * eventcnt has to be global and absolut!
+     * Each trigger uses its ouwn count and cannot update the global counter.
+     * (Trigger procedures do not know whether they are called as trigger
+     * or as LAM.)
+     * We update the counters here.
+     */
+    global_evc.ev_count++;
+    trinfo->last_ev_count=global_evc.ev_count;
+
 #define DEBUG
 #ifdef DEBUG
     if (!buffer_free) {
@@ -515,14 +630,14 @@ static void doreadout(void* dummy)
     }
 #endif
 #undef DEBUG
-    read_out(trigger.trigger);
+    read_out(trinfo->trigger);
 
 #ifdef MAXEVCOUNT
-    if (maxevcount && (trigger.eventcnt==maxevcount)) {
+    if (maxevcount && (global_evc.ev_count>=maxevcount)) {
         if (!suspended)
-            suspend_trigger_task(&trigger);
+            suspend_trigger_task(trinfo);
         readout_active=Invoc_stopped;
-        printf("%d EVENTS READ; READOUT STOPPED\n", trigger.eventcnt);
+        printf("%d EVENTS READ; READOUT STOPPED\n", global_evc.ev_count);
         maxevcount+=maxevinc;
         {
             ems_u32 obj[]={Invocation_readout, 0};
@@ -537,14 +652,31 @@ wieder aktiviert werden
 */
     if (!buffer_free) {
 #if 0
-        printf("doreadout: buffer_free=0, eventcnt=%d\n", trigger.eventcnt);
+        printf("doreadout: buffer_free=0, eventcnt=%d\n", global_evc.ev_count);
 #endif
-        suspend_trigger_task(&trigger);
+        suspend_trigger_tasks();
         suspended=1;
         suspensions++;
     }
 }
 /*****************************************************************************/
+static errcode
+init_trigger_data(void)
+{
+    struct triginfo *info=triginfo;
+    while (info) {
+        if (info->trinfo) {
+            bzero(info->trinfo, sizeof(struct triggerinfo));
+        } else {
+            info->trinfo=calloc(1, sizeof(struct triggerinfo));
+            if (!info->trinfo)
+                return Err_NoMem;
+        }
+        info=info->next;
+    }
+    return OK;
+}
+
 /*
 startreadout
 p[0] : id (ignoriert)
@@ -554,7 +686,7 @@ startreadout(ems_u32* p, unsigned int num)
 {
     int trig;
     errcode res;
-    int restlen,limit;
+    ssize_t restlen, limit;
 
     T(startreadout)
     if (num!=1) {
@@ -569,7 +701,7 @@ startreadout(ems_u32* p, unsigned int num)
         return Err_PIActive;
     printf("== %s STARTREADOUT ==\n", nowstr());
 
-    if (trigdata==0) {
+    if (triginfo==0) {
         printf("startreadout: no trigger defined\n");
         return Err_NoTrigger;
     }
@@ -631,8 +763,8 @@ startreadout(ems_u32* p, unsigned int num)
                         res=test_proclist(readoutlist->list, readoutlist->length,
                                 &limit);
                         if ((!res)&&(limit>restlen)) {
-                            printf("startreadout: limit=%d > restlen=%d\n",
-                                    limit, restlen);
+                            printf("startreadout: limit=%lld > restlen=%lld\n",
+                                    (long long)limit, (long long)restlen);
                             res=Err_BufOverfl;
                         }
                         if (res) {
@@ -655,7 +787,10 @@ startreadout(ems_u32* p, unsigned int num)
             max_prior=second_prior;
         }
     }
-    trigger.eventcnt=0;
+    if ((res=init_trigger_data())!=OK)
+        return res;
+
+    global_evc.ev_count=0;
 
 #ifdef PERFSPECT
     if (perfspect_realloc_arrays()!=plOK)
@@ -666,12 +801,10 @@ startreadout(ems_u32* p, unsigned int num)
     reset_delayed_read();
 #endif
 
-    if ((res=init_trigger(&trigger, trigdata->proc, trigdata->param))!=OK) {
+    if ((res=init_triggers())!=OK) {
         perfspect_set_state(perfspect_state_invalid);
         return res;
     }
-    trigger.cb_proc=doreadout;
-    trigger.cb_data=0;
 
     if ((res=start_dataout())!=OK) {
         perfspect_set_state(perfspect_state_invalid);
@@ -680,7 +813,7 @@ startreadout(ems_u32* p, unsigned int num)
 
     suspensions=0;
     /* insert_readout_task() ist beim Trigger definiert */
-    if ((res=insert_trigger_task(&trigger))!=OK) {
+    if ((res=insert_trigger_tasks())!=OK) {
         perfspect_set_state(perfspect_state_invalid);
         return res;
     }
@@ -689,7 +822,7 @@ startreadout(ems_u32* p, unsigned int num)
         schau_nach_speicher();
         if (!buffer_free) {
 /* readouttask muss von Bufferverwaltung wieder aktiviert werden */
-            suspend_trigger_task(&trigger);
+            suspend_trigger_tasks();
             suspensions++;
 /* schau_nach_speicher wird nur einmal ausgefuehrt; alles andere ist
    Sache der Bufferverwaltung */
@@ -739,7 +872,7 @@ outputbuffer_freed(void)
                 printf("\n");
                 fflush(stdout);
             } else {
-                reactivate_trigger_task(&trigger);
+                reactivate_trigger_tasks();
             }
         }
     }

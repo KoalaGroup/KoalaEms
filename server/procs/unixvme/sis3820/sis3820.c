@@ -3,7 +3,7 @@
  * created 2013-02-22 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: sis3820.c,v 1.3 2015/04/06 21:33:38 wuestner Exp $";
+    "$ZEL: sis3820.c,v 1.5 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -22,8 +22,7 @@ static const char* cvsid __attribute__((unused))=
 #include "sis3820.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
-extern int *memberlist;
+extern unsigned int *memberlist;
 
 RCS_REGISTER(cvsid, "procs/unixvme/sis3880")
 
@@ -105,8 +104,9 @@ future use R/W  One wire Id. register
  */
 plerrcode proc_sis3820init(ems_u32* p)
 {
-    int i, res;
+    unsigned int i;
     ems_u32 opmode=p[1];
+    int res;
 
     for (i=2; i<=p[0]; i++) {
         unsigned int help, id, version;
@@ -156,7 +156,7 @@ plerrcode proc_sis3820init(ems_u32* p)
 
 plerrcode test_proc_sis3820init(ems_u32* p)
 {
-    int i;
+    unsigned int i;
 
     if (p[0]<2)
         return plErr_ArgNum;
@@ -183,7 +183,7 @@ int ver_proc_sis3820init = 1;
  */
 plerrcode proc_sis3820clear(ems_u32* p)
 {
-    int i;
+    unsigned int i;
 
     for (i=1; i<=p[0]; i++) {
         ml_entry* module=ModulEnt(p[i]);
@@ -198,7 +198,7 @@ plerrcode proc_sis3820clear(ems_u32* p)
 
 plerrcode test_proc_sis3820clear(ems_u32* p)
 {
-    int i;
+    unsigned int i;
 
     if (p[0]<1)
         return plErr_ArgNum;
@@ -225,7 +225,7 @@ int ver_proc_sis3820clear = 1;
  * p[2..]: indices in memberlist
  */
 plerrcode proc_sis3820read(ems_u32* p) {
-    int i;
+    unsigned int i;
 
     if (p[1]) {
     /* LNE */
@@ -255,7 +255,7 @@ plerrcode proc_sis3820read(ems_u32* p) {
 
 plerrcode test_proc_sis3820read(ems_u32* p)
 {
-    int i;
+    unsigned int i;
 
     if (p[0]<2)
         return plErr_ArgNum;
@@ -282,7 +282,7 @@ int ver_proc_sis3820read = 1;
  * p[2...]: indices in memberlist
  */
 plerrcode proc_sis3820read_block(ems_u32* p) {
-    int i;
+    unsigned int i;
 
     if (p[1]) { /* LNE */
         for (i=2; i<=p[0]; i++) {
@@ -324,7 +324,7 @@ plerrcode proc_sis3820read_block(ems_u32* p) {
 }
 
 plerrcode test_proc_sis3820read_block(ems_u32* p) {
-    int i;
+    unsigned int i;
 
     if (p[0]<2)
         return plErr_ArgNum;
@@ -350,7 +350,7 @@ int ver_proc_sis3820read_block = 1;
  * p[1]: indices in memberlist
  */
 plerrcode proc_sis3820lne(ems_u32* p) {
-    int i;
+    unsigned int i;
 
     for (i=1; i<=p[0]; i++) {
         ml_entry* module=ModulEnt(p[i]);
@@ -363,7 +363,7 @@ plerrcode proc_sis3820lne(ems_u32* p) {
 }
 
 plerrcode test_proc_sis3820lne(ems_u32* p) {
-    int i;
+    unsigned int i;
 
     if (p[0]<1)
         return plErr_ArgNum;
@@ -392,7 +392,8 @@ int ver_proc_sis3820lne = 1;
 plerrcode proc_sis3820ShadowInit(ems_u32* p)
 {
     ems_u32 *var, mode;
-    int i, res;
+    unsigned int i;
+    int res;
 
     for (i=2; i<=p[0]; i++) {
         unsigned int help, id, version;
@@ -505,7 +506,7 @@ plerrcode proc_sis3820ShadowInit(ems_u32* p)
 plerrcode test_proc_sis3820ShadowInit(ems_u32* p)
 {
     unsigned int vsize;
-    int i;
+    unsigned int i;
     plerrcode pcode;
 
     if (p[0]<2)
@@ -545,7 +546,7 @@ plerrcode proc_sis3820ShadowClear(ems_u32* p)
 {
     ems_u32 *var;
     unsigned int vsize;
-    int i;
+    unsigned int i;
 
     var_get_ptr(p[1], &var);
     var_attrib(p[1], &vsize);
@@ -575,8 +576,9 @@ plerrcode test_proc_sis3820ShadowClear(ems_u32* p)
 {
     ems_u32 mtypes[]={SIS_3820, 0};
     unsigned int vsize;
-    int nr_modules, nr_channels, res;
+    unsigned int nr_modules, nr_channels;
     plerrcode pcode;
+    int res;
 
     if (p[0]!=1)
         return plErr_ArgNum;
@@ -617,7 +619,7 @@ int ver_proc_sis3820ShadowClear = 1;
 plerrcode proc_sis3820ShadowUpdate(ems_u32* p)
 {
     ems_u32 *var;
-    int mod, idx;
+    unsigned int mod, idx;
 
     var_get_ptr(p[1], &var);
 
@@ -714,7 +716,7 @@ plerrcode proc_sis3820ShadowUpdate(ems_u32* p)
 plerrcode test_proc_sis3820ShadowUpdate(ems_u32* p)
 {
     unsigned int vsize;
-    int i;
+    unsigned int i;
     plerrcode pcode;
 
     if (p[0]<2)

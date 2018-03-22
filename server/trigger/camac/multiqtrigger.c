@@ -2,7 +2,7 @@
  * trigger/camac/multiqtrigger.c
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: multiqtrigger.c,v 1.15 2011/04/06 20:30:35 wuestner Exp $";
+    "$ZEL: multiqtrigger.c,v 1.17 2017/10/21 22:07:48 wuestner Exp $";
 
 #if defined(__unix__)
 #include <stdlib.h>
@@ -32,7 +32,7 @@ struct private {
     struct qtrigger_addr* qqtrigger;
 };
 
-extern int* memberlist;
+extern unsigned int* memberlist;
 
 RCS_REGISTER(cvsid, "trigger/camac")
 
@@ -72,14 +72,14 @@ get_trig_qq(struct triggerinfo* trinfo)
 	}
     }
     if (priv->nochzuliefern) {
-	trinfo->eventcnt++;
+	trinfo->count++;
 	return priv->wohin[--priv->nochzuliefern];
     }
     return 0;
 }
 /*****************************************************************************/
 static void
-reset_trig_qq(struct triggerinfo* trinfo)
+reset_trig_qq(__attribute__((unused)) struct triggerinfo* trinfo)
 {}
 /*****************************************************************************/
 plerrcode init_trig_qq(ems_u32* p, struct triggerinfo* trinfo)
@@ -120,7 +120,7 @@ plerrcode init_trig_qq(ems_u32* p, struct triggerinfo* trinfo)
         priv->qqtrigger[i].addr=CAMACaddrM(m, p[3*i+3], p[3*i+4]);
         priv->qqtrigger[i].dev=m->address.camac.dev;
     }
-    trinfo->eventcnt=0;
+    trinfo->count=0;
     priv->nochzuliefern=0;
 
     tinfo->get_trigger=get_trig_qq;

@@ -3,7 +3,7 @@
  * created 2005-Aug-03 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: lvd_jtag.c,v 1.19 2011/04/06 20:30:25 wuestner Exp $";
+    "$ZEL: lvd_jtag.c,v 1.20 2017/10/22 22:32:22 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -147,6 +147,7 @@ jt_data(struct jtag_dev* jdev, ems_u32* v)
             break;
         case ZEL_LVD_MSYNCH:
             res=lvd_i_r(dev, jdev->addr, msync.jtag_data, v);
+            break;
         case ZEL_LVD_OSYNCH:
             res=lvd_i_r(dev, jdev->addr, osync.jtag_data, v);
             break;

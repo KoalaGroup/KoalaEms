@@ -3,7 +3,7 @@
  * created before 15.04.93
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: immertrigger.c,v 1.13 2013/12/06 20:24:50 wuestner Exp $";
+    "$ZEL: immertrigger.c,v 1.15 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -42,12 +42,12 @@ get_trig_immer(struct triggerinfo* trinfo)
 {
     struct trigprocinfo* tinfo=(struct trigprocinfo*)trinfo->tinfo;
     struct private* priv=(struct private*)tinfo->private;
-    trinfo->eventcnt++;
+    trinfo->count++;
     return priv->trigger;
 }
 /*****************************************************************************/
 static void
-reset_trig_immer(struct triggerinfo* trinfo)
+reset_trig_immer(__attribute__((unused)) struct triggerinfo* trinfo)
 {}
 /*****************************************************************************/
 /*
@@ -77,7 +77,7 @@ init_trig_immer(ems_u32* p, struct triggerinfo* trinfo)
     tinfo->private=priv;
 
     priv->trigger=p[1];
-    trinfo->eventcnt=0;
+    trinfo->count=0;
 
     tinfo->get_trigger=get_trig_immer;
     tinfo->reset_trigger=reset_trig_immer;

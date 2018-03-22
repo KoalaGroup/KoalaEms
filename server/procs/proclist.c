@@ -3,7 +3,7 @@
  * created: 13.09.94
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: proclist.c,v 1.18 2011/04/06 20:30:29 wuestner Exp $";
+    "$ZEL: proclist.c,v 1.20 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -13,6 +13,7 @@ static const char* cvsid __attribute__((unused))=
 #include <errorcodes.h>
 #include "emsctypes.h"
 #include "proclist.h"
+#include "procs.h"
 #include "../lowlevel/profile/profile.h"
 #if PERFSPECT
 #include "../lowlevel/perfspect/perfspect.h"
@@ -25,12 +26,12 @@ RCS_REGISTER(cvsid, "procs")
 /*****************************************************************************/
 
 extern ems_u32* outptr;
-int *memberlist;
+unsigned int *memberlist;
 struct IS *current_IS;
 #ifdef ISVARS
 ISV *isvar;
 #endif
-int wirbrauchen;
+ssize_t wirbrauchen;
 #if PERFSPECT
 int perfbedarf;
 #define NUMPERFS 100
@@ -39,13 +40,13 @@ char* perfnames[NUMPERFS];
 
 /*****************************************************************************/
 
-errcode test_proclist(ems_u32* p, unsigned int len, int* limit)
+errcode test_proclist(ems_u32* p, unsigned int len, ssize_t *limit)
 {
     plerrcode res;
     ems_u32* max;
     ems_u32* help;
     int anz, i;
-    int gesamtbedarf;
+    ssize_t gesamtbedarf;
 
     T(test_proclist)
     gesamtbedarf=0;
@@ -64,7 +65,8 @@ errcode test_proclist(ems_u32* p, unsigned int len, int* limit)
 #endif
         help=outptr;
         outptr+=3;
-        if ((unsigned int)(*p)>=NrOfProcs) {
+        wirbrauchen=-1; /* some (old) procedures do not set wirbrauchen */
+        if (*p>=NrOfProcs) {
             *outptr++= *p;
             res=plErr_NoSuchProc;
         } else {
@@ -87,6 +89,8 @@ errcode test_proclist(ems_u32* p, unsigned int len, int* limit)
         } else {
             outptr=help;
         }
+        printf("test_proclist: %s: wirbrauchen=%zd\n",
+                Proc[*p].name_proc, wirbrauchen);
         if ((wirbrauchen!=-1)&&(gesamtbedarf!=-1))
             gesamtbedarf+=wirbrauchen;
         else

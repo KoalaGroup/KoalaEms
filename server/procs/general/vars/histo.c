@@ -9,15 +9,13 @@
 *                                                                             *
 ******************************************************************************/
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: histo.c,v 1.6 2011/04/06 20:30:32 wuestner Exp $";
+    "$ZEL: histo.c,v 1.7 2017/10/09 21:25:37 wuestner Exp $";
 
 #include <errorcodes.h>
 #include <rcs_ids.h>
 #include "../../../objects/var/variables.h"
 #include "../../procs.h"
 #include "../../procprops.h"
-
-extern int wirbrauchen;
 
 RCS_REGISTER(cvsid, "procs/general/vars")
 

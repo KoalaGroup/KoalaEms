@@ -5,7 +5,7 @@
  * 02.Aug.2001 PW: multicrate support
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: trigger.c,v 1.10 2015/04/06 21:33:29 wuestner Exp $";
+    "$ZEL: trigger.c,v 1.12 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -18,9 +18,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../../../objects/domain/dom_ml.h"
 #include "../../procs.h"
 #include "../../procprops.h"
-
-extern int *memberlist;
-extern int wirbrauchen;
 
 RCS_REGISTER(cvsid, "procs/camac/trigger")
 

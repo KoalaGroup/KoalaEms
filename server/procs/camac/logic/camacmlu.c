@@ -7,7 +7,7 @@
  *
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: camacmlu.c,v 1.5 2011/04/06 20:30:30 wuestner Exp $";
+    "$ZEL: camacmlu.c,v 1.7 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <errorcodes.h>
 
@@ -26,7 +26,7 @@ static const char* cvsid __attribute__((unused))=
 #include "../camac_verify.h"
 
 extern ems_u32* outptr;
-extern int *memberlist, wirbrauchen;
+extern unsigned int *memberlist;
 
 /*
   (R/W line 8765 4321)
@@ -48,8 +48,8 @@ RCS_REGISTER(cvsid, "procs/camac/logic")
 
 /*****************************************************************************/
 static plerrcode
-LC2373_set_mode(struct camac_dev* dev, int N, int mode, ems_u32* oldmode,
-        char* caller)
+LC2373_set_mode(struct camac_dev* dev, int N, unsigned int mode,
+        ems_u32* oldmode, char* caller)
 {
     camadr_t caddr_read_mode=dev->CAMACaddr(N, 2, 0);
     camadr_t caddr_write_mode=dev->CAMACaddr(N, 2, 16);
@@ -93,7 +93,8 @@ LC2373_set_mode(struct camac_dev* dev, int N, int mode, ems_u32* oldmode,
 }
 /*****************************************************************************/
 static plerrcode
-LC2373_set_address(struct camac_dev* dev, int N, int addr, char* caller)
+LC2373_set_address(struct camac_dev* dev, int N, unsigned int addr,
+        char* caller)
 /* module must be in 'inhibit' mode */
 {
     camadr_t caddr_read_addr=dev->CAMACaddr(N, 1, 0);
@@ -233,7 +234,7 @@ plerrcode proc_camac_mlu_read(ems_u32* p)
     int N=module->address.camac.slot;
     camadr_t caddr_read_mem=dev->CAMACaddr(N, 0, 0);
     int mtype=module->modultype;
-    int i;
+    unsigned int i;
     plerrcode pres;
 
     switch (mtype) {
@@ -350,11 +351,11 @@ plerrcode proc_camac_mlu_test(ems_u32* p)
     camadr_t read_val=dev->CAMACaddr(N, 0, 0);
     camadr_t write_val=dev->CAMACaddr(N, 0, 16);
     ems_u32 val;
-    int i;
+    unsigned int i;
 
 /* set mode */
     for (i=0; i<4; i++) {
-        int mode=modes[i];
+        enum LC2373_modes mode=modes[i];
         dev->CAMACwrite(dev, &write_mode, mode);
         dev->CAMACread(dev, &read_mode, &val);
         if (!dev->CAMACgotX(val)) {

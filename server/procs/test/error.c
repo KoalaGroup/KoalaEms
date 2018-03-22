@@ -8,7 +8,7 @@
 *                                                                             *
 ******************************************************************************/
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: error.c,v 1.9 2011/04/06 20:30:34 wuestner Exp $";
+    "$ZEL: error.c,v 1.10 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <errorcodes.h>
 #include <sconf.h>
@@ -25,7 +25,7 @@ RCS_REGISTER(cvsid, "procs/test")
 
 plerrcode proc_Error(ems_u32* p)
 {
-register int i;
+unsigned int i;
 
 D(D_USER, printf("proc_Error(");
         for (i=1; i<=p[0]; i++) printf("%d%s", p[i], i<p[0]?", ":")\n");)
@@ -53,7 +53,7 @@ int ver_proc_Error=1;
 
 /*****************************************************************************/
 
-plerrcode proc_T_Error(ems_u32* p)
+plerrcode proc_T_Error(__attribute__((unused)) ems_u32* p)
 {
 D(D_USER, printf("proc_T_Error called!\n");)
 return(plErr_Other);

@@ -1,5 +1,5 @@
 # procs/unixvme/sis3316/Makefile.in
-# $ZEL: Makefile.in,v 1.1 2015/04/06 21:33:36 wuestner Exp $
+# $ZEL: Makefile.in,v 1.2 2016/02/25 22:50:47 wuestner Exp $
 
 CONF = ../../../conf
 
@@ -9,7 +9,7 @@ VPATH = @srcdir@
 include $(CONF)/rules.make
 include $(CONF)/config.make
 
-cfiles = sis3316.c
+cfiles = sis3316.c sis3316_clock.c sis3316_dac.c sis3316_adc.c
 ofiles = $(cfiles:.c=.o)
 depfiles = $(cfiles)
 

@@ -3,7 +3,7 @@
  * created 12.Mar.2005 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: sis1100_lvd_read_async.c,v 1.31 2012/09/12 15:00:13 wuestner Exp $";
+    "$ZEL: sis1100_lvd_read_async.c,v 1.33 2016/05/10 21:18:09 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -122,127 +122,64 @@ sis1100_lvd_release_block(struct lvd_sis1100_info* info, int block)
 /*****************************************************************************/
 /*
  * event_complete is called from fragment_complete whenever an event is
- * completely received.
- * event_complete calls the filter procedures (if any) and stores the event
- * to buffer.
+ * copied to the buffer.
+ * event_complete calls the filter procedures and parsing procedures.
+ * filter procedures can modify the amount and the content of the data.
+ * WARNING: there is no check whether enough space is available for
+ * adding data --> Good luck!
+ * parsing procedures must not modify the data, they should collect statistics
+ * only.
  */
 static plerrcode
 sis1100_event_complete(
     struct lvd_dev* dev,
-    ems_u32 *buffer,               /* destination (event stream) */
-    int *num_saved,                /* number of saved words */
-    struct fragmentcollector *event
+    ems_u32 *data,               /* pointer to data */
+    int *num,                    /* size of data (words) */
+    int maxnum
 )
 {
     struct lvd_sis1100_info* info=(struct lvd_sis1100_info*)dev->info;
     struct ra* ra=&info->ra;
-    struct datafilter *filter;
 
-    filter=dev->datafilter;
-    while (filter) {
-        plerrcode pres;
-        pres=filter->filter(filter, event->data, &event->num);
-        if (pres!=plOK)
-            return pres;
-        filter=filter->next;
+    if (dev->datafilter) {
+        struct datafilter *filter=dev->datafilter;
+        while (filter) {
+            plerrcode pres;
+            pres=filter->filter(filter, data, num, &maxnum);
+            if (pres!=plOK)
+                return pres;
+            filter=filter->next;
+        }
+        /* correct header */
+        /*
+         * WARNING:
+         * the length in the header must not exceed 17 bit!
+         */
+        data[0]=(data[0]&0xfffe0000)|(*num*4);
     }
-    /* correct header */
-    event->data[0]=(event->data[0]&0xc0000000)|(event->num*4);
 
-    /* parsing is not allowed to change num */
+    /* parsing is not allowed to change data or num */
     if (dev->parseflags) {
-        if (sis1100_lvd_parse_event(dev, event->data, event->num)) {
+        if (sis1100_lvd_parse_event(dev, data, *num)) {
             printf("error from sis1100_lvd_parse_event\n");
             return plErr_Program;
         }
     }
 
     /* update statistics */
-    trigger.eventcnt=event->data[2];
-    if (event->num>=ra->statist.max_evsize)
-        ra->statist.max_evsize=event->num;
-    //ra->statist.sum_evsize+=event->num;
-    //ra->statist.num_ev++;
-    ra->statist.events++;
-    ra->statist.words+=event->num;
-
-    /* finally copy data to buffer */
-    memcpy(buffer, event->data, event->num*4);
-#if 0
-    printf("A %p %08x %08x %08x, num=%d\n",
-            buffer, buffer[0], buffer[1], buffer[2], event->num);
+    if (!(data[0]&LVD_FRAGMENTED)) {
+#if 0 /* more work needed to make it compatible multiple triggers */
+        trigger.eventcnt=data[2];
 #endif
-    (*num_saved)+=event->num;
-    event->num=0;
-    event->hsize=0;
+        if (*num>=ra->statist.max_evsize)
+            ra->statist.max_evsize=*num;
+        ra->statist.events++;
+    } else {
+        ra->statist.fragments++;
+    }
+    ra->statist.words+=*num;
 
     return plOK;
-}
-/*****************************************************************************/
-static plerrcode
-sis1100_add_fragment_to_event(struct lvd_dev* dev)
-{
-    struct lvd_sis1100_info* info=(struct lvd_sis1100_info*)dev->info;
-    struct ra* ra=&info->ra;
-
-    if (!ra->event.num) { /* just switch the pointers */
-        ems_u32 *help=ra->event.data;
-        ra->event.data=ra->fragment.data;
-        ra->event.hsize=ra->fragment.hsize;
-        ra->event.num=ra->fragment.num;
-        ra->fragment.data=help;
-        ra->fragment.hsize=0;
-        ra->fragment.num=0;
-    } else {
-        int sumnum=ra->event.num+ra->fragment.num-3;
-        if (sumnum>event_max) {
-            complain("lvd_read_async: fragmented event too large: %d words",
-                   sumnum);
-            return plErr_NoMem;
-        }
-        memcpy(ra->event.data+ra->event.num, ra->fragment.data,
-            ra->fragment.num-3);
-        ra->event.data[0]=0x80000000+sumnum*4;
-        if (ra->fragment.data[0]&LVD_FRAGMENTED)
-            ra->event.data[0]|=LVD_FRAGMENTED;
-        ra->event.num=sumnum;
-        ra->event.hsize=sumnum;
-        ra->fragment.num=0;
-        ra->fragment.hsize=0;
-    }
-    return plOK;
-}
-/*****************************************************************************/
-/*
- * fragment_complete is called from save_event whenever a fragment is
- * completely received.
- * The fragment is merged with previous fragments if necessary.
- * If this fragment is the last (or only) part of an event
- * event_complete is called.
- */
-static plerrcode
-sis1100_fragment_complete(
-    struct lvd_dev* dev,
-    ems_u32 *buffer,               /* destination (event stream) */
-    int *num_saved                 /* number of saved words */
-)
-{
-    struct lvd_sis1100_info* info=(struct lvd_sis1100_info*)dev->info;
-    struct ra* ra=&info->ra;
-    plerrcode pres;
-
-    if (ra->fragment.data[0]&LVD_FRAGMENTED || ra->event.num) {
-        pres=sis1100_add_fragment_to_event(dev);
-        if (pres!=plOK)
-            return pres;
-        if (!(ra->event.data[0]&LVD_FRAGMENTED)) {
-            pres=sis1100_event_complete(dev, buffer, num_saved, &ra->event);
-        }
-    } else {
-        pres=sis1100_event_complete(dev, buffer, num_saved, &ra->fragment);
-    }
-
-    return pres;
 }
 /*****************************************************************************/
 /*
@@ -258,82 +195,95 @@ sis1100_lvd_save_event(
     int *num_saved,                /* number of saved words */
     ems_u32 *block,                /* source (part of DMA block) */
     int size,                      /* number of words in block */
-    int *num_used                  /* number of words used */
+    int *num_used,                 /* number of words used */
+    int maxnum                     /* maximum space in buffer */
     )
 {
     struct lvd_sis1100_info* info=(struct lvd_sis1100_info*)dev->info;
-    struct ra* ra=&info->ra;
-    int words;
+    struct fragmentcollector *event=&info->ra.event;
+    plerrcode pres=plErr_Program;
 
     *num_saved=0;
     *num_used=0;
 
-    /* at the beginning ra->fragment and ra->event are empty
-       new data are stored in ra->fragment until fragment is complete
-       if fragment is a complete event (not fragmented) it is moved to
-       buffer
-       if fragment is really a fragment it is moved to ra->event, new
-       fragments are added to ra->event until event is complete
-       then ra->event is moved to buffer
+    /* At the beginning ra->event is empty.
+       New data are stored in ra->event until an event is complete.
+       The fragment bit in the header is ignored here.
+       When the event (or a event fragment) is complete it is moved to
+       the buffer.
      */
 
-    if (ra->fragment.num<3) { /* we need a header */
-        words=MIN(size, 3-ra->fragment.num);
-        memcpy(ra->fragment.data+ra->fragment.num, block, words*4);
-        ra->fragment.num+=words;
-        block+=words;
-        size-=words;
-        (*num_used)+=words;
-        if (ra->fragment.num>3) {
-            complain("lvd_save_event: header has %d words", ra->fragment.num);
-            return plErr_Program;
+    /* If ra->event is empty then the first words in block are the header.
+       If 0xeeeeeeee words exist (DMA problem of newer SIS1100 cards) they
+       occur most likely here and can be tolerated (just skipped).
+       We determine the event size and copy whatever we can get.
+       If we can get the complete event we will copy it directly to the
+       buffer, otherwise to ra->event.
+     */
+    if (event->num==0) { /* start of a new event */
+        while (size>0 && block[0]==0xeeeeeeee) {
+            block++;
+            size--;
+            (*num_used)++;
         }
-        if (ra->fragment.num==3) {
-static int valid_events=0;
-            /* check consistency */
-            if (ra->fragment.data[0]==0xeeeeeeee) {
-                ra->statist.eeeeeeee_events++;
-                ra->fragment.data[0]=ra->fragment.data[1];
-                ra->fragment.data[1]=ra->fragment.data[2];
-                ra->fragment.num--;
-                printf("0xeeeeeeee received\n");
-                return plOK;
-            }
-            if ((ra->fragment.data[0]&0x9ffc0000)!=0x80000000) {
-                complain("lvd_readout_async: illegal header "
-                        "0x%08x 0x%08x 0x%08x",
-                    ra->fragment.data[0],
-                    ra->fragment.data[1],
-                    ra->fragment.data[2]);
-                complain("after %d valid events", valid_events);
-                //return plErr_HW;
-            }
-            /* extract length from header */
-            ra->fragment.hsize=(ra->fragment.data[0]&LVD_FIFO_MASK)/4;
-            if (ra->fragment.hsize>event_max) {
-                complain("lvd_readout_async: fragment too large: %d words",
-                    ra->fragment.hsize);
-                return plErr_NoMem;
-            }
-            valid_events++;
-        }
-        if (!size) {
-            //printf("save_event: size=0\n");
+        if (size==0) /* sorry, only eees */
             return plOK;
+        event->hsize=(block[0]&LVD_FIFO_MASK)/4;
+        if (size>=event->hsize) {
+            /* complete event, copy directly to buffer */
+            if (event->hsize>maxnum) {
+                complain("lvd_readout_async: no space for %d words;"
+                        " remaining space: %d words",
+                        event->hsize, maxnum);
+                return plErr_Overflow;
+            }
+            memcpy(buffer, block, event->hsize*4);
+            *num_saved=event->hsize;
+            *num_used+=event->hsize;
+            maxnum-=event->hsize;
+            /* and give 'event_complete' the chance to do statistics
+               or even modify the data */
+            pres=sis1100_event_complete(dev, buffer, num_saved, maxnum);
+        } else {
+            /* incomplete event, copy to buffer ra->event */
+            memcpy(event->data, block, size*4);
+            event->num=size;
+            *num_used+=size;
+            pres=plOK;
+        }
+    } else {
+    /* ra->event contains a partial event. We add the next part of the
+       event. If the event is now complete we copy it to the buffer.
+     */
+        int num=event->hsize-event->num;
+        if (size<num)
+            num=size;
+        memcpy(event->data+event->num, block, num*4);
+        event->num+=num;
+        block+=num;
+        size-=num;
+        *num_used+=num;
+        /* event complete? */
+        if (event->hsize==event->num) {
+            if (event->hsize>maxnum) {
+                complain("lvd_readout_async: no space for %d words;"
+                        " remaining space: %d words",
+                        event->hsize, maxnum);
+                return plErr_Overflow;
+            }
+            memcpy(buffer, event->data, event->hsize*4);
+            *num_saved=event->hsize;
+            event->num=0;
+            maxnum-=num;
+            /* give 'event_complete' the chance to do statistics
+               or modify the data */
+            pres=sis1100_event_complete(dev, buffer, num_saved, maxnum);
+        } else {
+            pres=plOK;
         }
     }
 
-    words=MIN(size, ra->fragment.hsize-ra->fragment.num);
-    memcpy(ra->fragment.data+ra->fragment.num, block, words*4);
-    ra->fragment.num+=words;
-    (*num_used)+=words;
-    /* no need to update block and size, we will not need them further */
-
-    /* is this fragment complete? */
-    if (ra->fragment.num<ra->fragment.hsize) /* No */
-        return plOK;
-
-    return sis1100_fragment_complete(dev, buffer, num_saved);
+    return pres;
 }
 /*****************************************************************************/
 static void
@@ -342,7 +292,7 @@ check_for_eeeeeeee(ems_u32* block, int size)
     int i, j;
     for (i=0; i<size; i++) {
         if (block[i]==0xeeeeeeee) {
-            if (i==size-1 || (block[i+1]&0xbffc0000)!=0x80000000) {
+            if (i==size-1 || (block[i+1]&0xeffe0000)!=0x80000000) {
                 printf("found eeee[%d]:", i);
                 for (j=i; j<i+4 && j<size; j++)
                     printf(" %08x", block[j]);
@@ -357,31 +307,33 @@ check_for_eeeeeeee(ems_u32* block, int size)
  * received.
  * Part of the block is presented to save_event until the block is exhausted.
  * Then release_block is called.
- * save_event is resposible to handle events crossing the event bounderies
+ * save_event is resposible to handle events crossing the block bounderies
  */
 static plerrcode
 sis1100_lvd_save_block(struct lvd_dev* dev,
         ems_u32* buffer, int *saved,
-        ems_u32* block, int size)
+        ems_u32* block, int blocksize, int maxnum)
 {
     int num_saved, num_used=0;
     plerrcode pres;
 
-    check_for_eeeeeeee(block, size);
+    check_for_eeeeeeee(block, blocksize);
 
-    while (size>0) {
-        pres=sis1100_lvd_save_event(dev, buffer, &num_saved, block, size,
-            &num_used);
+    while (blocksize>0) {
+        pres=sis1100_lvd_save_event(dev, buffer, &num_saved, block, blocksize,
+            &num_used, maxnum);
         if (pres!=plOK)
             return pres;
 
         block+=num_used;
-        size-=num_used;
+        blocksize-=num_used;
+        maxnum-=num_saved;
         buffer+=num_saved;
         *saved+=num_saved;
     }
-    if (size<0) {
-        complain("sis1100_lvd_save_block: fatal program error: size=%d", size);
+    if (blocksize<0) {
+        complain("sis1100_lvd_save_block: fatal program error: size=%d",
+                blocksize);
         return plErr_Program;
     }
     sis1100_lvd_block_statist(dev);
@@ -393,22 +345,17 @@ sis1100_lvd_save_block(struct lvd_dev* dev,
  * readout_async is called whenever a DMA block is full.
  * buffer is the destination for event data (inside a 'cluster', defined and
  * managed elsewhere).
- * #if 0
- * It is guaranteed that there is space in 'buffer' for
- * event_max words. More than event_max must not be written to 'buffer',
- * events larger than event_max are a fatal error.
- * #else
- * event_max has to be large enough for all data of this event. But we have no
- * information about other readout procedures.
- * But because the readout is asynchronous there are probably no other
- * readout procedures called.
- * #endif
+ * The size of the buffer is given in maxnum.
  * *saved is the amount of words written to buffer
  * (event_max is declared in objects/pi/readout.h)
  * readout_async is responsible for the DMA block management only.
+ *
+ * readout_async is normally called (via proc_lvd_read_async) after
+ * an interrupt (ZELLVD_DDMA_IRQ). What happens if we miss an interrupt?
  */
 plerrcode
-sis1100_lvd_readout_async(struct lvd_dev* dev, ems_u32* buffer, int* saved)
+sis1100_lvd_readout_async(struct lvd_dev* dev, ems_u32* buffer,
+    int* saved, int maxnum)
 {
     struct lvd_sis1100_info* info=(struct lvd_sis1100_info*)dev->info;
     struct ra* ra=&info->ra;
@@ -430,17 +377,11 @@ sis1100_lvd_readout_async(struct lvd_dev* dev, ems_u32* buffer, int* saved)
         return plErr_Program;
     }
 
-#if 0
-u_int32_t *data;
-printf("sis1100_lvd_readout_async called\n");
-printf("ra->dma_size=%d\n", ra->dma_size);
-data=ra->dma_buf+block*ra->dma_size;
-printf("data: %08x %08x %08x %08x\n", data[0], data[1], data[2], data[3]);
-#endif
-
     ra->activeblock=block;
     pres=sis1100_lvd_save_block(dev,
-            buffer, saved, ra->dma_buf+block*ra->dma_size, ra->dma_size);
+            buffer, saved,
+            ra->dma_buf+block*ra->dma_size, ra->dma_size,
+            maxnum);
     sis1100_lvd_release_block(info, block);
 
     if (pres!=plOK)
@@ -557,8 +498,6 @@ sis1100_lvd_cleanup_async(struct lvd_dev* dev)
 
     free(info->ra.event.data);
     info->ra.event.data=0;
-    free(info->ra.fragment.data);
-    info->ra.fragment.data=0;
 
     return pres;
 }
@@ -575,22 +514,18 @@ sis1100_lvd_cleanup_async(struct lvd_dev* dev)
  * (event_max and cluster_max are measured in words, bufsize is measured in
  *     bytes)
  * BUT!: event_max is the maximum size for the complete lvds superevent, not
- *     the 'normal' events which constitutes this superevent
+ *     the 'normal' events which constitute this superevent
  */
 plerrcode
 sis1100_lvd_prepare_async(struct lvd_dev* dev, int bufnum, size_t bufsize)
 {
     struct lvd_sis1100_info* info=(struct lvd_sis1100_info*)dev->info;
 
-    printf("sis1100_lvd_prepare_async: bufnum%d, bufsize=%llu\n",
+    printf("sis1100_lvd_prepare_async: bufnum=%d, bufsize=%llu bytes\n",
             bufnum, (unsigned long long)bufsize);
 
-    /* only 30 bits of first header word can be used for size */
-    if (event_max*4>0x3fffffff) {
-        complain("lvd_prepare_async: event_max is too large");
-        return plErr_NoMem;
-    }
-
+    /* LDVS events don't have a max. size, but at least one DMA buffer
+       must fit into an EMS event */
     if (bufsize>event_max*4) {
         printf("sis1100_lvd_prepare_async: bufsize (%llu) must not be "
             "larger than event_max*4 (%llu)\n",
@@ -603,12 +538,9 @@ sis1100_lvd_prepare_async(struct lvd_dev* dev, int bufnum, size_t bufsize)
         current_IS->decoding_hints|=decohint_lvd_async;
     if (alloc_dmabuf(dev, bufnum, bufsize)<0)
         return plErr_System;
-    info->ra.fragment.data=0;
     info->ra.event.data=0;
-    if (!(info->ra.fragment.data=malloc(event_max*4))) {
-        sis1100_lvd_cleanup_async(dev);
-        return plErr_NoMem;
-    }
+
+    /* same as above, but we don't have more information */
     if (!(info->ra.event.data=malloc(event_max*4))) {
         sis1100_lvd_cleanup_async(dev);
         return plErr_NoMem;
@@ -634,8 +566,6 @@ sis1100_lvd_start_async(struct lvd_dev* dev, int selftrigger)
     info->ra.dma_newblock=-1;
     info->ra.last_released_block=-1;
     info->ra.activeblock=-1;
-    info->ra.fragment.hsize=0;
-    info->ra.fragment.num=0;
     info->ra.event.hsize=0;
     info->ra.event.num=0;
 

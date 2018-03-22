@@ -1,7 +1,8 @@
-/LVDpoll.c/1.7/Tue May  3 09:11:34 2011//
-/Makefile.in/1.5/Tue May  3 09:11:34 2011//
-/lvdtrigger.c/1.29/Tue May  3 09:11:34 2011//
-/lvdtrigger.h/1.1/Tue May  3 09:11:34 2011//
-/lvdtrigger_async.c/1.18/Tue May  3 09:11:34 2011//
-/trigprocs.config/1.5/Tue May  3 09:11:34 2011//
+/LVDpoll.c/1.7/Wed Apr  6 20:30:36 2011//
+/Makefile.in/1.5/Sun Feb 12 21:35:05 2006//
+/lvdsync_pulser.c/1.1/Thu May 12 20:34:44 2016//
+/lvdtrigger.c/1.31/Thu May 12 22:00:12 2016//
+/lvdtrigger.h/1.1/Wed Feb 11 13:39:50 2004//
+/lvdtrigger_async.c/1.21/Fri Oct 20 23:21:31 2017//
+/trigprocs.config/1.5/Sun Feb 12 21:33:29 2006//
 D

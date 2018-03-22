@@ -3,7 +3,7 @@
  * created 01.04.93
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: fsctrigger.c,v 1.13 2011/04/06 20:30:35 wuestner Exp $";
+    "$ZEL: fsctrigger.c,v 1.14 2016/05/12 22:00:12 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -54,7 +54,7 @@ get_trig_fsc(struct triggerinfo* trinfo)
         dev->CAMACread(dev, &priv->fscaddr1, &qx);
         if (dev->CAMACgotQ(qx)) {
             dev->CAMACcntl(dev, &priv->fscaddr1, &qx);
-            trinfo->eventcnt++;
+            trinfo->count++;
             priv->lastmem=0;
             return 1;
         }
@@ -62,7 +62,7 @@ get_trig_fsc(struct triggerinfo* trinfo)
         dev->CAMACread(dev, &priv->fscaddr2, &qx);
         if (dev->CAMACgotQ(qx)) {
             dev->CAMACcntl(dev, &priv->fscaddr2, &qx);
-            trinfo->eventcnt++;
+            trinfo->count++;
             priv->lastmem=1;
             return 2;
         }
@@ -113,7 +113,7 @@ plerrcode init_trig_fsc(ems_u32* p, struct triggerinfo* trinfo)
     priv->fscaddr2=CAMACaddrM(m, 1, 10);
     priv->fsccntl=CAMACaddrM(m, 0, 16);
     priv->singleevent=p[2];
-    trinfo->eventcnt=0;
+    trinfo->count=0;
     priv->lastmem=1;
 
     tinfo->get_trigger=get_trig_fsc;

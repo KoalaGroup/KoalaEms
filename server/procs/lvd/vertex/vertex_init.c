@@ -3,7 +3,7 @@
  * created 2005-Feb-23 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: vertex_init.c,v 1.30 2011/09/23 13:09:21 trusov Exp $";
+    "$ZEL: vertex_init.c,v 1.32 2017/10/09 21:25:38 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -24,13 +24,40 @@ static const char* cvsid __attribute__((unused))=
 #define MATE3_CHIP_SHIFT 11
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
 extern int *memberlist;
 
 static ems_u32 mtypes[]={ZEL_LVD_ADC_VERTEX, ZEL_LVD_ADC_VERTEXM3, ZEL_LVD_ADC_VERTEXUN, 0};
 
 RCS_REGISTER(cvsid, "procs/lvd/vertex")
 
+/*****************************************************************************
+ * p[0]: argcount, if 0 - read value of 'ignore_va_check' key
+ * p[1]: value to be set in 'ignore_va_check' key: 0/1
+ * Affects all front-end cards with VA32TA2 chips
+ */
+
+plerrcode
+proc_lvd_vertex_ign_va_check(ems_u32* p) {
+  if(p[0] == 0) {
+    *outptr = get_ignore_va_check();
+    outptr++;
+  }
+  else {
+    set_ignore_va_check(p[1]);
+  }
+  return plOK;
+}
+
+plerrcode
+test_proc_lvd_vertex_ign_va_check(ems_u32* p) {
+  if(p[0] > 1) {
+    return plErr_ArgNum;
+  }
+  wirbrauchen=0;
+  return plOK;
+}
+char name_proc_lvd_vertex_ign_va_check[] = "lvd_vertex_ign_va_check";
+int ver_proc_lvd_vertex_ign_va_check = 1;
 
 /*****************************************************************************
  * This procedure must load any chip type (in correspondence with module 

@@ -3,7 +3,7 @@
  * created 04.11.96 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: pcitrigdata.c,v 1.9 2011/04/06 20:30:34 wuestner Exp $";
+    "$ZEL: pcitrigdata.c,v 1.11 2017/10/09 21:25:38 wuestner Exp $";
 
 #include <debug.h>
 #include <errno.h>
@@ -18,14 +18,16 @@ static const char* cvsid __attribute__((unused))=
 #include "../../procprops.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
 /*extern int wrote_cluster;*/
 extern int suspensions;
+#if 0
 static int old_suspensions=0, after_suspension=0;
+#endif
 
 RCS_REGISTER(cvsid, "procs/sync/zelsync")
 
 /*****************************************************************************/
+#if 0 /* more work needed to make it compatible multiple triggers */
 plerrcode proc_GetPCITrigData(ems_u32* p)
 {
     struct trigstatus pci_trigdata, pci_oldtrigdata;
@@ -79,7 +81,9 @@ procprop* prop_proc_GetPCITrigData()
 
 char name_proc_GetPCITrigData[]="GetPCITrigData";
 int ver_proc_GetPCITrigData=1;
+#endif
 /*****************************************************************************/
+#if 0 /* more work needed to make it compatible multiple triggers */
 plerrcode proc_GetPCITrigTime(ems_u32* p)
 {
     struct trigstatus pci_trigdata, pci_oldtrigdata;
@@ -118,7 +122,9 @@ procprop* prop_proc_GetPCITrigTime()
 #endif
 char name_proc_GetPCITrigTime[]="GetPCITrigTime";
 int ver_proc_GetPCITrigTime=1;
+#endif
 /*****************************************************************************/
+#if 0 /* more work needed to make it compatible multiple triggers */
 plerrcode proc_GetPCITrigTime_2(ems_u32* p)
 {
     struct trigstatus pci_trigdata, pci_oldtrigdata;
@@ -157,5 +163,6 @@ return(&GetPCITrigTime_2_prop);
 #endif
 char name_proc_GetPCITrigTime_2[]="GetPCITrigTime";
 int ver_proc_GetPCITrigTime_2=2;
+#endif
 /*****************************************************************************/
 /*****************************************************************************/

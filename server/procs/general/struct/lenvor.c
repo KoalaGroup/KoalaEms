@@ -1,15 +1,10 @@
-/******************************************************************************
-*                                                                             *
-* single.c                                                                    *
-*                                                                             *
-* OS9                                                                         *
-*                                                                             *
-* created before 17.06.94                                                     *
-* last changed 05.12.94                                                       *
-*                                                                             *
-******************************************************************************/
+/*
+ * procs/general/struct/lenvor.c
+ * created before 17.06.94
+ */
+
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: lenvor.c,v 1.6 2011/04/06 20:30:32 wuestner Exp $";
+    "$ZEL: lenvor.c,v 1.7 2017/10/09 21:25:37 wuestner Exp $";
 
 #include <errorcodes.h>
 #include <rcs_ids.h>
@@ -18,7 +13,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../../proclist.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
 
 RCS_REGISTER(cvsid, "procs/general/struct")
 
@@ -33,7 +27,7 @@ plerrcode proc_LenVor(ems_u32* p)
 
 plerrcode test_proc_LenVor(ems_u32* p)
 {
-    int limit;
+    ssize_t limit;
     if (*p<1) return(plErr_ArgNum);
     if (test_proclist(p+1,*p,&limit))
             return(plErr_RecursiveCall);

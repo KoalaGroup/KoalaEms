@@ -3,7 +3,7 @@
  * created 16.01.96 MD
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: objectcommon.c,v 1.9 2011/04/06 20:30:29 wuestner Exp $";
+    "$ZEL: objectcommon.c,v 1.10 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <string.h>
 #include <sconf.h>
@@ -118,7 +118,8 @@ objectcommon objobj={
 
 /*****************************************************************************/
 
-errcode notimpl(ems_u32* idx, unsigned int idxlen){
+errcode notimpl(__attribute__((unused)) ems_u32* idx,
+        __attribute__((unused)) unsigned int idxlen){
   return(Err_NotImpl);
 }
 

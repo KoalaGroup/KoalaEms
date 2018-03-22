@@ -3,7 +3,7 @@
  * created 2005-Sep-05 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: sis3300.c,v 1.10 2015/04/06 21:33:35 wuestner Exp $";
+    "$ZEL: sis3300.c,v 1.13 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -21,8 +21,7 @@ static const char* cvsid __attribute__((unused))=
 #include "../vme_verify.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
-extern int *memberlist;
+extern unsigned int *memberlist;
 
 RCS_REGISTER(cvsid, "procs/unixvme/sis3300")
 
@@ -339,7 +338,7 @@ plerrcode proc_sis3300read_single(ems_u32* p)
             *outptr++=p[4];
             res=dev->read_a32(dev, addr+0x400000+0x80000*i, outptr, p[4]*4, 4,
                     &outptr);
-            if (res!=p[4]*4) {
+            if (res<0 || (unsigned)res!=p[4]*4) {
                 printf("read sis3300: samples=%d, res=%d errno=%s\n",
                     p[4]*4, res*4, strerror(errno));
                 return plErr_System;
@@ -512,7 +511,7 @@ char name_proc_sis3300stop_single[] = "sis3300stop_single";
 int ver_proc_sis3300stop_single = 1;
 /*****************************************************************************/
 /*
- * p[0]: argcount(==3)
+ * p[0]: argcount(2 or 3)
  * p[1]: index in memberlist
  * p[2]: register
  * [p[3]: value]
@@ -520,16 +519,14 @@ int ver_proc_sis3300stop_single = 1;
 plerrcode proc_sis3300reg(ems_u32* p)
 {
     ml_entry* module=ModulEnt(p[1]);
-    /*struct vme_dev* dev=module->address.vme.dev;*/
-    ems_u32 addr=module->address.vme.addr;
     ems_u32 val;
     plerrcode pres;
 
     if (p[0]>2) {
-        if ((pres=sis3300_write(module, addr+p[2], p[3]))!=plOK)
+        if ((pres=sis3300_write(module, p[2], p[3]))!=plOK)
             return pres;
     } else {
-        if ((pres=sis3300_read(module, addr+p[2], &val))!=plOK)
+        if ((pres=sis3300_read(module, p[2], &val))!=plOK)
             return pres;
         *outptr++=val;
     }
@@ -551,7 +548,7 @@ plerrcode test_proc_sis3300reg(ems_u32* p)
     if ((pres=verify_vme_module(module, 0))!=plOK)
         return pres;
 
-    wirbrauchen=p[3];
+    wirbrauchen=p[0]>2?1:0;
     return plOK;
 }
 
@@ -570,9 +567,10 @@ plerrcode proc_sis3300fill_mem(ems_u32* p)
     ml_entry* module=ModulEnt(p[1]);
     struct vme_dev* dev=module->address.vme.dev;
     ems_u32 addr=module->address.vme.addr;
-    int res, i;
+    unsigned int i;
     plerrcode pres=plOK;
     ems_u32* buf;
+    int res;
 
     buf=malloc(p[4]*sizeof(ems_u32));
     if (!buf) {
@@ -583,7 +581,7 @@ plerrcode proc_sis3300fill_mem(ems_u32* p)
         buf[i]=p[3];
 
     res=dev->write_a32(dev, addr+0x400000+0x80000*p[2], buf, p[4]*4, 4);
-    if (res!=p[4]*4) {
+    if (res<0||(unsigned)res!=p[4]*4) {
         printf("proc_sis3300fill_mem: samples=%d, res=%d errno=%s\n",
                 p[4]*4, res*4, strerror(errno));
         pres=plErr_System;

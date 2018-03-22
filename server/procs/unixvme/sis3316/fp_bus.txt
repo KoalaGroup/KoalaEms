@@ -1,0 +1,254 @@
+FP-Bus:
+
+
+Initialisation for synchronised clock:
+
+# 250 MHz sample clock for all(!) modules; adjusts ADCs too
+sis3316_clock "-1 2"
+
+# reg 0x0070; sample clock to NIM clock output
+sis3316_lemo_out_co "-1 1"
+
+# reg 0x0050; use internal oscillator as sample clock (is default); for first module
+sis3316_clock_distribution "1 0"
+
+# reg 0x58; FP-Bus control; enable clock, status and control lines
+sis3316_fb_control "1 0x13"
+
+# reg 0x58; FP-Bus control; enable status lines only
+sis3316_fb_control "2 0x00"
+sis3316_fb_control "3 0x00"
+
+# reg 0x0050; use Clock from FP-LVDS Bus as sample clock
+sis3316_clock_distribution "2 2"
+sis3316_clock_distribution "3 2"
+
+
+# trigger:
+    poll at bit 19 and 21 of reg. 0x60
+
+
+
+ CLK Out
+
+
+
+reg 
+FP-Bus Sample Clock Out Enable     FP-Bus control register bit [4]
+FP-Bus Sample Clock Out MUX        FP-Bus control register bit [5]
+
+
+
+
+External ?Clock In? from FP-Bus (LVDS)
+
+
+
+
+lvds FP-Bus Clock
+lvds FP-Bus Control 1    Trigger or veto
+lvds FP-Bus Control 2    Timestamp-Clear
+lvds FP-Bus Control 3    Sample Control (bank swap?)
+ttl  FP-Bus Status 1     Sample Logic Busy
+ttl  FP-Bus Status 2     Address Threshold flag
+
+
+FP-Bus-In Control 1
+    FP-Bus-In Control 1 as Trigger Enable (Acquisition Contol/Status Reg bit 4)
+
+FP-Bus-In Control 1
+    FP-Bus-In Control 1 as Veto Enable (Acquisition Contol/Status Reg bit 5)
+
+FP-Bus-In Control 2 (External Timestamp Clear)
+    FP-Bus-In Control 2 Enable (Acquisition Contol/Status Reg bit 6)
+
+
+
+
+ADC Sample Clock Multiplexer 
+ADC Sample Clock distribution control register: 0x50
+0: onboard oscillator
+1: VXS clock
+2: FP-Bus
+3: NIM Clock (via multiplier)
+
+
+FP-Bus control register: 0x58
+bit 0: FP-Bus Control Lines Output Enable (output, one module only)
+bit 1: FP-Bus Status Lines Output Enable (output, all modules)
+bit 4: FP-Bus Sample Clock Out Enable (output, one module only)
+bit 5: FP-Bus Sample Clock Out MUX: 0: onboard osc.; 1: NIM Clock
+
+Acquisition control/status register: 0x60
+bit  4: FP-Bus-In Control 1 as Trigger Enable
+bit  5: FP-Bus-In Control 1 as Veto Enable
+bit  6: FP-Bus-In Control 2 Enable
+bit  7: FP-Bus-In Sample Control Enable
+bit  8: External Trigger function as Trigger Enable
+bit 14: Feedback Selected Internal Trigger as External Trigger Enable
+bit 15: External Trigger Disable with internal Busy select
+
+
+--> master:
+0x50:                       0
+0x58: bits 0 1 4         0x13
+0x60: bits 8 14 15     0xc100
+0x70:                  0x1
+
+--> slave:
+0x50: bit 1                 2
+0x58: bits 1                2
+0x60: 4 6 7 8 14 15    0xc1d0
+0x70:                  0x1
+
+
+
+
+1. Issue a Key Register Reset command (disarms the sample logic, too)
+2. Setup the ADC Sample Clock distribution logic via the ?ADC Sample Clock distribution
+control? register
+3. In case of use
+Internal CLK:
+External VXS CLK In:
+External FP-Bus CLK In:
+External Lemo CLK In:
+program internal CLK oscillator and wait until the clock
+is stable (min. 10ms)
+a valid stable clock must be present
+a valid stable clock must be present
+a valid stable clock must be present and program
+the Clock Multiplier (multiply factor or bypass)
+and wait until the clock is stable (max. 1200ms)
+4. Issue a Key ADC Clock DCM/PLL Reset command.
+The DCM/PPL will be stable after max. 5ms.
+The internal status of the DCM/PLL Logic of the ADC FPGAs can be read via the ?ADC
+FPGA Status? registers (bit 20).
+5. Calibrate and configure the ADC FPGA input logic of the ADC data inputs via the ?ADC
+Input tap delay? registers. The programmable tap delay depends on the sample frequency.
+See
+ sis3316_adc::configure_adc_fpga_iob_delays(unsigned
+ int
+ iob_delay)
+ in
+sis3316_class.cpp.
+Example:
+switch (clock_freq_choice) {
+case 0: iob_delay_value = 0x48 ; break; // 250000000.0
+case 1: iob_delay_value = 0x48 ; break; // 125000000.0
+case 2: iob_delay_value = 0x0 ; break; // 62500000.0
+}
+// Calibrate IOB-delay Logic Ch1 to Ch4
+vme_A32D32_write (module_base_addr + SIS3316_ADC_CH1_4_INPUT_TAP_DELAY_REG, 0xf00 );
+Sleep(1) ;
+// set IOB-delay Ch1 to Ch4
+vme_A32D32_write ( module_base_addr + SIS3316_ADC_CH1_4_INPUT_TAP_DELAY_REG,
+0x300 + iob_delay_value );
+Note: iob_delay_values have changed for Firmware version with ADC-FPGA V0250-0004/
+V0125-0004 and higher.
+6. Setup sample logic
+
+dump_regs master:
+sis3316_dump_regs(ser. 221): num=31
+sis3316_dump_regs(0):
+0020 000000eb temperature       
+0024 0100dd00 one wire control
+0028 008000dd serial number
+002c 80000000 internal data transfer speed
+0030 00000010 ADC FPGAs boot controller
+0034 00000010 SPI flash control status
+0038 00000000 SPI flash data
+003c 00000000 external veto gate delay
+0040 00000000 programmable ADC clock
+0044 00000000 programmable MGT1 clock
+0048 00000000 programmable MGT2 clock
+004c 00000000 programmable DDR3 clock
+0050 00000000 ADC sample clock distributoin control register
+0054 00010000 extrnal NIM clock multiplier
+0058 00000013 FP-bus control
+005c 00000010 NIM-IN control/status
+0060 00000000 acquisition control/status
+0070 00000001 LEMO out CO select
+0074 02000000 LEMO out TO select
+0078 00000000 LEMO out UO select
+007c 00000000 internal trigger feedback select
+0080 00000000 ADC FPGA 1 ch01-04 data transfer control
+0084 00000000 ADC FPGA 2 ch05-08 data transfer control
+0088 00000000 ADC FPGA 3 ch09-12 data transfer control
+008c 00000000 ADC FPGA 4 ch13-16 data transfer control
+0090 04000000 ADC FPGA 1 ch01-04 data transfer status
+0094 04000000 ADC FPGA 2 ch05-08 data transfer status
+0098 04000000 ADC FPGA 3 ch09-12 data transfer status
+009c 04000000 ADC FPGA 4 ch13-16 data transfer status
+00a0 18181818 VME FPGA ADC FPGAs data link status
+00a4 00000000 ADC FPGA SPI busy status
+
+dump_regs slave1:
+sis3316_dump_regs(ser. 242): num=31
+sis3316_dump_regs(1):
+0020 00000127 temperature       
+0024 0100f200 one wire control
+0028 008000f2 serial number
+002c 80000000 internal data transfer speed
+0030 00000010 ADC FPGAs boot controller
+0034 00000010 SPI flash control status
+0038 00000000 SPI flash data
+003c 00000000 external veto gate delay
+0040 00000000 programmable ADC clock
+0044 00000000 programmable MGT1 clock
+0048 00000000 programmable MGT2 clock
+004c 00000000 programmable DDR3 clock
+0050 00000002 ADC sample clock distributoin control register
+0054 00010000 extrnal NIM clock multiplier
+0058 00000000 FP-bus control
+005c 00000010 NIM-IN control/status
+0060 00000000 acquisition control/status
+0070 00000001 LEMO out CO select
+0074 02000000 LEMO out TO select
+0078 00000000 LEMO out UO select
+007c 00000000 internal trigger feedback select
+0080 00000000 ADC FPGA 1 ch01-04 data transfer control
+0084 00000000 ADC FPGA 2 ch05-08 data transfer control
+0088 00000000 ADC FPGA 3 ch09-12 data transfer control
+008c 00000000 ADC FPGA 4 ch13-16 data transfer control
+0090 04000000 ADC FPGA 1 ch01-04 data transfer status
+0094 04000000 ADC FPGA 2 ch05-08 data transfer status
+0098 04000000 ADC FPGA 3 ch09-12 data transfer status
+009c 04000000 ADC FPGA 4 ch13-16 data transfer status
+00a0 18181818 VME FPGA ADC FPGAs data link status
+00a4 00000000 ADC FPGA SPI busy status
+
+dump_regs slave2:
+sis3316_dump_regs(ser. 153): num=31
+sis3316_dump_regs(2):
+0020 000000f9 temperature       
+0024 01009900 one wire control
+0028 00000099 serial number
+002c 80000000 internal data transfer speed
+0030 00000010 ADC FPGAs boot controller
+0034 00000010 SPI flash control status
+0038 00000000 SPI flash data
+003c 00000000 external veto gate delay
+0040 00000000 programmable ADC clock
+0044 00000000 programmable MGT1 clock
+0048 00000000 programmable MGT2 clock
+004c 00000000 programmable DDR3 clock
+0050 00000002 ADC sample clock distributoin control register
+0054 00010000 extrnal NIM clock multiplier
+0058 00000000 FP-bus control
+005c 00000010 NIM-IN control/status
+0060 00000000 acquisition control/status
+0070 00000001 LEMO out CO select
+0074 02000000 LEMO out TO select
+0078 00000000 LEMO out UO select
+007c 00000000 internal trigger feedback select
+0080 00000000 ADC FPGA 1 ch01-04 data transfer control
+0084 00000000 ADC FPGA 2 ch05-08 data transfer control
+0088 00000000 ADC FPGA 3 ch09-12 data transfer control
+008c 00000000 ADC FPGA 4 ch13-16 data transfer control
+0090 04000000 ADC FPGA 1 ch01-04 data transfer status
+0094 04000000 ADC FPGA 2 ch05-08 data transfer status
+0098 04000000 ADC FPGA 3 ch09-12 data transfer status
+009c 04000000 ADC FPGA 4 ch13-16 data transfer status
+00a0 18181818 VME FPGA ADC FPGAs data link status
+00a4 00000000 ADC FPGA SPI busy status
+

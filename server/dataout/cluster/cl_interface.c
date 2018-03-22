@@ -3,7 +3,7 @@
  * created 1997-Mar-23 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: cl_interface.c,v 1.39 2015/04/21 16:05:45 wuestner Exp $";
+    "$ZEL: cl_interface.c,v 1.42 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <string.h>
 #include <stdio.h>
@@ -51,18 +51,25 @@ static int assumed_event_size;
 static struct Cluster *currentcluster;
 #endif
 
+static int max_ev_per_cluster=0;
+static struct timeval max_time_per_cluster={0, 0};
+static unsigned int next_ev_to_send=0;
+static struct timeval next_time_to_send={0, 0};
+
 extern ems_u32* outptr;
-extern int cluster_max, cluster_num; /* in cluster.c definiert */
+
+#if 0 /* imported from cluster.h, defined in cluster.c */
+extern int cluster_num; /* in cluster.c definiert */
+extern size_t cluster_max; /* in cluster.c definiert */
 extern struct Cluster* last_deposited_cluster;
+#endif
 
 extern int cl_write_count;
-int max_ev_per_cluster=0;
-int max_time_per_cluster=0;
 extern int suspended;
 extern int suspensions;
 
 #ifdef READOUT_CC
-extern int wirhaben; /* defined in objects/pi/readout_cc/readout.c */
+extern size_t wirhaben; /* defined in objects/pi/readout_cc/readout.c */
 #endif
 
 #if defined (CLUSTERCHECKSUM)
@@ -171,8 +178,10 @@ put_last_databuf(ems_u32 *data)
 
         int sev_id=*data++; /* subevent ID */
         *outptr++=sev_id;
-
         IS=find_is_idx(sev_id);
+#if 0
+        printf("put_last_databuf: sev=%d sev_id=%d IS=%p\n", sev, sev_id, IS);
+#endif
         hints=IS?IS->decoding_hints:0;
         if (hints&decohint_lvd_async) { /* contains MANY real subevents*/
                                         /* we use only the first one */
@@ -185,9 +194,22 @@ put_last_databuf(ems_u32 *data)
                 *outptr++=*data++;
         } else {
             int sev_len=*data++;
+#if 0
+            printf("put_last_databuf: sev_len=%d\n", sev_len);
+            {
+                int xxx=sev_len, i;
+                if (xxx>100)
+                    xxx=100;
+                *outptr++=xxx;
+                for (i=0; i<xxx; i++)
+                    *outptr++=data[i];
+                data+=sev_len;
+            }
+#else
             *outptr++=sev_len;
             while (sev_len--)
                 *outptr++=*data++;
+#endif
         }
     }
 }
@@ -203,10 +225,13 @@ errcode get_last_databuf(void)
 #ifdef READOUT_CC
     if (currentcluster) {
         data=&ClEVNUM(currentcluster->data);
+        /* number of events in the current cluster */
         evnum=*data++;
+        /* seek to the last event in the current cluster */
         if (evnum>=1) {
-            for (; evnum>1; evnum--)
+            for (; evnum>1; evnum--) {
                 data+=*data+1;
+            }
             put_last_databuf(data);
             return OK;
         }
@@ -365,6 +390,8 @@ errcode insert_dataout(unsigned int do_idx)
             res=do_dummy_init(do_idx);
             break;
 #endif
+        default:
+            break;
     }
     case InOut_Cluster:
         switch (dataout[do_idx].addrtyp) {
@@ -469,6 +496,7 @@ errcode getoutputstatus(unsigned int do_idx, int format)
     case 0: /* old and simple */
         if (dataout_cl[do_idx].procs.status)
         dataout_cl[do_idx].procs.status(do_idx);
+        break; /* or __attribute__((fallthrough)) ? */
     case 1: /* newer; but with 32 bit counters */
         *outptr++=do_statist[do_idx].clusters;
         *outptr++=do_statist[do_idx].words;
@@ -748,6 +776,8 @@ start_dataout(void)
     T(dataout/cluster/cl_interface.c:start_dataout)
 
     clusterpool_clear();
+    next_ev_to_send=0;
+    timerclear(&next_time_to_send);
 
     finalcluster=clusters_create(7, "final");
     if (finalcluster==0) {
@@ -909,10 +939,10 @@ errcode stop_dataout(int do_idx)
  */
 errcode writeoutput(unsigned int idx, int cl_type, ems_u32* data)
 {
-    int size;
+    size_t cl_size, size;
     struct Cluster* cluster;
     int nidx=4;
-    int cl_flags, cl_fraq, cl_start, cl_size;
+    int cl_flags, cl_fraq, cl_start;
 
     T(dataout/cluster/cl_interface.c:writeoutput)
     if (dataout[idx].bufftyp==-1) return Err_NoDo;
@@ -958,7 +988,7 @@ errcode writeoutput(unsigned int idx, int cl_type, ems_u32* data)
 #endif
 
     if (size>cluster_max) {
-        printf("writeoutput: clustersize=%d, requested size=%d\n",
+        printf("writeoutput: max. clustersize=%zu, requested size=%zu\n",
             cluster_max, size);
         return Err_BufOverfl;
     }
@@ -1165,6 +1195,11 @@ flush_current_cluster(void)
 #endif
 /*****************************************************************************/
 #ifdef READOUT_CC
+
+#if 0
+This is an old version which can not work any more.
+Below is a newer version.
+
 static int
 should_send_cluster(struct Cluster* cluster)
 {
@@ -1180,14 +1215,17 @@ should_send_cluster(struct Cluster* cluster)
  * New logic:
  * A cluster is to be sent if the real event number (eventcnt) has crossed
  * a multiple of maxev_procluster.
- * A cluster is also be sent if a time more than max_time_per_cluster
+ * A cluster is also to be sent if a time more than max_time_per_cluster
  * is elapsed.
  * In both cases an event is to be sent, even if it is empty.
  */
 
+#if 0 /* more work needed to make it compatible multiple triggers */
     static ems_u64 q_time=0;
     static ems_u32 q_evt=0;
+#endif
 
+#if 0 /* more work needed to make it compatible multiple triggers */
     if (max_ev_per_cluster) {
         ems_u32 q;
         q=trigger.eventcnt/max_ev_per_cluster;
@@ -1200,7 +1238,9 @@ should_send_cluster(struct Cluster* cluster)
             return 1;
         }
     }
+#endif
 
+#if 0 /* more work needed to make it compatible multiple triggers */
     if (max_time_per_cluster) {
         ems_u64 msec; /* ms since 1970-01-01 00:00:00 UTC */
         ems_u64 q;    /* trigger.time/max_time_per_cluster */
@@ -1227,10 +1267,59 @@ should_send_cluster(struct Cluster* cluster)
             return 1;
         }
     }
+#endif
 
     return 0;
 }
-#endif
+#endif /* 0 */
+
+/*
+ * This is the newer version (2016-03-17)
+ * We have now:
+ * - multiple trigger procedures which may have there own trigger counters
+ * - LVDS data: multiple physical events inside one EMS event, but with an
+ *   accessible event counter in the LDVS controller
+ * - "meta events" from different VME modules without accessible event counter
+ * The solution is:
+ * We count the sum of EMS events only. Each trigger procedure contributes to
+ * this global counter. The existence of multiple physical events inside one
+ * EMS event is ignored.
+ * The number of physical events (if known) and the number of events per
+ * trigger can be provided for display and statistics, but is not used here.
+ */
+static int
+should_send_cluster(__attribute__((unused)) struct Cluster* cluster)
+{
+    int should_send=0;
+
+    if (max_ev_per_cluster) {
+        if (global_evc.ev_count>=next_ev_to_send)
+            should_send=1;
+    }
+
+    if (!should_send && timerisset(&max_time_per_cluster)) {
+        struct timeval now;
+        gettimeofday(&now, 0);
+        should_send=!timercmp(&now, &next_time_to_send, <);
+    }
+
+    return should_send;
+}
+
+static void
+adjust_should_send(void)
+{
+    if (max_ev_per_cluster)
+        next_ev_to_send=global_evc.ev_count+max_ev_per_cluster;
+
+    if (timerisset(&max_time_per_cluster)) {
+        struct timeval now;
+        gettimeofday(&now, 0);
+        timeradd(&now, &max_time_per_cluster, &next_time_to_send);
+    }
+}
+
+#endif /* READOUT_CC */
 /*****************************************************************************/
 #ifdef READOUT_CC
 #ifdef USE_RESERVE
@@ -1322,6 +1411,7 @@ flush_databuf(ems_u32* p)
         assumed_event_size=ClLEN(currentcluster->data)/
                 ClEVNUM(currentcluster->data)+1;
         flush_cluster();
+        adjust_should_send();
     }
 }
 #endif
@@ -1340,5 +1430,42 @@ void extra_do_data(void)
 #else
 void extra_do_data(void) {}
 #endif
+/*****************************************************************************/
+void
+set_max_ev_per_cluster(ems_i32 new, ems_i32 *old)
+{
+    if (old)
+        *old=max_ev_per_cluster;
+
+    if (new==0) {
+        max_ev_per_cluster=0;
+        next_ev_to_send=0;
+    } else if (new>0) {
+        next_ev_to_send=next_ev_to_send-max_ev_per_cluster+new;
+        max_ev_per_cluster=new;
+    }
+}
+/*****************************************************************************/
+void
+set_max_time_per_cluster(ems_i32 new, ems_i32 *old) /* time in ms */
+{
+    if (old) {
+        *old=max_time_per_cluster.tv_sec*1000;
+        *old+=max_time_per_cluster.tv_usec/1000;
+    }
+
+    if (new==0) {
+        timerclear(&max_time_per_cluster);
+        timerclear(&next_time_to_send);
+    } else if (new>0) {
+        struct timeval newtv, help;
+        newtv.tv_sec=new/1000;
+        newtv.tv_usec=(new%1000)*1000;
+
+        timersub(&next_time_to_send, &max_time_per_cluster, &help);
+        timeradd(&help, &newtv, &next_time_to_send);
+        max_time_per_cluster=newtv;
+    }
+}
 /*****************************************************************************/
 /*****************************************************************************/

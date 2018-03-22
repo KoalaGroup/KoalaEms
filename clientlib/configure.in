@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 dnl $ems/clientlib
-dnl $ZEL: configure.in,v 2.21 2004/02/11 12:25:01 wuestner Exp $
+dnl $ZEL: configure.in,v 2.22 2017/10/21 19:10:02 wuestner Exp $
 
 AC_INIT(clientcomm.h)
 AC_CONFIG_AUX_DIR($srcdir/../confsupp)
@@ -78,7 +78,7 @@ if test $use_cplusplus = yes ; then
     WERROR="-Werror"
     case $build_os in
       linux*)
-        CPPFLAGS="-D_BSD_SOURCE"
+        CPPFLAGS="-D_DEFAULT_SOURCE"
       ;;
     esac
     LDX='$(LD)'

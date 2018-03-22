@@ -3,7 +3,7 @@
  * created 27.Jun.2003 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: v550.c,v 1.5 2011/04/06 20:30:35 wuestner Exp $";
+    "$ZEL: v550.c,v 1.7 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -20,8 +20,7 @@ static const char* cvsid __attribute__((unused))=
 #include "../vme_verify.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
-extern int *memberlist;
+extern unsigned int *memberlist;
 
 RCS_REGISTER(cvsid, "procs/unixvme/caen")
 
@@ -52,7 +51,7 @@ RCS_REGISTER(cvsid, "procs/unixvme/caen")
 /*
  * p[0]: argcount==0
  */
-plerrcode proc_v550clear(ems_u32* p)
+plerrcode proc_v550clear(__attribute__((unused)) ems_u32* p)
 {
     int m, res;
 
@@ -85,9 +84,10 @@ int ver_proc_v550clear = 1;
 /*
  * p[0]: argcount==0
  */
-plerrcode proc_v550read(ems_u32* p)
+plerrcode proc_v550read(__attribute__((unused)) ems_u32* p)
 {
-    int m, res;
+    unsigned int m;
+    int res;
     ems_u16 wordcount;
 
     for (m=1; m<=memberlist[0]; m++) {
@@ -145,9 +145,10 @@ int ver_proc_v550read = 1;
 /*
  * p[0]: argcount==0
  */
-plerrcode proc_v550status(ems_u32* p)
+plerrcode proc_v550status(__attribute__((unused)) ems_u32* p)
 {
-    int m, res;
+    unsigned int m;
+    int res;
 
     for (m=1; m<=memberlist[0]; m++) {
         ml_entry* module=ModulEnt(m);
@@ -180,9 +181,9 @@ int ver_proc_v550status = 1;
 /*
  * p[0]: argcount==0
  */
-plerrcode proc_v550init(ems_u32* p)
+plerrcode proc_v550init(__attribute__((unused)) ems_u32* p)
 {
-    int m;
+    unsigned int m;
 
     for (m=1; m<=memberlist[0]; m++) {
         ml_entry* module=ModulEnt(m);
@@ -235,9 +236,9 @@ int ver_proc_v550init = 1;
 /*
  * p[0]: argcount==0
  */
-plerrcode proc_v550fill(ems_u32* p)
+plerrcode proc_v550fill(__attribute__((unused)) ems_u32* p)
 {
-    int m;
+    unsigned int m;
 
     for (m=1; m<=memberlist[0]; m++) {
         ml_entry* module=ModulEnt(m);

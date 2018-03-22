@@ -4,7 +4,7 @@
  *
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: lc4508.c,v 1.8 2015/04/06 21:33:28 wuestner Exp $";
+    "$ZEL: lc4508.c,v 1.10 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <errorcodes.h>
 
@@ -25,7 +25,7 @@ static const char* cvsid __attribute__((unused))=
 #include "../camac_verify.h"
 
 extern ems_u32* outptr;
-extern int *memberlist, wirbrauchen;
+extern unsigned int *memberlist;
 
 RCS_REGISTER(cvsid, "procs/camac/logic")
 
@@ -266,7 +266,7 @@ plerrcode proc_lc4508_load_var(ems_u32* p)
     ml_entry* module=ModulEnt(p[1]);
     struct camac_dev* dev=module->address.camac.dev;
     int N=module->address.camac.slot;
-    int selector, p_idx, v_idx, i;
+    unsigned int selector, p_idx, v_idx, i;
     ems_i32 *ip=(ems_i32*)p;
     ems_u32 *pp;
     plerrcode pres;

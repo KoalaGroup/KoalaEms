@@ -4,7 +4,7 @@
  * created 04.11.94 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: random.c,v 1.14 2011/04/06 20:30:34 wuestner Exp $";
+    "$ZEL: random.c,v 1.16 2017/10/25 21:10:01 wuestner Exp $";
 
 #include <unistd.h>
 #include <stdlib.h>
@@ -19,13 +19,12 @@ static const char* cvsid __attribute__((unused))=
 #include "../procs.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
 
 RCS_REGISTER(cvsid, "procs/test")
 
 /*****************************************************************************/
 
-plerrcode proc_WriteVarSize(ems_u32* p)
+plerrcode proc_WriteVarSize(__attribute__((unused)) ems_u32* p)
 {
 T(proc_WriteVarSize)
 #ifdef OBJ_VAR
@@ -78,7 +77,7 @@ int ver_proc_WriteVarSize=1;
 
 /*****************************************************************************/
 
-plerrcode proc_WriteVarRSize(ems_u32* p)
+plerrcode proc_WriteVarRSize(__attribute__((unused)) ems_u32* p)
 {
 T(proc_WriteVarRSize)
 #ifdef OBJ_VAR
@@ -187,7 +186,7 @@ int ver_proc_WriteRandom=1;
 
 /*****************************************************************************/
 
-plerrcode proc_WriteVarSizeRandom(ems_u32* p)
+plerrcode proc_WriteVarSizeRandom(__attribute__((unused)) ems_u32* p)
 {
 T(proc_WriteVarSizeRandom)
 #ifdef OBJ_VAR
@@ -229,7 +228,7 @@ char name_proc_WriteVarSizeRandom[]="WriteVarSizeRandom";
 int ver_proc_WriteVarSizeRandom=1;
 
 /*****************************************************************************/
-plerrcode proc_Stream(ems_u32* p)
+plerrcode proc_Stream(__attribute__((unused)) ems_u32* p)
 {
 #ifdef OBJ_VAR
 {

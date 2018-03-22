@@ -3,7 +3,7 @@
  * created 2006-Feb-07 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: qdc.c,v 1.42 2013/09/24 14:08:03 wuestner Exp $";
+    "$ZEL: qdc.c,v 1.43 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -48,7 +48,8 @@ RCS_REGISTER(cvsid, "lowlevel/lvd/qdc")
 
 /*****************************************************************************/
 static plerrcode
-access_qdcfun(struct lvd_dev* dev, struct lvd_acard *acard, ems_u32 *val,
+access_qdcfun(__attribute__((unused)) struct lvd_dev* dev,
+        struct lvd_acard *acard, ems_u32 *val,
     int idx,
     plerrcode (**funlist)(struct lvd_acard*, ems_u32*, int),
     int numfun, const char *txt)
@@ -187,7 +188,8 @@ lvd_qdc_cr_rev(struct lvd_acard* acard)
  * sets the DACs which shift the baseline (slow QDC only)
  */
 static plerrcode
-lvd_qdcX_set_dac(struct lvd_acard* acard, ems_u32 *vals, int xxx)
+lvd_qdcX_set_dac(struct lvd_acard* acard, ems_u32 *vals,
+        __attribute__((unused)) int xxx)
 {
     struct qdc_info* info=(struct qdc_info*)acard->cardinfo;
     int idx, out, val, res=0;
@@ -221,7 +223,8 @@ lvd_qdcX_set_dac(struct lvd_acard* acard, ems_u32 *vals, int xxx)
     return res?plErr_HW:plOK;
 }
 static plerrcode
-lvd_qdc80_set_dac(struct lvd_acard* acard, ems_u32 *vals, int xxx)
+lvd_qdc80_set_dac(__attribute__((unused)) struct lvd_acard* acard,
+        __attribute__((unused)) ems_u32 *vals, __attribute__((unused)) int xxx)
 {
     complain("lvd_qdc8_set_dac: it is not known how to set the DACs");
     return plErr_Program;
@@ -253,7 +256,8 @@ lvd_qdc_set_dac(struct lvd_dev* dev, int addr, int channel, ems_u32 dac)
  * sets the baseline shifting DAC values from shadow (slow QDC only)
  */
 static plerrcode
-lvd_qdcX_get_dac(struct lvd_acard* acard, ems_u32 *dacs, int xxx)
+lvd_qdcX_get_dac(struct lvd_acard* acard, ems_u32 *dacs,
+        __attribute__((unused)) int xxx)
 {
     struct qdc_info* info=(struct qdc_info*)acard->cardinfo;
     int i;
@@ -289,7 +293,8 @@ lvd_qdc_get_dac(struct lvd_dev* dev, int addr, ems_u32 *dacs)
  * sets the DAC which defines the amplitude of the test pulse (fast QDC only)
  */
 static plerrcode
-lvd_qdc80_set_testdac(struct lvd_acard* acard, ems_u32 *vals, int xxx)
+lvd_qdc80_set_testdac(struct lvd_acard* acard, ems_u32 *vals,
+        __attribute__((unused)) int xxx)
 {
     struct qdc_info* info=(struct qdc_info*)acard->cardinfo;
     ems_u32 dac=(vals[0]&0xff)<<4;
@@ -303,7 +308,8 @@ lvd_qdc80_set_testdac(struct lvd_acard* acard, ems_u32 *vals, int xxx)
  * sets the DAC which defines the amplitude of the test pulse (fast QDC only)
  */
 static plerrcode
-lvd_qdc6_set_testdac(struct lvd_acard* acard, ems_u32 *vals, int xxx)
+lvd_qdc6_set_testdac(struct lvd_acard* acard, ems_u32 *vals,
+        __attribute__((unused)) int xxx)
 {
     struct qdc_info* info=(struct qdc_info*)acard->cardinfo;
     ems_u32 dac=(vals[0]&0xff)<<4;
@@ -321,7 +327,7 @@ lvd_qdc6_set_testdac(struct lvd_acard* acard, ems_u32 *vals, int xxx)
 }
 static plerrcode
 lvd_qdc3_set_testdac
-(struct lvd_acard* acard, ems_u32 *vals, int xxx)
+(struct lvd_acard* acard, ems_u32 *vals, __attribute__((unused)) int xxx)
 {
     struct qdc_info* info=(struct qdc_info*)acard->cardinfo;
     ems_u32 dac=(vals[0]&0xff)<<4;
@@ -389,14 +395,16 @@ lvd_qdc_get_testdac(struct lvd_dev* dev, int addr, ems_u32 *dac)
 }
 /*****************************************************************************/
 static plerrcode
-lvd_qdc6_test_pulse(struct lvd_acard* acard, ems_u32* vvv, int xxx)
+lvd_qdc6_test_pulse(struct lvd_acard* acard,
+        __attribute__((unused)) ems_u32* vvv, __attribute__((unused)) int xxx)
 {
     int res;
     res=lvd_i_w(acard->dev, acard->addr, qdc6.ctrl, 8);
     return res?plErr_HW:plOK;
 }
 static plerrcode
-lvd_qdc6s_test_pulse(struct lvd_acard* acard, ems_u32* vvv, int xxx)
+lvd_qdc6s_test_pulse(struct lvd_acard* acard,
+        __attribute__((unused)) ems_u32* vvv, __attribute__((unused)) int xxx)
 {
     int res;
     res=lvd_i_w(acard->dev, acard->addr, qdc6s.ctrl_bline_adjust, 8);
@@ -426,13 +434,15 @@ lvd_qdc_test_pulse(struct lvd_dev* dev, int addr)
  * does it still exist in verson 6?
  */
 static plerrcode
-lvd_qdc1_set_trglevel(struct lvd_acard* acard, ems_u32 *level, int xxx)
+lvd_qdc1_set_trglevel(struct lvd_acard* acard, ems_u32 *level,
+        __attribute__((unused)) int xxx)
 {
     return lvd_i_w(acard->dev, acard->addr, qdc1.trig_level, *level)
             ?plErr_HW:plOK;
 }
 static plerrcode
-lvd_qdc3_set_trglevel(struct lvd_acard* acard, ems_u32 *level, int xxx)
+lvd_qdc3_set_trglevel(struct lvd_acard* acard, ems_u32 *level,
+        __attribute__((unused)) int xxx)
 {
     return lvd_i_w(acard->dev, acard->addr, qdc3.trig_level, *level)
             ?plErr_HW:plOK;
@@ -497,7 +507,8 @@ lvd_qdc_get_trglevel(struct lvd_dev* dev, int addr, ems_u32 *level)
  * This sets a fixed baseline
  */
 static plerrcode
-lvd_qdc3_set_ped(struct lvd_acard* acard, ems_u32 *vals, int xxx)
+lvd_qdc3_set_ped(struct lvd_acard* acard, ems_u32 *vals,
+        __attribute__((unused)) int xxx)
 {
     struct qdc_info* info=(struct qdc_info*)acard->cardinfo;
     int res=0;
@@ -521,7 +532,8 @@ lvd_qdc3_set_ped(struct lvd_acard* acard, ems_u32 *vals, int xxx)
     return res?plErr_HW:plOK;
 }
 static plerrcode
-lvd_qdc5_set_ped(struct lvd_acard* acard, ems_u32 *vals, int xxx)
+lvd_qdc5_set_ped(struct lvd_acard* acard, ems_u32 *vals,
+        __attribute__((unused)) int xxx)
 {
     int res=0;
 
@@ -544,7 +556,8 @@ lvd_qdc5_set_ped(struct lvd_acard* acard, ems_u32 *vals, int xxx)
     return res?plErr_HW:plOK;
 }
 static plerrcode
-lvd_qdc6_set_ped(struct lvd_acard* acard, ems_u32 *vals, int xxx)
+lvd_qdc6_set_ped(struct lvd_acard* acard, ems_u32 *vals,
+        __attribute__((unused)) int xxx)
 {
     int res=0;
 
@@ -592,7 +605,8 @@ lvd_qdc_set_ped(struct lvd_dev* dev, int addr, int channel, ems_u32 ped)
  * This reads the value of the fixed baseline
  */
 static plerrcode
-lvd_qdc3_get_ped(struct lvd_acard* acard, ems_u32 *peds, int xxx)
+lvd_qdc3_get_ped(struct lvd_acard* acard, ems_u32 *peds,
+        __attribute__((unused)) int xxx)
 {
     struct qdc_info* info=(struct qdc_info*)acard->cardinfo;
     int i;
@@ -607,7 +621,8 @@ lvd_qdc3_get_ped(struct lvd_acard* acard, ems_u32 *peds, int xxx)
     return plOK;
 }
 static plerrcode
-lvd_qdc5_get_ped(struct lvd_acard* acard, ems_u32 *peds, int xxx)
+lvd_qdc5_get_ped(struct lvd_acard* acard, ems_u32 *peds,
+        __attribute__((unused)) int xxx)
 {
     int channel, res=0;
 
@@ -623,7 +638,8 @@ lvd_qdc5_get_ped(struct lvd_acard* acard, ems_u32 *peds, int xxx)
     return res?plErr_HW:plOK;
 }
 static plerrcode
-lvd_qdc6_get_ped(struct lvd_acard* acard, ems_u32 *peds, int xxx)
+lvd_qdc6_get_ped(struct lvd_acard* acard, ems_u32 *peds,
+        __attribute__((unused)) int xxx)
 {
     int channel, res=0;
 
@@ -661,7 +677,8 @@ lvd_qdc_get_ped(struct lvd_dev* dev, int addr, ems_u32 *peds)
  * sets the Q-threshold
  */
 static plerrcode
-lvd_qdcX_set_threshold(struct lvd_acard* acard, ems_u32* vals, int xxx)
+lvd_qdcX_set_threshold(struct lvd_acard* acard, ems_u32* vals,
+        __attribute__((unused)) int xxx)
 {
     struct qdc_info* info=(struct qdc_info*)acard->cardinfo;
     int res;
@@ -695,7 +712,8 @@ lvd_qdcX_set_threshold(struct lvd_acard* acard, ems_u32* vals, int xxx)
     return res?plErr_HW:plOK;
 }
 static plerrcode
-lvd_qdc6_set_threshold(struct lvd_acard* acard, ems_u32* vals, int xxx)
+lvd_qdc6_set_threshold(struct lvd_acard* acard, ems_u32* vals,
+        __attribute__((unused)) int xxx)
 {
     ems_u32 threshold=vals[1];
     int channel=vals[0];
@@ -745,7 +763,8 @@ lvd_qdc_set_threshold(struct lvd_dev* dev, int addr, int channel,
  * reads the Q-threshold
  */
 static plerrcode
-lvd_qdcX_get_threshold(struct lvd_acard* acard, ems_u32* thresholds, int xxx)
+lvd_qdcX_get_threshold(struct lvd_acard* acard, ems_u32* thresholds,
+        __attribute__((unused)) int xxx)
 {
     struct qdc_info* info=(struct qdc_info*)acard->cardinfo;
     int i;
@@ -759,7 +778,8 @@ lvd_qdcX_get_threshold(struct lvd_acard* acard, ems_u32* thresholds, int xxx)
     return plOK;
 }
 static plerrcode
-lvd_qdc5_get_threshold(struct lvd_acard* acard, ems_u32 *thresholds, int xxx)
+lvd_qdc5_get_threshold(struct lvd_acard* acard, ems_u32 *thresholds,
+        __attribute__((unused)) int xxx)
 {
     int channel, res=0;
 
@@ -774,7 +794,8 @@ lvd_qdc5_get_threshold(struct lvd_acard* acard, ems_u32 *thresholds, int xxx)
     return res?plErr_HW:plOK;
 }
 static plerrcode
-lvd_qdc6_get_threshold(struct lvd_acard* acard, ems_u32 *thresholds, int xxx)
+lvd_qdc6_get_threshold(struct lvd_acard* acard, ems_u32 *thresholds,
+        __attribute__((unused)) int xxx)
 {
     int channel, res=0;
 
@@ -811,7 +832,8 @@ lvd_qdc_get_threshold(struct lvd_dev* dev, int addr, ems_u32 *thresholds)
  * sets the level threshold used for coincidences and data selection
  */
 static plerrcode
-lvd_qdc4_set_thrh(struct lvd_acard* acard, ems_u32 *vals, int xxx)
+lvd_qdc4_set_thrh(struct lvd_acard* acard, ems_u32 *vals,
+        __attribute__((unused)) int xxx)
 {
     struct qdc_info* info=(struct qdc_info*)acard->cardinfo;
     int res=0;
@@ -827,7 +849,8 @@ lvd_qdc4_set_thrh(struct lvd_acard* acard, ems_u32 *vals, int xxx)
         }
         info->thrh_shadow_valid=0xffff;
     } else {
-        res=lvd_i_w(acard->dev, acard->addr, qdc3.bline_thlevel[channel], level);
+        res=lvd_i_w(acard->dev, acard->addr, qdc3.bline_thlevel[channel],
+                level);
         info->thrh_shadow[channel]=level;
         info->thrh_shadow_valid|=1<<channel;
     }
@@ -835,7 +858,8 @@ lvd_qdc4_set_thrh(struct lvd_acard* acard, ems_u32 *vals, int xxx)
     return res?plErr_HW:plOK;
 }
 static plerrcode
-lvd_qdc5_set_thrh(struct lvd_acard* acard, ems_u32 *vals, int xxx)
+lvd_qdc5_set_thrh(struct lvd_acard* acard, ems_u32 *vals,
+        __attribute__((unused)) int xxx)
 {
     int res=0;
 
@@ -850,14 +874,16 @@ lvd_qdc5_set_thrh(struct lvd_acard* acard, ems_u32 *vals, int xxx)
                     level);
         }
     } else {
-        res=lvd_i_w(acard->dev, acard->addr, qdc3.bline_thlevel[channel], level);
+        res=lvd_i_w(acard->dev, acard->addr, qdc3.bline_thlevel[channel],
+                level);
     }
 
     res|=lvd_qdc_cr_rev(acard);
     return res?plErr_HW:plOK;
 }
 static plerrcode
-lvd_qdc6_set_thrh(struct lvd_acard* acard, ems_u32 *vals, int xxx)
+lvd_qdc6_set_thrh(struct lvd_acard* acard, ems_u32 *vals,
+        __attribute__((unused)) int xxx)
 {
     int res=0;
 
@@ -872,7 +898,8 @@ lvd_qdc6_set_thrh(struct lvd_acard* acard, ems_u32 *vals, int xxx)
                     level);
         }
     } else {
-        res=lvd_i_w(acard->dev, acard->addr, qdc6.bline_thlevel[channel], level);
+        res=lvd_i_w(acard->dev, acard->addr, qdc6.bline_thlevel[channel],
+                level);
     }
 
     res|=lvd_qdc_cr_rev(acard);
@@ -904,7 +931,8 @@ lvd_qdc_set_thrh(struct lvd_dev* dev, int addr, ems_i32 channel, ems_u32 thrh)
  * reads the level threshold used for coincidences and data selection
  */
 static plerrcode
-lvd_qdc4_get_thrh(struct lvd_acard* acard, ems_u32 *thrh, int xxx)
+lvd_qdc4_get_thrh(struct lvd_acard* acard, ems_u32 *thrh,
+        __attribute__((unused)) int xxx)
 {
     struct qdc_info* info=(struct qdc_info*)acard->cardinfo;
     int i;
@@ -919,7 +947,8 @@ lvd_qdc4_get_thrh(struct lvd_acard* acard, ems_u32 *thrh, int xxx)
     return plOK;
 }
 static plerrcode
-lvd_qdc5_get_thrh(struct lvd_acard* acard, ems_u32 *thrh, int xxx)
+lvd_qdc5_get_thrh(struct lvd_acard* acard, ems_u32 *thrh,
+        __attribute__((unused)) int xxx)
 {
     int channel, res=0;
 
@@ -935,7 +964,8 @@ lvd_qdc5_get_thrh(struct lvd_acard* acard, ems_u32 *thrh, int xxx)
     return res?plErr_HW:plOK;
 }
 static plerrcode
-lvd_qdc6_get_thrh(struct lvd_acard* acard, ems_u32 *thrh, int xxx)
+lvd_qdc6_get_thrh(struct lvd_acard* acard, ems_u32 *thrh,
+        __attribute__((unused)) int xxx)
 {
     int channel, res=0;
 
@@ -970,7 +1000,8 @@ lvd_qdc_get_thrh(struct lvd_dev* dev, int addr, ems_u32 *thrh)
 }
 /*****************************************************************************/
 static plerrcode
-lvd_qdc1_noise(struct lvd_acard* acard, ems_u32 *noise, int xxx)
+lvd_qdc1_noise(struct lvd_acard* acard, ems_u32 *noise,
+        __attribute__((unused)) int xxx)
 {
     int i;
     for (i=0; i<16; i++) {
@@ -981,7 +1012,8 @@ lvd_qdc1_noise(struct lvd_acard* acard, ems_u32 *noise, int xxx)
     return plOK;
 }
 static plerrcode
-lvd_qdc3_noise(struct lvd_acard* acard, ems_u32 *noise, int xxx)
+lvd_qdc3_noise(struct lvd_acard* acard, ems_u32 *noise,
+        __attribute__((unused)) int xxx)
 {
     int i;
     for (i=0; i<16; i++) {
@@ -992,7 +1024,8 @@ lvd_qdc3_noise(struct lvd_acard* acard, ems_u32 *noise, int xxx)
     return plOK;
 }
 static plerrcode
-lvd_qdc5_noise(struct lvd_acard* acard, ems_u32 *noise, int xxx)
+lvd_qdc5_noise(struct lvd_acard* acard, ems_u32 *noise,
+        __attribute__((unused)) int xxx)
 {
     int i;
     /* select register set */
@@ -1007,7 +1040,8 @@ lvd_qdc5_noise(struct lvd_acard* acard, ems_u32 *noise, int xxx)
     return plOK;
 }
 static plerrcode
-lvd_qdc6_noise(struct lvd_acard* acard, ems_u32 *noise, int xxx)
+lvd_qdc6_noise(struct lvd_acard* acard, ems_u32 *noise,
+        __attribute__((unused)) int xxx)
 {
     int i;
     /* select register set */
@@ -1040,7 +1074,8 @@ lvd_qdc_noise(struct lvd_dev* dev, int addr, ems_u32 *noise)
 }
 /*****************************************************************************/
 static plerrcode
-lvd_qdc1_mean(struct lvd_acard* acard, ems_u32 *mean, int xxx)
+lvd_qdc1_mean(struct lvd_acard* acard, ems_u32 *mean,
+        __attribute__((unused)) int xxx)
 {
     int i;
     for (i=0; i<16; i++) {
@@ -1051,7 +1086,8 @@ lvd_qdc1_mean(struct lvd_acard* acard, ems_u32 *mean, int xxx)
     return plOK;
 }
 static plerrcode
-lvd_qdc3_mean(struct lvd_acard* acard, ems_u32 *mean, int xxx)
+lvd_qdc3_mean(struct lvd_acard* acard, ems_u32 *mean,
+        __attribute__((unused)) int xxx)
 {
     int i;
 
@@ -1064,7 +1100,8 @@ lvd_qdc3_mean(struct lvd_acard* acard, ems_u32 *mean, int xxx)
     return plOK;
 }
 static plerrcode
-lvd_qdc5_mean(struct lvd_acard* acard, ems_u32 *mean, int xxx)
+lvd_qdc5_mean(struct lvd_acard* acard, ems_u32 *mean,
+        __attribute__((unused)) int xxx)
 {
     int i;
 
@@ -1081,7 +1118,8 @@ lvd_qdc5_mean(struct lvd_acard* acard, ems_u32 *mean, int xxx)
     return plOK;
 }
 static plerrcode
-lvd_qdc6_mean(struct lvd_acard* acard, ems_u32 *mean, int xxx)
+lvd_qdc6_mean(struct lvd_acard* acard, ems_u32 *mean,
+        __attribute__((unused)) int xxx)
 {
     int i;
 
@@ -1183,13 +1221,15 @@ lvd_qdc_bline_adjust(struct lvd_dev* dev, int addr, ems_u32 *bline_adjust)
 }
 /*****************************************************************************/
 static plerrcode
-lvd_qdc1_set_inhibit(struct lvd_acard *acard, ems_u32* mask, int xxx)
+lvd_qdc1_set_inhibit(struct lvd_acard *acard, ems_u32* mask,
+        __attribute__((unused)) int xxx)
 {
     printf("qdc1_set_inhibit(%x): %04x\n", acard->addr, *mask);
     return lvd_i_w(acard->dev, acard->addr, qdc1.cha_inh, *mask)?plErr_HW:plOK;
 }
 static plerrcode
-lvd_qdc3_set_inhibit(struct lvd_acard *acard, ems_u32* mask, int xxx)
+lvd_qdc3_set_inhibit(struct lvd_acard *acard, ems_u32* mask,
+        __attribute__((unused)) int xxx)
 {
     printf("qdc1_set_inhibit(%x): %04x\n", acard->addr, *mask);
     return lvd_i_w(acard->dev, acard->addr, qdc3.cha_inh, *mask)?plErr_HW:plOK;
@@ -1247,12 +1287,14 @@ lvd_qdc_get_inhibit(struct lvd_dev* dev, int addr, ems_u32* mask)
 }
 /*****************************************************************************/
 static plerrcode
-lvd_qdc1_set_raw(struct lvd_acard *acard, ems_u32* mask, int xxx)
+lvd_qdc1_set_raw(struct lvd_acard *acard, ems_u32* mask,
+        __attribute__((unused)) int xxx)
 {
     return lvd_i_w(acard->dev, acard->addr, qdc1.cha_raw, *mask)?plErr_HW:plOK;
 }
 static plerrcode
-lvd_qdc3_set_raw(struct lvd_acard *acard, ems_u32* mask, int xxx)
+lvd_qdc3_set_raw(struct lvd_acard *acard, ems_u32* mask,
+        __attribute__((unused)) int xxx)
 {
     return lvd_i_w(acard->dev, acard->addr, qdc3.cha_raw, *mask)?plErr_HW:plOK;
 }
@@ -1309,14 +1351,17 @@ lvd_qdc_get_raw(struct lvd_dev* dev, int addr, ems_u32* mask)
 }
 /*****************************************************************************/
 static plerrcode
-lvd_qdc1_set_sw_start(struct lvd_acard *acard, ems_u32* start, int xxx)
+lvd_qdc1_set_sw_start(struct lvd_acard *acard, ems_u32* start,
+        __attribute__((unused)) int xxx)
 {
     return lvd_i_w(acard->dev, acard->addr, qdc1.latency, *start)?plErr_HW:plOK;
 }
 static plerrcode
-lvd_qdc3_set_sw_start(struct lvd_acard *acard, ems_u32* start, int xxx)
+lvd_qdc3_set_sw_start(struct lvd_acard *acard, ems_u32* start,
+        __attribute__((unused)) int xxx)
 {
-    return lvd_i_w(acard->dev, acard->addr, qdc3.sw_start, *start)?plErr_HW:plOK;
+    return lvd_i_w(acard->dev, acard->addr, qdc3.sw_start,
+            *start)?plErr_HW:plOK;
 }
 plerrcode
 lvd_qdc_set_sw_start(struct lvd_dev* dev, int addr, ems_u32 start)
@@ -1371,12 +1416,14 @@ lvd_qdc_get_sw_start(struct lvd_dev* dev, int addr, ems_u32* start)
 }
 /*****************************************************************************/
 static plerrcode
-lvd_qdc1_set_sw_length(struct lvd_acard *acard, ems_u32* len, int xxx)
+lvd_qdc1_set_sw_length(struct lvd_acard *acard, ems_u32* len,
+        __attribute__((unused)) int xxx)
 {
     return lvd_i_w(acard->dev, acard->addr, qdc1.window, *len)?plErr_HW:plOK;
 }
 static plerrcode
-lvd_qdc3_set_sw_length(struct lvd_acard *acard, ems_u32* len, int xxx)
+lvd_qdc3_set_sw_length(struct lvd_acard *acard, ems_u32* len,
+        __attribute__((unused)) int xxx)
 {
     return lvd_i_w(acard->dev, acard->addr, qdc3.sw_length, *len)?plErr_HW:plOK;
 }
@@ -1433,14 +1480,18 @@ lvd_qdc_get_sw_length(struct lvd_dev* dev, int addr, ems_u32* length)
 }
 /*****************************************************************************/
 static plerrcode
-lvd_qdc1_set_sw_ilength(struct lvd_acard *acard, ems_u32* len, int xxx)
+lvd_qdc1_set_sw_ilength(struct lvd_acard *acard, ems_u32* len,
+        __attribute__((unused)) int xxx)
 {
-    return lvd_i_w(acard->dev, acard->addr, qdc1.int_length, *len)?plErr_HW:plOK;
+    return lvd_i_w(acard->dev, acard->addr, qdc1.int_length, *len)?
+            plErr_HW:plOK;
 }
 static plerrcode
-lvd_qdc3_set_sw_ilength(struct lvd_acard *acard, ems_u32* len, int xxx)
+lvd_qdc3_set_sw_ilength(struct lvd_acard *acard, ems_u32* len,
+        __attribute__((unused)) int xxx)
 {
-    return lvd_i_w(acard->dev, acard->addr, qdc3.sw_ilength, *len)?plErr_HW:plOK;
+    return lvd_i_w(acard->dev, acard->addr, qdc3.sw_ilength, *len)?
+            plErr_HW:plOK;
 }
 plerrcode
 lvd_qdc_set_sw_ilength(struct lvd_dev* dev, int addr, ems_u32 length)
@@ -1495,14 +1546,18 @@ lvd_qdc_get_sw_ilength(struct lvd_dev* dev, int addr, ems_u32* length)
 }
 /*****************************************************************************/
 static plerrcode
-lvd_qdc1_set_iw_start(struct lvd_acard *acard, ems_u32* start, int xxx)
+lvd_qdc1_set_iw_start(struct lvd_acard *acard, ems_u32* start,
+        __attribute__((unused)) int xxx)
 {
-    return lvd_i_w(acard->dev, acard->addr, qdc1.iw_start, *start)?plErr_HW:plOK;
+    return lvd_i_w(acard->dev, acard->addr, qdc1.iw_start, *start)?
+            plErr_HW:plOK;
 }
 static plerrcode
-lvd_qdc3_set_iw_start(struct lvd_acard *acard, ems_u32* start, int xxx)
+lvd_qdc3_set_iw_start(struct lvd_acard *acard, ems_u32* start,
+        __attribute__((unused)) int xxx)
 {
-    return lvd_i_w(acard->dev, acard->addr, qdc3.iw_start, *start)?plErr_HW:plOK;
+    return lvd_i_w(acard->dev, acard->addr, qdc3.iw_start, *start)?
+            plErr_HW:plOK;
 }
 plerrcode
 lvd_qdc_set_iw_start(struct lvd_dev* dev, int addr, ems_u32 start)
@@ -1557,12 +1612,14 @@ lvd_qdc_get_iw_start(struct lvd_dev* dev, int addr, ems_u32* start)
 }
 /*****************************************************************************/
 static plerrcode
-lvd_qdc1_set_iw_length(struct lvd_acard *acard, ems_u32* len, int xxx)
+lvd_qdc1_set_iw_length(struct lvd_acard *acard, ems_u32* len,
+        __attribute__((unused)) int xxx)
 {
     return lvd_i_w(acard->dev, acard->addr, qdc1.iw_length, *len)?plErr_HW:plOK;
 }
 static plerrcode
-lvd_qdc3_set_iw_length(struct lvd_acard *acard, ems_u32* len, int xxx)
+lvd_qdc3_set_iw_length(struct lvd_acard *acard, ems_u32* len,
+        __attribute__((unused)) int xxx)
 {
     return lvd_i_w(acard->dev, acard->addr, qdc3.iw_length, *len)?plErr_HW:plOK;
 }
@@ -1619,13 +1676,15 @@ lvd_qdc_get_iw_length(struct lvd_dev* dev, int addr, ems_u32* length)
 }
 /*****************************************************************************/
 static plerrcode
-lvd_qdc1_set_anal(struct lvd_acard *acard, ems_u32* anal, int xxx)
+lvd_qdc1_set_anal(struct lvd_acard *acard, ems_u32* anal,
+        __attribute__((unused)) int xxx)
 {
     return lvd_i_w(acard->dev, acard->addr, qdc1.anal_ctrl, *anal)
             ?plErr_HW:plOK;
 }
 static plerrcode
-lvd_qdc3_set_anal(struct lvd_acard *acard, ems_u32* anal, int xxx)
+lvd_qdc3_set_anal(struct lvd_acard *acard, ems_u32* anal,
+        __attribute__((unused)) int xxx)
 {
     return lvd_i_w(acard->dev, acard->addr, qdc3.anal_ctrl, *anal)
             ?plErr_HW:plOK;
@@ -1683,13 +1742,15 @@ lvd_qdc_get_anal(struct lvd_dev* dev, int addr, ems_u32* anal)
 }
 /*****************************************************************************/
 static plerrcode
-lvd_qdc3_set_rawcycle(struct lvd_acard *acard, ems_u32* rawcycle, int xxx)
+lvd_qdc3_set_rawcycle(struct lvd_acard *acard, ems_u32* rawcycle,
+        __attribute__((unused)) int xxx)
 {
     return lvd_i_w(acard->dev, acard->addr, qdc3.traw_cycle, *rawcycle)?
             plErr_HW:plOK;
 }
 static plerrcode
-lvd_qdc80_set_rawcycle(struct lvd_acard *acard, ems_u32* rawcycle, int xxx)
+lvd_qdc80_set_rawcycle(struct lvd_acard *acard, ems_u32* rawcycle,
+        __attribute__((unused)) int xxx)
 {
     int res=0;
     u_int32_t coinmin_traw;
@@ -1754,13 +1815,15 @@ lvd_qdc_get_rawcycle(struct lvd_dev* dev, int addr, ems_u32* rawcycle)
 }
 /*****************************************************************************/
 static plerrcode
-lvd_qdc6_set_grp_coinc(struct lvd_acard* acard, ems_u32 *pattern, int xxx)
+lvd_qdc6_set_grp_coinc(struct lvd_acard* acard, ems_u32 *pattern,
+        __attribute__((unused)) int xxx)
 {
     return lvd_i_w(acard->dev, acard->addr, qdc6.grp_coinc, *pattern)
             ?plErr_HW:plOK;
 }
 static plerrcode
-lvd_qdc80_set_grp_coinc(struct lvd_acard* acard, ems_u32 *pattern, int xxx)
+lvd_qdc80_set_grp_coinc(struct lvd_acard* acard, ems_u32 *pattern,
+        __attribute__((unused)) int xxx)
 {
     return lvd_i_w(acard->dev, acard->addr, qdc80.grp_coinc, *pattern)
             ?plErr_HW:plOK;
@@ -1820,7 +1883,8 @@ lvd_qdc_get_grp_coinc(struct lvd_dev* dev, int addr, ems_u32 *pattern)
 }
 /*****************************************************************************/
 static plerrcode
-lvd_qdc6_set_coinc(struct lvd_acard* acard, ems_u32 *val, int xxx)
+lvd_qdc6_set_coinc(struct lvd_acard* acard, ems_u32 *val,
+        __attribute__((unused)) int xxx)
 {
     ems_i32 group=val[0];
     ems_u32 pattern=val[1];
@@ -1841,7 +1905,8 @@ lvd_qdc6_set_coinc(struct lvd_acard* acard, ems_u32 *val, int xxx)
     return res?plErr_HW:plOK;
 }
 static plerrcode
-lvd_qdc80_set_coinc(struct lvd_acard* acard, ems_u32 *val, int xxx)
+lvd_qdc80_set_coinc(struct lvd_acard* acard, ems_u32 *val,
+        __attribute__((unused)) int xxx)
 {
     ems_i32 group=val[0];
     ems_u32 pattern=val[1];
@@ -1960,7 +2025,8 @@ lvd_qdc_get_coinc(struct lvd_dev* dev, int addr, int group, ems_u32* pattern)
 }
 /*****************************************************************************/
 static plerrcode
-lvd_qdc6s_set_sc_rate(struct lvd_acard* acard, ems_u32 *val, int xxx)
+lvd_qdc6s_set_sc_rate(struct lvd_acard* acard, ems_u32 *val,
+        __attribute__((unused)) int xxx)
 {
     struct qdc_info* info=(struct qdc_info*)acard->cardinfo;
     int res;
@@ -1975,7 +2041,8 @@ lvd_qdc6s_set_sc_rate(struct lvd_acard* acard, ems_u32 *val, int xxx)
     }
 }
 static plerrcode
-lvd_qdc80_set_sc_rate(struct lvd_acard* acard, ems_u32 *val, int xxx)
+lvd_qdc80_set_sc_rate(struct lvd_acard* acard, ems_u32 *val,
+        __attribute__((unused)) int xxx)
 {
     struct qdc_info* info=(struct qdc_info*)acard->cardinfo;
     int res;
@@ -2054,7 +2121,8 @@ lvd_qdc_get_sc_rate(struct lvd_dev* dev, int addr, ems_u32 *val)
  * and the hardware is cleared
  */
 static plerrcode
-lvd_qdc6s_sc_init(struct lvd_acard *acard, ems_u32* val, int xxx)
+lvd_qdc6s_sc_init(struct lvd_acard *acard, ems_u32* val,
+        __attribute__((unused)) int xxx)
 {
     int res;
     struct qdc_info* info=(struct qdc_info*)acard->cardinfo;
@@ -2072,7 +2140,8 @@ lvd_qdc6s_sc_init(struct lvd_acard *acard, ems_u32* val, int xxx)
     return res?plErr_HW:plOK;
 }
 static plerrcode
-lvd_qdc80_sc_init(struct lvd_acard *acard, ems_u32* val, int xxx)
+lvd_qdc80_sc_init(struct lvd_acard *acard, ems_u32* val,
+        __attribute__((unused)) int xxx)
 {
     int res;
     struct qdc_info* info=(struct qdc_info*)acard->cardinfo;
@@ -2116,7 +2185,8 @@ lvd_qdc_sc_init(struct lvd_dev* dev, int addr, int first, int last)
  * and the hardware is cleared
  */
 static plerrcode
-lvd_qdc6s_sc_clear(struct lvd_acard *acard, ems_u32* vvv, int xxx)
+lvd_qdc6s_sc_clear(struct lvd_acard *acard,
+        __attribute__((unused)) ems_u32* vvv, __attribute__((unused)) int xxx)
 {
     int res;
     struct qdc_info* info=(struct qdc_info*)acard->cardinfo;
@@ -2128,7 +2198,8 @@ lvd_qdc6s_sc_clear(struct lvd_acard *acard, ems_u32* vvv, int xxx)
     return res?plErr_HW:plOK;
 }
 static plerrcode
-lvd_qdc80_sc_clear(struct lvd_acard *acard, ems_u32* vvv, int xxx)
+lvd_qdc80_sc_clear(struct lvd_acard *acard,
+        __attribute__((unused)) ems_u32* vvv, __attribute__((unused)) int xxx)
 {
     int res;
     struct qdc_info* info=(struct qdc_info*)acard->cardinfo;
@@ -2161,7 +2232,8 @@ lvd_qdc_sc_clear(struct lvd_dev* dev, int addr)
 /* lvd_qdc_sc_update updates the shadow registers for all enabled channels
  */
 static plerrcode
-lvd_qdc6s_sc_update(struct lvd_acard *acard, ems_u32* ooo, int xxx)
+lvd_qdc6s_sc_update(struct lvd_acard *acard,
+        __attribute__((unused)) ems_u32* ooo, __attribute__((unused)) int xxx)
 {
     int res=0, i;
     struct qdc_info* info=(struct qdc_info*)acard->cardinfo;
@@ -2186,7 +2258,8 @@ lvd_qdc6s_sc_update(struct lvd_acard *acard, ems_u32* ooo, int xxx)
     return res?plErr_HW:plOK;
 }
 static plerrcode
-lvd_qdc80_sc_update(struct lvd_acard *acard, ems_u32* ooo, int xxx)
+lvd_qdc80_sc_update(struct lvd_acard *acard,
+        __attribute__((unused)) ems_u32* ooo, __attribute__((unused)) int xxx)
 {
     int res=0, i;
     struct qdc_info* info=(struct qdc_info*)acard->cardinfo;
@@ -2300,14 +2373,16 @@ lvd_qdc_sc_get(struct lvd_dev* dev, int addr, ems_u32 mask,
 /*****************************************************************************/
 /*****************************************************************************/
 static int
-lvd_start_qdc(struct lvd_dev* dev, struct lvd_acard* acard)
+lvd_start_qdc(__attribute__((unused)) struct lvd_dev* dev,
+        struct lvd_acard* acard)
 {
     struct qdc_info *info=(struct qdc_info*)acard->cardinfo;
     return lvd_qdc_cr_set(acard, acard->daqmode|info->f1flag);
 }
 /*****************************************************************************/
 static int
-lvd_stop_qdc(struct lvd_dev* dev, struct lvd_acard* acard)
+lvd_stop_qdc(__attribute__((unused)) struct lvd_dev* dev,
+        struct lvd_acard* acard)
 {
     return lvd_qdc_cr_set(acard, 0);
 }
@@ -2324,7 +2399,8 @@ lvd_clear_qdc(struct lvd_dev* dev, struct lvd_acard* acard)
 /*****************************************************************************/
 /* initialize one QDC card */
 static plerrcode
-lvd_qdcX_init(struct lvd_acard* acard, ems_u32 *mode, int xxx)
+lvd_qdcX_init(struct lvd_acard* acard, ems_u32 *mode,
+        __attribute__((unused)) int xxx)
 {
     struct qdc_info *info=(struct qdc_info*)acard->cardinfo;
     struct lvd_dev* dev=acard->dev;
@@ -2412,7 +2488,8 @@ lvd_qdcX_init(struct lvd_acard* acard, ems_u32 *mode, int xxx)
 }
 
 static plerrcode
-lvd_qdc80_init(struct lvd_acard* acard, ems_u32 *mode, int xxx)
+lvd_qdc80_init(struct lvd_acard* acard, ems_u32 *mode,
+        __attribute__((unused)) int xxx)
 {
     struct qdc_info *info=(struct qdc_info*)acard->cardinfo;
     struct lvd_dev* dev=acard->dev;
@@ -2498,14 +2575,16 @@ lvd_qdc_init(struct lvd_dev* dev, int addr, int daqmode)
 }
 /*****************************************************************************/
 static void
-lvd_qdc_acard_free(struct lvd_dev* dev, struct lvd_acard* acard)
+lvd_qdc_acard_free(__attribute__((unused)) struct lvd_dev* dev,
+        struct lvd_acard* acard)
 {
     free(acard->cardinfo);
     acard->cardinfo=0;
 }
 /*****************************************************************************/
 int
-lvd_qdc_acard_init(struct lvd_dev* dev, struct lvd_acard* acard)
+lvd_qdc_acard_init(__attribute__((unused)) struct lvd_dev* dev,
+        struct lvd_acard* acard)
 {
     struct qdc_info *info;
 

@@ -1,7 +1,7 @@
 /*
  * lowlevel/jtag/jtag_int.h
  * created 2005-Aug-03 PW
- * $ZEL: jtag_int.h,v 1.4 2008/03/11 20:26:08 wuestner Exp $
+ * $ZEL: jtag_int.h,v 1.5 2017/10/22 22:09:36 wuestner Exp $
  */
 
 #ifndef _jtag_int_h_
@@ -62,7 +62,7 @@ struct jtag_chip {
 
 struct jtag_chain {
     struct jtag_dev jtag_dev;
-    int num_chips;
+    unsigned int num_chips;
     struct jtag_chip* chips;
     enum jtag_states jstate;
     int state;
@@ -88,7 +88,7 @@ extern int jtag_traced; /* defined in jtag_proc.c */
 
 int  jtag_force_TLR(struct jtag_chain* chain);
 int  jtag_action(struct jtag_chain* chain, int tms, int tdi, int* tdo);
-int  jtag_read_ids(struct jtag_chain*, ems_u32** IDs, int* IDnum);
+int  jtag_read_ids(struct jtag_chain*, ems_u32** IDs, unsigned int* IDnum);
 int  jtag_irlen(struct jtag_chain*);
 int  jtag_datalen(struct jtag_chain*);
 int  jtag_instruction(struct jtag_chip*, ems_u32 icode, ems_u32* ret);

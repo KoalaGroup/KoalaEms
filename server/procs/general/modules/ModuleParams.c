@@ -3,7 +3,7 @@
  * created: 10.Aug.2003
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: ModuleParams.c,v 1.6 2011/08/13 20:21:16 wuestner Exp $";
+    "$ZEL: ModuleParams.c,v 1.8 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <sconf.h>
 #include <stdlib.h>
@@ -19,8 +19,7 @@ static const char* cvsid __attribute__((unused))=
 #endif
 
 extern ems_u32* outptr;
-extern int* memberlist;
-extern int wirbrauchen;
+extern unsigned int* memberlist;
 
 RCS_REGISTER(cvsid, "procs/general/modules")
 

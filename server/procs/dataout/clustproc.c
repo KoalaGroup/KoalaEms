@@ -3,18 +3,16 @@
  * PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: clustproc.c,v 1.2 2011/04/06 20:30:30 wuestner Exp $";
+    "$ZEL: clustproc.c,v 1.5 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <errorcodes.h>
 
 #include <xdrstring.h>
 #include <rcs_ids.h>
 #include "../procs.h"
-#include "../../dataout/dataout.h"
+#include "../../dataout/cluster/do_cluster.h"
 
 extern ems_u32* outptr;
-extern int max_ev_per_cluster;
-extern int max_time_per_cluster;
 
 RCS_REGISTER(cvsid, "procs/dataout")
 
@@ -28,9 +26,12 @@ int ver_proc_ClusterEvMax=1;
 
 plerrcode proc_ClusterEvMax(ems_u32* p)
 {
-    int old=max_ev_per_cluster;
-    if (p[0]>0)
-        max_ev_per_cluster=p[1];
+    ems_i32 *ip=(ems_i32*)p;
+    ems_i32 new, old;
+
+    new=ip[0]>0?ip[1]:-1;
+    set_max_ev_per_cluster(new, &old);
+
     *outptr++=old;
     return plOK;
 }
@@ -39,6 +40,7 @@ plerrcode test_proc_ClusterEvMax(ems_u32* p)
 {
     if (p[0]>1)
         return plErr_ArgNum;
+    wirbrauchen=1;
     return plOK;
 }
 /*****************************************************************************/
@@ -51,9 +53,12 @@ int ver_proc_ClusterTimeMax=1;
 
 plerrcode proc_ClusterTimeMax(ems_u32* p)
 {
-    int old=max_time_per_cluster;
-    if (p[0]>0)
-        max_time_per_cluster=p[1];
+    ems_i32 *ip=(ems_i32*)p;
+    ems_i32 new, old;
+
+    new=ip[0]>0?ip[1]:-1;
+    set_max_time_per_cluster(new, &old);
+
     *outptr++=old;
     return plOK;
 }
@@ -62,6 +67,7 @@ plerrcode test_proc_ClusterTimeMax(ems_u32* p)
 {
     if (p[0]>1)
         return plErr_ArgNum;
+    wirbrauchen=1;
     return plOK;
 }
 /*****************************************************************************/

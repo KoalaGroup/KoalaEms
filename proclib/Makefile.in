@@ -62,23 +62,18 @@ libproc.$(SELFVER)$(SHLIBSUFFIX): $(OBJS)
 	$(CXX) $(CXXFLAGS) $(LDOFLAGS) -o $@ $^ @LDONONEFLAG@  \
 	$(NOLIBS)
 
-depend: sed.in
+depend:
 	cp Makefile Makefile.bak
 	sed -e '/^# DO NOT DELETE THIS LINE/,$$d' < Makefile.bak > Makefile
 	echo '# DO NOT DELETE THIS LINE' >> Makefile
 	echo ' ' >> Makefile
 	for i in $(SRC); do \
 	  echo checking $$i ; \
-	  $(CXX) -M $(CPPFLAGS) $(CXXFLAGS) $(srcdir)/$$i|sed -f sed.in>> Makefile ; \
+	  $(CXX) -MM $(CPPFLAGS) $(CXXFLAGS) $(srcdir)/$$i >> Makefile ; \
 	done
 
-sed.in:
-	# echo 's|/usr/include/[^ ]*||g' >sed.in
-	echo '/.*: $$/d' >>sed.in
-	echo '/^ *\\ *$$/d' >>sed.in
-
 clean:
-	rm -f *.o *.a *.so core sed.in
+	rm -f *.o *.a *.so core
 
 realclean: clean
 

@@ -8,7 +8,7 @@
 *                                                                             *
 ******************************************************************************/
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: exit.c,v 1.7 2011/04/06 20:30:34 wuestner Exp $";
+    "$ZEL: exit.c,v 1.8 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -25,7 +25,7 @@ RCS_REGISTER(cvsid, "procs/test")
 
 /*****************************************************************************/
 
-plerrcode proc_Exit(ems_u32* p)
+plerrcode proc_Exit(__attribute__((unused)) ems_u32* p)
 {
 printf("Auf Wiedersehen !\n");
 exit(2);

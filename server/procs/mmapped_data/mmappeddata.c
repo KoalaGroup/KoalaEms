@@ -4,7 +4,7 @@
  * created 2011-08-04 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: mmappeddata.c,v 1.1 2011/08/13 19:28:49 wuestner Exp $";
+    "$ZEL: mmappeddata.c,v 1.2 2017/10/09 21:25:38 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -17,7 +17,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../procprops.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
 
 RCS_REGISTER(cvsid, "procs/mmapped_data")
 

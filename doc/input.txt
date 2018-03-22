@@ -1,4 +1,0 @@
-hello first
-hello second
-dummy line
-hello third

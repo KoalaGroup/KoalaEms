@@ -2,7 +2,7 @@
  * procs/camac/ral/ral_filterram.c
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: ral_filterram.c,v 1.7 2011/04/06 20:30:30 wuestner Exp $";
+    "$ZEL: ral_filterram.c,v 1.8 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -18,9 +18,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../../procs.h"
 #include "ralreg.h"
 #include "ral_config.h"
-
-extern int* memberlist;
-extern ems_u32* outptr;
 
 RCS_REGISTER(cvsid, "procs/camac/ral")
 
@@ -105,7 +102,7 @@ static int ral_test_filter(ml_entry* n)
 plerrcode proc_RALfilterramload(ems_u32* p)
 {
 	u_int8_t *data;
-	int i;
+	unsigned int i;
 
 	data = malloc(RAL_FRAM_LEN / 8);
 

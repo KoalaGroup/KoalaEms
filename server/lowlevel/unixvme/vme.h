@@ -1,6 +1,6 @@
 /*
  * lowlevel/unixvme/vme.h
- * $ZEL: vme.h,v 1.22 2009/03/12 13:25:13 wuestner Exp $
+ * $ZEL: vme.h,v 1.24 2016/02/25 22:56:23 wuestner Exp $
  * created 23.Jan.2001 PW
  */
 
@@ -25,7 +25,14 @@ typedef void (*vmeirq_callback)(struct vme_dev*,
         const struct vmeirq_callbackdata*,
         void* data);
 
-enum vmetypes {vme_none, vme_drv, vme_sis3100};
+enum vmetypes {
+    vme_none,
+    vme_drv,
+    vme_sis3100,
+    vme_sis3100_udp,
+    vme_sis3151_usb
+};
+
 /*
  *   all read/write functions return number of BYTES read/written or
  *   (-errno) in case of error

@@ -1,0 +1,251 @@
+/**
+ * p[0]: argcount(2 or more)
+ * p[1..]: indices in memberlist (no -1 allowed)
+ *
+ * The logic is explained at page 28 of the manual (sis3316-m-1-1-v117.pdf).
+ * 1..3: done in sis3316_readout_start_udp
+ * 4: done in trigger procedure (trig_sis3316_poll)
+ * 5..8: in this procedure
+ *
+ * The name (sis3316_readout_udp) is probably wrong. The procedure does not
+ * use any VME specifica. But it should be usable for both UDP and VME access.
+ */
+plerrcode
+proc_sis3316_readout_udp(ems_u32* p)
+{
+    plerrcode pres=plOK;
+ml_entry* module;
+struct sis3316_priv_data *priv;
+
+    /* swap banks of all modules */
+    for (m=1; m<p[0]; m++) {
+        module=ModulEnt(p[m]);
+        priv=(struct sis3316_priv_data*)module->private_data;
+
+        /* read Acquisition control/status register */
+        if (priv->last_acq_state_valid) {
+            acqstate=priv->last_acq_state;
+        } else {
+            pres=sis3316_read_reg(module, 0x60, &acqstate);
+            if (pres!=plOK) {
+                complain("sis3316_readout_udp(ser. %d): cannot read ACQ status",
+                        priv->serial);
+                goto error;
+            }
+        }
+        if (!(acqstate&(1<<16))) {
+            complain("sis3316_readout_udp(ser. %d): sample logic not armed",
+                    priv->serial);
+            pres=plErr_Verify;
+            goto error;
+        }
+
+        bank=!!(acqstate&(1<<17)); /* actual bank */
+        priv->previous_bank=bank;
+
+        /* disarm/arm banks */
+        pres=sis3316_write_reg(module, bank?0x420:0x424, 0);
+        if (pres!=plOK) {
+            complain("sis3316_readout_udp(ser. %d): cannot switch banks",
+                    priv->serial);
+            goto error;
+        }
+
+        /* check for lost arm bit */
+            /* nein, keine Lust */
+    }
+
+    *outptr++=p[0]; /* number of modules */
+
+    /* wait for bank swap and read out */
+    for (m=1; m<p[0]; m++) {
+        module=ModulEnt(p[m]);
+        priv=(struct sis3316_priv_data*)module->private_data;
+
+        /*
+         * actual bank swap occures after the actual event is completely
+         * stored; we may have to wait here
+         */
+        count=20;
+        delay=1;
+        deltime=0;
+        do { /* poll for changed bank flag */
+            again=0;
+            pres=sis3316_read_reg(module, 0x60, &acqstate);
+            if (pres!=plOK) {
+                complain("sis3316_readout_udp(ser. %d): cannot read ACQ state",
+                        priv->serial);
+                goto error;
+            }
+            /* still the old bank? */
+            if (!!(acqstate&(1<<17))==priv->previous_bank) {
+                microsleep(delay);
+                deltime+=delay;
+                delay*=2;
+                again=1;
+            }
+        } while (count-- && again);
+        if (again) {
+            complain("sis3316_readout: banks not switched");
+#if 1
+            pres=plErr_Timeout;
+            goto error;
+#else
+            return try_restart(module);
+#endif
+        }
+
+        /* read the amount of date to be read (Previous Bank Sample address) */
+        pres=sis3316_read_regs(module, address_regs, address_vals, 16);
+        if (pres!=plOK) {
+            complain("sis3316_readout_udp(ser. %d): cannot read sample "
+                    "addresses", priv->serial);
+            goto error;
+        }
+        /* check again whether banks are switched */
+        for (chan=0; chan<16; chan++) {
+            /* old bank still active? */
+            bank=!!(address_vals[chan]&(1<<24));
+            if (bank!=priv->previous_bank) {
+#if 1
+                printf("sis3316_readout_udp(ser. %d): old bank[chan=%d]: "
+                        "%08x\n",
+                        chan, address_vals[chan]);
+#endif
+            }
+        }
+
+        help=outptr++;  /* space for word count */
+        for (chan=0; chan<16; chan++) {
+            /*
+             * for each channel we need three derived values: group space start
+             *     group  ==FPGA ==chan/4 (0..4)
+             *     space  mem1 (==0), mem2 (==1), statistics (==3)
+             *     space  ==(chan/2)%2
+             *     start  ==(chan%2)*0x2000000+bank*0x1000000;
+             */
+            int group=chan/4; /* ADC FPGA */
+            int space=(chan/2)%2; /* memory inside group */
+            ems_u32 start=(chan%2)*0x2000000+bank*0x1000000;
+            ems_u32 *help_ch=outptr++;
+            int num=address_vals[chan]&0xffffff;
+
+            pres=sis3316_read_mem(module, group, space, start, outptr, num);
+            if (pres!=plOK) {
+                complain("sis3316_readout: read_mem failed");
+                goto error;
+            }
+            *help_ch=num;
+            outptr+=num;
+#if 0
+            printf("mod %d chan %d num=%d\n", p[1], chan, num);
+#endif
+        }
+        *help=outptr-help-1;
+    }
+
+error:
+    return pres;
+}
+
+plerrcode
+test_proc_sis3316_readout_udp(ems_u32* p)
+{
+    plerrcode pres;
+
+    if (p[0]<2) {
+        complain("sis3316_readout_udp: illegal # of arguments: %d", p[0]);
+        return plErr_ArgNum;
+    }
+    if (p[1]<0) {
+        complain("sis3316_readout_udp: -1 not allowed as modules address");
+        return plErr_ArgRange;
+    }
+
+    for (m=1; m<p[0]; m++) {
+        if ((pres=check_sis3316(p[m], 0, 0, "sis3316_readout_udp"))!=plOK)
+            return pres;
+    }
+
+    wirbrauchen=-1;
+    return plOK;
+}
+
+char name_proc_sis3316_readout_udp[] = "sis3316_readout_udp";
+int ver_proc_sis3316_readout_udp = 1;
+/*****************************************************************************/
+ * p[0]: argcount(2 or more)
+ * p[1...]: indices in memberlist (or -1 for all sis3316 modules)
+
+This procedure has to:
+- set 
+- clear the timestamp counter of all modules at the same time
+    (VME multicast or use of FP bus)
+- sis3316_disarm_arm
+    (preferably a VME multicast)
+
+
+
+
+plerrcode
+proc_sis3316_readout_start_udp(ems_u32* p)
+{
+    ems_i32 *ip=(ems_i32*)p;
+    plerrcode pres=plOK;
+
+    if (ip[1]<0) {
+        pres=for_each_sis3316_member(p, proc_sis3316_readout_start_udp, 2);
+    } else {
+        for (m=1; m<p[0]; m++) {
+            ml_entry* module=ModulEnt(p[1]);
+            priv=(struct sis3316_priv_data*)module->private_data;
+
+            priv->last_acq_state_valid=0;
+
+
+        }
+    }
+
+sis3316_acq_ctrl 0x8500
+clear the timestamp
+pres=sis3316_write_reg(module, 0x41c, 0);
+
+
+
+    return plOK;
+}
+
+plerrcode
+test_proc_sis3316_readout_start_udp(ems_u32* p)
+{
+    ems_i32 *ip=(ems_i32*)p;
+    plerrcode pres=plOK;
+    int num;
+
+    if (p[0]<2) {
+        complain("sis3316_readout_start_udp: illegal # of arguments: %d", p[0]);
+        return plErr_ArgNum;
+    }
+    if (p[0]==1 && ip[1]==-1) {
+        pres=check_sis3316(ip[1], 0, 0, "sis3316_readout_start_udp");
+    } else {
+        for (m=1; m<p[0]; m++) {
+            if (ip[m]<0) {
+                complain("sis3316_readout_start_udp: -1 as module is not allowed "
+                        "if more than one argument is given");
+                pres=plErr_ArgRange;
+            } else {
+                pres=check_sis3316(p[m], 0, 0, "sis3316_readout_start_udp");
+            }
+            if (pres!=plOK)
+                break;
+        }
+    }
+
+    wirbrauchen=0;
+    return pres;
+}
+
+char name_proc_sis3316_readout_start_udp[] = "sis3316_readout_start_udp";
+int ver_proc_sis3316_readout_start_udp = 1;
+/*****************************************************************************/

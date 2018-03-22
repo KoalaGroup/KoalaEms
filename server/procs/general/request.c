@@ -3,7 +3,7 @@
  * created: 2009-08-05 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: request.c,v 1.2 2011/04/06 20:30:32 wuestner Exp $";
+    "$ZEL: request.c,v 1.3 2017/10/09 21:25:37 wuestner Exp $";
 
 #include <sconf.h>
 #include <errno.h>
@@ -16,7 +16,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../../main/requests.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
 
 RCS_REGISTER(cvsid, "procs/general")
 

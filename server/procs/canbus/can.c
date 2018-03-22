@@ -3,7 +3,7 @@
  * created 7.1.2006 pk
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: can.c,v 1.4 2011/04/06 20:30:30 wuestner Exp $";
+    "$ZEL: can.c,v 1.6 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <stdio.h>
 #include <errno.h>
@@ -13,9 +13,6 @@ static const char* cvsid __attribute__((unused))=
 #include <rcs_ids.h>
 #include "../../lowlevel/canbus/can.h"
 #include "../procs.h"
-
-extern ems_u32* outptr;
-extern int wirbrauchen;
 
 #define get_device(bus) \
     (struct canbus_dev*)get_gendevice(modul_can, (bus))
@@ -34,7 +31,7 @@ plerrcode proc_canbus_write(ems_u32* p)
 {
     struct canbus_dev* dev=get_device(p[1]);
     struct can_msg msg;
-    int i;
+    unsigned int i;
 
     msg.id=p[2];
     msg.msgtype=p[3];
@@ -125,7 +122,8 @@ plerrcode proc_canbus_write_read(ems_u32* p)
     struct can_rd_msg rmsg;
     struct can_msg wmsg;
     plerrcode pres;
-    int i;
+    unsigned int i;
+    int ii;
 
     wmsg.id=p[2];
     wmsg.msgtype=p[3];
@@ -142,8 +140,8 @@ plerrcode proc_canbus_write_read(ems_u32* p)
     *outptr++=rmsg.msg.msgtype;
     *outptr++=rmsg.dwTime;
     *outptr++=rmsg.msg.len;
-    for (i=0; i<rmsg.msg.len; i++)
-        *outptr++=rmsg.msg.data[i];
+    for (ii=0; ii<rmsg.msg.len; ii++)
+        *outptr++=rmsg.msg.data[ii];
     return plOK;
 }
 
@@ -178,7 +176,8 @@ plerrcode proc_canbus_write_read_burst(ems_u32* p)
     struct can_msg wmsg;
     struct can_rd_msg *rmsg;
     plerrcode pres;
-    int i, j, nread;
+    unsigned i;
+    int ii, j, nread;
 
     rmsg=malloc(p[5]*sizeof(struct can_rd_msg));
     if (!rmsg) {
@@ -203,14 +202,14 @@ plerrcode proc_canbus_write_read_burst(ems_u32* p)
         return pres;
 
     *outptr++=nread;
-    for (i=0; i<nread; i++) {
-        *outptr++=rmsg[i].msg.len+4;
-        *outptr++=rmsg[i].msg.id;
-        *outptr++=rmsg[i].msg.msgtype;
-        *outptr++=rmsg[i].dwTime;
-        *outptr++=rmsg[i].msg.len;
-        for (j=0; j<rmsg[i].msg.len; j++)
-            *outptr++=rmsg[i].msg.data[j];
+    for (ii=0; ii<nread; ii++) {
+        *outptr++=rmsg[ii].msg.len+4;
+        *outptr++=rmsg[ii].msg.id;
+        *outptr++=rmsg[ii].msg.msgtype;
+        *outptr++=rmsg[ii].dwTime;
+        *outptr++=rmsg[ii].msg.len;
+        for (j=0; j<rmsg[ii].msg.len; j++)
+            *outptr++=rmsg[ii].msg.data[j];
     }
 
     free(rmsg);

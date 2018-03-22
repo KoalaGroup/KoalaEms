@@ -9,7 +9,7 @@ RANLIB = @RANLIB@
 	m4 $(M4FLAGS) <$< >$@
 
 (%.o): %.o
-	$(AR) cr $@ $%
+	$(AR) @ARFLAGS@ $@ $%
 	$(RANLIB) $@
 
 CPPFLAGS = -I$(srcdir) -I$(CONF) -I$(EXCOMMON) -I$(COMMON) -I. @AUXINC@ @DEFS@

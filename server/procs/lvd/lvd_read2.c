@@ -3,7 +3,7 @@
  * created 2005-Mar-14 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: lvd_read2.c,v 1.3 2011/04/06 20:30:33 wuestner Exp $";
+    "$ZEL: lvd_read2.c,v 1.4 2017/10/09 21:25:38 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -17,7 +17,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../../lowlevel/devices.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
 extern int *memberlist;
 
 #define get_device(crate) \

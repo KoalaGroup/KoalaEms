@@ -1,6 +1,6 @@
 /*
  * lowlevel/unixvme/sis3100/vme_sis.h
- * $ZEL: vme_sis.h,v 1.15 2007/10/15 14:33:50 wuestner Exp $
+ * $ZEL: vme_sis.h,v 1.16 2015/11/11 19:34:40 wuestner Exp $
  * created 23.Jan.2001 PW
  * 07.Sep.2002 PW: current_am added
  */

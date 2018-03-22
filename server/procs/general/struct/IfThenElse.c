@@ -1,15 +1,10 @@
-/******************************************************************************
-*                                                                             *
-* IfThenElse.c                                                                *
-*                                                                             *
-* OS9                                                                         *
-*                                                                             *
-* created before 28.09.93                                                     *
-* last changed 05.12.94                                                       *
-*                                                                             *
-******************************************************************************/
+/*
+ * procs/general/struct/IfThenElse.c
+ * created before 28.09.93
+ */
+
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: IfThenElse.c,v 1.10 2011/04/06 20:30:32 wuestner Exp $";
+    "$ZEL: IfThenElse.c,v 1.11 2017/10/09 21:25:37 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -20,7 +15,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../../procprops.h"
 #include "../../proclist.h"
 
-extern int wirbrauchen;
 extern ems_u32* outptr;
 
 RCS_REGISTER(cvsid, "procs/general/struct")
@@ -50,7 +44,9 @@ plerrcode proc_IfThenElse(ems_u32* p)
 plerrcode test_proc_IfThenElse(ems_u32* p)
 {
     ems_u32* help;
-    int i, limit1, limit2;
+    ssize_t limit1, limit2;
+    int i;
+
     T(test_proc_IfThenElse)
     if (*p<3) return(plErr_ArgNum);
     if (p[1]>MAX_VAR) return(plErr_IllVar);

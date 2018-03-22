@@ -3,7 +3,7 @@
  * created before 07.09.93
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: tovariable.c,v 1.18 2015/04/06 21:33:23 wuestner Exp $";
+    "$ZEL: tovariable.c,v 1.20 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -14,9 +14,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../procs.h"
 #include "../procprops.h"
 #include "../../objects/domain/dom_ml.h"
-
-extern ems_u32* outptr;
-extern int wirbrauchen, *memberlist;
 
 RCS_REGISTER(cvsid, "procs/camac")
 
@@ -114,7 +111,7 @@ plerrcode proc_nAFblreadVar(ems_u32* p)
 {
     ems_u32 *var=var_list[p[1]].len==1?
         &var_list[p[1]].var.val:var_list[p[1]].var.ptr;
-    int i;
+    unsigned int i;
     ml_entry* m=ModulEnt(p[2]);
     struct camac_dev* dev=m->address.camac.dev;
     camadr_t addr=dev->CAMACaddr(CAMACslot_e(m), p[3], p[4]);

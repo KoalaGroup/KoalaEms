@@ -3,7 +3,7 @@
  * created 15.10.97 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: syncstatist.c,v 1.8 2011/04/06 20:30:34 wuestner Exp $";
+    "$ZEL: syncstatist.c,v 1.9 2016/05/12 21:49:49 wuestner Exp $";
 
 #include <debug.h>
 #include <errno.h>
@@ -21,6 +21,7 @@ extern ems_u32* outptr;
 RCS_REGISTER(cvsid, "procs/sync/zelsync/statist")
 
 /*****************************************************************************/
+#if 0 /* more work needed to make it compatible multiple triggers */
 /*
  * clear u. requested:
  * 0 nichts
@@ -145,7 +146,9 @@ procprop* prop_proc_GetSyncStatist()
 char name_proc_GetSyncStatist[]="GetSyncStatist";
 int ver_proc_GetSyncStatist=1;
 
+#endif
 /*****************************************************************************/
+#if 0 /* more work needed to make it compatible multiple triggers */
 /*
  * clear:
  * 0 nichts
@@ -187,7 +190,9 @@ procprop* prop_proc_ClearSyncStatist()
 char name_proc_ClearSyncStatist[]="ClearSyncStatist";
 int ver_proc_ClearSyncStatist=1;
 
+#endif
 /*****************************************************************************/
+#if 0 /* more work needed to make it compatible multiple triggers */
 /*
  * selected:
  * 0 nichts (Unsinn)
@@ -235,5 +240,6 @@ procprop* prop_proc_SetSyncStatist()
 char name_proc_SetSyncStatist[]="SetSyncStatist";
 int ver_proc_SetSyncStatist=1;
 
+#endif
 /*****************************************************************************/
 /*****************************************************************************/

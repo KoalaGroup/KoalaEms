@@ -3,7 +3,7 @@
  * 
  * created: 15.08.94 PW
  *
- * $ZEL: proc_ved.hxx,v 2.28 2014/07/14 15:11:54 wuestner Exp $
+ * $ZEL: proc_ved.hxx,v 2.29 2016/05/02 15:28:43 wuestner Exp $
  */
 
 #ifndef _proc_ved_hxx_
@@ -195,11 +195,11 @@ class C_VED : public nocopy {
     void trig_add_param(int par) {triglist->add_par(par);}
     void trig_add_param(int num, int par, ...);
     void trig_add_param(const char* par) {triglist->add_par(par);}
-    void DownloadTrigger();
-    void DownloadTrigger(const char* proc, int argnum, ...);
-    void DownloadTrigger(const char* proc, int* args, int argnum);
-    C_confirmation* UploadTrigger();
-    void DeleteTrigger();
+    void DownloadTrigger(int idx);
+    void DownloadTrigger(int idx, const char* proc, int argnum, ...);
+    void DownloadTrigger(int idx, const char* proc, int* args, int argnum);
+    C_confirmation* UploadTrigger(int idx);
+    void DeleteTrigger(int idx);
 };
 
 #endif

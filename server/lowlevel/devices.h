@@ -3,7 +3,7 @@
  * 
  * created 01.Oct.2002 PW
  *
- * $ZEL: devices.h,v 1.20 2008/06/28 21:47:53 wuestner Exp $
+ * $ZEL: devices.h,v 1.21 2017/10/20 23:21:31 wuestner Exp $
  */
 
 #ifndef _devices_h_
@@ -54,14 +54,14 @@ struct generic_dev {
  * all registered devices of all types
  */
 extern struct generic_dev** devices;
-extern int numdevs;
+extern unsigned int numdevs;
 
 /*
  * xdevices is an array of arrays of indices for the devices of all types
  * the size of each subarray is numxdevs[Modulclass]
  */
-extern int* xdevices[modul_invalid]; /* index in devices[] */
-extern int numxdevs[modul_invalid]; /* number of devices */
+extern unsigned int* xdevices[modul_invalid]; /* index in devices[] */
+extern unsigned int numxdevs[modul_invalid]; /* number of devices */
 
 void devices_init(void);
 errcode devices_done(void);
@@ -84,11 +84,27 @@ plerrcode find_odevice(Modulclass class, unsigned int crate, struct generic_dev*
         *dev=(struct camac_dev*)device;                                  \
     pres;                                                                \
 })
+#define _find_camac_odevice(crate, dev)                                  \
+({                                                                       \
+    struct generic_dev *device;                                          \
+    plerrcode pres;                                                      \
+    if ((pres=find_odevice(modul_camac, crate, &device))==plOK)          \
+        *dev=(struct camac_dev*)device;                                  \
+    pres;                                                                \
+})
 #define find_lvd_odevice(crate, dev)                                     \
 ({                                                                       \
     struct generic_dev *device;                                          \
     plerrcode pres;                                                      \
     if ((pres=find_odevice(modul_lvd, crate, &device))==plOK && dev)     \
+        *dev=(struct lvd_dev*)device;                                    \
+    pres;                                                                \
+})
+#define _find_lvd_odevice(crate, dev)                                    \
+({                                                                       \
+    struct generic_dev *device;                                          \
+    plerrcode pres;                                                      \
+    if ((pres=find_odevice(modul_lvd, crate, &device))==plOK)            \
         *dev=(struct lvd_dev*)device;                                    \
     pres;                                                                \
 })

@@ -3,7 +3,7 @@
  * created 04.11.94 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: maxevcount.c,v 1.8 2011/04/06 20:30:34 wuestner Exp $";
+    "$ZEL: maxevcount.c,v 1.10 2017/10/25 21:13:02 wuestner Exp $";
 
 #include <errorcodes.h>
 #include <sconf.h>
@@ -14,8 +14,8 @@ static const char* cvsid __attribute__((unused))=
 
 extern ems_u32* outptr;
 #ifdef MAXEVCOUNT
-extern int maxevcount;
-extern int maxevinc;
+extern unsigned int maxevcount;
+extern unsigned int maxevinc;
 #endif
 
 RCS_REGISTER(cvsid, "procs/test")
@@ -26,7 +26,7 @@ RCS_REGISTER(cvsid, "procs/test")
  * p[0]: argcount (0||1)
  * [p[1]: maximum event count]
  */
-plerrcode proc_MaxevCount(ems_u32* p)
+plerrcode proc_MaxevCount(__attribute__((unused)) ems_u32* p)
 {
 #ifdef MAXEVCOUNT
     *outptr++=maxevcount;
@@ -36,7 +36,7 @@ plerrcode proc_MaxevCount(ems_u32* p)
     return plOK;
 }
 
-plerrcode test_proc_MaxevCount(ems_u32* p)
+plerrcode test_proc_MaxevCount(__attribute__((unused)) ems_u32* p)
 {
     plerrcode res=plOK;
 #ifdef MAXEVCOUNT
@@ -69,7 +69,7 @@ int ver_proc_MaxevCount=1;
  * p[0]: argcount (0||1)
  * [p[1]: maximum event count]
  */
-plerrcode proc_MaxevInc(ems_u32* p)
+plerrcode proc_MaxevInc(__attribute__((unused)) ems_u32* p)
 {
 #ifdef MAXEVCOUNT
     *outptr++=maxevinc;
@@ -79,7 +79,7 @@ plerrcode proc_MaxevInc(ems_u32* p)
     return plOK;
 }
 
-plerrcode test_proc_MaxevInc(ems_u32* p)
+plerrcode test_proc_MaxevInc(__attribute__((unused)) ems_u32* p)
 {
     plerrcode res=plOK;
 #ifdef MAXEVCOUNT

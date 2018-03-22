@@ -1,5 +1,5 @@
 /******************************************************************************
-* $ZEL: InputNumberD.c,v 1.8 2011/04/06 20:30:34 wuestner Exp $
+* $ZEL: InputNumberD.c,v 1.10 2017/10/20 23:20:52 wuestner Exp $
 *                                                                             *
 * InputNumberD.c                                                              *
 *                                                                             *
@@ -9,7 +9,7 @@
 *                                                                             *
 ******************************************************************************/
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: InputNumberD.c,v 1.8 2011/04/06 20:30:34 wuestner Exp $";
+    "$ZEL: InputNumberD.c,v 1.10 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <stdio.h>
 #include <errorcodes.h>
@@ -17,13 +17,12 @@ static const char* cvsid __attribute__((unused))=
 #include "../../procs.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
 
 RCS_REGISTER(cvsid, "procs/test/console")
 
 /*****************************************************************************/
 
-plerrcode proc_InputNumberD(ems_u32* p)
+plerrcode proc_InputNumberD(__attribute__((unused)) ems_u32* p)
 {
     int num;
 

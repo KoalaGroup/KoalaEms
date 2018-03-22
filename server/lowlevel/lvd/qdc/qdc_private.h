@@ -1,6 +1,6 @@
 /*
  * lowlevel/lvd/qdc/qdc_private.h
- * $ZEL: qdc_private.h,v 1.2 2013/01/17 22:44:54 wuestner Exp $
+ * $ZEL: qdc_private.h,v 1.3 2017/10/20 23:21:31 wuestner Exp $
  * created 2012-Sep-11 PW
  */
 
@@ -20,7 +20,7 @@ struct qdc_info {
     ems_u16 cr_shadow_;
     float base_clk;
     float adc_clk;
-    int f1flag;
+    ems_u16 f1flag;
     int qdcver, qdcverL;
     u_int16_t dac_shadow_valid;
     u_int16_t threshold_shadow_valid;

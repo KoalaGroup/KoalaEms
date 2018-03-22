@@ -3,7 +3,7 @@
  * created before 24.02.93
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: trigprocs.c.m4,v 1.18 2011/04/06 20:30:35 wuestner Exp $";
+    "$ZEL: trigprocs.c.m4,v 1.20 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -48,7 +48,7 @@ struct trigproc Trig[]= {
 
 int NrOfTrigs=sizeof(Trig)/sizeof(struct trigproc);
 
-struct triggerinfo trigger;
+//struct triggerinfo trigger;
 extern ems_u32* outptr;
 extern int* memberlist;
 
@@ -56,21 +56,26 @@ extern int* memberlist;
 int
 trigger_init(void)
 {
+#if 0 /* not needed for multiple triggers */
     trigger.cb_proc=0;
     trigger.tinfo=0;
+#endif
     return 0;
 }
 /*****************************************************************************/
 int
 trigger_done(void)
 {
+#if 0 /* not needed for multiple triggers */
     trigger.cb_proc=0;
     trigger.tinfo=0;
+#endif
     return 0;
 }
 /*****************************************************************************/
 errcode
-gettrigproclist(ems_u32* p, unsigned int num)
+gettrigproclist(__attribute__((unused)) ems_u32* p,
+        __attribute__((unused)) unsigned int num)
 {
     register int i;
 
@@ -107,7 +112,9 @@ trigger_task(union callbackdata data)
 }
 /*****************************************************************************/
 static void
-trigger_stask(int path, enum select_types types, union callbackdata data)
+trigger_stask(__attribute__((unused)) int path,
+        __attribute__((unused)) enum select_types types,
+        union callbackdata data)
 {
     return trigger_Xtask((struct triggerinfo*)data.p);
 }
@@ -138,7 +145,9 @@ static errcode insert_def_triggertask_poll(struct triggerinfo* trinfo)
             calldata, READOUT_PRIOR, 0, "trigger");
     return tinfo->i.tp_poll.t?OK:Err_System;
 }
-static errcode insert_def_triggertask_signal(struct triggerinfo* trinfo)
+static errcode
+insert_def_triggertask_signal(
+        __attribute__((unused)) struct triggerinfo* trinfo)
 {
     printf("insert_def_triggertask_signal: not yet implemented\n");
     return Err_Program;
@@ -169,7 +178,9 @@ static void suspend_def_triggertask_poll(struct triggerinfo* trinfo)
     else
         sched_adjust_prio_t(tinfo->i.tp_poll.t, 0, 0);
 }
-static void suspend_def_triggertask_signal(struct triggerinfo* trinfo)
+static void
+suspend_def_triggertask_signal(
+        __attribute__((unused)) struct triggerinfo* trinfo)
 {
 }
 static void suspend_def_triggertask_timer(struct triggerinfo* trinfo)
@@ -199,7 +210,9 @@ static void reactivate_def_triggertask_poll(struct triggerinfo* trinfo)
     else
         sched_adjust_prio_t(tinfo->i.tp_poll.t, READOUT_PRIOR, 0);
 }
-static void reactivate_def_triggertask_signal(struct triggerinfo* trinfo)
+static void
+reactivate_def_triggertask_signal(
+        __attribute__((unused)) struct triggerinfo* trinfo)
 {
 }
 static void reactivate_def_triggertask_timer(struct triggerinfo* trinfo)
@@ -236,7 +249,9 @@ static void remove_def_triggertask_poll(struct triggerinfo* trinfo)
         sched_remove_task(tinfo->i.tp_poll.t);
     tinfo->i.tp_poll.t=0;
 }
-static void remove_def_triggertask_signal(struct triggerinfo* trinfo)
+static void
+remove_def_triggertask_signal(
+        __attribute__((unused)) struct triggerinfo* trinfo)
 {
 }
 static void remove_def_triggertask_timer(struct triggerinfo* trinfo)

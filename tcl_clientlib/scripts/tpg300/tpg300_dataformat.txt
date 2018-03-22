@@ -1,0 +1,33 @@
+
+number of following 32-bit words (==4+11*num_tpg300)
+  version of this format (actually 0)
+  timestamp (seconds since the Epoch and microseconds)
+  number of TPG300 systems (actually 20)
+    N*TPG300_block
+
+TPG300_block:
+
+number of following 32-bit words (==10)
+  profibus addr
+  slave_state:
+    byte 0:
+        0: OK, !=0:error; in case of error the channel blocks are invalid
+        1: not alive (not seen by Profibus)
+        2: communication error
+    byte 1: unit:
+        0: mbar
+        1: Torr
+        2: Pascal
+    byte 2 and 3: unassigned yet
+  4*channel_block
+
+channel_block:
+  state:
+    0: OK
+    1: underrange
+    2: overrange
+    3: error
+    4: off
+    5: no hardware
+  value:
+    (float)

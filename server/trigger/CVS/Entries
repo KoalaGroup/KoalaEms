@@ -1,3 +1,8 @@
+/GNUmakefile.osk/1.4/Mon Mar 17 21:28:20 1997//
+/Makefile.in/1.4/Wed Nov  6 15:37:55 2002//
+/trigger.h/1.9/Thu May 12 22:00:12 2016//
+/trigprocs.c.m4/1.20/Fri Oct 20 23:21:31 2017//
+/trigprocs.h.m4/1.6/Mon Oct 15 14:22:35 2007//
 D/camac////
 D/chi////
 D/chi_ext////
@@ -6,8 +11,3 @@ D/chi_ext_r////
 D/general////
 D/pci////
 D/vme////
-/GNUmakefile.osk/1.4/Tue May  3 09:11:34 2011//
-/Makefile.in/1.4/Tue May  3 09:11:34 2011//
-/trigger.h/1.8/Tue May  3 09:11:34 2011//
-/trigprocs.c.m4/1.18/Tue May  3 09:11:34 2011//
-/trigprocs.h.m4/1.6/Tue May  3 09:11:34 2011//

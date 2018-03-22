@@ -3,7 +3,7 @@
  * created before 07.11.94
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: ved.c,v 1.21 2011/04/06 20:30:29 wuestner Exp $";
+    "$ZEL: ved.c,v 1.22 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -146,7 +146,7 @@ return(OK);
 
 /*****************************************************************************/
 
-errcode Conclude(ems_u32* p, int num)
+errcode Conclude(__attribute__((unused)) ems_u32* p, int num)
 {/* Conclude */
 T(Conclude)
 D(D_REQ, printf("Conclude\n");)
@@ -157,7 +157,7 @@ return(OK);
 
 /*****************************************************************************/
 
-errcode GetVEDStatus(ems_u32* p, int num)
+errcode GetVEDStatus(__attribute__((unused)) ems_u32* p, int num)
 {
 T(GetVEDStatus)
 D(D_REQ, printf("GetVEDStatus\n");)
@@ -235,7 +235,7 @@ p[0] : object
 errcode GetNameList(ems_u32* p, unsigned int num)
 {
     T(GetNameList)
-    D(D_REQ, int i; printf("GetNameList(");
+    D(D_REQ, unsigned int i; printf("GetNameList(");
         for (i=0; i<num; i++) printf("%d%s", p[i], i+1<num?", ":"");
         printf(")\n");
     )
@@ -310,7 +310,7 @@ p[0] : level (0: nur Laengen, 1: Syntax, 2: Text, ...?)
 p[1] : no. of procs
 .... : procIDs
 */
-errcode GetProcProperties(ems_u32* p, int num)
+errcode GetProcProperties(ems_u32* p, unsigned int num)
 {
 T(GetProcProperties)
 D(D_REQ, printf("GetProcProperties\n");)
@@ -324,7 +324,8 @@ return(Err_NotImpl);
 
 /*****************************************************************************/
 
-static objectcommon *lookup_ved(ems_u32* id, unsigned int idlen,
+static objectcommon *lookup_ved(__attribute__((unused)) ems_u32* id,
+    __attribute__((unused)) unsigned int idlen,
     unsigned int* remlen)
 {
 *remlen=0;

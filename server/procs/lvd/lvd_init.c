@@ -3,7 +3,7 @@
  * created 2005-Feb-23 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: lvd_init.c,v 1.39 2013/01/17 22:40:41 wuestner Exp $";
+    "$ZEL: lvd_init.c,v 1.44 2017/11/08 02:15:51 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -19,10 +19,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../../objects/domain/dom_ml.h"
 #include "../../lowlevel/lvd/lvdbus.h"
 #include "../../lowlevel/devices.h"
-
-extern ems_u32* outptr;
-extern int wirbrauchen;
-extern int *memberlist;
 
 #define get_device(branch) \
     ((struct lvd_dev*)get_gendevice(modul_lvd, (branch)))
@@ -60,7 +56,7 @@ char name_proc_lvdbus_init[] = "lvdbus_init";
 int ver_proc_lvdbus_init = 1;
 /*****************************************************************************/
 /*
- * p[0]: argcount==4
+ * p[0]: argcount>=4
  * p[1]: branch
  * p[2]: trigger input mask
  *        0x1: LEMO, 0x2: RJ45, 0x4: 6pack, 0x8: optics
@@ -77,7 +73,9 @@ int ver_proc_lvdbus_init = 1;
 plerrcode proc_lvd_init(ems_u32* p)
 {
     struct lvd_dev* dev=get_device(p[1]);
-    return lvd_init_controllers(dev, p[2], p[3], p[4], p[0]>4?p[5]:-1);
+    ems_i32 *ip=(ems_i32*)p;
+
+    return lvd_init_controllers(dev, p[2], p[3], p[4], p[0]>4?ip[5]:-1);
 }
 
 plerrcode test_proc_lvd_init(ems_u32* p)
@@ -132,7 +130,7 @@ int ver_proc_lvd_eventcount = 1;
  */
 //new:
 /*
- * p[0]: argcount==1|2
+ * p[0]: argcount==1..3
  * p[1]: branch
  * [p[2]: mode for controller card
  */
@@ -201,7 +199,7 @@ char name_proc_lvd_daqmode[] = "lvd_daqmode";
 int ver_proc_lvd_daqmode = 1;
 /*****************************************************************************/
 /*
- * p[0]: argcount==2|4
+ * p[0]: argcount==2|3|4
  * p[1]: branch
  * p[2]: module addr (-1 for all)
  * [[p[3]: module type]
@@ -234,6 +232,7 @@ plerrcode test_proc_lvdacq_daqmode(ems_u32* p)
     ems_i32* ip=(ems_i32*)p;
     plerrcode pres;
 
+    /* check for existence of p[1]; all other test inside the switch ... */
     if (p[0]<1)
         return plErr_ArgNum;
     if ((pres=find_odevice(modul_lvd, p[1], 0))!=plOK)
@@ -246,6 +245,7 @@ plerrcode test_proc_lvdacq_daqmode(ems_u32* p)
     case 3:
         if (ip[2]<0)
             return plErr_ArgNum;
+        /* fallthrough */
     case 4:
         wirbrauchen=0;
         break;
@@ -365,7 +365,7 @@ char name_proc_lvd_blockread[] = "lvd_blockread";
 int ver_proc_lvd_blockread = 1;
 /*****************************************************************************/
 /*
- * p[0]: argcount==6
+ * p[0]: argcount>=6
  * p[1]: branch
  * p[2]: c/i (1: controller 0: input card)
  * p[3]: addr
@@ -618,7 +618,7 @@ char name_proc_lvd_test_pulse[] = "lvd_test_pulse";
 int ver_proc_lvd_test_pulse = 1;
 /*****************************************************************************/
 /*
- * p[0]: argcount==5
+ * p[0]: argcount==3
  * p[1]: branch
  * p[2]: addr
  * p[3]: level
@@ -666,7 +666,7 @@ char name_proc_lvd_modulestat[] = "lvd_modstat";
 int ver_proc_lvd_modulestat = 1;
 /*****************************************************************************/
 /*
- * p[0]: argcount==5
+ * p[0]: argcount==2
  * p[1]: branch
  * p[2]: level
  *       level&0x30 ==   0: print to stdout
@@ -713,7 +713,7 @@ char name_proc_lvd_controllerstat[] = "lvd_contrstat";
 int ver_proc_lvd_controllerstat = 1;
 /*****************************************************************************/
 /*
- * p[0]: argcount==5
+ * p[0]: argcount==2
  * p[1]: branch
  * p[2]: level
  *       level&0x30 ==   0: print to stdout
@@ -760,7 +760,7 @@ char name_proc_lvd_cratestat[] = "lvd_cratestat";
 int ver_proc_lvd_cratestat = 1;
 /*****************************************************************************/
 /*
- * p[0]: argcount==5
+ * p[0]: argcount==1
  * p[1]: branch
  */
 plerrcode proc_lvd_localreset(ems_u32* p)
@@ -789,7 +789,7 @@ char name_proc_lvd_localreset[] = "lvd_localreset";
 int ver_proc_lvd_localreset = 1;
 /*****************************************************************************/
 /*
- * p[0]: argcount==5
+ * p[0]: argcount==3..5
  * p[1]: branch
  * p[2]: addr
  * p[3]: id
@@ -798,10 +798,11 @@ int ver_proc_lvd_localreset = 1;
  */
 plerrcode proc_lvd_force_module_id(ems_u32* p)
 {
+    ems_i32 *ip=(ems_i32*)p;
     struct lvd_dev* dev=get_device(p[1]);
 
     return lvd_force_module_id(dev, p[2], p[3],
-            p[0]>3?p[4]:0xffff, p[0]>4?p[5]:-1);
+            p[0]>3?p[4]:0xffff, p[0]>4?ip[5]:-1);
 }
 
 plerrcode test_proc_lvd_force_module_id(ems_u32* p)
@@ -874,7 +875,7 @@ char name_proc_lvd_statist[] = "lvd_statist";
 int ver_proc_lvd_statist = 1;
 /*****************************************************************************/
 /*
- * p[0]: argcount==2
+ * p[0]: argcount==1..2
  * p[1]: crate
  * [p[2]: parseflags (see enum parsebits in lowlevel/lvd/lvdbus.h)]
  */
@@ -1047,7 +1048,7 @@ char name_proc_lvd_controller_f1gpx_rate_trigger_count[] =
 int ver_proc_lvd_controller_f1gpx_rate_trigger_count = 1;
 /*****************************************************************************/
 /*
- * p[0]: argcount (1)
+ * p[0]: argcount (2)
  * p[1]: branch
  * p[2]: period
  */
@@ -1078,7 +1079,7 @@ char name_proc_lvd_controller_f1gpx_extra_trig[] =
 int ver_proc_lvd_controller_f1gpx_extra_trig = 1;
 /*****************************************************************************/
 /*
- * p[0]: argcount (1)
+ * p[0]: argcount (2)
  * p[1]: branch
  * p[2]: period
  */

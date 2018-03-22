@@ -2,7 +2,7 @@
  * trigger/general/shmtrigger.c
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: shmtrigger.c,v 1.8 2011/04/06 20:30:36 wuestner Exp $";
+    "$ZEL: shmtrigger.c,v 1.10 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -24,7 +24,7 @@ static const char* cvsid __attribute__((unused))=
 struct private {
     int trigger;
     int id;
-    int* addr;
+    u_int32_t* addr;
 };
 
 extern ems_u32* outptr;
@@ -50,8 +50,8 @@ get_trig_shm(struct triggerinfo* trinfo)
     struct trigprocinfo* tinfo=(struct trigprocinfo*)trinfo->tinfo;
     struct private* priv=(struct private*)tinfo->private;
 
-    if (*priv->addr>trinfo->eventcnt) {
-        trinfo->eventcnt++;
+    if (*priv->addr>trinfo->count) {
+        trinfo->count++;
         return priv->trigger;
     } else {
         return 0;
@@ -59,7 +59,7 @@ get_trig_shm(struct triggerinfo* trinfo)
 }
 /*****************************************************************************/
 static void
-reset_trig_shm(struct triggerinfo* trinfo)
+reset_trig_shm(__attribute__((unused)) struct triggerinfo* trinfo)
 {}
 /*****************************************************************************/
 plerrcode
@@ -67,6 +67,7 @@ init_trig_shm(ems_u32* p, struct triggerinfo* trinfo)
 {
     struct trigprocinfo* tinfo=(struct trigprocinfo*)trinfo->tinfo;
     struct private* priv;
+    void *addr;
 
     if (p[0]!=1)
         return plErr_ArgNum;
@@ -90,14 +91,15 @@ init_trig_shm(ems_u32* p, struct triggerinfo* trinfo)
         free(priv);
         return plErr_System;
     }
-    priv->addr=(int*)shmat(priv->id, (void*)0, 0666);
-    if (priv->addr==(int*)-1) {
+    addr=shmat(priv->id, (void*)0, 0666);
+    if (addr==(void*)-1) {
         printf("shmtrigger: shmat: %s\n", strerror(errno));
         free(priv);
         return plErr_System;
     }
+    priv->addr=(u_int32_t*)addr;
     *priv->addr=0;
-    trinfo->eventcnt=0;
+    trinfo->count=0;
 
     tinfo->get_trigger=get_trig_shm;
     tinfo->reset_trigger=reset_trig_shm;

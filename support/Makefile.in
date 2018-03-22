@@ -16,8 +16,7 @@ COMMON_INCLUDE    := @EMSCOMMON@
 COMMON_EX_INCLUDE := @EMSEXCOMMON@
 COMMON_LIB        := @EMSCOMMONLIB@
 CXX               := @CXX@
-CXXFLAGS_old      := @CXXFLAGS@ -Wall -Woverloaded-virtual -Wsign-promo
-CXXFLAGS          := $(CXXFLAGS_old) -Wold-style-cast
+CXXFLAGS          := @CXXFLAGS@
 INSTALL           := @INSTALL@
 INSTALL_DATA      := @INSTALL_DATA@
 RANLIB            := @RANLIB@
@@ -27,7 +26,7 @@ LDOFLAGS    := @LDOFLAGS@
 
 SRC     := readargs.cc errors.cc ems_errors.cc buf.cc inbuf.cc outbuf.cc  \
 	   sockets.cc stringlist.cc xdrstrdup.cc xferbuf.cc iopathes.cc  \
-           debuglevel.cc mkpath.cc compressed_io.cc
+           debuglevel.cc mkpath.cc compressed_io.cc fifo.cc
 OBJS    := $(SRC:.cc=.o)
 VEDSRC  := ved_addr.cc
 VEDOBJS := $(VEDSRC:.cc=.o)

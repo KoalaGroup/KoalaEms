@@ -3,7 +3,7 @@
  * created 24.02.93
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: signaltrigger.c,v 1.17 2011/04/06 20:30:36 wuestner Exp $";
+    "$ZEL: signaltrigger.c,v 1.18 2016/05/12 22:00:12 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -51,7 +51,7 @@ static void sighndlr(union SigHdlArg arg, int s)
 
     for (i=0; i<priv->siganz; i++) {
         if ((s==priv->signals[i]) && !priv->trigger) {
-            trinfo->eventcnt++;
+            trinfo->count++;
             priv->trigger=i+1;
         }
     }
@@ -121,7 +121,7 @@ plerrcode init_trig_signal(ems_u32* p, struct triggerinfo* trinfo)
     tinfo->private=priv;
 
     priv->trigger=0;
-    trinfo->eventcnt=0;
+    trinfo->count=0;
     priv->siganz=p[1];
     priv->signals=calloc(priv->siganz, sizeof(int));
     if (!priv->signals) {

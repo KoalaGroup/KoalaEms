@@ -19,7 +19,7 @@
 #include "versions.hxx"
 
 VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
-"$ZEL: outbuf.cc,v 2.26 2014/07/14 15:09:53 wuestner Exp $")
+"$ZEL: outbuf.cc,v 2.27 2016/05/02 15:22:22 wuestner Exp $")
 #define XVERSION
 
 using namespace std;
@@ -160,19 +160,23 @@ return(*this);
 }
 
 /*****************************************************************************/
-
 C_outbuf& C_outbuf::operator<<(const char *v)
 {
-int num;
+    int num;
+    num=v?strxdrlen(v):1;
+    if (idx+num>bsize)
+        grow(idx+num-1);
+    if (v) {
+        outstring(buffer+idx, v);
+        idx+=num;
+    } else {
+        buffer[idx++]=0; // empty string
+    }
+    if (idx>dsize)
+        dsize=idx;
 
-num=strxdrlen(v);
-if (idx+num>bsize) grow(idx+num-1);
-outstring(buffer+idx, v);
-idx+=num;
-if (idx>dsize) dsize=idx;
-return(*this);
+    return *this;
 }
-
 /*****************************************************************************/
 
 C_outbuf& C_outbuf::operator<<(const string& v)

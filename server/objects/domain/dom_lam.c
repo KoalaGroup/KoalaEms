@@ -3,7 +3,7 @@
  * created before 10.02.94
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: dom_lam.c,v 1.14 2011/04/06 20:30:29 wuestner Exp $";
+    "$ZEL: dom_lam.c,v 1.15 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -154,8 +154,8 @@ errcode deletelamlist(ems_u32* p, unsigned int num)
     return OK;
 }
 /*****************************************************************************/
-static objectcommon* lookup_dom_lam(ems_u32* id, unsigned int idlen,
-        unsigned int* remlen)
+static objectcommon* lookup_dom_lam(__attribute__((unused)) ems_u32* id,
+    unsigned int idlen, unsigned int* remlen)
 {
   T(lookup_dom_lam)
   if(idlen>0){

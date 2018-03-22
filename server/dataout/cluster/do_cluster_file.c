@@ -3,7 +3,7 @@
  * created      26.05.98 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: do_cluster_file.c,v 1.34 2011/11/30 21:18:12 wuestner Exp $";
+    "$ZEL: do_cluster_file.c,v 1.37 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -281,7 +281,7 @@ not_same_fs(const char *path1, const char *path2)
 }
 /*****************************************************************************/
 static void
-free_tsm_lock(int do_idx)
+free_tsm_lock(__attribute__((unused)) int do_idx)
 {
     if (daq_lock_link && daq_lock_link[0]) {
         if (unlink(daq_lock_link)<0)
@@ -411,7 +411,8 @@ expand_filename_glob(char* filename, int *choices)
     char globstr[MAXPATHLEN+1];
     glob_t globbuf;
     char *p; 
-    int res, i;
+    unsigned int i;
+    int res;
 
     struct globstat {
         char* name;
@@ -421,7 +422,7 @@ expand_filename_glob(char* filename, int *choices)
     };
     struct globstat* globstat;
     int* valids;
-    int idx;
+    unsigned int idx;
 
     p=strstr(filename, "//");
 
@@ -942,7 +943,8 @@ stops all activities of this dataout, but leaves all other status unchanged
     D(D_TRIG, printf("do_cluster_file_freeze(do_idx=%d)\n", do_idx);)
 }
 /*****************************************************************************/
-static void do_cluster_file_patherror(int do_idx, int error)
+static void do_cluster_file_patherror(int do_idx,
+        __attribute__((unused)) int error)
 {
     struct do_special_file* special=
         (struct do_special_file*)dataout_cl[do_idx].s;

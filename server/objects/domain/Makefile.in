@@ -1,5 +1,5 @@
 # objects/domain/Makefile.in
-# $ZEL: Makefile.in,v 1.4 2002/11/06 15:37:02 wuestner Exp $
+# $ZEL: Makefile.in,v 1.5 2017/11/02 21:01:07 wuestner Exp $
 
 CONF = ../../conf
 
@@ -12,6 +12,10 @@ include $(CONF)/config.make
 
 ofiles = domain.o $(foreach d,$(domains),dom_$(d).o)
 depfiles = domain.c $(foreach d,$(domains),dom_$(d).c)
+
+LOWLEVELTYPES = $(shell echo $(lowlevel)|tr '[:lower:]/' '[:upper:]_')
+LOWLEVELFLAGS=$(foreach typ,$(LOWLEVELTYPES),-DLOWLEVEL_$(typ) )
+CFLAGS += $(LOWLEVELFLAGS)
 
 lib = ../libobj.a
 

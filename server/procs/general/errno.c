@@ -4,7 +4,7 @@
  * created: 11. Aug 2000 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: errno.c,v 1.5 2011/04/06 20:30:32 wuestner Exp $";
+    "$ZEL: errno.c,v 1.7 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <sconf.h>
 #include <errno.h>
@@ -15,7 +15,6 @@ static const char* cvsid __attribute__((unused))=
 #include <xdrstring.h>
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
 
 RCS_REGISTER(cvsid, "procs/general")
 
@@ -49,7 +48,7 @@ return plOK;
 
 plerrcode test_proc_Strerror(ems_u32* p)
 {
-if ((p[0]<0) || (p[0]>2)) return(plErr_ArgNum);
+if (p[0]>2) return(plErr_ArgNum);
 wirbrauchen=-1;
 return plOK;
 }

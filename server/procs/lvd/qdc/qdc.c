@@ -3,7 +3,7 @@
  * created 2006-Apr-05 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: qdc.c,v 1.17 2011/11/22 02:00:49 wuestner Exp $";
+    "$ZEL: qdc.c,v 1.19 2017/10/20 23:11:44 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -16,10 +16,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../../../lowlevel/lvd/qdc/qdc.h"
 #include "../../../lowlevel/devices.h"
 #include "../lvd_verify.h"
-
-extern ems_u32* outptr;
-extern int wirbrauchen;
-extern int *memberlist;
 
 RCS_REGISTER(cvsid, "procs/lvd/qdc")
 
@@ -44,7 +40,7 @@ plerrcode test_proc_lvd_qdc_init(ems_u32* p)
 
     if (p[0]!=3)
         return plErr_ArgNum;
-    if ((pres=find_lvd_odevice(p[1], &dev))!=plOK)
+    if ((pres=_find_lvd_odevice(p[1], &dev))!=plOK)
         return pres;
 
     wirbrauchen=0;
@@ -91,7 +87,7 @@ plerrcode test_proc_lvd_qdc_window(ems_u32* p)
         return plErr_ArgRange;
     }
 
-    if ((pres=find_lvd_odevice(p[1], &dev))!=plOK)
+    if ((pres=_find_lvd_odevice(p[1], &dev))!=plOK)
         return pres;
 
     wirbrauchen=0;
@@ -132,7 +128,7 @@ plerrcode test_proc_lvd_qdc_getwindow(ems_u32* p)
 
     if (p[0]!=2)
         return plErr_ArgNum;
-    if ((pres=find_lvd_odevice(p[1], &dev))!=plOK)
+    if ((pres=_find_lvd_odevice(p[1], &dev))!=plOK)
         return pres;
 
     wirbrauchen=32;
@@ -171,7 +167,7 @@ plerrcode test_proc_lvd_qdc_swstart(ems_u32* p)
 
     if ((p[0]!=2) && (p[0]!=3))
         return plErr_ArgNum;
-    if ((pres=find_lvd_odevice(p[1], &dev))!=plOK)
+    if ((pres=_find_lvd_odevice(p[1], &dev))!=plOK)
         return pres;
 
     wirbrauchen=p[0]<3?16:0;
@@ -210,7 +206,7 @@ plerrcode test_proc_lvd_qdc_swlength(ems_u32* p)
 
     if ((p[0]!=2) && (p[0]!=3))
         return plErr_ArgNum;
-    if ((pres=find_lvd_odevice(p[1], &dev))!=plOK)
+    if ((pres=_find_lvd_odevice(p[1], &dev))!=plOK)
         return pres;
 
     wirbrauchen=p[0]<3?16:0;
@@ -249,7 +245,7 @@ plerrcode test_proc_lvd_qdc_intlength(ems_u32* p)
 
     if ((p[0]!=2) && (p[0]!=3))
         return plErr_ArgNum;
-    if ((pres=find_lvd_odevice(p[1], &dev))!=plOK)
+    if ((pres=_find_lvd_odevice(p[1], &dev))!=plOK)
         return pres;
 
     wirbrauchen=p[0]<3?16:0;
@@ -288,7 +284,7 @@ plerrcode test_proc_lvd_qdc_iwstart(ems_u32* p)
 
     if ((p[0]!=2) && (p[0]!=3))
         return plErr_ArgNum;
-    if ((pres=find_lvd_odevice(p[1], &dev))!=plOK)
+    if ((pres=_find_lvd_odevice(p[1], &dev))!=plOK)
         return pres;
 
     wirbrauchen=p[0]<3?16:0;
@@ -327,7 +323,7 @@ plerrcode test_proc_lvd_qdc_iwlength(ems_u32* p)
 
     if ((p[0]!=2) && (p[0]!=3))
         return plErr_ArgNum;
-    if ((pres=find_lvd_odevice(p[1], &dev))!=plOK)
+    if ((pres=_find_lvd_odevice(p[1], &dev))!=plOK)
         return pres;
 
     wirbrauchen=p[0]<3?16:0;
@@ -366,7 +362,7 @@ plerrcode test_proc_lvd_qdc_rawcycle(ems_u32* p)
 
     if ((p[0]!=2) && (p[0]!=3))
         return plErr_ArgNum;
-    if ((pres=find_lvd_odevice(p[1], &dev))!=plOK)
+    if ((pres=_find_lvd_odevice(p[1], &dev))!=plOK)
         return pres;
 
     wirbrauchen=p[0]<3?16:0;
@@ -408,7 +404,7 @@ plerrcode test_proc_lvd_qdc_dac(ems_u32* p)
 
     if (p[0]!=2 && p[0]!=4)
         return plErr_ArgNum;
-    if ((pres=find_lvd_odevice(p[1], &dev))!=plOK)
+    if ((pres=_find_lvd_odevice(p[1], &dev))!=plOK)
         return pres;
 
     if (p[0]>2 && ip[3]>15) {
@@ -458,7 +454,7 @@ plerrcode test_proc_lvd_qdc_testdac(ems_u32* p)
 
     if (p[0]!=2 && p[0]!=3)
         return plErr_ArgNum;
-    if ((pres=find_lvd_odevice(p[1], &dev))!=plOK)
+    if ((pres=_find_lvd_odevice(p[1], &dev))!=plOK)
         return pres;
 
     if (p[0]>2 && p[3]>255) {
@@ -503,7 +499,7 @@ plerrcode test_proc_lvd_qdc_test_pulse(ems_u32* p)
 
     if (p[0]!=2)
         return plErr_ArgNum;
-    if ((pres=find_lvd_odevice(p[1], &dev))!=plOK)
+    if ((pres=_find_lvd_odevice(p[1], &dev))!=plOK)
         return pres;
 
     wirbrauchen=0;
@@ -542,7 +538,7 @@ plerrcode test_proc_lvd_qdc_trglevel(ems_u32* p)
 
     if (p[0]!=2 && p[0]!=3)
         return plErr_ArgNum;
-    if ((pres=find_lvd_odevice(p[1], &dev))!=plOK)
+    if ((pres=_find_lvd_odevice(p[1], &dev))!=plOK)
         return pres;
 
     wirbrauchen=p[0]<3?16:0;
@@ -583,7 +579,7 @@ plerrcode test_proc_lvd_qdc_pedestal(ems_u32* p)
 
     if (p[0]!=2 && p[0]!=4)
         return plErr_ArgNum;
-    if ((pres=find_lvd_odevice(p[1], &dev))!=plOK)
+    if ((pres=_find_lvd_odevice(p[1], &dev))!=plOK)
         return pres;
 
     if (p[0]>2 && ip[3]>15) {
@@ -629,7 +625,7 @@ plerrcode test_proc_lvd_qdc_threshold(ems_u32* p)
 
     if (p[0]!=2 && p[0]!=4)
         return plErr_ArgNum;
-    if ((pres=find_lvd_odevice(p[1], &dev))!=plOK)
+    if ((pres=_find_lvd_odevice(p[1], &dev))!=plOK)
         return pres;
 
     if (p[0]>2 && ip[3]>15) {
@@ -675,7 +671,7 @@ plerrcode test_proc_lvd_qdc_thlevel(ems_u32* p)
 
     if (p[0]!=2 && p[0]!=4)
         return plErr_ArgNum;
-    if ((pres=find_lvd_odevice(p[1], &dev))!=plOK)
+    if ((pres=_find_lvd_odevice(p[1], &dev))!=plOK)
         return pres;
 
     if (p[0]>2 && ip[3]>15) {
@@ -719,7 +715,7 @@ plerrcode test_proc_lvd_qdc_inhibit(ems_u32* p)
 
     if ((p[0]!=2) && (p[0]!=3))
         return plErr_ArgNum;
-    if ((pres=find_lvd_odevice(p[1], &dev))!=plOK)
+    if ((pres=_find_lvd_odevice(p[1], &dev))!=plOK)
         return pres;
 
     wirbrauchen=p[0]<3?16:0;
@@ -758,7 +754,7 @@ plerrcode test_proc_lvd_qdc_raw(ems_u32* p)
 
     if ((p[0]!=2) && (p[0]!=3))
         return plErr_ArgNum;
-    if ((pres=find_lvd_odevice(p[1], &dev))!=plOK)
+    if ((pres=_find_lvd_odevice(p[1], &dev))!=plOK)
         return pres;
 
     wirbrauchen=p[0]<3?16:0;
@@ -797,7 +793,7 @@ plerrcode test_proc_lvd_qdc_anal(ems_u32* p)
 
     if ((p[0]!=2) && (p[0]!=3))
         return plErr_ArgNum;
-    if ((pres=find_lvd_odevice(p[1], &dev))!=plOK)
+    if ((pres=_find_lvd_odevice(p[1], &dev))!=plOK)
         return pres;
 
     wirbrauchen=p[0]<3?16:0;
@@ -832,7 +828,7 @@ plerrcode test_proc_lvd_qdc_noise(ems_u32* p)
 
     if (p[0]!=2)
         return plErr_ArgNum;
-    if ((pres=find_lvd_odevice(p[1], &dev))!=plOK)
+    if ((pres=_find_lvd_odevice(p[1], &dev))!=plOK)
         return pres;
 
     wirbrauchen=16;
@@ -867,7 +863,7 @@ plerrcode test_proc_lvd_qdc_mean(ems_u32* p)
 
     if (p[0]!=2)
         return plErr_ArgNum;
-    if ((pres=find_lvd_odevice(p[1], &dev))!=plOK)
+    if ((pres=_find_lvd_odevice(p[1], &dev))!=plOK)
         return pres;
 
     wirbrauchen=16;
@@ -902,7 +898,7 @@ plerrcode test_proc_lvd_qdc_ovr(ems_u32* p)
 
     if (p[0]!=2)
         return plErr_ArgNum;
-    if ((pres=find_lvd_odevice(p[1], &dev))!=plOK)
+    if ((pres=_find_lvd_odevice(p[1], &dev))!=plOK)
         return pres;
 
     wirbrauchen=16;
@@ -937,7 +933,7 @@ plerrcode test_proc_lvd_qdc_bline_adjust(ems_u32* p)
 
     if (p[0]!=2)
         return plErr_ArgNum;
-    if ((pres=find_lvd_odevice(p[1], &dev))!=plOK)
+    if ((pres=_find_lvd_odevice(p[1], &dev))!=plOK)
         return pres;
 
     wirbrauchen=16;
@@ -976,7 +972,7 @@ plerrcode test_proc_lvd_qdc_grp_coinc(ems_u32* p)
 
     if ((p[0]!=2) && (p[0]!=3))
         return plErr_ArgNum;
-    if ((pres=find_lvd_odevice(p[1], &dev))!=plOK)
+    if ((pres=_find_lvd_odevice(p[1], &dev))!=plOK)
         return pres;
 
     wirbrauchen=p[0]<3?16:0;
@@ -1016,7 +1012,7 @@ plerrcode test_proc_lvd_qdc_coinc(ems_u32* p)
 
     if ((p[0]!=2) && (p[0]!=5))
         return plErr_ArgNum;
-    if ((pres=find_lvd_odevice(p[1], &dev))!=plOK)
+    if ((pres=_find_lvd_odevice(p[1], &dev))!=plOK)
         return pres;
 
     wirbrauchen=p[0]<3?64:0;
@@ -1057,7 +1053,7 @@ plerrcode test_proc_lvd_qdc_sc_rate(ems_u32* p)
         return plErr_ArgNum;
     if (p[0]>2 && p[3]>15)
         return plErr_ArgRange;
-    if ((pres=find_lvd_odevice(p[1], &dev))!=plOK)
+    if ((pres=_find_lvd_odevice(p[1], &dev))!=plOK)
         return pres;
 
     wirbrauchen=p[0]<3?16:0;
@@ -1099,7 +1095,7 @@ plerrcode test_proc_lvd_qdc_sc_init(ems_u32* p)
 	if (p[3]>15 || p[4]>15)
 	    return plErr_ArgRange;
     }
-    if ((pres=find_lvd_odevice(p[1], &dev))!=plOK)
+    if ((pres=_find_lvd_odevice(p[1], &dev))!=plOK)
         return pres;
 
     wirbrauchen=0;
@@ -1131,7 +1127,7 @@ plerrcode test_proc_lvd_qdc_sc_clear(ems_u32* p)
 
     if (p[0]!=2)
         return plErr_ArgNum;
-    if ((pres=find_lvd_odevice(p[1], &dev))!=plOK)
+    if ((pres=_find_lvd_odevice(p[1], &dev))!=plOK)
         return pres;
 
     wirbrauchen=0;
@@ -1161,7 +1157,7 @@ plerrcode test_proc_lvd_qdc_sc_update(ems_u32* p)
 
     if (p[0]!=1)
         return plErr_ArgNum;
-    if ((pres=find_lvd_odevice(p[1], &dev))!=plOK)
+    if ((pres=_find_lvd_odevice(p[1], &dev))!=plOK)
         return pres;
 
     wirbrauchen=0;
@@ -1194,17 +1190,18 @@ plerrcode proc_lvd_qdc_sc_get(ems_u32* p)
 plerrcode test_proc_lvd_qdc_sc_get(ems_u32* p)
 {
     struct lvd_dev* dev;
+    ems_i32 *ip=(ems_i32*)p;
     plerrcode pres;
 
     if (p[0]!=3)
         return plErr_ArgNum;
     if (p[3]&0xffff0000)
 	return plErr_ArgRange;
-    if ((pres=find_lvd_odevice(p[1], &dev))!=plOK)
+    if ((pres=_find_lvd_odevice(p[1], &dev))!=plOK)
         return pres;
 
     /* 16 64-bit values and two header words per module */
-    wirbrauchen=34*(p[2]<0?15:1);
+    wirbrauchen=34*(ip[2]<0?15:1);
     return plOK;
 }
 

@@ -20,7 +20,7 @@
 
 #ifndef XVERSION
 VERSION("2014-07-11", __FILE__, __DATE__, __TIME__,
-"$ZEL: smartptr_t.cc,v 1.9 2014/07/14 15:11:54 wuestner Exp $")
+"$ZEL: smartptr_t.cc,v 1.10 2016/05/10 16:24:46 wuestner Exp $")
 #define XVERSION
 #endif
 
@@ -34,7 +34,7 @@ T* T_smartptr<T>::operator ->()
 if (p==0)
   {
   ostringstream os;
-  os<<"smartptr("<<name<<")operator->; p="<<(void*)p;
+  os<<"smartptr("<<name<<")operator->; p="<<reinterpret_cast<void*>(p);
   throw new C_ptr_error(os);
   }
 return p;
@@ -48,7 +48,7 @@ T_smartptr<T>::operator T*(void)
 if (p==0)
   {
   ostringstream os;
-  os<<"smartptr("<<name<<")cast to *; p="<<(void*)p<<endl;
+  os<<"smartptr("<<name<<")cast to *; p="<<reinterpret_cast<void*>(p)<<endl;
   //xx=*(int*)0;
   throw new C_ptr_error(os);
   }
@@ -63,7 +63,7 @@ T& T_smartptr<T>::operator *(void)
 if (p==0)
   {
   ostringstream os;
-  os<<"smartptr("<<name<<")operator*; p="<<(void*)p<<endl;
+  os<<"smartptr("<<name<<")operator*; p="<<reinterpret_cast<void*>(p)<<endl;
   throw new C_ptr_error(os);
   }
 return *p;

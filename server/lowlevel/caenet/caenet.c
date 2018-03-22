@@ -3,7 +3,7 @@
  * created: 2007-Mar-20 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: caenet.c,v 1.5 2011/04/06 20:30:22 wuestner Exp $";
+    "$ZEL: caenet.c,v 1.6 2017/10/22 20:50:39 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -53,7 +53,8 @@ struct caenet_init caen_init[]= {
 errcode caenet_low_init(char* arg)
 {
     char *devicepath, *help;
-    int i, j, n;
+    unsigned int i;
+    int j, n;
     errcode res;
 
     T(can_low_init)

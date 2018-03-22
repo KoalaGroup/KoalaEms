@@ -3,7 +3,7 @@
  * created 10.Dec.2003 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: sis1100_lvd.c,v 1.52 2013/01/17 22:44:54 wuestner Exp $";
+    "$ZEL: sis1100_lvd.c,v 1.54 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -619,7 +619,7 @@ sis1100_lvd_plxwrite_(struct lvd_dev* dev, int lnk, u_int32_t addr,
 }
 /*****************************************************************************/
 static plerrcode
-sis1100_plx_stat(struct lvd_dev* dev, int lnk, void *xp, int level)
+sis1100_plx_stat(struct lvd_dev* dev, int lnk, void *xp, __attribute__((unused)) int level)
 {
     struct lvd_sis1100_info *info=(struct lvd_sis1100_info*)dev->info;
     struct lvd_sis1100_link *link=lnk?info->B:info->A;
@@ -667,7 +667,7 @@ sis1100_plx_stat(struct lvd_dev* dev, int lnk, void *xp, int level)
 }
 /*****************************************************************************/
 static plerrcode
-sis1100_sis_stat(struct lvd_dev* dev, int lnk, void *xp, int level)
+sis1100_sis_stat(struct lvd_dev* dev, int lnk, void *xp, __attribute__((unused)) int level)
 {
     struct lvd_sis1100_info *info=(struct lvd_sis1100_info*)dev->info;
     struct lvd_sis1100_link *link=lnk?info->B:info->A;
@@ -719,7 +719,7 @@ sis1100_sis_stat(struct lvd_dev* dev, int lnk, void *xp, int level)
 }
 /*****************************************************************************/
 static plerrcode
-sis1100_mc_stat(struct lvd_dev* dev, int lnk, void *xp, int level)
+sis1100_mc_stat(struct lvd_dev* dev, int lnk, void *xp, __attribute__((unused)) int level)
 {
     struct lvd_sis1100_info *info=(struct lvd_sis1100_info*)dev->info;
     struct lvd_sis1100_link *link=lnk?info->B:info->A;
@@ -1521,7 +1521,7 @@ find_matching_link(struct lvd_dev *dev)
 static struct lvd_dev*
 find_matching_dev(struct lvd_sis1100_link *link)
 {
-    int i;
+    unsigned int i;
 
     printf("search_matching_dev for %s\n", link->pathname);
 
@@ -1540,7 +1540,7 @@ find_matching_dev(struct lvd_sis1100_link *link)
 }
 /*****************************************************************************/
 static void
-sis1100_link_up(struct lvd_sis1100_link *link, struct sis1100_irq_get2* get)
+sis1100_link_up(struct lvd_sis1100_link *link, __attribute__((unused)) struct sis1100_irq_get2* get)
 {
     struct lvd_sis1100_info *info;
 
@@ -1576,7 +1576,7 @@ sis1100_link_up(struct lvd_sis1100_link *link, struct sis1100_irq_get2* get)
 }
 /*****************************************************************************/
 static void
-sis1100_link_down(struct lvd_sis1100_link *link, struct sis1100_irq_get2* get)
+sis1100_link_down(struct lvd_sis1100_link *link, __attribute__((unused)) struct sis1100_irq_get2* get)
 {
     link->online=0;
 
@@ -1693,7 +1693,7 @@ printf("sis1100_link_up_down: link(%s) is now %s\n",
 static void
 sis1100_doorbell_err(struct lvd_dev* dev,
         const struct lvdirq_callbackdata *lvd_data,
-        void *data)
+        __attribute__((unused)) void *data)
 {
     struct lvd_sis1100_info *info=(struct lvd_sis1100_info*)dev->info;
     struct lvd_sis1100_link *link=info->A;
@@ -1827,7 +1827,7 @@ struct sis1100_irq_get2 {
 };
 #endif
 static void
-sis1100_irq(int p, enum select_types selected, union callbackdata data)
+sis1100_irq(int p, __attribute__((unused)) enum select_types selected, union callbackdata data)
 {
     //struct generic_dev* gdev=(struct generic_dev*)data.p;
     //struct lvd_dev* dev=(struct lvd_dev*)gdev;
@@ -1878,12 +1878,9 @@ init_ra_statist(struct ra_statist *ra_st)
 {
     ra_st->blocks=0;
     ra_st->events=0;
-    ra_st->eeeeeeee_events=0;
-    ra_st->splitted_events=0;
+    ra_st->fragments=0;
     ra_st->words=0;
     ra_st->max_evsize=0;
-    //ra_st->sum_evsize=0;
-    //ra_st->num_ev=0;
 }
 /*****************************************************************************/
 static errcode

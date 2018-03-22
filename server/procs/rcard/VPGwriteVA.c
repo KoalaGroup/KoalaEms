@@ -1,5 +1,5 @@
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: VPGwriteVA.c,v 1.4 2011/04/06 20:30:34 wuestner Exp $";
+    "$ZEL: VPGwriteVA.c,v 1.5 2017/10/09 21:25:38 wuestner Exp $";
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -53,7 +53,6 @@ RCS_REGISTER(cvsid, "procs/rcard")
  * #define TESTon (TEST_ON>>16)
 */
 
-extern int wirbrauchen;
 extern Modlist *modullist;
 extern int *memberlist;
 extern int *outptr; 

@@ -1,0 +1,28 @@
+#!/bin/sh
+
+MAKE=/usr/bin/make
+
+SRCDIR=/home/koala/workspace/ems_test/server
+DIR=`pwd`
+ziel=`basename $DIR`
+args="--with-auxinc=/home/koala/ems/driver_old/KoalaEms"
+
+case "$1" in
+  "neu")
+    mv mache .mache
+    rm -r *
+    mv .mache mache
+    $SRCDIR/configure $args
+    $MAKE z=$ziel depend
+    $MAKE z=$ziel
+  ;;
+  "leer")
+    mv mache .mache
+    rm -r *
+    mv .mache mache
+  ;;
+  *)
+    echo make z=$ziel $1
+    $MAKE z=$ziel $1
+  ;;
+esac

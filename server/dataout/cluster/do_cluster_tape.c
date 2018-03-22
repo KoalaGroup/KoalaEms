@@ -3,7 +3,7 @@
  * created      25.04.97 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: do_cluster_tape.c,v 1.17 2011/04/06 20:30:22 wuestner Exp $";
+    "$ZEL: do_cluster_tape.c,v 1.18 2017/10/21 22:48:42 wuestner Exp $";
 
 #include <errno.h>
 #include <stdio.h>
@@ -1244,7 +1244,7 @@ if (special->child==0) /* wir sind das Kind */
   char* args[6];
   char vs[256];
   char dens[256];
-  int i;
+  unsigned int i;
   if (special->sockets[1]!=3)
     {
     dup2(special->sockets[1], 3);

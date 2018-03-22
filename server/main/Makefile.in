@@ -1,5 +1,5 @@
 # main/Makefile.in
-# $ZEL: Makefile.in,v 1.6 2009/08/27 01:26:42 wuestner Exp $
+# $ZEL: Makefile.in,v 1.7 2017/11/02 21:00:07 wuestner Exp $
 
 CONF = ../conf
 COMMONLIB = @EMSCOMMONLIB@
@@ -20,7 +20,7 @@ ofiles = $(cfiles:.c=.o)
 depfiles = scheduler.c server.c signals_unix.c timers_unix.c  \
 	childhndlr.c
 
-libs1 = ../commu/libcommu.a ../objects/libobj.a
+libs1 = ../objects/libobj.a
 ifdef procs
 libs2 = ../procs/libprocs.a
 endif
@@ -34,7 +34,8 @@ endif
 ifdef lowlevel
 libs6 = ../lowlevel/libll.a
 endif
-libs = $(libs2) $(libs3) $(libs4) $(libs5) $(libs6) $(libs1)
+libs7 = ../commu/libcommu.a
+libs = $(libs1) $(libs2) $(libs3) $(libs4) $(libs5) $(libs6) $(libs7)
 
 all: ../server.$(z)
 ../server.$(z): $(ofiles) $(libs) $(COMMONLIB)/libcommon.a

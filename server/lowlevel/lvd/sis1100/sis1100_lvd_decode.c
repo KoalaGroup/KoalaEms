@@ -3,7 +3,7 @@
  * created 10.Dec.2003 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: sis1100_lvd_decode.c,v 1.29 2012/09/12 14:49:28 wuestner Exp $";
+    "$ZEL: sis1100_lvd_decode.c,v 1.30 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -23,7 +23,7 @@ struct bus_descr {
 };
 
 static void
-decode_union24(struct lvd_dev* dev, int addr, int size,
+decode_union24(__attribute__((unused)) struct lvd_dev* dev, int addr, int size,
         struct bus_descr* descr, int idx)
 {
     if (size==descr[idx].size) {
@@ -42,8 +42,8 @@ decode_union24(struct lvd_dev* dev, int addr, int size,
 }
 
 static void
-decode_arr2(struct lvd_dev* dev, int addr, int size, struct bus_descr* descr,
-        int i)
+decode_arr2(__attribute__((unused)) struct lvd_dev* dev, int addr, int size, __attribute__((unused)) struct bus_descr* descr,
+        __attribute__((unused)) int i)
 {
     int idx=addr/2;
     printf("[%d]", idx);
@@ -562,7 +562,7 @@ decode_card(struct lvd_dev* dev, int addr, int size,
 
 static void
 decode_incards(struct lvd_dev* dev, int addr, int size,
-        struct bus_descr* descr, int idx)
+        __attribute__((unused)) struct bus_descr* descr, __attribute__((unused)) int idx)
 {
     int i=addr/0x80, indx;
     ems_u32 mtype;
@@ -572,7 +572,7 @@ decode_incards(struct lvd_dev* dev, int addr, int size,
         mtype=dev->acards[indx].mtype;
     else
         mtype=-1;
-    if (mtype<0) {
+    if ((int)mtype<0) {
         printf("in_card_nix[%d].", i);
         decode_card(dev, addr%0x80, size, lvd_incard_all_descr);
     } else {
@@ -628,7 +628,7 @@ decode_incards(struct lvd_dev* dev, int addr, int size,
 
 static void
 decode_controller(struct lvd_dev* dev, int addr, int size,
-        struct bus_descr* descr, int idx)
+        __attribute__((unused)) struct bus_descr* descr, __attribute__((unused)) int idx)
 {
     ems_u32 mtype;
     lvd_c_mtype(dev, &mtype);
@@ -653,15 +653,15 @@ decode_controller(struct lvd_dev* dev, int addr, int size,
 
 static void
 decode_incard_bc(struct lvd_dev* dev, int addr, int size,
-        struct bus_descr* descr, int idx)
+        __attribute__((unused)) struct bus_descr* descr, __attribute__((unused)) int idx)
 {
     printf("incard_bc.");
     decode_card(dev, addr%0x80, size, lvd_incard_bc_descr);
 }
 
 static void
-decode_illegal(struct lvd_dev* dev, int addr, int size,
-        struct bus_descr* descr, int idx)
+decode_illegal(__attribute__((unused)) struct lvd_dev* dev, int addr, int size,
+        __attribute__((unused)) struct bus_descr* descr, __attribute__((unused)) int idx)
 {
     printf("address in illegal space: 0x%x/%d", addr, size);
 }

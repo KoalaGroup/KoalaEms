@@ -1,7 +1,7 @@
 /*
  * objects/domain/dom_datain.h
  * 
- * $ZEL: dom_datain.h,v 1.7 2011/08/16 19:19:50 wuestner Exp $
+ * $ZEL: dom_datain.h,v 1.8 2017/10/27 21:06:48 wuestner Exp $
  * 
  * created 1993-04-27
  */
@@ -38,10 +38,10 @@ typedef struct
       int flags;
     } inetV6sock;
   } addr;
-  int bufinfosize;
-  int* bufinfo;
-  int addrinfosize;
-  int* addrinfo;
+  size_t bufinfosize;
+  ems_u32* bufinfo;
+  size_t addrinfosize;
+  ems_u32* addrinfo;
 } datain_info;
 
 extern datain_info datain[];

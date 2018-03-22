@@ -3,7 +3,7 @@
  * created before 14.04.94
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: pi.c,v 1.19 2011/04/06 20:30:29 wuestner Exp $";
+    "$ZEL: pi.c,v 1.22 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -29,7 +29,10 @@ static const char* cvsid __attribute__((unused))=
 void moncontrol(int);
 
 extern ems_u32* outptr;
-int event_max=EVENT_MAX;
+size_t event_max=EVENT_MAX;
+#ifdef READOUT_CC
+struct global_evc global_evc; /* declared in readout.h */
+#endif
 
 RCS_REGISTER(cvsid, "objects/pi")
 
@@ -366,7 +369,7 @@ piobj pi_obj={
         dir_pi,
         0
     },
-    0
+    0, 0, 0, 0, 0, 0, 0, 0
 };
 /*****************************************************************************/
 /*****************************************************************************/

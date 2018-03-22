@@ -3,7 +3,7 @@
  * created 2007-08-06 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: sy527.c,v 1.2 2011/04/06 20:30:33 wuestner Exp $";
+    "$ZEL: sy527.c,v 1.3 2017/10/09 21:25:38 wuestner Exp $";
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,7 +16,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../../../objects/domain/dom_ml.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
 
 #define get_device(bus) \
     (struct caenet_dev*)get_gendevice(modul_caenet, (bus))

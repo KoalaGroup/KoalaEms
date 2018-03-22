@@ -3,7 +3,7 @@
  * created 2010-Feb-03 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: datafilter.c,v 1.3 2011/04/06 20:30:25 wuestner Exp $";
+    "$ZEL: datafilter.c,v 1.4 2016/05/12 20:39:21 wuestner Exp $";
 
 #include <sconf.h>
 #include <stdlib.h>
@@ -139,9 +139,11 @@ lvd_clear_datafilter(struct lvd_dev* dev)
 /*****************************************************************************/
 
 static struct filterdefinition definitions[]={
+#if 0
     {"sync_statist", filter_sync_statist_init, filter_sync_statist_filter},
-    {"add_header", filter_add_header_init, filter_add_header_filter},
     {"qdc_sparse", filter_qdc_sparse_init, filter_qdc_sparse_filter},
+#endif
+    {"add_header", filter_add_header_init, filter_add_header_filter},
 };
 static int num_filterdefinitions=
         sizeof(definitions)/sizeof(struct filterdefinition);

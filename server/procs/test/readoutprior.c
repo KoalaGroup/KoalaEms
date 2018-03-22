@@ -1,6 +1,6 @@
 /******************************************************************************
 *                                                                             *
-* debuglevel.c                                                                *
+* readoutprior.c                                                              *
 *                                                                             *
 * OS9                                                                         *
 *                                                                             *
@@ -8,7 +8,7 @@
 *                                                                             *
 ******************************************************************************/
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: readoutprior.c,v 1.5 2011/04/06 20:30:34 wuestner Exp $";
+    "$ZEL: readoutprior.c,v 1.6 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <errorcodes.h>
 #include <config.h>
@@ -28,7 +28,7 @@ RCS_REGISTER(cvsid, "procs/test")
 /*
 ReadoutPrior
 */
-plerrcode proc_ReadoutPrior(ems_u32* p)
+plerrcode proc_ReadoutPrior(__attribute__((unused)) ems_u32* p)
 {
 #ifdef VAR_READOUT_PRIOR
 *outptr++=readout_prior;
@@ -37,7 +37,7 @@ if (p[0]>0) readout_prior=p[1];
 return(plOK);
 }
 
-plerrcode test_proc_ReadoutPrior(ems_u32* p)
+plerrcode test_proc_ReadoutPrior(__attribute__((unused)) ems_u32* p)
 {
 plerrcode res=plOK;
 #ifdef VAR_READOUT_PRIOR

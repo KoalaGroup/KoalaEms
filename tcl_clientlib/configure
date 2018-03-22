@@ -3890,7 +3890,7 @@ if test "$GXX" = yes ; then
     WERROR="-Werror"
     case $build_os in
         linux*)
-        CPPFLAGS="-D_BSD_SOURCE"
+        #CPPFLAGS="-D_BSD_SOURCE"
     ;;
     esac
 else

@@ -3,7 +3,7 @@
  * created 2006-Feb-07 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: sync_master.c,v 1.20 2013/01/17 22:44:54 wuestner Exp $";
+    "$ZEL: sync_master.c,v 1.21 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -43,7 +43,7 @@ RCS_REGISTER(cvsid, "lowlevel/lvd/sync")
  * the real start will be done in lvd_syncmaster_start
  */
 static int
-lvd_start_msynch(struct lvd_dev* dev, struct lvd_acard* acard)
+lvd_start_msynch(__attribute__((unused)) struct lvd_dev* dev, __attribute__((unused)) struct lvd_acard* acard)
 {
     return 0;
 }
@@ -52,13 +52,14 @@ lvd_start_msynch(struct lvd_dev* dev, struct lvd_acard* acard)
  * the real stop should already be done in lvd_syncmaster_stop
  */
 static int
-lvd_stop_msynch(struct lvd_dev* dev, struct lvd_acard* acard)
+lvd_stop_msynch(__attribute__((unused)) struct lvd_dev* dev, __attribute__((unused)) struct lvd_acard* acard)
 {
     return 0;
 }
 /*****************************************************************************/
 static int
-lvd_clear_msynch(struct lvd_dev* dev, struct lvd_acard* acard)
+lvd_clear_msynch(__attribute__((unused)) struct lvd_dev* dev,
+        __attribute__((unused)) struct lvd_acard* acard)
 {
     return 0;
 }
@@ -660,7 +661,7 @@ dump_evc(struct lvd_dev* dev, int addr, void *xp)
 }
 /*****************************************************************************/
 static int
-dump_softinfo(struct lvd_dev* dev, struct lvd_acard* acard, void *xp)
+dump_softinfo(__attribute__((unused)) struct lvd_dev* dev, struct lvd_acard* acard, void *xp)
 {
     xprintf(xp, "  daq_mode  =0x%04x\n", acard->daqmode);
     return 0;
@@ -748,14 +749,14 @@ lvd_cardstat_synch_master2(struct lvd_dev* dev, struct lvd_acard* acard,
 }
 /*****************************************************************************/
 static void
-lvd_msync_acard_free(struct lvd_dev* dev, struct lvd_acard* acard)
+lvd_msync_acard_free(__attribute__((unused)) struct lvd_dev* dev, struct lvd_acard* acard)
 {
     free(acard->cardinfo);
     acard->cardinfo=0;
 }
 /*****************************************************************************/
 int
-lvd_msync_acard_init(struct lvd_dev* dev, struct lvd_acard* acard)
+lvd_msync_acard_init(__attribute__((unused)) struct lvd_dev* dev, struct lvd_acard* acard)
 {
     struct msync_info *info;
 

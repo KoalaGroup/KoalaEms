@@ -4,8 +4,7 @@
  * 11.09.1998 PW: debugcl changed to policies
  */
 
-#define _BSD_SOURCE
-#define _OSF_SOURCE
+#define _DEFAULT_SOURCE
 #define _clientcommlib_c_
 #include "config.h"
 #include "clientcommlib.h"

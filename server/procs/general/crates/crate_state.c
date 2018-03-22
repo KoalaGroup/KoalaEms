@@ -4,7 +4,7 @@
  * created 01.Jul.2009 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: crate_state.c,v 1.2 2011/04/06 20:30:32 wuestner Exp $";
+    "$ZEL: crate_state.c,v 1.4 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <sconf.h>
 #include <stdio.h>
@@ -18,7 +18,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../../../lowlevel/devices.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
 
 RCS_REGISTER(cvsid, "procs/general")
 
@@ -47,7 +46,7 @@ plerrcode proc_crate_state(ems_u32* p)
     ems_u32 mask;
     enum Modulclass mclass, mc;
     char* devname;
-    int i;
+    unsigned int i;
 
     xdrstrcdup(&devname, p+1);
 

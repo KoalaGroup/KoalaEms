@@ -3,7 +3,7 @@
  * created      14.04.97 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: do_cluster_sock.c,v 1.14 2011/04/06 20:30:22 wuestner Exp $";
+    "$ZEL: do_cluster_sock.c,v 1.15 2017/10/20 23:21:31 wuestner Exp $";
 
 #include <errno.h>
 #include <string.h>
@@ -360,7 +360,8 @@ special->connected=0;
 return OK;
 }
 /*****************************************************************************/
-static void do_cluster_sock_patherror(int do_idx, int error)
+static void do_cluster_sock_patherror(int do_idx,
+        __attribute__((unused)) int error)
 {
 struct do_special_sock* special=(struct do_special_sock*)dataout_cl[do_idx].s;
 T(dataout/cluster/do_cluster_sock.c:do_cluster_sock_patherror)

@@ -4,7 +4,7 @@
  * created 04.11.94
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: unsol.c,v 1.16 2011/04/06 20:30:34 wuestner Exp $";
+    "$ZEL: unsol.c,v 1.19 2017/10/25 21:13:02 wuestner Exp $";
 
 
 #include <sconf.h>
@@ -34,7 +34,6 @@ static const char* cvsid __attribute__((unused))=
 #endif
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
 
 RCS_REGISTER(cvsid, "procs/test")
 
@@ -45,7 +44,7 @@ SendUnsol
 plerrcode proc_SendUnsol(ems_u32* p)
 {
     unsigned int num;
-    int i;
+    unsigned int i;
     ems_u32* ptr=0;
 
     T(proc_SendUnsol)
@@ -87,7 +86,7 @@ SendUnsolLoop
 */
 plerrcode proc_SendUnsolLoop(ems_u32* p)
 {
-int i;
+unsigned int i;
 ems_u32 *ptr=0;
 
 T(proc_SendUnsolLoop)
@@ -101,7 +100,7 @@ if ((p[0]>1)&&((ptr=(ems_u32*)calloc(p[0]-1, sizeof(ems_u32)))==0))
   }
 for (i=0; i<p[1]; i++)
   {
-  int j;
+  unsigned int j;
   for (j=0; j<p[0]-1; j++) ptr[j]=p[j+2];
   send_unsolicited(Unsol_Test, ptr, p[0]-1);
   }
@@ -133,10 +132,11 @@ SendLoopTime
 */
 plerrcode proc_SendLoopTime(ems_u32* p)
 {
-int i, start;
+int start;
 ems_u32 buf[2];
 struct timeval tv;
 struct timezone tz;
+unsigned int i;
 
 T(proc_SendLoopTime)
 gettimeofday(&tv, &tz);
@@ -175,7 +175,7 @@ SendLoopCount
 */
 plerrcode proc_SendLoopCount(ems_u32* p)
 {
-int i;
+unsigned int i;
 
 T(proc_SendLoopCount)
 for (i=0; i<p[1]; i++)
@@ -214,7 +214,7 @@ p[2] = sleep
 */
 plerrcode proc_SULC(ems_u32* p)
 {
-    int i, count;
+    unsigned int count, i;
     unsigned int sl;
     ems_u32* ptr;
 
@@ -228,7 +228,7 @@ plerrcode proc_SULC(ems_u32* p)
         return(plErr_NoMem);
     }
     for (i=0; i<count; i++) {
-        int j;
+        unsigned int j;
         ptr[0]=i;
         for (j=1; j<p[0]-1; j++) ptr[j]=p[j+2];
         send_unsolicited(Unsol_Test, ptr, p[0]-1);
@@ -258,10 +258,10 @@ int ver_proc_SULC=1;
 
 /*****************************************************************************/
 
-plerrcode proc_SendVarUnsol(ems_u32* p)
+plerrcode proc_SendVarUnsol(__attribute__((unused)) ems_u32* p)
 {
 #ifdef OBJ_VAR
-int i;
+unsigned int i;
 unsigned int len;
 ems_u32 *buf, *ptr;
 
@@ -284,7 +284,7 @@ free(buf);
 return(plOK);
 }
 
-plerrcode test_proc_SendVarUnsol(ems_u32* p)
+plerrcode test_proc_SendVarUnsol(__attribute__((unused)) ems_u32* p)
 {
 T(test_proc_SendVarUnsol)
 #ifdef OBJ_VAR
@@ -323,7 +323,7 @@ int ver_proc_SendVarUnsol=1;
  *      0x10: addressee of mail
  *      0x20: text of mail
  */
-plerrcode proc_SendUnsolAlarm(ems_u32* p)
+plerrcode proc_SendUnsolAlarm(__attribute__((unused)) ems_u32* p)
 {
 #if 0
     int idx, i;

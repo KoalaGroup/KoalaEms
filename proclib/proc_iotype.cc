@@ -18,7 +18,7 @@
 #include "versions.hxx"
 
 VERSION("2014-09-07", __FILE__, __DATE__, __TIME__,
-"$ZEL: proc_iotype.cc,v 2.12 2014/09/12 13:07:33 wuestner Exp $")
+"$ZEL: proc_iotype.cc,v 2.14 2017/10/21 18:53:43 wuestner Exp $")
 #define XVERSION
 
 using namespace std;
@@ -79,9 +79,11 @@ delete[] args;
 void C_io_type::pruefen() const
 {
 cerr << "C_io_type:" << endl;
-cerr << "  direction=" << (int)direction << "; argnum=" << argnum << endl;
+cerr << "  direction=" << static_cast<int>(direction) << "; argnum=" << argnum << endl;
 cerr << "  args:";
-for (int i=0; i<argnum; i++) cerr << ' ' << args[i]; cerr << endl;
+for (int i=0; i<argnum; i++)
+    cerr << ' ' << args[i];
+cerr << endl;
 cerr << "  forcelists_=" << forcelists_ << "; uselists()=" << uselists() << endl; 
 }
 
@@ -125,11 +127,11 @@ C_io_type* C_io_type::create(io_direction direction, C_inbuf& ib)
     // the particular C_io_type_* constructors do not consume words from
     // ib.
 
-    iotype_=(ems_i32)ib.getint();
+    iotype_=static_cast<ems_i32>(ib.getint());
     if (iotype_==-1) {
         use_lists=true;
         // use the next word
-        iotype_=(ems_i32)ib.getint();
+        iotype_=static_cast<ems_i32>(ib.getint());
     }
     iotyp=static_cast<InOutTyp>(iotype_);
 

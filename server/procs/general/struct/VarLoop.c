@@ -1,15 +1,10 @@
-/******************************************************************************
-*                                                                             *
-* VarLoop.c                                                                   *
-*                                                                             *
-* OS9                                                                         *
-*                                                                             *
-* created before 28.09.93                                                     *
-* last changed 01.12.94                                                       *
-*                                                                             *
-******************************************************************************/
+/*
+ * procs/general/struct/VarLoop.c
+ * created before 28.09.93
+ */
+
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: VarLoop.c,v 1.10 2011/04/06 20:30:32 wuestner Exp $";
+    "$ZEL: VarLoop.c,v 1.11 2017/10/09 21:25:37 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -19,8 +14,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../../procs.h"
 #include "../../procprops.h"
 #include "../../proclist.h"
-
-extern int wirbrauchen;
 
 RCS_REGISTER(cvsid, "procs/general/struct")
 
@@ -53,7 +46,7 @@ plerrcode proc_While(ems_u32* p)
 
 plerrcode test_proc_VarLoop(ems_u32* p)
 {
-int limit;
+ssize_t limit;
 T(test_proc_VarLoop)
 if (*p<2) return(plErr_ArgNum);
 if (p[1]>MAX_VAR) return(Err_IllVar);
@@ -66,7 +59,7 @@ return(plOK);
 
 plerrcode test_proc_While(ems_u32* p)
 {
-  int limit;
+  ssize_t limit;
   if(*p<2)return(plErr_ArgNum);
   if(p[1]>MAX_VAR)return(Err_IllVar);
   if(!var_list[p[1]].len)return(Err_NoVar);

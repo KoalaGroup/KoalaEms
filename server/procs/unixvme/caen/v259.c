@@ -3,7 +3,7 @@
  * created 05.Sep.2002 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: v259.c,v 1.4 2011/04/06 20:30:35 wuestner Exp $";
+    "$ZEL: v259.c,v 1.6 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -18,8 +18,7 @@ static const char* cvsid __attribute__((unused))=
 #include "../vme_verify.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
-extern int *memberlist;
+extern unsigned int *memberlist;
 
 RCS_REGISTER(cvsid, "procs/unixvme/caen")
 
@@ -45,7 +44,7 @@ RCS_REGISTER(cvsid, "procs/unixvme/caen")
 /*
  * p[0]: argcount==0
  */
-plerrcode proc_v259init(ems_u32* p)
+plerrcode proc_v259init(__attribute__((unused)) ems_u32* p)
 {
     int i, res;
 
@@ -81,7 +80,8 @@ int ver_proc_v259init = 1;
  */
 plerrcode proc_v259read(ems_u32* p)
 {
-    int i, res;
+    unsigned int i;
+    int res;
 
     for (i=1; i<=memberlist[0]; i++) {
         ml_entry* module=ModulEnt(i);

@@ -1,2 +1,0 @@
-lesen von doorbell (reg 0x10 in sis1100) setzt bit 19 in sr
-

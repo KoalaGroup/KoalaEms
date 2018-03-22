@@ -1,0 +1,31 @@
+# server/procs/ip/Makefile.in
+# created 2016-04-27 PeWue
+# $ZEL: Makefile.in,v 1.2 2016/07/01 16:17:24 wuestner Exp $
+
+CONF = ../../conf
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+include $(CONF)/rules.make
+include $(CONF)/config.make
+
+cfiles = ip_opaque.c
+ofiles = $(cfiles:.c=.o)
+depfiles = $(cfiles)
+
+lib = ../libprocs.a
+
+all: $(lib)
+
+$(lib): $(lib)($(ofiles))
+	$(RANLIB) $@
+
+clean:
+	-$(RM) *.o
+
+depend: xdepend
+
+.PHONY: depend
+
+#############################################

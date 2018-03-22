@@ -3,7 +3,7 @@
  * created 10.Oct.2003 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: sis3400.c,v 1.9 2011/04/06 20:30:35 wuestner Exp $";
+    "$ZEL: sis3400.c,v 1.11 2017/10/20 23:20:52 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -19,8 +19,7 @@ static const char* cvsid __attribute__((unused))=
 #include "../vme_verify.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
-extern int *memberlist;
+extern unsigned int *memberlist;
 
 #define FIFOSIZE 32768
 
@@ -109,7 +108,7 @@ int ver_proc_sis3400init = 1;
 /*
  * p[0]: argcount==0
  */
-plerrcode proc_sis3400clear(ems_u32* p)
+plerrcode proc_sis3400clear(__attribute__((unused)) ems_u32* p)
 {
     int i;
 
@@ -141,7 +140,7 @@ int ver_proc_sis3400clear = 1;
 /*
  * p[0]: argcount==0
  */
-plerrcode proc_sis3400read(ems_u32* p)
+plerrcode proc_sis3400read(__attribute__((unused)) ems_u32* p)
 {
     int i;
 
@@ -200,7 +199,7 @@ int ver_proc_sis3400read = 1;
 /*
  * p[0]: argcount==0
  */
-plerrcode proc_sis3400tread(ems_u32* p)
+plerrcode proc_sis3400tread(__attribute__((unused)) ems_u32* p)
 {
     int i;
 
@@ -244,7 +243,7 @@ int ver_proc_sis3400tread = 1;
 /*
  * p[0]: argcount==0
  */
-plerrcode proc_sis3400readclock(ems_u32* p)
+plerrcode proc_sis3400readclock(__attribute__((unused)) ems_u32* p)
 {
     int i;
 

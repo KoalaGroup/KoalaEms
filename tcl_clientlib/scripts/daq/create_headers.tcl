@@ -1,4 +1,4 @@
-# $ZEL: create_headers.tcl,v 1.7 2009/04/01 16:29:58 wuestner Exp $
+# $ZEL: create_headers.tcl,v 1.8 2016/03/18 16:40:02 wuestner Exp $
 # copyright 2001
 #   Peter Wuestner; Zentrallabor fuer Elektronik; Forschungszentrum Juelich
 #
@@ -140,7 +140,13 @@ proc create_vedheader {ved} {
       }
     }
     if [info exists trigger] {
-      lappend head [list trigger $trigger]
+        if {[array exists trigger]==0} {
+            lappend head [list trigger $trigger]
+        } else {
+            foreach i [lsort -integer -decreasing [array names trigger]] {
+                lappend head [list trigger $i $trigger($i)]
+            }
+        }
     }
     if [array exists vars] {
       foreach i [array names vars] {

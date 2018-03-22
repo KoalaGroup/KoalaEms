@@ -7,10 +7,6 @@
 #define _GNU_SOURCE
 #endif
 
-#ifndef _BSD_SOURCE
-#define _BSD_SOURCE
-#endif
-
 #ifdef __linux__
 /*
  * these are automatically defined if _GNU_SOURCE is defined

@@ -1,5 +1,5 @@
 # lowlevel/lvd/datafilter/Makefile.in
-# $ZEL: Makefile.in,v 1.2 2010/04/20 10:03:47 wuestner Exp $
+# $ZEL: Makefile.in,v 1.3 2016/05/12 20:39:21 wuestner Exp $
 
 CONF = ../../../conf
 
@@ -10,9 +10,7 @@ include $(CONF)/rules.make
 include $(CONF)/config.make
 
 cfiles = lvd_datafilter.c datafilter.c  \
-         filter_qdc_sparse.c \
-         filter_add_header.c \
-         filter_sync_statist.c
+         filter_add_header.c
 ofiles = $(cfiles:.c=.o)
 depfiles = $(cfiles)
 

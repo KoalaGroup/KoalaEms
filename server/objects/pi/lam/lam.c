@@ -3,7 +3,7 @@
  * created before 22.09.93
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: lam.c,v 1.21 2011/04/06 20:30:29 wuestner Exp $";
+    "$ZEL: lam.c,v 1.23 2017/10/20 23:21:31 wuestner Exp $";
 
 /*
  * LAMs are triggered by an arbitrary trigger procedure.
@@ -39,7 +39,7 @@ static const char* cvsid __attribute__((unused))=
 extern ems_u32 *outptr, *outbuf;
 struct LAM *lam_list=0; /* linked list */
 
-extern int *memberlist;
+extern unsigned int *memberlist;
 
 RCS_REGISTER(cvsid, "objects/pi/lam")
 
@@ -89,7 +89,7 @@ p[4...] : arguments of the trigger procedure
 errcode createlam(ems_u32* p, unsigned int num)
 {
     struct LAM *lam;
-    int i;
+    unsigned int i;
 
     /* check number of arguments */
     if (num<5 || p[4]!=num-5)
@@ -185,7 +185,7 @@ printf("objects/pi/lam/lam.c::lam_callback called\n");
 static errcode test_lam_proc(struct LAM *lam)
 {
     errcode res;
-    int limit=0;
+    ssize_t limit=0;
 
     if (!lam->proclist)
         return Err_NoReadoutList;
@@ -196,7 +196,7 @@ static errcode test_lam_proc(struct LAM *lam)
         memberlist=0;
 
     res=test_proclist(lam->proclist, lam->proclistlen, &limit);
-    printf("test_lam_proc: res=%d limit=%d\n", res, limit);
+    printf("test_lam_proc: res=%d limit=%lld\n", res, (long long)limit);
     return res;
 }
 /*****************************************************************************/
@@ -393,7 +393,7 @@ p[0] : LAM-Index
 errcode getlamattr(ems_u32* p, unsigned int num)
 {
     struct LAM *lam;
-    int i;
+    unsigned int i;
 
     T(getlamattr)
     if (num!=1)
@@ -445,8 +445,8 @@ static ems_u32 *dir_pi_lam(ems_u32* p)
     return(p);
 }
 /*****************************************************************************/
-static objectcommon* lookup_pi_lam(ems_u32* id, unsigned int idlen,
-        unsigned int* remlen)
+static objectcommon* lookup_pi_lam(__attribute__((unused)) ems_u32* id,
+    unsigned int idlen, unsigned int* remlen)
 {
 T(lookup_pi_lam)
 if (idlen>0)

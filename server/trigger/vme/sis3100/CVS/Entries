@@ -1,11 +1,11 @@
-/Makefile.in/1.2/Tue May  3 09:11:34 2011//
-/nanosender.c/1.2/Tue May  3 09:11:34 2011//
-/off.c/1.2/Tue May  3 09:11:34 2011//
-/on.c/1.2/Tue May  3 09:11:34 2011//
-/sender.c/1.2/Tue May  3 09:11:34 2011//
-/sender3400.c/1.2/Tue May  3 09:11:34 2011//
-/sis3100_pulser.c/1.2/Tue May  3 09:11:34 2011//
-/sis3100_zelsync.c/1.23/Tue May  3 09:11:34 2011//
-/sis3100trigger.c/1.8/Tue May  3 09:11:34 2011//
-/trigprocs.config/1.2/Tue May  3 09:11:34 2011//
+/Makefile.in/1.2/Sat Mar 24 21:34:46 2007//
+/nanosender.c/1.2/Wed Apr  6 20:30:36 2011//
+/off.c/1.2/Wed Apr  6 20:30:36 2011//
+/on.c/1.2/Wed Apr  6 20:30:36 2011//
+/sender.c/1.2/Wed Apr  6 20:30:36 2011//
+/sender3400.c/1.2/Wed Apr  6 20:30:36 2011//
+/sis3100_pulser.c/1.2/Wed Apr  6 20:30:36 2011//
+/sis3100_zelsync.c/1.25/Thu May 12 22:00:12 2016//
+/sis3100trigger.c/1.14/Sat Oct 21 22:44:12 2017//
+/trigprocs.config/1.2/Sat Mar 24 21:34:46 2007//
 D

@@ -8,7 +8,7 @@
 *                                                                             *
 ******************************************************************************/
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: onreadouterror.c,v 1.7 2011/04/06 20:30:34 wuestner Exp $";
+    "$ZEL: onreadouterror.c,v 1.8 2017/10/25 21:13:02 wuestner Exp $";
 
 #include <errorcodes.h>
 #include <sconf.h>
@@ -24,7 +24,7 @@ RCS_REGISTER(cvsid, "procs/test")
 
 /*****************************************************************************/
 
-plerrcode proc_OnReadoutError(ems_u32* p)
+plerrcode proc_OnReadoutError(__attribute__((unused)) ems_u32* p)
 {
 #ifdef READOUT_CC
 onreadouterror=p[1];
@@ -32,7 +32,7 @@ onreadouterror=p[1];
 return(plOK);
 }
 
-plerrcode test_proc_OnReadoutError(ems_u32* p)
+plerrcode test_proc_OnReadoutError(__attribute__((unused)) ems_u32* p)
 {
 #ifdef READOUT_CC
 if (p[0]==1)

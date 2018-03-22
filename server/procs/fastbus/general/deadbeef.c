@@ -2,7 +2,7 @@
  * procs/fastbus/general/deadbeef.c
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: deadbeef.c,v 1.9 2015/04/06 21:33:31 wuestner Exp $";
+    "$ZEL: deadbeef.c,v 1.10 2017/10/09 21:25:37 wuestner Exp $";
 
 #include <sconf.h>
 #include <stdlib.h>
@@ -25,7 +25,6 @@ static const char* cvsid __attribute__((unused))=
 
 extern ems_u32* outptr;
 extern int *memberlist;
-extern int wirbrauchen;
 
 static void
 dump(ems_u32* pp, unsigned int wc, ems_u32 pa, int ev)

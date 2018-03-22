@@ -3,7 +3,7 @@
  * created 30.Sep.2002 p.kulessa
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: v785_792.c,v 1.9 2015/04/06 21:33:35 wuestner Exp $";
+    "$ZEL: v785_792.c,v 1.10 2017/10/09 21:09:24 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -25,7 +25,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../vme_verify.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
 extern int *memberlist;
 
 RCS_REGISTER(cvsid, "procs/unixvme/caen")

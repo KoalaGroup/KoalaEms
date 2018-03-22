@@ -11,8 +11,7 @@
 
 
 extern ems_u32* outptr;
-extern int* memberlist;
-extern int wirbrauchen;
+extern unsigned int* memberlist;
 
 
 //*******ADDRESSES***********
@@ -50,7 +49,7 @@ const int PS_TEST_R        = 0x100000;
 
 /*****************************************************************************/
 static plerrcode
-test_vmeparm(ems_u32* p, int n)
+test_vmeparm(ems_u32* p, unsigned int n)
 {
   if (p[0]!=n) return(plErr_ArgNum);
   if (!valid_module(p[1], modul_vme)) return plErr_ArgRange;

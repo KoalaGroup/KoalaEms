@@ -1,8 +1,8 @@
+/Makefile.in/1.2/Tue Dec  8 14:24:30 2009//
+/sync.c/1.5/Sun Oct 22 22:38:17 2017//
+/sync.h/1.1/Wed Jul 18 16:40:38 2007//
+/sync_init.h/1.1/Wed Jul 18 16:40:38 2007//
+/syncdev.h/1.2/Tue Mar 11 20:28:35 2008//
 D/chi_gsi////
 D/pci_zel////
 D/plxsync////
-/Makefile.in/1.2/Tue May  3 09:11:35 2011//
-/sync.c/1.4/Tue May  3 09:11:35 2011//
-/sync.h/1.1/Tue May  3 09:11:35 2011//
-/sync_init.h/1.1/Tue May  3 09:11:35 2011//
-/syncdev.h/1.2/Tue May  3 09:11:35 2011//

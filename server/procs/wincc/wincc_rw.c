@@ -3,7 +3,7 @@
  * 09.02.1999
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: wincc_rw.c,v 1.4 2011/04/06 20:30:35 wuestner Exp $";
+    "$ZEL: wincc_rw.c,v 1.5 2017/10/09 21:25:38 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -19,7 +19,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../../lowlevel/wincc/wincc.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
 
 RCS_REGISTER(cvsid, "procs/wincc")
 

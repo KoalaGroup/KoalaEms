@@ -4,7 +4,7 @@
  * created: 24.Jul.2004 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: dataoutlog.c,v 1.3 2011/04/06 20:30:30 wuestner Exp $";
+    "$ZEL: dataoutlog.c,v 1.4 2017/10/09 21:25:37 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -20,7 +20,6 @@ static const char* cvsid __attribute__((unused))=
 #include "../../objects/do/dataout.h"
 
 extern ems_u32* outptr;
-extern int wirbrauchen;
 
 RCS_REGISTER(cvsid, "procs/dataout")
 

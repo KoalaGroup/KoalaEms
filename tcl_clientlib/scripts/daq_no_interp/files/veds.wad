@@ -1,2 +1,0 @@
-set setupfile(cc) {zel_cc_dummy.wad}
-set setupfile(em) {zel_em.wad}

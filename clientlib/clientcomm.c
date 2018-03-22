@@ -1,6 +1,6 @@
 /*
  * clientcomm.c
- * $ZEL: clientcomm.c,v 2.28 2014/07/14 15:06:46 wuestner Exp $
+ * $ZEL: clientcomm.c,v 2.29 2017/10/21 19:10:02 wuestner Exp $
  *
  * created before: 16.08.94
  * 14.05.1998 PW: EMSE_Unknown changed to EMSE_CommuTimeout
@@ -10,7 +10,7 @@
  */
 
 #define _clientcomm_c_
-#define _BSD_SOURCE
+#define _DEFAULT_SOURCE
 #include "config.h"
 #include "clientcommlib.h"
 #include "clientcomm.h"
@@ -37,7 +37,7 @@
 #endif
 #include "compat.h"
 
-/* $ZEL: clientcomm.c,v 2.28 2014/07/14 15:06:46 wuestner Exp $ */
+/* $ZEL: clientcomm.c,v 2.29 2017/10/21 19:10:02 wuestner Exp $ */
 
 static int testpath= -1;
 static struct timeval deftimeout_={20, 0};

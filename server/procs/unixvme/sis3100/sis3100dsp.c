@@ -3,7 +3,7 @@
  * created 25.Jun.2003 PW
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: sis3100dsp.c,v 1.17 2011/04/06 20:30:35 wuestner Exp $";
+    "$ZEL: sis3100dsp.c,v 1.20 2017/10/22 23:25:43 wuestner Exp $";
 
 #include <sconf.h>
 #include <debug.h>
@@ -32,10 +32,6 @@ static const char* cvsid __attribute__((unused))=
 #ifdef DMALLOC
 #include dmalloc.h
 #endif
-
-extern ems_u32* outptr;
-extern int wirbrauchen;
-extern int *memberlist;
 
 #define get_vmedevice(crate) \
     (struct vme_dev*)get_gendevice(modul_vme, (crate))
@@ -128,8 +124,8 @@ dump_mem(struct vme_dev* dev, unsigned int start, unsigned int size,
         const char* format)
 {
     static u_int32_t* buf=0;
-    static int bufsize=0;
-    int l, n, i;
+    static unsigned int bufsize=0;
+    unsigned int i, l, n;
     struct mem_procs* mem_procs=dev->get_mem_procs(dev);
 
     size=(size+3)&(unsigned int)~3;
@@ -154,8 +150,8 @@ dump_mem_f(struct vme_dev* dev, unsigned int start, unsigned int size,
         const char* format)
 {
     static u_int32_t* buf=0;
-    static int bufsize=0;
-    int l, n, i;
+    static unsigned int bufsize=0;
+    unsigned int l, n, i;
     struct mem_procs* mem_procs=dev->get_mem_procs(dev);
     float x;
 
@@ -259,7 +255,7 @@ int ver_proc_sis3100dsp_init = 1;
 /*
  * p[0]: argcount==0
  */
-plerrcode proc_sis3100dsp_init(ems_u32* p)
+plerrcode proc_sis3100dsp_init(__attribute__((unused)) ems_u32* p)
 {
 /* XXX all modules must reside in the same crate */
 /* XXX trigger ID can not be used yet */
@@ -268,7 +264,7 @@ plerrcode proc_sis3100dsp_init(ems_u32* p)
     u_int32_t list[32];
     u_int32_t listpos, descrpos;
     unsigned int N;
-    int n, i;
+    unsigned int n, i;
 
     struct vme_dev* dev=ModulEnt(1)->address.vme.dev;
     struct mem_procs* mem_procs=dev->get_mem_procs(dev);
@@ -381,7 +377,13 @@ int ver_proc_sis3100dsp_readout = 1;
  * p[1]: crate ID
  * p[2]: send trigger
  */
-plerrcode proc_sis3100dsp_readout(ems_u32* p)
+plerrcode proc_sis3100dsp_readout(
+#ifdef DELAYED_READ
+        ems_u32* p
+#else
+        __attribute__((unused)) ems_u32* p
+#endif
+)
 {
 #ifdef DELAYED_READ
     struct vme_dev* dev=get_vmedevice(p[1]);
@@ -594,7 +596,7 @@ int ver_proc_sis3100dsp_fillmem = 1;
  */
 plerrcode proc_sis3100dsp_fillmem(ems_u32* p)
 {
-    int i;
+    unsigned int i;
     struct vme_dev* dev=get_vmedevice(p[1]);
     struct mem_procs* mem_procs=dev->get_mem_procs(dev);
 

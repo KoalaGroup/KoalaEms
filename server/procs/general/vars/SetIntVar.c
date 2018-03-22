@@ -3,18 +3,17 @@
  * created before 28.09.93
  */
 static const char* cvsid __attribute__((unused))=
-    "$ZEL: SetIntVar.c,v 1.7 2012/09/10 22:47:48 wuestner Exp $";
+    "$ZEL: SetIntVar.c,v 1.9 2017/10/09 21:25:37 wuestner Exp $";
 
+#include <sconf.h>
 #include <errorcodes.h>
 #include <rcs_ids.h>
 #include "../../procs.h"
 #include "../../procprops.h"
 #include "../../../objects/var/variables.h"
-#ifdef TRIGGER
-#include "../../../trigger/trigger.h"
+#ifdef READOUT_CC
+#include "../../../objects/pi/readout.h"
 #endif
-
-extern int wirbrauchen;
 
 RCS_REGISTER(cvsid, "procs/general/vars")
 
@@ -59,10 +58,10 @@ int ver_proc_SetIntVar=1;
  */
 plerrcode proc_evc2var(ems_u32* p)
 {
-#ifndef TRIGGER
-    return NoSuchProc;
+#ifndef READOUT_CC
+    return plErr_NoSuchProc;
 #else
-    ems_u32 evc=trigger.eventcnt;
+    ems_u32 evc=global_evc.ev_count;
     if (p[0]>1)
         evc%=p[2];
     var_list[p[1]].var.val=evc;
@@ -72,8 +71,8 @@ plerrcode proc_evc2var(ems_u32* p)
 
 plerrcode test_proc_evc2var(ems_u32* p)
 {
-#ifndef TRIGGER
-    return NoSuchProc;
+#ifndef READOUT_CC
+    return plErr_NoSuchProc;
 #else
     if (p[0]!=1 && p[0]!=2)
         return plErr_ArgNum;
