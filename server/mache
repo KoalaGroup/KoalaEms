@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -e
 
 MAKE=/usr/bin/make
 
@@ -10,16 +10,29 @@ args="--with-auxinc=/home/koala/ems/driver_old/KoalaEms"
 case "$1" in
   "neu")
     mv mache .mache
-    rm -r *
+    if [ -e ems_server.sh ];then
+        mv ems_server.sh .ems_server.sh
+    fi
+    rm -rf *
     mv .mache mache
+    if [ -e .ems_server.sh ];then
+        mv .ems_server.sh ems_server.sh
+    fi
+
     $SRCDIR/configure $args
     $MAKE z=$ziel depend
     $MAKE z=$ziel
   ;;
   "leer")
     mv mache .mache
-    rm -r *
+    if [ -e ems_server.sh ];then
+        mv ems_server.sh .ems_server.sh
+    fi
+    rm -rf *
     mv .mache mache
+    if [ -e .ems_server.sh ];then
+        mv .ems_server.sh ems_server.sh
+    fi
   ;;
   *)
     echo make z=$ziel $1
