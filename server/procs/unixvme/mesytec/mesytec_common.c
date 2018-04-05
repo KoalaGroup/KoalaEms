@@ -508,7 +508,7 @@ proc_mxdc32_reg(ems_u32* p)
 
 plerrcode test_proc_mxdc32_reg(ems_u32* p)
 {
-    ems_u32 mtypes[]={mesytec_madc32, mesytec_mqdc32, mesytec_mtdc32, 0};
+  ems_u32 mtypes[]={mesytec_madc32, mesytec_mqdc32, mesytec_mtdc32, vme_mcst, vme_cblt, 0};
     ems_i32 *ip=(ems_i32*)p;
     ml_entry* module;
 
