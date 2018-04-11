@@ -260,13 +260,16 @@ mxdc32_scan_events(ems_u32 *data, int words)
     mxdc32_statist.updated=now;
     mxdc32_statist.superevents++;
 
+    DV(D_USER,printf("scan_events(total:%d, residual:%d): words=%d\n",mxdc32_statist.superevents, mxdc32_statist.superevents%34,words);)
     for (i=0; i<words; i++) {
         ems_u32 d=data[i];
+        DV(D_USER, if(i==0 && ((d>>30)&3) != 0x1) { printf("Error: first word is not Header\n");} )
         switch ((d>>30)&3) {
         case 0x1: { /* header */
                 int id=(d>>16)&0xff;
                 int len=d&0xfff;
                 private=find_private_by_id(id);
+                DV(D_USER,printf("Header: module_id=%d, word_index=%d, remaining_words=%d\n",id, i+1, len); )
                 mxdc32_statist.events++;
                 mxdc32_statist.words+=len;
 
@@ -279,14 +282,14 @@ mxdc32_scan_events(ems_u32 *data, int words)
                     private->statist.events++;
                     private->statist.words+=len;
                 } else {
-                    printf("mxdc32header %08x: no private module data for "
-                            "module %02x\n", d, id);
+                  DV(D_USER, printf("mxdc32header %08x: no private module data for module %02x, word_index=%d\n", d, id, i+1); )
                 }
             }
             break;
         case 0x0: { /* data, timestamp or dummy */
                 switch ((d>>22)&0xff) {
                 case    0: /* dummy */
+                    DV(D_USER, printf("dummy word, word_index=%d\n",i+1); )
                     break;
                 case 0x10: { /* data */
                         int channel=(d>>16)&0x1f;
@@ -294,6 +297,7 @@ mxdc32_scan_events(ems_u32 *data, int words)
                         if (private) {
                             private->statist.channel[channel]++;
                         }
+                        DV(D_USER, printf("data word, channel=%d, word_index=%d\n",channel, i+1); )
                     }
                     break;
                 case 0x12: { /* extended time stamp */
@@ -301,6 +305,7 @@ mxdc32_scan_events(ems_u32 *data, int words)
                         if (private) {
                             private->statist.timestamp_high=stamp;
                         }
+                        DV(D_USER, printf("extended timestamp, word_index=%d\n",i+1); )
                     }
                     break;
                 default:
@@ -309,6 +314,7 @@ mxdc32_scan_events(ems_u32 *data, int words)
             }
             break;
         case 0x3: { /* end of event */
+          DV(D_USER, printf("End of Event, word_index=%d\n", i+1); )
                 if (private) {
                     int stamp=d&0x3fffffff;
                     if (private->marking_type==0) { /* event counter */
@@ -318,7 +324,7 @@ mxdc32_scan_events(ems_u32 *data, int words)
                     }
                     private=0;
                 } else {
-                    printf("mxdc32eoe %08x: no private module data\n", d);
+                  DV(D_USER, printf("mxdc32eoe %08x: no private module data, word_index=%d\n", d,i+1); )
                 }
             }
             break;
@@ -1355,6 +1361,7 @@ proc_mxdc32_read_simple(ems_u32* p)
     if (ip[1]<0) {
         pres=for_each_mxdc_member(p, mtypes, proc_mxdc32_read_simple);
     } else {
+      DV(D_USER, printf("\nread_simple: start\n"); )
         ml_entry* module=ModulEnt(p[1]);
         struct vme_dev* dev=module->address.vme.dev;
         ems_u32 addr=module->address.vme.addr;
@@ -1365,12 +1372,22 @@ proc_mxdc32_read_simple(ems_u32* p)
 
 #if 0
         /* read data size */
+        int val;
         res=dev->read_a32d16(dev, addr+0x6030, &val);
         if (res!=2) {
             complain("mxdc32_read_simple: read length: res=%d errno=%s",
                     res, strerror(errno));
             return plErr_System;
         }
+        DV(D_USER, printf("Data length in FIFO: %d\n",val); )
+        /* read irq_threshold */
+        res=dev->read_a32d16(dev, addr+0x6018, &val);
+        if (res!=2) {
+          complain("mxdc32_read_simple: read irq_threshold: res=%d errno=%s",
+                   res, strerror(errno));
+          return plErr_System;
+        }
+        DV(D_USER, printf("irq_threshold: %d\n",val); )
 #endif
 
         /* read data */
@@ -1390,6 +1407,7 @@ proc_mxdc32_read_simple(ems_u32* p)
             return plErr_System;
         }
         mxdc32_scan_events(oldoutptr, outptr-oldoutptr);
+        DV(D_USER, printf("read_simple: stop\n"); )
     }
 
     return pres;
@@ -1443,6 +1461,7 @@ proc_mxdc32_read_mcst(ems_u32* p)
 
 //printf("mxdc32_read_mcst\n");
 
+    DV(D_USER, printf("\nread_mcst: start\n"); )
     if (memberlist) { /* iterate over memberlist */
         for (i=1; i<=memberlist[0]; i++) {
             module=&modullist->entry[memberlist[i]];
@@ -1481,6 +1500,7 @@ proc_mxdc32_read_mcst(ems_u32* p)
     }
 
     mxdc32_scan_events(oldoutptr, outptr-oldoutptr);
+    DV(D_USER, printf("read_mcst: stop\n"); )
 
     return plOK;
 }
@@ -1499,6 +1519,7 @@ plerrcode test_proc_mxdc32_read_mcst(ems_u32* p)
         complain("mxdc32_read_mcst: p[1](==%u): no valid VME module", p[1]);
         return plErr_ArgRange;
     }
+
     module=ModulEnt(p[1]);
     if (module->modultype!=vme_mcst) {
         complain("mxdc32_read_mcst: p[1](==%u): no mcst module", p[1]);
@@ -1523,6 +1544,7 @@ int ver_proc_mxdc32_read_mcst = 1;
 plerrcode
 proc_mxdc32_read_cblt(ems_u32* p)
 {
+  DV(D_USER, printf("\nreab_cblt start:\n"); )
     ml_entry* mcst_module=ModulEnt(p[1]);
     ml_entry* cblt_module=ModulEnt(p[2]);
     /* dev of mcst and cblt should be identical */
@@ -1545,6 +1567,7 @@ proc_mxdc32_read_cblt(ems_u32* p)
     }
 
     mxdc32_scan_events(oldoutptr, outptr-oldoutptr);
+    DV(D_USER, printf("reab_cblt end:\n"); )
 
     return plOK;
 }
