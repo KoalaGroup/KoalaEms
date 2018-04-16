@@ -451,22 +451,6 @@ printf("proc_madc32_init: p[1]=%d, idx=%d\n", ip[1], mxdc_member_idx());
           return plErr_System;
         }
 
-        /* FIFO reset */
-        res=dev->write_a32d16(dev, addr+0x603C, 0);
-        if (res!=2) {
-          complain("madc32_init: FIFO reset: res=%d errno=%s",
-                   res, strerror(errno));
-          return plErr_System;
-        }
-
-        /* readout reset */
-        res=dev->write_a32d16(dev, addr+0x6034, 0);
-        if (res!=2) {
-          complain("madc32_init: readout reset: res=%d errno=%s",
-                   res, strerror(errno));
-          return plErr_System;
-        }
-
         /* clear threshold memory */
         for (i=0; i<32; i++) {
             res=dev->write_a32d16(dev, addr+0x4000+2*i, 0);

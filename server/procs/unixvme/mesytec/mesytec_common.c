@@ -956,7 +956,7 @@ char name_proc_mxdc32_init_cblt[] = "mxdc32_init_cblt";
 int ver_proc_mxdc32_init_cblt = 1;
 /*****************************************************************************/
 static plerrcode
-read_time_counters_simple(ml_entry *module)
+read_time_counters(ml_entry *module)
 {
         struct vme_dev* dev=module->address.vme.dev;
         ems_u32 addr=module->address.vme.addr;
@@ -1011,14 +1011,6 @@ proc_mxdc32_start_simple(ems_u32* p)
 
         pres=plOK;
         mxdc32_clear_statist(module);
-
-        /* stop acq (should not be necessary) */
-        res=dev->write_a32d16(dev, addr+0x603a, 0);
-        if (res!=2) {
-            complain("mxdc32_start_simple: stop acq: res=%d errno=%s",
-                    res, strerror(errno));
-            return plErr_System;
-        }
 
         /* set multievent */
         res=dev->write_a32d16(dev, addr+0x6036, p[2]);
@@ -1137,14 +1129,6 @@ proc_mxdc32_start_cblt(ems_u32* p)
     mxdc32_clear_statist(0);
     for_each_mxdc_module(mtypes, mxdc32_clear_statist);
 
-    /* stop acq (should not be necessary) */
-    res=dev->write_a32d16(dev, maddr+0x603a, 0);
-    if (res!=2) {
-        complain("mxdc32_start_cblt: stop acq: res=%d errno=%s",
-                res, strerror(errno));
-        return plErr_System;
-    }
-
     /* set multievent */
     res=dev->write_a32d16(dev, maddr+0x6036, p[2]);
     if (res!=2) {
@@ -1205,7 +1189,7 @@ proc_mxdc32_start_cblt(ems_u32* p)
                res, strerror(errno));
       return plErr_System;
     }
-    for_each_mxdc_module(mtypes, read_time_counters_simple);
+    for_each_mxdc_module(mtypes, read_time_counters);
     res=dev->write_a32d16(dev, maddr+0x60ae, 0);
     if (res!=2) {
       complain("mxdc32_start_cblt: start counters: res=%d errno=%s",
@@ -1396,18 +1380,7 @@ proc_mxdc32_read_simple(ems_u32* p)
 
         pres=plOK;
 
-#if 0
-        /* read data size */
-        res=dev->read_a32d16(dev, addr+0x6030, &val);
-        if (res!=2) {
-            complain("mxdc32_read_simple: read length: res=%d errno=%s",
-                    res, strerror(errno));
-            return plErr_System;
-        }
-#endif
-
         /* read data */
-        //oldoutptr=outptr;
         res=dev->read(dev, addr+0, 0xb, outptr, /*4*val*/4*p[2], 4, &outptr);
         if (res<0) {
             complain("mxdc32_read_simple: read: res=%d errno=%s",
