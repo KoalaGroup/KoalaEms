@@ -443,12 +443,12 @@ printf("proc_madc32_init: p[1]=%d, idx=%d\n", ip[1], mxdc_member_idx());
             return plErr_System;
         }
 
-        /* disable readout */
+        /* disable readout to get a definite state */
         res=dev->write_a32d16(dev, addr+0x603a, 0);
         if (res!=2) {
-            complain("madc32_init: disable readout: res=%d errno=%s",
-                    res, strerror(errno));
-            return plErr_System;
+          complain("madc32_init: disable readout: res=%d errno=%s",
+                   res, strerror(errno));
+          return plErr_System;
         }
 
         /* clear threshold memory */

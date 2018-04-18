@@ -514,7 +514,7 @@ proc_mxdc32_reg(ems_u32* p)
 
 plerrcode test_proc_mxdc32_reg(ems_u32* p)
 {
-    ems_u32 mtypes[]={mesytec_madc32, mesytec_mqdc32, mesytec_mtdc32, 0};
+  ems_u32 mtypes[]={mesytec_madc32, mesytec_mqdc32, mesytec_mtdc32, vme_mcst, vme_cblt, 0};
     ems_i32 *ip=(ems_i32*)p;
     ml_entry* module;
 
@@ -969,15 +969,6 @@ read_time_counters(ml_entry *module)
         int res;
         ems_u16 c_lo, c_hi, id;
 
-#if 1
-        res=dev->write_a32d16(dev, addr+0x6090, 3);
-        if (res!=2) {
-            complain("mxdc32_start: reset counters: res=%d errno=%s",
-                    res, strerror(errno));
-            return plErr_System;
-        }
-#endif
-
         res=dev->read_a32d16(dev, addr+0x609c, &c_lo);
         if (res!=2) {
             complain("mxdc32_start: read counter lo: res=%d errno=%s",
@@ -1027,14 +1018,6 @@ proc_mxdc32_start_simple(ems_u32* p)
         pres=plOK;
         mxdc32_clear_statist(module);
 
-        /* stop acq (should not be necessary) */
-        res=dev->write_a32d16(dev, addr+0x603a, 0);
-        if (res!=2) {
-            complain("mxdc32_start_simple: stop acq: res=%d errno=%s",
-                    res, strerror(errno));
-            return plErr_System;
-        }
-
         /* set multievent */
         res=dev->write_a32d16(dev, addr+0x6036, p[2]);
         if (res!=2) {
@@ -1060,15 +1043,30 @@ proc_mxdc32_start_simple(ems_u32* p)
         }
  
         /* reset counters */
+        /* step 1: stop counters */
+        res=dev->write_a32d16(dev, addr+0x60ae, 3);
+        if (res!=2) {
+          complain("mxdc32_start_simple: stop counters: res=%d errno=%s",
+                   res, strerror(errno));
+          return plErr_System;
+        }
+        /* step 2: reset counters */
+        /* TODO: b1100 single shot reset ? */
         res=dev->write_a32d16(dev, addr+0x6090, 3);
         if (res!=2) {
             complain("mxdc32_start_simple: reset counters: res=%d errno=%s",
                     res, strerror(errno));
             return plErr_System;
         }
+        usleep(10);
+        /* step 3: start counters */
+        res=dev->write_a32d16(dev, addr+0x60ae, 0);
+        if (res!=2) {
+          complain("mxdc32_start_simple: start counters: res=%d errno=%s",
+                   res, strerror(errno));
+          return plErr_System;
+        }
 
-        /* read counters (possible error ignored) */
-        read_time_counters(module);
 
         /* start acq */
         res=dev->write_a32d16(dev, addr+0x603a, 1);
@@ -1078,12 +1076,12 @@ proc_mxdc32_start_simple(ems_u32* p)
             return plErr_System;
         }
 
-        /* readout reset */
+  	/* readout reset */
         res=dev->write_a32d16(dev, addr+0x6034, ANY);
         if (res!=2) {
-            complain("mxdc32_start_simple: readout reset: res=%d errno=%s",
-                    res, strerror(errno));
-            return plErr_System;
+          complain("mxdc32_start_simple: readout reset: res=%d errno=%s",
+                   res, strerror(errno));
+          return plErr_System;
         }
     }
 
@@ -1138,14 +1136,6 @@ proc_mxdc32_start_cblt(ems_u32* p)
     mxdc32_clear_statist(0);
     for_each_mxdc_module(mtypes, mxdc32_clear_statist);
 
-    /* stop acq (should not be necessary) */
-    res=dev->write_a32d16(dev, maddr+0x603a, 0);
-    if (res!=2) {
-        complain("mxdc32_start_cblt: stop acq: res=%d errno=%s",
-                res, strerror(errno));
-        return plErr_System;
-    }
-
     /* set multievent */
     res=dev->write_a32d16(dev, maddr+0x6036, p[2]);
     if (res!=2) {
@@ -1168,24 +1158,52 @@ proc_mxdc32_start_cblt(ems_u32* p)
     /* FIFO reset */
     res=dev->write_a32d16(dev, maddr+0x603c, ANY);
     if (res!=2) {
-        complain("mxdc32_start_simple: reset FIFO: res=%d errno=%s",
+        complain("mxdc32_start_cblt: reset FIFO: res=%d errno=%s",
                 res, strerror(errno));
         return plErr_System;
     }
 
-#if 0
     /* reset counters */
-    /* does not work as muticast! --> moved to read_time_counters */
+    /* step 1: stop counters */
+    res=dev->write_a32d16(dev, maddr+0x60ae, 3);
+    if (res!=2) {
+      complain("mxdc32_start_cblt: stop counters: res=%d errno=%s",
+               res, strerror(errno));
+      return plErr_System;
+    }
+    /* step 2: reset counters */
+    /* TODO: b1100 single shot reset ? */
     res=dev->write_a32d16(dev, maddr+0x6090, 3);
     if (res!=2) {
         complain("mxdc32_start_cblt: reset counters: res=%d errno=%s",
                 res, strerror(errno));
         return plErr_System;
     }
-#endif
+    usleep(10);
+    /* step 3: start counters */
+    res=dev->write_a32d16(dev, maddr+0x60ae, 0);
+    if (res!=2) {
+      complain("mxdc32_start_cblt: start counters: res=%d errno=%s",
+               res, strerror(errno));
+      return plErr_System;
+    }
 
-    /* read counters (possible error ignored) */
+#if 0
+    /* step 4: read counters (possible error ignored) */
+    res=dev->write_a32d16(dev, maddr+0x60ae, 3);
+    if (res!=2) {
+      complain("mxdc32_start_cblt: stop counters: res=%d errno=%s",
+               res, strerror(errno));
+      return plErr_System;
+    }
     for_each_mxdc_module(mtypes, read_time_counters);
+    res=dev->write_a32d16(dev, maddr+0x60ae, 0);
+    if (res!=2) {
+      complain("mxdc32_start_cblt: start counters: res=%d errno=%s",
+               res, strerror(errno));
+      return plErr_System;
+    }
+#endif
 
     /* start acq */
     res=dev->write_a32d16(dev, maddr+0x603a, 1);
@@ -1198,9 +1216,9 @@ proc_mxdc32_start_cblt(ems_u32* p)
     /* readout reset */
     res=dev->write_a32d16(dev, maddr+0x6034, ANY);
     if (res!=2) {
-        complain("mxdc32_start_cblt: reset FIFO: res=%d errno=%s",
-                res, strerror(errno));
-        return plErr_System;
+      complain("mxdc32_start_cblt: reset FIFO: res=%d errno=%s",
+               res, strerror(errno));
+      return plErr_System;
     }
 
     return plOK;
@@ -1361,7 +1379,6 @@ proc_mxdc32_read_simple(ems_u32* p)
     if (ip[1]<0) {
         pres=for_each_mxdc_member(p, mtypes, proc_mxdc32_read_simple);
     } else {
-      DV(D_USER, printf("\nread_simple: start\n"); )
         ml_entry* module=ModulEnt(p[1]);
         struct vme_dev* dev=module->address.vme.dev;
         ems_u32 addr=module->address.vme.addr;
@@ -1370,28 +1387,7 @@ proc_mxdc32_read_simple(ems_u32* p)
 
         pres=plOK;
 
-#if 0
-        /* read data size */
-        int val;
-        res=dev->read_a32d16(dev, addr+0x6030, &val);
-        if (res!=2) {
-            complain("mxdc32_read_simple: read length: res=%d errno=%s",
-                    res, strerror(errno));
-            return plErr_System;
-        }
-        DV(D_USER, printf("Data length in FIFO: %d\n",val); )
-        /* read irq_threshold */
-        res=dev->read_a32d16(dev, addr+0x6018, &val);
-        if (res!=2) {
-          complain("mxdc32_read_simple: read irq_threshold: res=%d errno=%s",
-                   res, strerror(errno));
-          return plErr_System;
-        }
-        DV(D_USER, printf("irq_threshold: %d\n",val); )
-#endif
-
         /* read data */
-        //oldoutptr=outptr;
         res=dev->read(dev, addr+0, 0xb, outptr, /*4*val*/4*p[2], 4, &outptr);
         if (res<0) {
             complain("mxdc32_read_simple: read: res=%d errno=%s",
