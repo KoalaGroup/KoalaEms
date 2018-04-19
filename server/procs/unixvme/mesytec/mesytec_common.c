@@ -1379,6 +1379,7 @@ proc_mxdc32_read_simple(ems_u32* p)
     if (ip[1]<0) {
         pres=for_each_mxdc_member(p, mtypes, proc_mxdc32_read_simple);
     } else {
+      DV(D_USER, printf("\nread_simple: start\n"); )
         ml_entry* module=ModulEnt(p[1]);
         struct vme_dev* dev=module->address.vme.dev;
         ems_u32 addr=module->address.vme.addr;
