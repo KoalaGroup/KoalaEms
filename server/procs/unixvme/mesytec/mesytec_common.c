@@ -136,7 +136,7 @@ RCS_REGISTER(cvsid, "procs/unixvme/mesytec")
  *     triggers      : only with marking type 0 (==event counter in footer)
  */
 struct mxdc32_statist {
-    u_int64_t channel[32]; /* number of hits for each channel */
+    u_int64_t channel[34]; /* number of hits for each channel */
     u_int64_t superevents; /* how often scan_events was called */
     u_int64_t events;      /* number of event headers found */
     u_int64_t words;       /* number of data words */
@@ -292,12 +292,12 @@ mxdc32_scan_events(ems_u32 *data, int words)
                     DV(D_USER, printf("dummy word, word_index=%d\n",i+1); )
                     break;
                 case 0x10: { /* data */
-                        int channel=(d>>16)&0x1f;
-                        //int value=d&0xffff;
+                        int channel=(d>>16)&0x3f;
+                        int value=d&0xffff;
                         if (private) {
                             private->statist.channel[channel]++;
                         }
-                        DV(D_USER, printf("data word, channel=%d, word_index=%d\n",channel, i+1); )
+                        DV(D_USER, printf("data word, channel=%d, value=%d, word_index=%d\n",channel, value, i+1); )
                     }
                     break;
                 case 0x12: { /* extended time stamp */
