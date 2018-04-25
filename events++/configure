@@ -582,7 +582,7 @@ PACKAGE_STRING=
 PACKAGE_BUGREPORT=
 PACKAGE_URL=
 
-ac_unique_file="tapedup.cc"
+ac_unique_file=
 ac_default_prefix=/usr/local/ems
 # Factoring default headers for most tests.
 ac_includes_default="\
