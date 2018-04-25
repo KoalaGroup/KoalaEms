@@ -192,17 +192,20 @@ int use_koala_event(koala_event *koala, TH1F** h)
   int64_t tmin=koala->events[nr_mesymodules-1]->timestamp;
   int64_t trange=0x40000000;
   int64_t t;
+  int64_t delta_t;
   static bool overflow=false;
   static bool print=false;
   for (int mod=0; mod<nr_mesymodules; mod++) {
     event=koala->events[mod];
     t=event->timestamp;
-    if(t<tmin) t+=trange;
-    h[mod]->Fill(t-tmin+mod*100);
-    if((t-tmin)>1000){
-      overflow=true;
-      print=true;
-    }
+    if((t-tmin)>trange/2) delta_t=t-tmin-trange;
+    else if((t-tmin)<-trange/2) delta_t=t-tmin+trange;
+    else delta_t=t-tmin;
+    h[mod]->Fill(delta_t+mod*100);
+    // if((t-tmin)>1000){
+    //   overflow=true;
+    //   print=true;
+    // }
   }
 
   if(overflow){
