@@ -33,6 +33,7 @@
 #include "TCanvas.h"
 #include "TStyle.h"
 #include "TString.h"
+#include "THStack.h"
 
 using namespace std;
 
@@ -163,9 +164,13 @@ void draw_hist(const char* filename)
 {
   TCanvas* can=new TCanvas("can","Timestamp Diff");
   gPad->SetLogy();
+  THStack* hstack=new THStack("htimediff","Timestampe Diff");
   for(int mod=0;mod<nr_mesymodules;mod++){
-    h_timediff[mod]->Draw("same");
+    // h_timediff[mod]->Draw("same");
+    hstack->Add(h_timediff[mod]);
   }
+
+  hstack->Draw();
   can->Print(filename);
   delete can;
   return;

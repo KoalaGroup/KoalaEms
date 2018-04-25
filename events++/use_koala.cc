@@ -196,7 +196,7 @@ int use_koala_event(koala_event *koala, TH1F** h)
     event=koala->events[mod];
     t=event->timestamp;
     if(t<tmin) t+=trange;
-    h[mod]->Fill(t-tmin);
+    h[mod]->Fill(t-tmin+mod*100);
   }
 
   delete koala;
