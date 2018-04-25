@@ -136,7 +136,7 @@ void book_hist()
 {
   gStyle->SetOptStat(111111);
   for(int mod=0;mod<nr_mesymodules;mod++){
-    h_timediff[mod] = new TH1F(Form("h_timediff_%d",mod),Form("Timestamp diff of ADC%d (offset=%d)",mod+1,mod*100),700,-100,600);
+    h_timediff[mod] = new TH1F(Form("h_timediff_%d",mod),Form("Timestamp diff of ADC%d (offset=%d)",mod+1,mod*100),1500,-500,1000);
     h_timediff[mod]->SetLineColor(kBlack+mod);
   }
   return;
