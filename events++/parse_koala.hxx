@@ -78,7 +78,7 @@ struct koala_event {
 
 // The following functions are to be invoked in parse_koala.cc
 int use_koala_event(koala_event *koala);
-int use_koala_event(koala_event *koala, TH1F* h);
+int use_koala_event(koala_event *koala, TH1F** h);
 void use_koala_init(void);
 void use_koala_done(void);
 

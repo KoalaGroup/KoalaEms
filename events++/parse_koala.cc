@@ -32,6 +32,7 @@
 #include "TFile.h"
 #include "TCanvas.h"
 #include "TStyle.h"
+#include "TString.h"
 
 using namespace std;
 
@@ -127,8 +128,48 @@ static struct global_statist global_statist;
 static struct mxdc32_depot depot;
 static bool use_beamdata;
 static char* const *files;
-static TH1F* h_timediff = new TH1F("h_timediff","h_timediff",4000,-100,3900);
+static TH1F* h_timediff[nr_mesymodules];
 
+//---------------------------------------------------------------------------//
+void book_hist()
+{
+  gStyle->SetOptStat(111111);
+  for(int mod=0;mod<nr_mesymodules;mod++){
+    h_timediff[mod] = new TH1F(Form("h_timediff_%d",mod),Form("Timestamp diff of ADC%d (offset=%d)",mod+1,mod*100),700,-100,600);
+    h_timediff[mod]->SetLineColor(kBlack+mod);
+  }
+  return;
+}
+
+void delete_hist()
+{
+  for(int mod=0;mod<nr_mesymodules;mod++){
+    delete h_timediff[mod];
+  }
+  return;
+}
+
+void save_hist(const char* filename)
+{
+  TFile *file=new TFile(filename,"recreate");
+  for(int mod=0;mod<nr_mesymodules;mod++){
+    h_timediff[mod]->Write();
+  }
+  delete file;
+  return;
+}
+
+void draw_hist(const char* filename)
+{
+  TCanvas* can=new TCanvas("can","Timestamp Diff");
+  gPad->SetLogy();
+  for(int mod=0;mod<nr_mesymodules;mod++){
+    h_timediff[mod]->Draw("same");
+  }
+  can->Print(filename);
+  delete can;
+  return;
+}
 //---------------------------------------------------------------------------//
 static void
 printusage(const char* argv0)
@@ -992,6 +1033,7 @@ main(int argc, char* const argv[])
 
     prepare_globals();
 
+    book_hist();
     if ((res=readargs(argc, argv)))
         return res<0?1:0;
 
@@ -1017,16 +1059,11 @@ main(int argc, char* const argv[])
         res=parse_file(0);
     }
 
-    gStyle->SetOptStat(111111);
-    TFile* rootfile=new TFile("timediff.root","recreate");
-    h_timediff->Write();
-    TCanvas* can=new TCanvas("can");
-    gPad->SetLogy();
-    h_timediff->Draw();
-    can->Print("timediff.pdf");
-    delete can;
-    delete rootfile;
-   
+    // output the histogram
+    draw_hist("timediff.pdf");
+    save_hist("timediff.root");
+    delete_hist();
+
     return res<0?3:0;
 }
 //---------------------------------------------------------------------------//

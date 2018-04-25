@@ -169,7 +169,7 @@ analyse_koala(koala_event *koala)
 }
 #endif
 //---------------------------------------------------------------------------//
-int use_koala_event(koala_event *koala, TH1F* h)
+int use_koala_event(koala_event *koala, TH1F** h)
 {
   koala_statist.koala_events++;
   if (koala->mesypattern==0x3f) {
@@ -186,6 +186,8 @@ int use_koala_event(koala_event *koala, TH1F* h)
   if (koala->mesypattern&0x3f) {
     koala_statist.good_adc++;
   }
+
+  // fill the hist
   mxdc32_event *event;
   int64_t tmin=koala->events[nr_mesymodules-1]->timestamp;
   int64_t trange=0x40000000;
@@ -194,7 +196,7 @@ int use_koala_event(koala_event *koala, TH1F* h)
     event=koala->events[mod];
     t=event->timestamp;
     if(t<tmin) t+=trange;
-    h->Fill(t-tmin);
+    h[mod]->Fill(t-tmin);
   }
 
   delete koala;
