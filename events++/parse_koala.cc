@@ -422,16 +422,6 @@ collect_koala_event(void)
      * we know the oldest time stamp.
      */
 
-    /* The rightmost module has to have the oldest timestamp.
-     * If this is not the case we have to be carefull...
-     */
-    // if (ioldest!=nr_mesymodules-1) {
-    //     printf("rightmost module: %d\n", ioldest);
-    //     //dump_timestamps();
-    // }
-
-
-
     /* Create a koala_event and store all module data in this event if
        timestamp-oldest<3000.
        This 3000 is specific to this particular KOALA runtime!
