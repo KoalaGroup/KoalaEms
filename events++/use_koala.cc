@@ -50,7 +50,14 @@ struct koala_statist {
     uint32_t only_qdc;
     uint32_t good_adc;
 };
+struct timestamp_statist{
+  uint32_t equal_ev[nr_mesymodules];
+  uint32_t plusone_ev[nr_mesymodules];
+  uint32_t minusone_ev[nr_mesymodules];
+  uint32_t unsync_ev[nr_mesymodules];
+};
 static struct koala_statist koala_statist;
+static struct timestamp_statist timestamp_statist;
 static char outputbase[1024];
 static char rootfile[1024];
 static char pdffile[1024];
@@ -60,6 +67,7 @@ static TH1F* h_timediff[nr_mesymodules];
 void book_hist()
 {
   gStyle->SetOptStat(111111);
+  gStyle->SetPaperSize(TStyle::kA4);
   for(int mod=0;mod<nr_mesymodules;mod++){
     h_timediff[mod] = new TH1F(Form("h_timediff_%d",mod),Form("Timestamp diff of ADC%d (offset=%d)",mod+1,mod*100),1500,-500,1000);
     h_timediff[mod]->SetLineColor(kBlack+mod);
@@ -100,12 +108,65 @@ void draw_hist()
   delete can;
   return;
 }
+
+//---------------------------------------------------------------------------//
+// check the timestamp and fill h_timediff
+void check_timestamp(koala_event* koala)
+{
+  // timestamp check
+  mxdc32_event *event;
+  int64_t tmin=koala->events[nr_mesymodules-1]->timestamp;
+  int64_t trange=0x40000000;
+  int64_t delta_t;
+  static bool unsync=false;
+  static bool print=false;
+  for (int mod=0; mod<nr_mesymodules; mod++) {
+    event=koala->events[mod];
+    delta_t=event->timestamp-tmin;
+    if(delta_t>trange/2) delta_t-=trange;
+    else if(delta_t<-trange/2) delta_t+=trange;
+
+    //fill hist
+    h_timediff[mod]->Fill(delta_t+mod*100);
+
+    // check
+    if(delta_t>1 || delta_t<-1){
+      unsync=true;
+      print=true;
+      //
+      timestamp_statist.unsync_ev[mod]++;
+    }
+    else if(delta_t==1) timestamp_statist.plusone_ev[mod]++;
+    else if(delta_t==-1) timestamp_statist.minusone_ev[mod]++;
+    else timestamp_statist.equal_ev[mod]++;
+  }
+
+  // printing
+  if(unsync){
+    printf("unsync event (%d): ",koala_statist.complete_events);
+    for (int mod=0; mod<nr_mesymodules; mod++) {
+      event=koala->events[mod];
+      printf("%d\t",event->timestamp);
+    }
+    printf("\n");
+    unsync=false;
+  } else if(print){
+    printf("after unsync event (%d): ",koala_statist.complete_events);
+    for (int mod=0; mod<nr_mesymodules; mod++) {
+      event=koala->events[mod];
+      printf("%d\t",event->timestamp);
+    }
+    printf("\n");
+    print=false;
+  }
+}
 //---------------------------------------------------------------------------//
 // use_koala_setup will extract the filename base
 void
 use_koala_setup(const char* outputfile)
 {
   bzero(&koala_statist, sizeof(struct koala_statist));
+  bzero(&timestamp_statist,sizeof(struct timestamp_statist));
   //
   const char* p;
   if((p = strrchr(outputfile,'.')) != NULL){
@@ -135,7 +196,8 @@ use_koala_done(void)
     draw_hist();
     save_hist();
     delete_hist();
-  //
+
+    //
     cout<<endl;
     cout<<"**********************************************"<<endl;
     cout<<"    koala_events   : "<<setw(8)<<koala_statist.koala_events<<endl;
@@ -152,48 +214,37 @@ use_koala_done(void)
                     static_cast<double>(koala_statist.koala_events)
             <<endl;
 
-}
-//---------------------------------------------------------------------------//
-__attribute__((unused))
-static void
-print_times(koala_event *a, koala_event *b)
-{
-    printf("%02x <===> %02x\n", a->mesypattern, b->mesypattern);
-    for (int i=0; i<nr_mesymodules; i++) {
-        printf("[%d]", i);
-        if (a->events[i])
-            printf(" %10ld", a->events[i]->timestamp);
-        else
-            printf("           ");
-        if (b->events[i])
-            printf(" %10ld\n", b->events[i]->timestamp);
-        else
-            printf("           \n");
+    cout<<"**********************************************"<<endl;
+    cout<<"    sync_events   : ";
+    for(int mod=0;mod<nr_mesymodules;mod++){
+      cout<<setw(8)<<timestamp_statist.equal_ev[mod]<<"("
+          <<static_cast<double>(timestamp_statist.equal_ev[mod])/
+        static_cast<double>(koala_statist.koala_events)
+          <<")"<<endl;
+    }
+    cout<<"    plusone_events   : ";
+    for(int mod=0;mod<nr_mesymodules;mod++){
+      cout<<setw(8)<<timestamp_statist.plusone_ev[mod]<<"("
+          <<static_cast<double>(timestamp_statist.plusone_ev[mod])/
+        static_cast<double>(koala_statist.koala_events)
+          <<")"<<endl;
+    }
+    cout<<"    minusone_events   : ";
+    for(int mod=0;mod<nr_mesymodules;mod++){
+      cout<<setw(8)<<timestamp_statist.minusone_ev[mod]<<"("
+          <<static_cast<double>(timestamp_statist.minusone_ev[mod])/
+        static_cast<double>(koala_statist.koala_events)
+          <<")"<<endl;
+    }
+    cout<<"    unsync_events   : ";
+    for(int mod=0;mod<nr_mesymodules;mod++){
+      cout<<setw(8)<<timestamp_statist.unsync_ev[mod]<<"("
+          <<static_cast<double>(timestamp_statist.unsync_ev[mod])/
+        static_cast<double>(koala_statist.koala_events)
+          <<")"<<endl;
     }
 }
 //---------------------------------------------------------------------------//
-#if 1
-__attribute__((unused))
-static void
-analyse_koala(koala_event *koala)
-{
-    mxdc32_event *event;
-    int mod, i;
-
-    for (mod=0; mod<nr_mesymodules; mod++) {
-        event=koala->events[mod];
-        if (event) {
-            for (i=0; i<32; i++) {
-                printf("%c", event->data[i]?'*':'-');
-            }
-            printf("\n");
-        } else {
-            printf("00000000000000000000000000000000\n");
-        }
-    }
-    printf("\n");
-}
-#else
 __attribute__((unused))
 static void
 analyse_koala(koala_event *koala)
@@ -214,42 +265,7 @@ analyse_koala(koala_event *koala)
         }
     }
     printf("\n");
-
-#if 0
-    mxdc32_event *qevent=koala->events[6];
-    mxdc32_event *tevent=koala->events[7];
-    for (i=0; i<32; i++) {
-        printf("%08x %08x %5d %4d\n",
-                tevent->data[i], qevent->data[i],
-                tevent->data[i]&0xffff, qevent->data[i]&0xfff);
-    }
-#endif
-#if 0
-    for (i=0; i<32; i++) {
-        printf("%4d %4d %4d %4d %4d %4d %4d %5d\n",
-                koala->events[0]->data[i]&0xfff,
-                koala->events[1]->data[i]&0xfff,
-                koala->events[2]->data[i]&0xfff,
-                koala->events[3]->data[i]&0xfff,
-                koala->events[4]->data[i]&0xfff,
-                koala->events[5]->data[i]&0xfff,
-                koala->events[6]->data[i]&0xfff,
-                koala->events[7]->data[i]&0xffff);
-    }
-#endif
-#if 0
-    printf("%f %f %f %f %f %f %f %f\n",
-            koala->event_data.bct[0],
-            koala->event_data.bct[1],
-            koala->event_data.bct[2],
-            koala->event_data.bct[3],
-            koala->event_data.bct[4],
-            koala->event_data.bct[5],
-            koala->event_data.bct[6],
-            koala->event_data.bct[7]);
-#endif
 }
-#endif
 //---------------------------------------------------------------------------//
 int use_koala_event(koala_event *koala)
 {
@@ -268,47 +284,13 @@ int use_koala_event(koala_event *koala)
   if (koala->mesypattern&0x3f) {
     koala_statist.good_adc++;
   }
+  
+  // check timestamp
+  check_timestamp(koala);
 
-  // fill the hist
-  mxdc32_event *event;
-  int64_t tmin=koala->events[nr_mesymodules-1]->timestamp;
-  int64_t trange=0x40000000;
-  int64_t t;
-  int64_t delta_t;
-  static bool overflow=false;
-  static bool print=false;
-  for (int mod=0; mod<nr_mesymodules; mod++) {
-    event=koala->events[mod];
-    t=event->timestamp;
-    if((t-tmin)>trange/2) delta_t=t-tmin-trange;
-    else if((t-tmin)<-trange/2) delta_t=t-tmin+trange;
-    else delta_t=t-tmin;
-    h_timediff[mod]->Fill(delta_t+mod*100);
-    // if((t-tmin)>1000){
-    //   overflow=true;
-    //   print=true;
-    // }
-  }
+  // data extraction and fill the tree
 
-  if(overflow){
-    printf("overflow (%d): ",koala_statist.complete_events);
-    for (int mod=0; mod<nr_mesymodules; mod++) {
-      event=koala->events[mod];
-      t=event->timestamp;
-      printf("%d\t", t);
-    }
-    printf("\n");
-    overflow=false;
-  } else if(print){
-    printf("after overflow (%d): ",koala_statist.complete_events);
-    for (int mod=0; mod<nr_mesymodules; mod++) {
-      event=koala->events[mod];
-      t=event->timestamp;
-      printf("%d\t", t);
-    }
-    printf("\n");
-    print=false;
-  }
+  // delete koala_event
   delete koala;
   return 0;
 }
