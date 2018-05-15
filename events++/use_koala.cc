@@ -30,10 +30,15 @@
 //#include <cmath>
 #include <limits>       // std::numeric_limits
 #include <unistd.h>
+#include "global.hxx"
 #include "parse_koala.hxx"
-#include "TH1F.h"
-#include "TCanvas.h"
 #include "TFile.h"
+#include "TH1F.h"
+#include "TFile.h"
+#include "TCanvas.h"
+#include "TStyle.h"
+#include "TString.h"
+#include "THStack.h"
 
 using namespace std;
 
@@ -46,17 +51,93 @@ struct koala_statist {
     uint32_t good_adc;
 };
 static struct koala_statist koala_statist;
+static char outputbase[1024];
+static char rootfile[1024];
+static char pdffile[1024];
 
+//---------------------------------------------------------------------------//
+static TH1F* h_timediff[nr_mesymodules];
+void book_hist()
+{
+  gStyle->SetOptStat(111111);
+  for(int mod=0;mod<nr_mesymodules;mod++){
+    h_timediff[mod] = new TH1F(Form("h_timediff_%d",mod),Form("Timestamp diff of ADC%d (offset=%d)",mod+1,mod*100),1500,-500,1000);
+    h_timediff[mod]->SetLineColor(kBlack+mod);
+  }
+  return;
+}
+
+void delete_hist()
+{
+  for(int mod=0;mod<nr_mesymodules;mod++){
+    delete h_timediff[mod];
+  }
+  return;
+}
+
+void save_hist()
+{
+  TFile *file=new TFile(rootfile,"recreate");
+  for(int mod=0;mod<nr_mesymodules;mod++){
+    h_timediff[mod]->Write();
+  }
+  delete file;
+  return;
+}
+
+void draw_hist()
+{
+  TCanvas* can=new TCanvas("can","Timestamp Diff");
+  gPad->SetLogy();
+  THStack* hstack=new THStack("htimediff","Timestampe Diff");
+  for(int mod=0;mod<nr_mesymodules;mod++){
+    // h_timediff[mod]->Draw("same");
+    hstack->Add(h_timediff[mod]);
+  }
+
+  hstack->Draw();
+  can->Print(pdffile);
+  delete can;
+  return;
+}
+//---------------------------------------------------------------------------//
+// use_koala_setup will extract the filename base
+void
+use_koala_setup(const char* outputfile)
+{
+  bzero(&koala_statist, sizeof(struct koala_statist));
+  //
+  const char* p;
+  if((p = strrchr(outputfile,'.')) != NULL){
+    strncpy(outputbase,outputfile,p-outputfile);
+    outputbase[p-outputfile]='\0';
+  }
+  else{
+    strcpy(outputbase,outputfile);
+  }
+  strcpy(rootfile,outputbase);
+  strcpy(pdffile,outputbase);
+
+  //
+  strcat(rootfile,".root");
+  strcat(pdffile,".pdf");
+}
 //---------------------------------------------------------------------------//
 void
 use_koala_init(void)
 {
-    bzero(&koala_statist, sizeof(struct koala_statist));
+    book_hist();
 }
 //---------------------------------------------------------------------------//
 void
 use_koala_done(void)
 {
+    draw_hist();
+    save_hist();
+    delete_hist();
+  //
+    cout<<endl;
+    cout<<"**********************************************"<<endl;
     cout<<"    koala_events   : "<<setw(8)<<koala_statist.koala_events<<endl;
     cout<<"    good ADC       : "<<setw(8)<<koala_statist.good_adc<<endl;
 //    cout<<"    complete_events: "<<setw(8)<<koala_statist.complete_events<<endl;
@@ -70,6 +151,7 @@ use_koala_done(void)
             <<static_cast<double>(koala_statist.good_adc)/
                     static_cast<double>(koala_statist.koala_events)
             <<endl;
+
 }
 //---------------------------------------------------------------------------//
 __attribute__((unused))
@@ -169,7 +251,7 @@ analyse_koala(koala_event *koala)
 }
 #endif
 //---------------------------------------------------------------------------//
-int use_koala_event(koala_event *koala, TH1F** h)
+int use_koala_event(koala_event *koala)
 {
   koala_statist.koala_events++;
   if (koala->mesypattern==0x3f) {
@@ -201,7 +283,7 @@ int use_koala_event(koala_event *koala, TH1F** h)
     if((t-tmin)>trange/2) delta_t=t-tmin-trange;
     else if((t-tmin)<-trange/2) delta_t=t-tmin+trange;
     else delta_t=t-tmin;
-    h[mod]->Fill(delta_t+mod*100);
+    h_timediff[mod]->Fill(delta_t+mod*100);
     // if((t-tmin)>1000){
     //   overflow=true;
     //   print=true;
@@ -232,31 +314,6 @@ int use_koala_event(koala_event *koala, TH1F** h)
 }
 //---------------------------------------------------------------------------//
 #if 0
-koala_event *last_koala=0;
-
-int
-use_koala_event(koala_event *koala)
-{
-    koala_statist.koala_events++;
-    if (koala->mesypattern==0xff)
-        koala_statist.complete_events++;
-    if (koala->mesypattern==0xbf)
-        koala_statist.without_qdc++;
-    if (koala->mesypattern==0x40)
-        koala_statist.only_dqc++;
-
-    if (last_koala) {
-        if (((koala->mesypattern|last_koala->mesypattern)==0xff) &&
-            ((koala->mesypattern&last_koala->mesypattern)==0)) {
-                print_times(last_koala, koala);
-        }
-        delete last_koala;
-    }
-    last_koala=koala;
-
-    return 0;
-}
-#else
 int
 use_koala_event(koala_event *koala)
 {

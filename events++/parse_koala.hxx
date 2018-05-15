@@ -8,27 +8,7 @@
 // This file defines the data structure related to one single KOALA event
 #ifndef _parse_koala_hxx_
 #define _parse_koala_hxx_
-#include "TH1F.h"
-enum mesytypes {mesytec_madc32=0x21f10032UL, mesytec_mqdc32=0x22f10032UL,
-        mesytec_mtdc32=0x23f10032UL};
-
-struct mesymodules {
-    uint32_t ID;//module id
-    enum mesytypes mesytype;
-};
-
-// Hardware configuration
-static const struct mesymodules mesymodules[]= {
-    {1, mesytec_madc32},
-    {2, mesytec_madc32},
-    {3, mesytec_madc32},
-    {4, mesytec_madc32},
-    {5, mesytec_madc32},
-    {6, mesytec_madc32},
-    //{7, mesytec_mqdc32},
-    //{8, mesytec_mtdc32},
-};
-static const int nr_mesymodules=sizeof(mesymodules)/sizeof(struct mesymodules);
+#include "global.hxx"
 
 // data from EMS event
 // each event has a timestamp and the scaler data
@@ -76,10 +56,5 @@ struct koala_event {
     uint32_t mesypattern; // whether corresponding module has data in this event
 };
 
-// The following functions are to be invoked in parse_koala.cc
-int use_koala_event(koala_event *koala);
-int use_koala_event(koala_event *koala, TH1F** h);
-void use_koala_init(void);
-void use_koala_done(void);
 
 #endif

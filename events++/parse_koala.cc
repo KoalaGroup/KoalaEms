@@ -26,14 +26,9 @@
 #include <limits>       // std::numeric_limits
 #include <unistd.h>
 #include <fcntl.h>
-#include "parse_koala.hxx"
 #include "read_saved_beam.hxx"
-#include "TH1F.h"
-#include "TFile.h"
-#include "TCanvas.h"
-#include "TStyle.h"
-#include "TString.h"
-#include "THStack.h"
+#include "parse_koala.hxx"
+#include "use_koala.hxx"
 
 using namespace std;
 
@@ -129,96 +124,9 @@ static struct global_statist global_statist;
 static struct mxdc32_depot depot;
 static bool use_beamdata;
 static char* const *files;
-static TH1F* h_timediff[nr_mesymodules];
+static bool use_simplestructure;
+static const char* outputfile;
 
-//---------------------------------------------------------------------------//
-void book_hist()
-{
-  gStyle->SetOptStat(111111);
-  for(int mod=0;mod<nr_mesymodules;mod++){
-    h_timediff[mod] = new TH1F(Form("h_timediff_%d",mod),Form("Timestamp diff of ADC%d (offset=%d)",mod+1,mod*100),1500,-500,1000);
-    h_timediff[mod]->SetLineColor(kBlack+mod);
-  }
-  return;
-}
-
-void delete_hist()
-{
-  for(int mod=0;mod<nr_mesymodules;mod++){
-    delete h_timediff[mod];
-  }
-  return;
-}
-
-void save_hist(const char* filename)
-{
-  TFile *file=new TFile(filename,"recreate");
-  for(int mod=0;mod<nr_mesymodules;mod++){
-    h_timediff[mod]->Write();
-  }
-  delete file;
-  return;
-}
-
-void draw_hist(const char* filename)
-{
-  TCanvas* can=new TCanvas("can","Timestamp Diff");
-  gPad->SetLogy();
-  THStack* hstack=new THStack("htimediff","Timestampe Diff");
-  for(int mod=0;mod<nr_mesymodules;mod++){
-    // h_timediff[mod]->Draw("same");
-    hstack->Add(h_timediff[mod]);
-  }
-
-  hstack->Draw();
-  can->Print(filename);
-  delete can;
-  return;
-}
-//---------------------------------------------------------------------------//
-static void
-printusage(const char* argv0)
-{
-    fprintf(stderr, "usage: %s [-h] [-b beamdir] [file ...]\n", argv0);
-    fprintf(stderr, "       -h: print this help and exit\n");
-    fprintf(stderr, "       -q: do not print messages about nonfatal errors\n");
-    fprintf(stderr, "       beamdir: base directory of the beam data files\n");
-    fprintf(stderr, "                (the files written by 'savebeam'\n");
-    fprintf(stderr, "       file ...: one or more ems cluster file(s)\n");
-    fprintf(stderr, "            data input may also come from stdin\n");
-}
-//---------------------------------------------------------------------------//
-static int
-readargs(int argc, char* const argv[])
-{
-    int c;
-    bool err=false;
-
-    while (!err && ((c=getopt(argc, argv, "hqb:")) != -1)) {
-        switch (c) {
-        case 'h':
-            printusage(argv[0]);
-            return 1;
-        case 'q':
-            quiet++;
-            break;
-        case 'b':
-            (void)init_beamdata(optarg);
-            use_beamdata=true;
-            break;
-        default:
-            err=true;
-        }
-    }
-    if (err) {
-        printusage(argv[0]);
-        return -1;
-    }
-
-    files=argv+optind;
-
-    return 0;
-}
 //---------------------------------------------------------------------------//
 koala_event::koala_event(void) :
  // next(0),
@@ -341,6 +249,59 @@ mxdc32_private::drop_event(void)
     return help;
 }
 //---------------------------------------------------------------------------//
+static void
+printusage(const char* argv0)
+{
+    fprintf(stderr, "usage: %s [-h] [-b beamdir] [-s] [-o outputfile] [file ...]\n", argv0);
+    fprintf(stderr, "       -h: print this help and exit\n");
+    fprintf(stderr, "       -q: do not print messages about nonfatal errors\n");
+    fprintf(stderr, "       -s: output simple flat tree structure\n");
+    fprintf(stderr, "       outputfile: the basename of the output files when the data input is stdin");
+    fprintf(stderr, "       beamdir: base directory of the beam data files\n");
+    fprintf(stderr, "                (the files written by 'savebeam'\n");
+    fprintf(stderr, "       file ...: one or more ems cluster file(s)\n");
+    fprintf(stderr, "            data input may also come from stdin\n");
+}
+//---------------------------------------------------------------------------//
+static int
+readargs(int argc, char* const argv[])
+{
+    int c;
+    bool err=false;
+
+    while (!err && ((c=getopt(argc, argv, "hqb:so:")) != -1)) {
+        switch (c) {
+        case 'h':
+            printusage(argv[0]);
+            return 1;
+        case 'q':
+            quiet++;
+            break;
+        case 'b':
+            (void)init_beamdata(optarg);
+            use_beamdata=true;
+            break;
+        case 's':
+            use_simplestructure=true;
+            break;
+        case 'o':
+          outputfile=optarg;
+          break;
+        default:
+            err=true;
+        }
+    }
+    if (err) {
+        printusage(argv[0]);
+        return -1;
+    }
+
+    files=argv+optind;
+
+    return 0;
+}
+
+//---------------------------------------------------------------------------//
 __attribute__((unused))
 static void
 dump_event(struct mxdc32_event *event)
@@ -434,7 +395,7 @@ collect_koala_event(void)
         koala->events[mod]=mxdc32_private[mod].drop_event();
     }
 
-    if (use_koala_event(koala,h_timediff)<0)
+    if (use_koala_event(koala)<0)
         return -1;
 
     return empty?0:1;
@@ -972,14 +933,14 @@ parse_file(int p)
 
     } while (res>0);
 
-    // print some statistics here
-    if (quiet<2) {
-        cout<<"  event clusters   : "<<setw(8)<<global_statist.evclusters<<endl;
-        cout<<"  events           : "<<setw(8)<<global_statist.events<<endl;
-        cout<<"  subevents        : "<<setw(8)<<global_statist.subevents<<endl;
-    }
     use_koala_done();
 
+    // print some statistics here
+    if (quiet<2) {
+      cout<<"  event clusters   : "<<setw(8)<<global_statist.evclusters<<endl;
+      cout<<"  events           : "<<setw(8)<<global_statist.events<<endl;
+      cout<<"  subevents        : "<<setw(8)<<global_statist.subevents<<endl;
+    }
     for (int mod=0; mod<nr_mesymodules; mod++) {
         printf(" events[%d]: %8ld\n", mod, mxdc32_private[mod].statist.events);
     }
@@ -987,28 +948,6 @@ parse_file(int p)
     for (int mod=0; mod<nr_mesymodules; mod++) {
         printf("words  [%d]: %8ld\n", mod, mxdc32_private[mod].statist.words);
     }
-
-#if 0
-    for (int mod=0; mod<nr_mesymodules; mod++) {
-        FILE *f;
-        char ss[100];
-        sprintf(ss, "%02d_a.hist", mesymodules[mod].ID);
-        f=fopen(ss, "w");
-
-        fprintf(f, "# module %d\n", mesymodules[mod].ID);
-        fclose(f);
-    }
-#endif
-#if 0
-    {
-        FILE *f;
-        char ss[100];
-        sprintf(ss, "span.hist");
-        f=fopen(ss, "w");
-
-        fclose(f);
-    }
-#endif
 
     return res;
 }
@@ -1018,6 +957,8 @@ prepare_globals()
 {
     bzero(&global_statist, sizeof(struct global_statist));
     use_beamdata=false;
+    use_simplestructure=false;
+    outputfile="koala_data";
     quiet=0;
 }
 //---------------------------------------------------------------------------//
@@ -1028,7 +969,6 @@ main(int argc, char* const argv[])
 
     prepare_globals();
 
-    book_hist();
     if ((res=readargs(argc, argv)))
         return res<0?1:0;
 
@@ -1043,6 +983,7 @@ main(int argc, char* const argv[])
             }
 
             printf("FILE %s\n", *files);
+            use_koala_setup(*files);
             res=parse_file(p);
             close(p);
             if (res<0)
@@ -1051,13 +992,9 @@ main(int argc, char* const argv[])
             files++;
         }
     } else {
+        use_koala_setup(outputfile);
         res=parse_file(0);
     }
-
-    // output the histogram
-    draw_hist("timediff.pdf");
-    save_hist("timediff.root");
-    delete_hist();
 
     return res<0?3:0;
 }
