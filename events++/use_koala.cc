@@ -220,29 +220,34 @@ use_koala_done(void)
       cout<<setw(8)<<timestamp_statist.equal_ev[mod]<<"("
           <<static_cast<double>(timestamp_statist.equal_ev[mod])/
         static_cast<double>(koala_statist.koala_events)
-          <<")"<<endl;
+          <<")\t";
     }
+    cout<<endl;
     cout<<"    plusone_events   : ";
     for(int mod=0;mod<nr_mesymodules;mod++){
       cout<<setw(8)<<timestamp_statist.plusone_ev[mod]<<"("
           <<static_cast<double>(timestamp_statist.plusone_ev[mod])/
         static_cast<double>(koala_statist.koala_events)
-          <<")"<<endl;
+          <<")\t";
     }
+    cout<<endl;
     cout<<"    minusone_events   : ";
     for(int mod=0;mod<nr_mesymodules;mod++){
       cout<<setw(8)<<timestamp_statist.minusone_ev[mod]<<"("
           <<static_cast<double>(timestamp_statist.minusone_ev[mod])/
         static_cast<double>(koala_statist.koala_events)
-          <<")"<<endl;
+          <<")\t";
     }
+    cout<<endl;
     cout<<"    unsync_events   : ";
     for(int mod=0;mod<nr_mesymodules;mod++){
       cout<<setw(8)<<timestamp_statist.unsync_ev[mod]<<"("
           <<static_cast<double>(timestamp_statist.unsync_ev[mod])/
         static_cast<double>(koala_statist.koala_events)
-          <<")"<<endl;
+          <<")\t";
     }
+    cout<<endl;
+    cout<<"**********************************************"<<endl;
 }
 //---------------------------------------------------------------------------//
 __attribute__((unused))
