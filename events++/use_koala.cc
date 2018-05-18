@@ -57,6 +57,8 @@ struct timestamp_statist{
   uint32_t equal_ev[nr_mesymodules];
   uint32_t plusone_ev[nr_mesymodules];
   uint32_t minusone_ev[nr_mesymodules];
+  uint32_t plustwo_ev[nr_mesymodules];
+  uint32_t minustwo_ev[nr_mesymodules];
   uint32_t unsync_ev[nr_mesymodules];
 };
 
@@ -136,7 +138,7 @@ void check_timestamp(koala_event* koala)
     h_timediff[mod]->Fill(delta_t+mod*100);
 
     // check
-    if(delta_t>1 || delta_t<-1){
+    if(delta_t>2 || delta_t<-2){
       unsync=true;
       print=true;
       //
@@ -144,6 +146,8 @@ void check_timestamp(koala_event* koala)
     }
     else if(delta_t==1) timestamp_statist.plusone_ev[mod]++;
     else if(delta_t==-1) timestamp_statist.minusone_ev[mod]++;
+    else if(delta_t==-2) timestamp_statist.minustwo_ev[mod]++;
+    else if(delta_t==2) timestamp_statist.plustwo_ev[mod]++;
     else timestamp_statist.equal_ev[mod]++;
   }
 
@@ -261,6 +265,22 @@ use_koala_done(void)
     for(int mod=0;mod<nr_mesymodules;mod++){
       cout<<setw(8)<<timestamp_statist.minusone_ev[mod]<<"("
           <<static_cast<double>(timestamp_statist.minusone_ev[mod])/
+        static_cast<double>(koala_statist.koala_events)
+          <<")\t";
+    }
+    cout<<endl;
+    cout<<"    plustwo_events   : ";
+    for(int mod=0;mod<nr_mesymodules;mod++){
+      cout<<setw(8)<<timestamp_statist.plustwo_ev[mod]<<"("
+          <<static_cast<double>(timestamp_statist.plustwo_ev[mod])/
+        static_cast<double>(koala_statist.koala_events)
+          <<")\t";
+    }
+    cout<<endl;
+    cout<<"    minustwo_events   : ";
+    for(int mod=0;mod<nr_mesymodules;mod++){
+      cout<<setw(8)<<timestamp_statist.minustwo_ev[mod]<<"("
+          <<static_cast<double>(timestamp_statist.minustwo_ev[mod])/
         static_cast<double>(koala_statist.koala_events)
           <<")\t";
     }
