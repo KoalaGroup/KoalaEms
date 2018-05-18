@@ -21,7 +21,6 @@
 #include <sstream>
 #include <iomanip>
 #include <cerrno>
-#include <cstdint>
 #include <cstring>
 #include <limits>       // std::numeric_limits
 #include <unistd.h>
@@ -983,7 +982,7 @@ main(int argc, char* const argv[])
             }
 
             printf("FILE %s\n", *files);
-            use_koala_setup(*files);
+            use_koala_setup(*files,use_simplestructure);
             res=parse_file(p);
             close(p);
             if (res<0)
@@ -992,7 +991,7 @@ main(int argc, char* const argv[])
             files++;
         }
     } else {
-        use_koala_setup(outputfile);
+      use_koala_setup(outputfile,use_simplestructure);
         res=parse_file(0);
     }
 

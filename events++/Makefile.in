@@ -57,13 +57,16 @@ EXECS := $(SOURCES:.cc=) $(OSOURCES:.cc=)
 .PHONY: all
 all: $(EXECS)
 
-parse_koala: parse_koala.o use_koala.o read_saved_beam.o
+parse_koala: parse_koala.o use_koala.o read_saved_beam.o KoaRawData.o
 	$(CXX) -o $@ $^ $(LIBS)
 
 use_koala.o: use_koala.cc
 	$(CXX) $(CPPFLAGS) -o $@ -c $^
 
 parse_koala.o: parse_koala.cc
+	$(CXX) $(CPPFLAGS) -o $@ -c $^
+
+KoaRawData.o: KoaRawData.cc
 	$(CXX) $(CPPFLAGS) -o $@ -c $^
 
 depend: sed.in

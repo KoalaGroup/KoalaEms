@@ -9,6 +9,7 @@
 #ifndef _parse_koala_hxx_
 #define _parse_koala_hxx_
 #include "global.hxx"
+#include <sys/time.h>
 
 // data from EMS event
 // each event has a timestamp and the scaler data
@@ -31,15 +32,13 @@ struct event_data {
 // single (sub) event of a single module
 struct mxdc32_event {
     void invalidate();
-    struct mxdc32_event *next;
-    uint32_t data[34]; // channel data including trigger channel
+    struct mxdc32_event *next; // used for linked-list
+    uint32_t data[34]; // channel data words including trigger channel, the index is ch_id
     uint32_t header; // header word
     uint32_t footer; // EOE word
-    uint64_t ext_stamp; // extended timestamp word
-    // uint32_t trigger;
+    uint64_t ext_stamp; // extended timestamp (extracted)
     bool ext_stamp_valid; // whether extended timestamp is found in the data frame
-    // int64_t ext_time;
-    int64_t timestamp; // timestamp of this event
+    int64_t timestamp; // timestamp of this event (extracted and with ext_stamp)
     uint64_t evnr; // koala event number of this event in this moudle, couted by parse_mxdc32
     int len; // number of following words in this event
 };

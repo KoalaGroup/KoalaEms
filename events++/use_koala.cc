@@ -32,8 +32,10 @@
 #include <unistd.h>
 #include "global.hxx"
 #include "parse_koala.hxx"
+#include "KoaRawData.hxx"
 #include "TFile.h"
 #include "TH1F.h"
+#include "TTree.h"
 #include "TFile.h"
 #include "TCanvas.h"
 #include "TStyle.h"
@@ -50,26 +52,31 @@ struct koala_statist {
     uint32_t only_qdc;
     uint32_t good_adc;
 };
+
 struct timestamp_statist{
   uint32_t equal_ev[nr_mesymodules];
   uint32_t plusone_ev[nr_mesymodules];
   uint32_t minusone_ev[nr_mesymodules];
   uint32_t unsync_ev[nr_mesymodules];
 };
+
 static struct koala_statist koala_statist;
 static struct timestamp_statist timestamp_statist;
 static char outputbase[1024];
 static char rootfile[1024];
 static char pdffile[1024];
 
-//---------------------------------------------------------------------------//
+static TFile* rfile;
 static TH1F* h_timediff[nr_mesymodules];
+static KoaRaw *koala_raw;
+
+//---------------------------------------------------------------------------//
 void book_hist()
 {
   gStyle->SetOptStat(111111);
   gStyle->SetPaperSize(TStyle::kA4);
   for(int mod=0;mod<nr_mesymodules;mod++){
-    h_timediff[mod] = new TH1F(Form("h_timediff_%d",mod),Form("Timestamp diff of ADC%d (offset=%d)",mod+1,mod*100),1500,-500,1000);
+    h_timediff[mod] = new TH1F(Form("h_timediff_%d",mod),Form("Timestamp diff of ADC%d (offset=%d)",mod+1,mod*100),600,-50,550);
     h_timediff[mod]->SetLineColor(kBlack+mod);
   }
   return;
@@ -85,11 +92,10 @@ void delete_hist()
 
 void save_hist()
 {
-  TFile *file=new TFile(rootfile,"recreate");
+  rfile->cd();
   for(int mod=0;mod<nr_mesymodules;mod++){
     h_timediff[mod]->Write();
   }
-  delete file;
   return;
 }
 
@@ -163,7 +169,7 @@ void check_timestamp(koala_event* koala)
 //---------------------------------------------------------------------------//
 // use_koala_setup will extract the filename base
 void
-use_koala_setup(const char* outputfile)
+use_koala_setup(const char* outputfile, bool use_simplestructure)
 {
   bzero(&koala_statist, sizeof(struct koala_statist));
   bzero(&timestamp_statist,sizeof(struct timestamp_statist));
@@ -176,19 +182,33 @@ use_koala_setup(const char* outputfile)
   else{
     strcpy(outputbase,outputfile);
   }
+
   strcpy(rootfile,outputbase);
   strcpy(pdffile,outputbase);
-
-  //
   strcat(rootfile,".root");
   strcat(pdffile,".pdf");
+
+  //
+  if(use_simplestructure){
+    koala_raw = new KoaRawSimple();
+  }
+  else{
+    //TODO
+    //koala_raw = new KoaRawComplex();
+  }
 }
 //---------------------------------------------------------------------------//
 void
 use_koala_init(void)
 {
+    rfile=new TFile(rootfile,"recreate");
+    //
     book_hist();
+
+    koala_raw->Setup(rfile);
+    koala_raw->Init();
 }
+
 //---------------------------------------------------------------------------//
 void
 use_koala_done(void)
@@ -196,6 +216,12 @@ use_koala_done(void)
     draw_hist();
     save_hist();
     delete_hist();
+
+    koala_raw->Done();
+
+    delete koala_raw;
+    // rfile must be deleted after koala_raw
+    delete rfile;
 
     //
     cout<<endl;
@@ -294,6 +320,7 @@ int use_koala_event(koala_event *koala)
   check_timestamp(koala);
 
   // data extraction and fill the tree
+  koala_raw->Fill(koala);
 
   // delete koala_event
   delete koala;
