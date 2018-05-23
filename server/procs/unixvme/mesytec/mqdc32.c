@@ -566,6 +566,8 @@ proc_mqdc32_gate_delay(ems_u32* p)
         struct vme_dev* dev=module->address.vme.dev;
         ems_u32 addr=module->address.vme.addr;
 
+        pres=plOK;
+
         if (p[1]==0 && p[0]>2 &&  p[2]==0) {
             /* delay for both banks is zero --> disable experiment trigger */
             /* this is not ideal, e.g. ECL input is ignored */
