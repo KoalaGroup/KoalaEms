@@ -247,6 +247,16 @@ printf("proc_mqdc32_init: p[1]=%d, idx=%d\n", ip[1], mxdc_member_idx());
                     res, strerror(errno));
             return plErr_System;
         }
+        /* according to QDC manual, wait 1s for the setting being stable */
+        usleep(1000);
+
+        /* disable readout to get a definite state */
+        res=dev->write_a32d16(dev, addr+0x603a, 0);
+        if (res!=2) {
+          complain("madc32_init: disable readout: res=%d errno=%s",
+                   res, strerror(errno));
+          return plErr_System;
+        }
 
         /* clear threshold memory */
         for (i=0; i<32; i++) {
@@ -566,7 +576,9 @@ proc_mqdc32_gate_delay(ems_u32* p)
         struct vme_dev* dev=module->address.vme.dev;
         ems_u32 addr=module->address.vme.addr;
 
-        if (p[1]==0 && p[0]>2 &&  p[2]==0) {
+        pres=plOK;
+
+        if (p[2]==0 && p[0]>2 &&  p[3]==0) {
             /* delay for both banks is zero --> disable experiment trigger */
             /* this is not ideal, e.g. ECL input is ignored */
             res=dev->write_a32d16(dev, addr+0x606c, 0);

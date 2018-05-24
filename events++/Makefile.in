@@ -57,7 +57,7 @@ EXECS := $(SOURCES:.cc=) $(OSOURCES:.cc=)
 .PHONY: all
 all: $(EXECS)
 
-parse_koala: parse_koala.o use_koala.o read_saved_beam.o KoaRawData.o
+parse_koala: parse_koala.o use_koala.o  KoaRawData.o
 	$(CXX) -o $@ $^ $(LIBS)
 
 use_koala.o: use_koala.cc

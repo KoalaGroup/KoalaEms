@@ -25,7 +25,6 @@
 #include <limits>       // std::numeric_limits
 #include <unistd.h>
 #include <fcntl.h>
-#include "read_saved_beam.hxx"
 #include "parse_koala.hxx"
 #include "use_koala.hxx"
 
@@ -121,7 +120,6 @@ static struct event_data event_data;
 static struct mxdc32_private mxdc32_private[nr_mesymodules];
 static struct global_statist global_statist;
 static struct mxdc32_depot depot;
-static bool use_beamdata;
 static char* const *files;
 static bool use_simplestructure;
 static const char* outputfile;
@@ -251,13 +249,11 @@ mxdc32_private::drop_event(void)
 static void
 printusage(const char* argv0)
 {
-    fprintf(stderr, "usage: %s [-h] [-b beamdir] [-s] [-o outputfile] [file ...]\n", argv0);
+    fprintf(stderr, "usage: %s [-h] [-s] [-o outputfile] [file ...]\n", argv0);
     fprintf(stderr, "       -h: print this help and exit\n");
     fprintf(stderr, "       -q: do not print messages about nonfatal errors\n");
     fprintf(stderr, "       -s: output simple flat tree structure\n");
     fprintf(stderr, "       outputfile: the basename of the output files when the data input is stdin");
-    fprintf(stderr, "       beamdir: base directory of the beam data files\n");
-    fprintf(stderr, "                (the files written by 'savebeam'\n");
     fprintf(stderr, "       file ...: one or more ems cluster file(s)\n");
     fprintf(stderr, "            data input may also come from stdin\n");
 }
@@ -268,17 +264,13 @@ readargs(int argc, char* const argv[])
     int c;
     bool err=false;
 
-    while (!err && ((c=getopt(argc, argv, "hqb:so:")) != -1)) {
+    while (!err && ((c=getopt(argc, argv, "hqso:")) != -1)) {
         switch (c) {
         case 'h':
             printusage(argv[0]);
             return 1;
         case 'q':
             quiet++;
-            break;
-        case 'b':
-            (void)init_beamdata(optarg);
-            use_beamdata=true;
             break;
         case 's':
             use_simplestructure=true;
@@ -413,7 +405,7 @@ mxdc32_get_idx_by_id(u_int32_t id)
     }
     if (!quiet)
         cout<<"mxdc32_get_idx_by_id: ID "<<id<<" not known"<<endl;
-    return 0;
+    return -1;
 }
 //---------------------------------------------------------------------------////---------------------------------------------------------------------------//
 static int
@@ -619,7 +611,7 @@ parse_mxdc32(const uint32_t *buf, int size, const struct is_info* info)
         case 0x3: { /* footer */
                 if (event==0) {
                     if (!quiet) {
-                        cout<<"mxdc32 footer: event storage not valid"<<endl;
+                        printf("mxdc32 footer(0x%x): event storage not valid\n",d);
                     }
                     // break  /*return -1*/;
                     return -1;
@@ -706,11 +698,6 @@ parse_event(const uint32_t *buf, int size)
 
     global_statist.subevents+=nr_sev;
 
-    if (use_beamdata && event_data.tv_valid) {
-        if (get_beamdata(&event_data.tv, -8, event_data.bct)<0)
-            return -1;
-    }
-
     do {
         res=collect_koala_event();
     } while (res>0);
@@ -778,8 +765,9 @@ parse_cluster(const uint32_t *buf, int size)
     clustertype=static_cast<clustertypes>(buf[idx++]);
     switch (clustertype) {
     case clusterty_events:
-        //cout<<"cluster: events"<<endl;
         global_statist.evclusters++;
+        if(!quiet)
+          cout<<"cluster: events No."<< global_statist.evclusters << endl;
         if (parse_events(buf+idx, size-idx)<0)
             return -1;
         break;
@@ -790,11 +778,13 @@ parse_cluster(const uint32_t *buf, int size)
         break;
     case clusterty_text:
         // currently ignored
-        cout<<"cluster: text"<<endl;
+        if(!quiet)
+          cout<<"cluster: text"<<endl;
         break;
     case clusterty_file:
         // currently ignored
-        cout<<"cluster: file"<<endl;
+        if(!quiet)
+          cout<<"cluster: file"<<endl;
         break;
     case clusterty_no_more_data:
         if (!quiet)
@@ -914,7 +904,6 @@ parse_file(int p)
     int res;
 
     use_koala_init();
-    init_beamdata(0);
 
     do {
         u_int32_t *buf;
@@ -932,20 +921,28 @@ parse_file(int p)
 
     } while (res>0);
 
+    if(res<0){
+      cout << endl;
+      cout << "****************************************************" << endl;
+      cout << "* FATAL ERROR IN DECODING! PLEASE CHECK YOUR DATA! *" << endl;
+      cout << "****************************************************" << endl;
+    } 
+    else printf("Decoding Successfully!\n");
+
     use_koala_done();
 
     // print some statistics here
     if (quiet<2) {
-      cout<<"  event clusters   : "<<setw(8)<<global_statist.evclusters<<endl;
-      cout<<"  events           : "<<setw(8)<<global_statist.events<<endl;
-      cout<<"  subevents        : "<<setw(8)<<global_statist.subevents<<endl;
+      cout<<"  ems clusters   : "<<setw(8)<<global_statist.evclusters<<endl;
+      cout<<"  ems events           : "<<setw(8)<<global_statist.events<<endl;
+      cout<<"  ems subevents        : "<<setw(8)<<global_statist.subevents<<endl;
     }
     for (int mod=0; mod<nr_mesymodules; mod++) {
-        printf(" events[%d]: %8ld\n", mod, mxdc32_private[mod].statist.events);
+        printf(" experiment events[%d]: %8ld\n", mod, mxdc32_private[mod].statist.events);
     }
     printf("\n");
     for (int mod=0; mod<nr_mesymodules; mod++) {
-        printf("words  [%d]: %8ld\n", mod, mxdc32_private[mod].statist.words);
+        printf(" words  [%d]: %8ld\n", mod, mxdc32_private[mod].statist.words);
     }
 
     return res;
@@ -955,7 +952,6 @@ static void
 prepare_globals()
 {
     bzero(&global_statist, sizeof(struct global_statist));
-    use_beamdata=false;
     use_simplestructure=false;
     outputfile="koala_data";
     quiet=0;

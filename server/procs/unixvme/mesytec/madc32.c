@@ -442,6 +442,7 @@ printf("proc_madc32_init: p[1]=%d, idx=%d\n", ip[1], mxdc_member_idx());
                     res, strerror(errno));
             return plErr_System;
         }
+        usleep(100);
 
         /* disable readout to get a definite state */
         res=dev->write_a32d16(dev, addr+0x603a, 0);
