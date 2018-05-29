@@ -1271,6 +1271,14 @@ proc_mxdc32_stop_cblt(ems_u32* p)
         return plErr_System;
     }
 
+    /* FIFO reset */
+    res=dev->write_a32d16(dev, addr+0x603c, ANY);
+    if (res!=2) {
+      complain("mxdc32_stop_cblt: reset FIFO: res=%d errno=%s",
+               res, strerror(errno));
+      return plErr_System;
+    }
+
     return plOK;
 }
 
@@ -1322,11 +1330,20 @@ proc_mxdc32_stop_simple(ems_u32* p)
 
         pres=plOK;
 
+        // Stop first
         res=dev->write_a32d16(dev, addr+0x603a, 0);
         if (res!=2) {
-            complain("stop_simple: res=%d errno=%s",
+            complain("mxdc32_stop_simple: res=%d errno=%s",
                     res, strerror(errno));
             return plErr_System;
+        }
+
+        /* FIFO reset */
+        res=dev->write_a32d16(dev, addr+0x603c, ANY);
+        if (res!=2) {
+          complain("mxdc32_stop_simple: reset FIFO: res=%d errno=%s",
+                   res, strerror(errno));
+          return plErr_System;
         }
     }
 
