@@ -1272,7 +1272,7 @@ proc_mxdc32_stop_cblt(ems_u32* p)
     }
 
     /* FIFO reset */
-    res=dev->write_a32d16(dev, addr+0x603c, ANY);
+    res=dev->write_a32d16(dev, maddr+0x603c, ANY);
     if (res!=2) {
       complain("mxdc32_stop_cblt: reset FIFO: res=%d errno=%s",
                res, strerror(errno));
