@@ -27,7 +27,7 @@
 #include <cerrno>
 #include <cstdint>
 #include <cstring>
-//#include <cmath>
+#include <cstdlib>
 #include <limits>       // std::numeric_limits
 #include <unistd.h>
 #include "global.hxx"
@@ -67,9 +67,11 @@ static struct timestamp_statist timestamp_statist;
 static char outputbase[1024];
 static char rootfile[1024];
 static char pdffile[1024];
+static int  max_tsdiff;
 
 static TFile* rfile;
 static TH1F* h_timediff[nr_mesymodules];
+static TH1F* hwords[nr_mesymodules];
 static KoaRaw *koala_raw;
 
 //---------------------------------------------------------------------------//
@@ -81,13 +83,30 @@ void book_hist()
     h_timediff[mod] = new TH1F(Form("h_timediff_%d",mod),Form("Timestamp diff of ADC%d (offset=%d)",mod+1,mod*100),600,-50,550);
     h_timediff[mod]->SetLineColor(kBlack+mod);
   }
+  //
+  for(int i=0;i<nr_mesymodules;i++){
+    hwords[i]=new TH1F(Form("hwords_%s",mesymodules[i].label),Form("hwords_%s",mesymodules[i].label),40,-2.5,37.5);
+  }
+  //
   return;
+}
+
+void fill_hist(koala_event* koala){
+  mxdc32_event *event;
+  for(int i=0;i<nr_mesymodules;i++){
+    event=koala->events[i];
+    hwords[i]->Fill(event->len);
+  }
 }
 
 void delete_hist()
 {
   for(int mod=0;mod<nr_mesymodules;mod++){
-    delete h_timediff[mod];
+    if(!h_timediff[mod]) delete h_timediff[mod];
+  }
+  //
+  for(int mod=0;mod<nr_mesymodules;mod++){
+    if(!hwords[mod]) delete hwords[mod];
   }
   return;
 }
@@ -98,6 +117,10 @@ void save_hist()
   for(int mod=0;mod<nr_mesymodules;mod++){
     h_timediff[mod]->Write();
   }
+  //
+  for(int mod=0;mod<nr_mesymodules;mod++){
+    hwords[mod]->Write();
+  }
   return;
 }
 
@@ -107,13 +130,21 @@ void draw_hist()
   gPad->SetLogy();
   THStack* hstack=new THStack("htimediff","Timestampe Diff");
   for(int mod=0;mod<nr_mesymodules;mod++){
-    // h_timediff[mod]->Draw("same");
     hstack->Add(h_timediff[mod]);
   }
 
   hstack->Draw();
   can->Print(pdffile);
   delete can;
+  delete hstack;
+  //
+  for(int mod=0;mod<nr_mesymodules;mod++){
+    can = new TCanvas(Form("can_%s",mesymodules[mod].label),Form("can_%s",mesymodules[mod].label));
+    gPad->SetLogy();
+    hwords[mod]->Draw();
+    can->Print(Form("hwords_%s.pdf",mesymodules[mod].label));
+    delete can;
+  }
   return;
 }
 
@@ -124,6 +155,9 @@ void check_timestamp(koala_event* koala)
   // timestamp check
   mxdc32_event *event;
   int64_t tmin=koala->events[nr_mesymodules-1]->timestamp;
+  if(mesymodules[nr_mesymodules-1].mesytype == mesytec_mqdc32){
+    tmin -= max_tsdiff;
+  }
   int64_t trange=0x40000000;
   int64_t delta_t;
   static bool unsync=false;
@@ -134,11 +168,13 @@ void check_timestamp(koala_event* koala)
     if(delta_t>trange/2) delta_t-=trange;
     else if(delta_t<-trange/2) delta_t+=trange;
 
+    if(mesymodules[mod].mesytype == mesytec_mqdc32){
+      delta_t -= max_tsdiff;
+    }
     //fill hist
     h_timediff[mod]->Fill(delta_t+mod*100);
 
-    // check
-    if(delta_t>2 || delta_t<-2){
+    if(abs(delta_t) > 3){
       unsync=true;
       print=true;
       //
@@ -173,7 +209,7 @@ void check_timestamp(koala_event* koala)
 //---------------------------------------------------------------------------//
 // use_koala_setup will extract the filename base
 void
-use_koala_setup(const char* outputfile, bool use_simplestructure)
+use_koala_setup(const char* outputfile, bool use_simplestructure,  int max_diff)
 {
   bzero(&koala_statist, sizeof(struct koala_statist));
   bzero(&timestamp_statist,sizeof(struct timestamp_statist));
@@ -200,6 +236,9 @@ use_koala_setup(const char* outputfile, bool use_simplestructure)
     //TODO
     //koala_raw = new KoaRawComplex();
   }
+
+  //
+  max_tsdiff=max_diff;
 }
 //---------------------------------------------------------------------------//
 void
@@ -219,7 +258,7 @@ use_koala_done(void)
 {
     draw_hist();
     save_hist();
-    delete_hist();
+    // delete_hist();
 
     koala_raw->Done();
 
@@ -321,7 +360,7 @@ analyse_koala(koala_event *koala)
 int use_koala_event(koala_event *koala)
 {
   koala_statist.koala_events++;
-  if (koala->mesypattern==0x3f) {
+  if (koala->mesypattern==0x7) {
     koala_statist.complete_events++;
   }
   if (koala->mesypattern==0xbf) {
@@ -338,6 +377,9 @@ int use_koala_event(koala_event *koala)
   
   // check timestamp
   check_timestamp(koala);
+
+  // fill hist
+  fill_hist(koala);
 
   // data extraction and fill the tree
   koala_raw->Fill(koala);

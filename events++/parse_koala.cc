@@ -22,6 +22,7 @@
 #include <iomanip>
 #include <cerrno>
 #include <cstring>
+#include <cstdlib>
 #include <limits>       // std::numeric_limits
 #include <unistd.h>
 #include <fcntl.h>
@@ -123,6 +124,7 @@ static struct mxdc32_depot depot;
 static char* const *files;
 static bool use_simplestructure;
 static const char* outputfile;
+static int max_tsdiff;
 
 //---------------------------------------------------------------------------//
 koala_event::koala_event(void) :
@@ -249,10 +251,11 @@ mxdc32_private::drop_event(void)
 static void
 printusage(const char* argv0)
 {
-    fprintf(stderr, "usage: %s [-h] [-s] [-o outputfile] [file ...]\n", argv0);
+    fprintf(stderr, "usage: %s [-h] [-q] [-s] [-m max_tsdiff ][-o outputfile] [file ...]\n", argv0);
     fprintf(stderr, "       -h: print this help and exit\n");
     fprintf(stderr, "       -q: do not print messages about nonfatal errors\n");
     fprintf(stderr, "       -s: output simple flat tree structure\n");
+    fprintf(stderr, "       -m: QDC included in the DAQ, and max_tsdiff is the max timestamp diff between QDC and other modules (which should be the master gate width/clock width)");
     fprintf(stderr, "       outputfile: the basename of the output files when the data input is stdin");
     fprintf(stderr, "       file ...: one or more ems cluster file(s)\n");
     fprintf(stderr, "            data input may also come from stdin\n");
@@ -264,7 +267,7 @@ readargs(int argc, char* const argv[])
     int c;
     bool err=false;
 
-    while (!err && ((c=getopt(argc, argv, "hqso:")) != -1)) {
+    while (!err && ((c=getopt(argc, argv, "hqsm:o:")) != -1)) {
         switch (c) {
         case 'h':
             printusage(argv[0]);
@@ -275,6 +278,11 @@ readargs(int argc, char* const argv[])
         case 's':
             use_simplestructure=true;
             break;
+        case 'm':
+          {
+            max_tsdiff = atoi(optarg);
+            break;
+          }
         case 'o':
           outputfile=optarg;
           break;
@@ -942,7 +950,7 @@ parse_file(int p)
     }
     printf("\n");
     for (int mod=0; mod<nr_mesymodules; mod++) {
-        printf(" words  [%d]: %8ld\n", mod, mxdc32_private[mod].statist.words);
+      printf(" words [%d] (sum/average): %8ld / %.4f\n", mod, mxdc32_private[mod].statist.words,(float)mxdc32_private[mod].statist.words/mxdc32_private[mod].statist.events);
     }
 
     return res;
@@ -955,6 +963,7 @@ prepare_globals()
     use_simplestructure=false;
     outputfile="koala_data";
     quiet=0;
+    max_tsdiff=2;
 }
 //---------------------------------------------------------------------------//
 int
@@ -978,7 +987,7 @@ main(int argc, char* const argv[])
             }
 
             printf("FILE %s\n", *files);
-            use_koala_setup(*files,use_simplestructure);
+            use_koala_setup(*files,use_simplestructure, max_tsdiff);
             res=parse_file(p);
             close(p);
             if (res<0)
@@ -987,7 +996,7 @@ main(int argc, char* const argv[])
             files++;
         }
     } else {
-      use_koala_setup(outputfile,use_simplestructure);
+      use_koala_setup(outputfile,use_simplestructure,max_tsdiff);
         res=parse_file(0);
     }
 

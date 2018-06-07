@@ -1252,15 +1252,21 @@ char name_proc_mxdc32_start_cblt[] = "mxdc32_start_cblt";
 int ver_proc_mxdc32_start_cblt = 1;
 /*****************************************************************************/
 /*
- * p[0]: argcount==2
+ * p[0]: argcount==3
  * p[1]: mcst_module
+ * p[2]: cblt_module
+ * p[3]: max words (should be equal to max_transfer_data in
+ *       mxdc32_start_cblt times number of modules)
  */
 plerrcode
 proc_mxdc32_stop_cblt(ems_u32* p)
 {
     ml_entry* mcst_module=ModulEnt(p[1]);
+    ml_entry* cblt_module=ModulEnt(p[2]);
+    /* dev of mcst and cblt should be identical */
     struct vme_dev* dev=mcst_module->address.vme.dev;
     ems_u32 maddr=mcst_module->address.vme.addr;
+    ems_u32 caddr=cblt_module->address.vme.addr;
     int res;
 
     /* stop acq */
@@ -1271,13 +1277,16 @@ proc_mxdc32_stop_cblt(ems_u32* p)
         return plErr_System;
     }
 
+    /* readout remaining words */
+    /* res=dev->read(dev, caddr+0, 0xb, outptr, 4*p[3], 4, &outptr); */
+
     /* FIFO reset */
-    res=dev->write_a32d16(dev, maddr+0x603c, ANY);
-    if (res!=2) {
-      complain("mxdc32_stop_cblt: reset FIFO: res=%d errno=%s",
-               res, strerror(errno));
-      return plErr_System;
-    }
+    /* res=dev->write_a32d16(dev, maddr+0x603c, ANY); */
+    /* if (res!=2) { */
+    /*   complain("mxdc32_stop_cblt: reset FIFO: res=%d errno=%s", */
+    /*            res, strerror(errno)); */
+    /*   return plErr_System; */
+    /* } */
 
     return plOK;
 }
@@ -1286,7 +1295,7 @@ plerrcode test_proc_mxdc32_stop_cblt(ems_u32* p)
 {
     ml_entry* module;
 
-    if (p[0]!=1) {
+    if (p[0]!=3) {
         complain("mxdc32_stop_cblt: illegal # of arguments: %d", p[0]);
         return plErr_ArgNum;
     }
@@ -1302,12 +1311,115 @@ plerrcode test_proc_mxdc32_stop_cblt(ems_u32* p)
         return plErr_BadModTyp;
     }
 
-    wirbrauchen=0;
+    if (!valid_module(p[2], modul_vme)) {
+      complain("mxdc32_stop_cblt: p[2](==%u): no valid VME module", p[1]);
+      return plErr_ArgRange;
+    }
+
+    module=ModulEnt(p[2]);
+    if (module->modultype!=vme_cblt) {
+      complain("mxdc32_stop_cblt: p[2](==%u): no cblt module", p[1]);
+      return plErr_BadModTyp;
+    }
+
+    wirbrauchen=p[3];
     return plOK;
 }
 
 char name_proc_mxdc32_stop_cblt[] = "mxdc32_stop_cblt";
 int ver_proc_mxdc32_stop_cblt = 1;
+/*****************************************************************************/
+/*
+ * p[0]: argcount==2
+ * p[1]: mcst_module
+ * p[2]: max_words (per module)
+ */
+plerrcode
+proc_mxdc32_stop_mcst(ems_u32* p)
+{
+    ems_u32 mtypes[]={mesytec_madc32, mesytec_mqdc32, mesytec_mtdc32, 0};
+    ml_entry *module, *mcst_module=ModulEnt(p[1]);
+    struct vme_dev* dev, *mdev=mcst_module->address.vme.dev;
+    ems_u32 addr, maddr=mcst_module->address.vme.addr;
+    ems_u32 *oldoutptr=outptr;
+    unsigned int i;
+    int res;
+
+    /* stop acq */
+    res=dev->write_a32d16(dev, maddr+0x603a, 0);
+    if (res!=2) {
+        complain("mxdc32_stop_cblt: res=%d errno=%s",
+                res, strerror(errno));
+        return plErr_System;
+    }
+
+    /* readout remaining words */
+    /* if (memberlist) { /\* iterate over memberlist *\/ */
+    /*     for (i=1; i<=memberlist[0]; i++) { */
+    /*         module=&modullist->entry[memberlist[i]]; */
+    /*         if (is_mesytecvme(module, mtypes)) { */
+    /*             dev=module->address.vme.dev; */
+    /*             addr=module->address.vme.addr; */
+    /*             res=dev->read(dev, addr, 0xb, outptr, 4*p[2], 4, &outptr); */
+    /*             if (res<0) { */
+    /*                 complain("mxdc32_stop_mcst: %s", strerror(errno)); */
+    /*                 return plErr_System; */
+    /*             } */
+    /*         } */
+    /*     } */
+    /* } else {          /\* iterate over modullist *\/ */
+    /*     for (i=0; i<modullist->modnum; i++) { */
+    /*         module=&modullist->entry[i]; */
+    /*         if (is_mesytecvme(module, mtypes)) { */
+    /*             dev=module->address.vme.dev; */
+    /*             addr=module->address.vme.addr; */
+    /*             res=dev->read(dev, addr, 0xb, outptr, 4*p[2], 4, &outptr); */
+    /*             if (res<0) { */
+    /*                 complain("mxdc32_stop_mcst: %s", strerror(errno)); */
+    /*                 return plErr_System; */
+    /*             } */
+    /*         } */
+    /*     } */
+    /* } */
+
+    /* FIFO reset */
+    /* res=dev->write_a32d16(dev, maddr+0x603c, ANY); */
+    /* if (res!=2) { */
+    /*   complain("mxdc32_stop_cblt: reset FIFO: res=%d errno=%s", */
+    /*            res, strerror(errno)); */
+    /*   return plErr_System; */
+    /* } */
+
+    return plOK;
+}
+
+plerrcode test_proc_mxdc32_stop_mcst(ems_u32* p)
+{
+    ems_u32 mtypes[]={mesytec_madc32, mesytec_mqdc32, mesytec_mtdc32, 0};
+    ml_entry* module;
+
+    if (p[0]!=2) {
+        complain("mxdc32_stop_mcst: illegal # of arguments: %d", p[0]);
+        return plErr_ArgNum;
+    }
+
+    if (!valid_module(p[1], modul_vme)) {
+        complain("mxdc32_stop_mcst: p[1](==%u): no valid VME module", p[1]);
+        return plErr_ArgRange;
+    }
+
+    module=ModulEnt(p[1]);
+    if (module->modultype!=vme_mcst) {
+        complain("mxdc32_stop_mcst: p[1](==%u): no mcst module", p[1]);
+        return plErr_BadModTyp;
+    }
+
+    wirbrauchen=nr_mxdc_modules(mtypes)*p[2];
+    return plOK;
+}
+
+char name_proc_mxdc32_stop_mcst[] = "mxdc32_stop_mcst";
+int ver_proc_mxdc32_stop_mcst = 1;
 /*****************************************************************************/
 /*
  * p[0]: argcount==1
@@ -1333,18 +1445,34 @@ proc_mxdc32_stop_simple(ems_u32* p)
         // Stop first
         res=dev->write_a32d16(dev, addr+0x603a, 0);
         if (res!=2) {
-            complain("mxdc32_stop_simple: res=%d errno=%s",
+            complain("mxdc32_stop_simple: stop: res=%d errno=%s",
                     res, strerror(errno));
             return plErr_System;
         }
 
+        // Read remaining words in the FIFO
+        /* ems_u16 val; */
+        /* res=dev->read_a32d16(dev, addr+0x6030, &val); */
+        /* if (res!=2) { */
+        /*   complain("mxdc32_stop_simple: remaining words: res=%d errno=%s", */
+        /*            res, strerror(errno)); */
+        /*   return plErr_System; */
+        /* } */
+
+        /* res=dev->read(dev, addr+0, 0xb, outptr, 4*val, 4, &outptr); */
+        /* if (res<0) { */
+        /*   complain("mxdc32_stop_simple: read: res=%d errno=%s", */
+        /*            res, strerror(errno)); */
+        /*   return plErr_System; */
+        /* } */
+
         /* FIFO reset */
-        res=dev->write_a32d16(dev, addr+0x603c, ANY);
-        if (res!=2) {
-          complain("mxdc32_stop_simple: reset FIFO: res=%d errno=%s",
-                   res, strerror(errno));
-          return plErr_System;
-        }
+        /* res=dev->write_a32d16(dev, addr+0x603c, ANY); */
+        /* if (res!=2) { */
+        /*   complain("mxdc32_stop_simple: reset FIFO: res=%d errno=%s", */
+        /*            res, strerror(errno)); */
+        /*   return plErr_System; */
+        /* } */
     }
 
     return pres;
@@ -1381,7 +1509,7 @@ char name_proc_mxdc32_stop_simple[] = "mxdc32_stop_simple";
 int ver_proc_mxdc32_stop_simple = 1;
 /*****************************************************************************/
 /*
- * p[0]: argcount==1
+ * p[0]: argcount==2
  * p[1]: module idx
  * p[2]: max_words (per module)
  */
