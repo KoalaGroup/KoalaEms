@@ -247,8 +247,9 @@ printf("proc_mqdc32_init: p[1]=%d, idx=%d\n", ip[1], mxdc_member_idx());
                     res, strerror(errno));
             return plErr_System;
         }
+
         /* according to QDC manual, wait 1s for the setting being stable */
-        usleep(1000);
+        usleep(1000000);
 
         /* disable readout to get a definite state */
         res=dev->write_a32d16(dev, addr+0x603a, 0);
@@ -323,6 +324,14 @@ printf("proc_mqdc32_init: p[1]=%d, idx=%d\n", ip[1], mxdc_member_idx());
                 return plErr_System;
             }
         }
+
+        /* FIFO reset */
+        /* res=dev->write_a32d16(dev, addr+0x603c, ANY); */
+        /* if (res!=2) { */
+        /*   complain("mqdc32_init: reset FIFO: res=%d errno=%s", */
+        /*            res, strerror(errno)); */
+        /*   return plErr_System; */
+        /* } */
 
         mxdc32_init_private(module, module_id, marking_type, -1);
     }
@@ -456,6 +465,9 @@ proc_mqdc32_offset(ems_u32* p)
                 return plErr_System;
             }
         }
+
+        // According to the manual, it may take several milliseconds before these commands take effect
+        usleep(1000);
     }
 
     return pres;
@@ -650,7 +662,7 @@ proc_mqdc32_fast_vme(ems_u32* p)
 
         pres=plOK;
 
-        res=dev->write_a32d16(dev, addr+0x600e, p[2]);
+        res=dev->write_a32d16(dev, addr+0x6006, p[2]);
         if (res!=2) {
             complain("mqdc32_fast_vme: res=%d errno=%s",
                     res, strerror(errno));

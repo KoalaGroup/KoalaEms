@@ -397,6 +397,16 @@ collect_koala_event(void)
     if (use_koala_event(koala)<0)
         return -1;
 
+    empty = true;
+    for (int mod=0; mod<nr_mesymodules; mod++) {
+      struct mxdc32_event *event=mxdc32_private[mod].first;
+      if (event) {
+        empty=false;
+      } else {
+        notfull=true;
+      }
+    }
+
     return empty?0:1;
 }
 #endif
@@ -937,8 +947,6 @@ parse_file(int p)
     } 
     else printf("Decoding Successfully!\n");
 
-    use_koala_done();
-
     // print some statistics here
     if (quiet<2) {
       cout<<"  ems clusters   : "<<setw(8)<<global_statist.evclusters<<endl;
@@ -952,6 +960,8 @@ parse_file(int p)
     for (int mod=0; mod<nr_mesymodules; mod++) {
       printf(" words [%d] (sum/average): %8ld / %.4f\n", mod, mxdc32_private[mod].statist.words,(float)mxdc32_private[mod].statist.words/mxdc32_private[mod].statist.events);
     }
+
+    use_koala_done();
 
     return res;
 }

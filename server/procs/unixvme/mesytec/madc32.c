@@ -538,6 +538,14 @@ printf("proc_madc32_init: p[1]=%d, idx=%d\n", ip[1], mxdc_member_idx());
             }
         }
 
+        /* FIFO reset */
+        /* res=dev->write_a32d16(dev, addr+0x603c, ANY); */
+        /* if (res!=2) { */
+        /*   complain("madc32_init: reset FIFO: res=%d errno=%s", */
+        /*            res, strerror(errno)); */
+        /*   return plErr_System; */
+        /* } */
+
         mxdc32_init_private(module, module_id, marking_type, -1);
     }
 

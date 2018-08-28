@@ -1,5 +1,5 @@
 #include "KoaRawData.hxx"
-#define UNDER_THRESHOLD -1
+#define UNDER_THRESHOLD -5
 #define ADC_OVERFLOW 0x20000
 #define QDC_OVERFLOW 0x10000
 

@@ -130,6 +130,7 @@ void draw_hist()
   gPad->SetLogy();
   THStack* hstack=new THStack("htimediff","Timestampe Diff");
   for(int mod=0;mod<nr_mesymodules;mod++){
+    //TODO this line crash when use_koala_event is not invoked anytime
     hstack->Add(h_timediff[mod]);
   }
 
