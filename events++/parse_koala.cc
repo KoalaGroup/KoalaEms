@@ -290,7 +290,7 @@ readargs(int argc, char* const argv[])
             err=true;
         }
     }
-    if (err) {
+    if (err || optind == 1) {
         printusage(argv[0]);
         return -1;
     }

@@ -3,8 +3,8 @@
 TOPDIR=`pwd`
 trap 'cd $TOPDIR' EXIT
 
-# package 'common', 'support', 'commu', 'clientlib', 'proclib'
-packages=( common support commu clientlib proclib )
+# package 'common', 'support', 'commu', 'clientlib', 'proclib' 'events++'
+packages=( common support commu clientlib proclib events++)
 for package in $packages
 do
     if [ ! -d $package ];then
