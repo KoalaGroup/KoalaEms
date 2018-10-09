@@ -56,7 +56,7 @@ void KoaRaw::Decode(koala_event* koala)
     {
       case mesytec_madc32:
         {
-          fResolution[mod] = (event->header>>12)&0x8;
+          fResolution[mod] = (event->header>>12)&0x7;
           for(int ch=0;ch<32;ch++){
             if(event->data[ch]){
               if((event->data[ch]>>14)&0x1){
@@ -66,7 +66,7 @@ void KoaRaw::Decode(koala_event* koala)
                 switch(fResolution[mod])
                 {
                 case 0:
-                  fData[mod][ch] = (event->data[ch])&0x8ff;
+                  fData[mod][ch] = (event->data[ch])&0x7ff;
                   break;
                 case 1:
                 case 2:
