@@ -361,21 +361,7 @@ analyse_koala(koala_event *koala)
 int use_koala_event(koala_event *koala)
 {
   koala_statist.koala_events++;
-  if (koala->mesypattern==0x7) {
-    koala_statist.complete_events++;
-  }
-  if (koala->mesypattern==0xbf) {
-    koala_statist.without_qdc++;
-  }
 
-  if (koala->mesypattern==0x40) {
-    koala_statist.only_qdc++;
-  }
-
-  if (koala->mesypattern&0x3f) {
-    koala_statist.good_adc++;
-  }
-  
   // check timestamp
   check_timestamp(koala);
 
@@ -395,21 +381,6 @@ int
 use_koala_event(koala_event *koala)
 {
     koala_statist.koala_events++;
-    if (koala->mesypattern==0x3f) {
-        koala_statist.complete_events++;
-    }
-    if (koala->mesypattern==0xbf) {
-        koala_statist.without_qdc++;
-    }
-
-    if (koala->mesypattern==0x40) {
-        koala_statist.only_qdc++;
-    }
-
-    if (koala->mesypattern&0x3f) {
-        koala_statist.good_adc++;
-    }
-
     analyse_koala(koala);
 
     delete koala;

@@ -459,7 +459,7 @@ proc_mtdc32_trigger(ems_u32* p)
             return plErr_System;
         }
 
-        res=dev->write_a32d16(dev, addr+0x6062, p[2]);
+        res=dev->write_a32d16(dev, addr+0x6062, p[3]);
         if (res!=2) {
             complain("mtdc32_trigger: set ecl_term: res=%d errno=%s",
                     res, strerror(errno));

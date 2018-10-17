@@ -581,11 +581,11 @@ parse_mxdc32(const uint32_t *buf, int size, const struct is_info* info)
                         // break  /*return -1*/;
                         return -1;
                     }
-                    if (mod>=0 && mesymodules[mod].mesytype==mesytec_mqdc32) {
-                        int chan=(d>>16)&0x1f;
+                    if (mod>=0 && (mesymodules[mod].mesytype==mesytec_mtdc32 || mesymodules[mod].mesytype==mesytec_mqdc32)) {
+                        int chan=(d>>16)&0x3f;
                         if (event->data[chan]) {
                             if (!quiet) {
-                                cout<<"QDC: chan "<<chan<<" already filled"
+                                cout<<"TDC: chan "<<chan<<" already filled"
                                     <<endl;
 #if 0
                                 printf("===> %08x\n", d);
@@ -595,7 +595,11 @@ parse_mxdc32(const uint32_t *buf, int size, const struct is_info* info)
 #endif
                             }
                             return -1;
-                        } else {
+                        } else if(chan>33){
+                          printf("channel %d not valid in %08x\n",
+                                 chan, d);
+                          return -1;
+                        }else {
                             event->data[chan]=d;
                         }
                     } else {

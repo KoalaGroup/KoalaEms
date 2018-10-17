@@ -1,7 +1,7 @@
 #include "KoaRawData.hxx"
 #define UNDER_THRESHOLD -5
-#define ADC_OVERFLOW 0x20000
-#define QDC_OVERFLOW 0x10000
+#define ADC_OVERFLOW 0x2000
+#define QDC_OVERFLOW 0x1000
 
 KoaRaw::~KoaRaw()
 {
@@ -92,7 +92,7 @@ void KoaRaw::Decode(koala_event* koala)
           for(int ch=0;ch<32;ch++){
             if(event->data[ch]){
               if((event->data[ch]>>15)&0x1){
-                fData[mod][ch] = ADC_OVERFLOW;
+                fData[mod][ch] = QDC_OVERFLOW;
               }
               else{
                 fData[mod][ch] = (event->data[ch])&0xfff;
