@@ -594,7 +594,7 @@ parse_mxdc32(const uint32_t *buf, int size, const struct is_info* info)
                                 }
 #endif
                             }
-                            return -1;
+                            // return -1;
                         } else if(chan>33){
                           printf("channel %d not valid in %08x\n",
                                  chan, d);

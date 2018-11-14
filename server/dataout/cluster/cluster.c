@@ -13,6 +13,9 @@ static const char* cvsid __attribute__((unused))=
 #include <sys/types.h>
 #include <unistd.h>
 #include <string.h>
+// fix by Yong 17.10.2018
+#include <stdint.h>
+// 
 #ifndef HAVE_CGETCAP
 #include <getcap.h>
 #endif

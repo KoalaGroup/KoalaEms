@@ -1338,17 +1338,17 @@ plerrcode
 proc_mxdc32_stop_mcst(ems_u32* p)
 {
     ems_u32 mtypes[]={mesytec_madc32, mesytec_mqdc32, mesytec_mtdc32, 0};
-    ml_entry *module, *mcst_module=ModulEnt(p[1]);
-    struct vme_dev* dev, *mdev=mcst_module->address.vme.dev;
-    ems_u32 addr, maddr=mcst_module->address.vme.addr;
+    ml_entry *mcst_module=ModulEnt(p[1]);
+    struct vme_dev *mdev=mcst_module->address.vme.dev;
+    ems_u32 maddr=mcst_module->address.vme.addr;
     ems_u32 *oldoutptr=outptr;
     unsigned int i;
     int res;
 
     /* stop acq */
-    res=dev->write_a32d16(dev, maddr+0x603a, 0);
+    res=mdev->write_a32d16(mdev, maddr+0x603a, 0);
     if (res!=2) {
-        complain("mxdc32_stop_cblt: res=%d errno=%s",
+        complain("mxdc32_stop_mcst: res=%d errno=%s",
                 res, strerror(errno));
         return plErr_System;
     }
