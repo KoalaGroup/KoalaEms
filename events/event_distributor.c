@@ -326,7 +326,7 @@ create_listening_socket (int listening_port)
         return -3;
     }
 
-    # only one connection request allowed? Both input and output?
+    // only one connection request allowed? Both input and output?
     if ((listen(listening_socket, 1))<0) {
         printf("listen listening_socket: %s\n", strerror(errno));
         return -4;
@@ -638,12 +638,12 @@ main(int argc, char *argv[])
     int insock_l, outsock_l;
     char *p;
 
-    # arguments parsing
+    // arguments parsing
     if (readargs(argc, argv)) return 1;
 
     printf("inname=%s; outname=%s\n", inname, outname);
 
-    # determine the input stream type
+    // determine the input stream type
     if (strcmp(inname, "-")==0) {
         intype=intype_stdin;
     } else if ((p=index(inname, ':'))) {
@@ -669,10 +669,10 @@ main(int argc, char *argv[])
         if ((inport=portname2portnum(inname))<0) return 1;
     }
 
-    # get output stream server binding port
+    // get output stream server binding port
     if ((outport=portname2portnum(outname))<0) return 1;
 
-    # verbose information about input & output stream
+    // verbose information about input & output stream
     if (!quiet) {
         printf("using ");
         switch (intype) {
@@ -695,7 +695,7 @@ main(int argc, char *argv[])
     /*signal (SIGPIPE, SIG_IGN);*/
     signal (SIGPIPE, sigpipe);
 
-    # setup binding port for input & output connection
+    // setup binding port for input & output connection
     if (intype==intype_accept) {
         if ((insock_l=create_listening_socket(inport))<0) {
             printf("create_listening_socket input: %s\n", strerror(errno));
@@ -709,7 +709,7 @@ main(int argc, char *argv[])
         return outsock_l;
     }
 
-    # waiting establishing input & output connection and do the data receiving & distribution
+    // waiting establishing input & output connection and do the data receiving & distribution
     main_loop (insock_l, outsock_l);
 
     return 0;
