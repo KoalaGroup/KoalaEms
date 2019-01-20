@@ -20,6 +20,18 @@ mxdc32_event::invalidate()
 }
 
 //---------------------------------------------------------------------------//
+mxdc32_private::~mxdc32_private()
+{
+  if(prepared) fDepot->put(prepared);
+  mxdc32_event* current=first;
+  mxdc32_event* previous=first;
+  while(current){
+    current = previous->next;
+    fDepot->put(previous);
+    previous=current;
+  }
+}
+//---------------------------------------------------------------------------//
 /*
  * prepare_event prepares a new, empty event structure
  */

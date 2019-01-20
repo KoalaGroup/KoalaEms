@@ -51,7 +51,7 @@ public:
   void SetMxdc32Depot(mxdc32_depot* depot) { fMxdc32Depot=depot; }
 
 private:
-  class mxdc32_depot* fMxdc32Depot;
+  mxdc32_depot* fMxdc32Depot;
 };
 
 class  mxdc32_depot {
@@ -90,9 +90,10 @@ public:
   {
     fDepot = mxdc32_depot::Instance();
   };
-  struct mxdc32_event* prepare_event(int);
+  ~mxdc32_private();
+  mxdc32_event* prepare_event(int);
   void store_event(void);
-  struct mxdc32_event* drop_event(void);
+  mxdc32_event* drop_event(void);
 
 private:
   mxdc32_depot *fDepot;
@@ -100,10 +101,10 @@ private:
   int64_t last_time;
   //int64_t last_diff;
   //int64_t offset;
-  struct mxdc32_event *prepared;
-  struct mxdc32_event *first;
-  struct mxdc32_event *last;
-  struct mxdc32_statist statist;
+  mxdc32_event *prepared;
+  mxdc32_event *first;
+  mxdc32_event *last;
+  mxdc32_statist statist;
 };
 
 // koala_event contains the module data corresponding to the same event, i.e. synchronized data.
