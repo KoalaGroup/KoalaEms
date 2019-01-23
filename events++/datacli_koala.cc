@@ -386,7 +386,7 @@ main_loop()
             } else {
                 if (ibs.valid) {
                     // decode this cluster data
-
+                    printf("receive one new cluster\n");
                     //
                     clear_new_event(&ibs);
                 }

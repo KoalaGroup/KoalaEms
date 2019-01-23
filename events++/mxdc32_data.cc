@@ -1,4 +1,5 @@
 #include "mxdc32_data.hxx"
+#include "KoaLoguru.hxx"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -16,39 +17,56 @@ using namespace std;
 void
 mxdc32_event::invalidate()
 {
-  bzero(this, sizeof(*this));
+  // WARNING: bzero is a deprecated function, use memset instead
+  // bzero(this, sizeof(*this));
+  memset(this,0,sizeof(*this));
+}
+
+//---------------------------------------------------------------------------//
+void mxdc32_event::recycle()
+{
+  mxdc32_depot* fDepot=mxdc32_depot::Instance();
+  fDepot->put(this);
 }
 
 //---------------------------------------------------------------------------//
 mxdc32_private::~mxdc32_private()
 {
-  if(prepared) fDepot->put(prepared);
+  if(prepared) prepared->recycle();
   mxdc32_event* current=first;
-  mxdc32_event* previous=first;
   while(current){
-    current = previous->next;
-    fDepot->put(previous);
-    previous=current;
+    current = first->next;
+    first->recycle();
+    first=current;
   }
 }
 //---------------------------------------------------------------------------//
 /*
  * prepare_event prepares a new, empty event structure
  */
-struct mxdc32_event*
-mxdc32_private::prepare_event(int ID)
+mxdc32_event*
+mxdc32_private::prepare_event()
 {
     // if there is an unused event (previous data where invalid), return this
     // otherwise fetch one from the depot
     if (prepared==0)
         prepared=fDepot->get();
-    if (prepared==0) { // no more memory?
-        cout<<"cannot create storage for the next event"<<endl;
-        return 0;
-    }
+
+    CHECK_NOTNULL_F(prepared,"Can't allocate memory for the next event");
     prepared->invalidate();
     return prepared;
 }
+
+//---------------------------------------------------------------------------//
+mxdc32_event*
+mxdc32_private::get_prepared()
+{
+  LOG_SCOPE_FUNCTION(INFO);
+  CHECK_NOTNULL_F(prepared,"prepare_event first");
+
+  return prepared;
+}
+
 //---------------------------------------------------------------------------//
 /*
  * store_event stores the previously prepared event at the end of
@@ -76,10 +94,10 @@ mxdc32_private::store_event(void)
 /*
  * store_event releases the first (oldest) event from the event queue
  */
-struct mxdc32_event*
+mxdc32_event*
 mxdc32_private::drop_event(void)
 {
-    struct mxdc32_event *help;
+    mxdc32_event *help;
 
     /* idiotic, but save */
     if (!first)
@@ -94,24 +112,18 @@ mxdc32_private::drop_event(void)
 }
 
 //---------------------------------------------------------------------------//
-koala_event::koala_event(void) :
-  // next(0),
-  mesypattern(0)
+bool
+mxdc32_private::is_empty()
 {
-  /* events[] will be filled in collect_koala_event */
+  if(!first)
+    return true;
+
+  return false;
 }
+
 //---------------------------------------------------------------------------//
-koala_event::~koala_event(void)
-{
-  mxdc32_depot* depot=mxdc32_depot::Instance();
-  for (int mod=0; mod<nr_mesymodules; mod++) {
-    if (events[mod])
-      depot->put(events[mod]);
-  }
-}
-//---------------------------------------------------------------------------//
-mxdc32_depot* mxdc32_depot::_fInstance=0;
-Mxdc32DepotDestroyer mxdc32_depot::_fDestroyer;
+mxdc32_depot* mxdc32_depot::fInstance=nullptr;
+Mxdc32DepotDestroyer mxdc32_depot::fDestroyer;
 
 Mxdc32DepotDestroyer::~Mxdc32DepotDestroyer()
 {
@@ -121,11 +133,11 @@ Mxdc32DepotDestroyer::~Mxdc32DepotDestroyer()
 
 mxdc32_depot* mxdc32_depot::Instance()
 {
-  if(!_fInstance){
-    _fInstance = new mxdc32_depot();
-    _fDestroyer.SetMxdc32Depot(_fInstance);
+  if(!fInstance){
+    fInstance = new mxdc32_depot();
+    fDestroyer.SetMxdc32Depot(fInstance);
   }
-  return _fInstance;
+  return fInstance;
 }
 
 //---------------------------------------------------------------------------//
@@ -135,6 +147,7 @@ mxdc32_depot::~mxdc32_depot()
   while(current){
     current=first->next;
     delete first;
+    first=current;
   }
 }
 //---------------------------------------------------------------------------//
@@ -144,16 +157,16 @@ mxdc32_depot::~mxdc32_depot()
  * the new structure is not cleared or initialised, this is the task
  * of mxdc32_private::prepare_event
  */
-struct mxdc32_event*
+mxdc32_event*
 mxdc32_depot::get(void)
 {
-    struct mxdc32_event *event;
+    mxdc32_event *event;
 
     if (first) {
         event=first;
         first=event->next;
     } else {
-        event=new struct mxdc32_event;
+        event=new mxdc32_event;
     }
     if (event==0) {
         cout<<"mxdc32_depot:get: cannot allocate new event structure"<<endl;
@@ -166,10 +179,10 @@ mxdc32_depot::get(void)
  * put stores unused mesytec events inside mxdc32_depot for later use
  */
 void
-mxdc32_depot::put(struct mxdc32_event *event)
+mxdc32_depot::put(mxdc32_event *event)
 {
     if (!event) {
-        cout<<"depot::put: event=0"<<endl;
+        cout<<"mxdc32_depot::put: event=0"<<endl;
         return;
     }
     //cout<<"depot::put: store "<<event->seq<<endl;
