@@ -3,7 +3,7 @@
 
 #include "ems_data.hxx"
 #include "koala_data.hxx"
-#incldue "KoaRawData.hxx"
+#include "KoaRawData.hxx"
 #include "TFile.h"
 #include "TH1F.h"
 #include "global.hxx"
