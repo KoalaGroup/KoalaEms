@@ -2,10 +2,9 @@
 #define _koala_data_hxx_
 
 #include "global.hxx"
+#include "mxdc32_data.hxx"
 // koala_event contains the module data corresponding to the same event, i.e. synchronized data.
 // [TODO] ??Shall it also contain the ems event infomation corresponding to this KOALA event?
-
-class mxdc32_event;
 
 class koala_event {
 public:

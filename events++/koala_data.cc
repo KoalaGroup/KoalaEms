@@ -1,5 +1,4 @@
 #include "koala_data.hxx"
-#include "mxdc32_data.hxx"
 #include "KoaLoguru.hxx"
 #include <cstring>
 #include <iostream>

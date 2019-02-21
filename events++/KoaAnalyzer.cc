@@ -38,7 +38,7 @@ namespace DecodeUtil
   }
 
   //
-  KoaSimpleAnalyzer::KoaSimpleAnalyzer(const char* outputfile="koala_raw.root", bool use_simplestructure=true,  int max_diff=0)
+  KoaSimpleAnalyzer::KoaSimpleAnalyzer(const char* outputfile, bool use_simplestructure,  int max_diff)
   {
     SetOutputFile(outputfile);
     SetSimpleStructure(use_simplestructure);

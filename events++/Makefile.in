@@ -85,7 +85,7 @@ LDLIBS =  -L$(SUPPORT_LIB) -lsupp.$(SUPPORTVER) \
 		      -lpthread -ldl
 
 # srcs for executables
-SOURCES := test.cc parse_koala.cc datacli_koala.cc \
+SOURCES := test.cc datacli_koala.cc \
            new_parser_koala.cc
 OBJS := $(SOURCES:.cc=.o)
 EXECS := $(SOURCES:.cc=)
@@ -93,7 +93,7 @@ EXECS := $(SOURCES:.cc=)
 # srcs for libraries
 LIBSOURCES := mxdc32_data.cc koala_data.cc ems_data.cc \
 							parser_koala.cc decode_util.cc decoder_koala.cc \
-							KoaAnalyzer.cc  KoaAssembler.cc \
+							KoaRawData.cc KoaAnalyzer.cc  KoaAssembler.cc \
 							KoaLoguru.cc
 LIBOBJS := $(LIBSOURCES:.cc=.o)
 LIBS    := libutils.$(SELFVER)$(LIBSUFFIX)
@@ -109,9 +109,6 @@ test: test.o $(LIBS)
 	$(CXX) -o $@ $^ $(LDLIBS)
 
 new_parser_koala: new_parser_koala.o $(LIBS)
-	$(CXX) -o $@ $^ $(LDLIBS)
-
-parse_koala: parse_koala.o use_koala.o  KoaRawData.o
 	$(CXX) -o $@ $^ $(LDLIBS)
 
 datacli_koala: datacli_koala.o
