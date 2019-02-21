@@ -80,8 +80,17 @@ void book_hist()
   gStyle->SetOptStat(111111);
   gStyle->SetPaperSize(TStyle::kA4);
   for(int mod=0;mod<nr_mesymodules;mod++){
-    h_timediff[mod] = new TH1F(Form("h_timediff_%d",mod),Form("Timestamp diff of ADC%d (offset=%d)",mod+1,mod*100),600,-50,550);
+    h_timediff[mod] = new TH1F(Form("h_timediff_%d",mod),Form("Timestamp diff of ADC%d (offset=%d)",mod+1,mod*1000),8150,-100,8050);
     h_timediff[mod]->SetLineColor(kBlack+mod);
+    h_timediff[mod]->SetLineWidth(3);
+    if(mod== 2)
+      h_timediff[mod]->SetLineColor(kBlue);
+    if(mod== 3)
+      h_timediff[mod]->SetLineColor(kGreen);
+    if(mod== 4)
+      h_timediff[mod]->SetLineColor(kRed+1);
+    if(mod== 5)
+      h_timediff[mod]->SetLineColor(kYellow);
   }
   //
   for(int i=0;i<nr_mesymodules;i++){
@@ -173,7 +182,7 @@ void check_timestamp(koala_event* koala)
       delta_t -= max_tsdiff;
     }
     //fill hist
-    h_timediff[mod]->Fill(delta_t+mod*100);
+    h_timediff[mod]->Fill(delta_t+mod*1000);
 
     if(abs(delta_t) > 3){
       unsync=true;

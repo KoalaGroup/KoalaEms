@@ -552,7 +552,7 @@ parse_mxdc32(const uint32_t *buf, int size, const struct is_info* info)
                 int id=(d>>16)&0xff;
                 mod=mxdc32_get_idx_by_id(id);
                 if (mod<0) {
-                    cout<<"mxdc32 header: private data not found"<<endl;
+                  cout<<"mxdc32 header: private data not found "<< id <<endl;
                     return 0;
                 }
                 priv=mxdc32_private+mod;
