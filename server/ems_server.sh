@@ -1,2 +1,2 @@
-cd /home/koala/src/ems_test/build/cc_test
-./server -l:vmep=/dev/sis1100_00\;sis3100
+cd /home/koala/ems/KoalaEms/build/cc_simple
+./server.cc_simple -l:vmep=/dev/sis1100_00\;sis3100
