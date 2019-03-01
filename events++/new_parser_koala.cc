@@ -200,6 +200,7 @@ parse_file(int p)
     //   printf(" words [%d] (sum/average): %8ld / %.4f\n", mod, mxdc32_private[mod].statist.words,(float)mxdc32_private[mod].statist.words/mxdc32_private[mod].statist.events);
     // }
 
+  delete evtlist;
   delete decoder;
 
   return res;
