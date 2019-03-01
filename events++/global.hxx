@@ -19,9 +19,9 @@ static const struct mesymodules mesymodules[]= {
   {4, mesytec_madc32, "ADC4"},
   {5, mesytec_madc32, "ADC5"},
   {6, mesytec_madc32, "ADC6"},
-  // {9, mesytec_madc32, "ADC"},
-  // {10, mesytec_mqdc32, "QDC"},
-  // {11, mesytec_mtdc32, "TDC"},
+  {10, mesytec_mqdc32, "QDC"},
+  {11, mesytec_mtdc32, "TDC1"},
+  {12, mesytec_mtdc32, "TDC2"},
 };
 
 static const int nr_mesymodules=sizeof(mesymodules)/sizeof(struct mesymodules);
