@@ -80,7 +80,7 @@ void book_hist()
   gStyle->SetOptStat(111111);
   gStyle->SetPaperSize(TStyle::kA4);
   for(int mod=0;mod<nr_mesymodules;mod++){
-    h_timediff[mod] = new TH1F(Form("h_timediff_%d",mod),Form("Timestamp diff of ADC%d (offset=%d)",mod+1,mod*100),600,-50,550);
+    h_timediff[mod] = new TH1F(Form("h_timediff_%d",mod),Form("Timestamp diff of ADC%d (offset=%d)",mod+1,mod*100),nr_mesymodules*100,-50,nr_mesymodules*100-50);
     h_timediff[mod]->SetLineColor(kBlack+mod);
   }
   //
@@ -190,7 +190,7 @@ void check_timestamp(koala_event* koala)
 
   // printing
   if(unsync){
-    printf("unsync event (%d): ",koala_statist.complete_events);
+    printf("unsync event (%d): ",koala_statist.koala_events);
     for (int mod=0; mod<nr_mesymodules; mod++) {
       event=koala->events[mod];
       printf("%d\t",event->timestamp);
@@ -198,7 +198,7 @@ void check_timestamp(koala_event* koala)
     printf("\n");
     unsync=false;
   } else if(print){
-    printf("after unsync event (%d): ",koala_statist.complete_events);
+    printf("after unsync event (%d): ",koala_statist.koala_events);
     for (int mod=0; mod<nr_mesymodules; mod++) {
       event=koala->events[mod];
       printf("%d\t",event->timestamp);

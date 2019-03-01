@@ -3,7 +3,8 @@ pkill commu
 commu
 
 # event distributor in the background
-pkill event_distributor
+# pkill has a maximum charactor limit
+pkill event_distr
 nohup event_distributor &>/dev/null &
 
 # server in the background
