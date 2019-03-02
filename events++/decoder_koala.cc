@@ -93,6 +93,45 @@ namespace DecodeUtil
   }
 
   int
+  Decoder::Init()
+  {
+    if(fAssembler)
+      fAssembler->Init();
+    if(fAnalyzer)
+      fAnalyzer->Init();
+  }
+
+  int
+  Decoder::Done()
+  {
+    if(fAssembler)
+      fAssembler->Done();
+    if(fAnalyzer)
+      fAnalyzer->Done();
+  }
+
+  int
+  Decoder::Print()
+  {
+    cout<<"  ems clusters   : "<<setw(8)<<fStatistics.evclusters<<endl;
+    cout<<"  ems events           : "<<setw(8)<<fStatistics.events<<endl;
+    cout<<"  ems subevents        : "<<setw(8)<<fStatistics.subevents<<endl;
+
+    for (int mod=0; mod<nr_mesymodules; mod++) {
+      printf(" experiment events[%d]: %8ld\n", mod, fMxdc32Private[mod].get_statist_events());
+    }
+    printf("\n");
+    for (int mod=0; mod<nr_mesymodules; mod++) {
+      printf(" words [%d] (sum/average): %8ld / %.4f\n", mod, fMxdc32Private[mod].get_statist_words(),(float)fMxdc32Private[mod].get_statist_words()/fMxdc32Private[mod].get_statist_events());
+    }
+    
+    if(fAssembler)
+      fAssembler->Print();
+    if(fAnalyzer)
+      fAnalyzer->Print();
+  }
+
+  int
   Decoder::DecodeCluster(const uint32_t *buf, int size)
   {
     int idx=0;

@@ -85,12 +85,18 @@ public:
   koala_event* drop_event();
   bool  is_empty();
 
+  uint32_t get_statist_events()
+  {
+    return statist.events;
+  }
+
 private:
   koala_depot* fDepot;
   koala_event* prepared;
   koala_event* first;
   koala_event* last;
 
+public:
   koala_statist statist;
 };
 

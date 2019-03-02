@@ -155,11 +155,12 @@ parse_file(int p)
   decoder->SetAssembler(assembler);
 
   //
-  KoaAnalyzer*  analyzer=new KoaAnalyzer();
+  KoaAnalyzer*  analyzer=new KoaSimpleAnalyzer(outputfile,use_simplestructure,max_tsdiff);
   decoder->SetAnalyzer(analyzer);
 
   //
   int res;
+  decoder->Init();
 
   do {
     uint32_t *buf;
@@ -186,19 +187,8 @@ parse_file(int p)
   else
     cout << "Decoding Successfully" <<endl;
 
-    // print some statistics here
-    // if (quiet<2) {
-    //   cout<<"  ems clusters   : "<<setw(8)<<global_statist.evclusters<<endl;
-    //   cout<<"  ems events           : "<<setw(8)<<global_statist.events<<endl;
-    //   cout<<"  ems subevents        : "<<setw(8)<<global_statist.subevents<<endl;
-    // }
-    // for (int mod=0; mod<nr_mesymodules; mod++) {
-    //     printf(" experiment events[%d]: %8ld\n", mod, mxdc32_private[mod].statist.events);
-    // }
-    // printf("\n");
-    // for (int mod=0; mod<nr_mesymodules; mod++) {
-    //   printf(" words [%d] (sum/average): %8ld / %.4f\n", mod, mxdc32_private[mod].statist.words,(float)mxdc32_private[mod].statist.words/mxdc32_private[mod].statist.events);
-    // }
+  decoder->Print();
+  decoder->Done();
 
   delete evtlist;
   delete decoder;
@@ -301,6 +291,7 @@ main(int argc, char* argv[])
       }
 
       printf("FILE %s\n", *files);
+      outputfile=*files;
       res=parse_file(p);
       close(p);
       if (res<0)

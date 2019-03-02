@@ -96,6 +96,8 @@ private:
   ems_event *prepared;
   ems_event *first;
   ems_event *last;
+
+public:
   ems_statist statist;
 };
 #endif

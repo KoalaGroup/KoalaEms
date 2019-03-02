@@ -28,6 +28,7 @@ namespace DecodeUtil
         koala_cur->modules[mod]=fMxdc32Private[mod].drop_event();
       }
       fKoalaPrivate->store_event();
+      fKoalaPrivate->statist.events++;
       //
       for (int mod=0; mod<nr_mesymodules; mod++) {
         if (fMxdc32Private[mod].is_empty()) {

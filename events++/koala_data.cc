@@ -147,7 +147,6 @@ koala_private::store_event(void)
         first=prepared;
     }
 
-    statist.events++;
     prepared=0;
 }
 

@@ -12,7 +12,10 @@ namespace DecodeUtil
   {
   public:
     virtual ~KoaAssembler() {}
+    virtual int Init() {}
     virtual int Assemble();
+    virtual int Done() {}
+    virtual void Print() {}
 
     void SetMxdc32Private(mxdc32_private* pri)
     {
@@ -31,7 +34,7 @@ namespace DecodeUtil
   private:
     koala_private*  fKoalaPrivate;
     mxdc32_private* fMxdc32Private;
-    ems_private*    fEmsPrivate;
+    ems_private*    fEmsPrivate; // TODO: EmsPrivate not used in this class
   };
 }
 

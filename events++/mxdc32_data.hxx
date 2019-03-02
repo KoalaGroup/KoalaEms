@@ -88,6 +88,16 @@ public:
   mxdc32_event* drop_event(void);
   bool is_empty();
 
+  uint64_t get_statist_events()
+  {
+    return statist.events;
+  }
+
+  uint64_t get_statist_words()
+  {
+    return statist.words;
+  }
+
 private:
   mxdc32_depot *fDepot;
   //uint32_t marking_type;

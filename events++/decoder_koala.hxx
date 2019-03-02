@@ -55,6 +55,9 @@ namespace DecodeUtil
     void SetAnalyzer(KoaAnalyzer* analyzer);
 
     int  DecodeCluster(const uint32_t *buf, int size);
+    int  Init();
+    int  Done();
+    int  Print();
 
   private:
     // util functions
