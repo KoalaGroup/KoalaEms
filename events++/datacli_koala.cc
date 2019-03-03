@@ -78,6 +78,10 @@ static EmsIsInfo ISes[]={
 static Decoder* decoder=new Decoder();
 //
 static private_list* evtlist=new private_list();
+
+// signal actions
+static struct sigaction sa_sigint_new, sa_sigint_old;
+
 /******************************************************************************/
 static void
 printusage(char* argv0)
@@ -148,7 +152,10 @@ sigint(int num)
   decoder->Done();
   delete evtlist;
   delete decoder;
+
+  // 
   exit(1);
+  // (*sa_sigint_old.sa_handler)(num);
 }
 /******************************************************************************/
 static const char*
@@ -534,7 +541,14 @@ main(int argc, char *argv[])
     /*signal (SIGINT, *sigact);*/
     /*signal (SIGPIPE, SIG_IGN);*/
     signal(SIGPIPE, sigpipe);
-    signal(SIGINT, sigint);
+    //
+    // signal(SIGINT, sigint);
+    sa_sigint_new.sa_handler=sigint;
+    sigemptyset(&sa_sigint_new.sa_mask);
+    sa_sigint_new.sa_flags=0;
+    sigaction(SIGINT,NULL,&sa_sigint_old);
+    if(sa_sigint_old.sa_handler != SIG_IGN)
+      sigaction(SIGINT,&sa_sigint_new,NULL);
 
     // waiting establishing input & output connection and do the data receiving & distribution
     main_loop();
