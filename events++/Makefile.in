@@ -86,7 +86,7 @@ LDLIBS =  -L$(SUPPORT_LIB) -lsupp.$(SUPPORTVER) \
 
 # srcs for executables
 SOURCES := test.cc datacli_koala.cc \
-           new_parser_koala.cc
+           new_parser_koala.cc event_distributor.cc
 OBJS := $(SOURCES:.cc=.o)
 EXECS := $(SOURCES:.cc=)
 
@@ -109,6 +109,9 @@ test: test.o $(LIBS)
 	$(CXX) -o $@ $^ $(LDLIBS)
 
 new_parser_koala: new_parser_koala.o $(LIBS)
+	$(CXX) -o $@ $^ $(LDLIBS)
+
+event_distributor: event_distributor.o
 	$(CXX) -o $@ $^ $(LDLIBS)
 
 datacli_koala: datacli_koala.o
