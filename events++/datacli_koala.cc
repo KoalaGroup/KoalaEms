@@ -18,6 +18,12 @@
 #include <sys/time.h>
 #include <signal.h>
 #include <fcntl.h>
+#include "KoaLoguru.hxx"
+#include "KoaDecoder.hxx"
+#include "KoaSimpleAnalyzer.hxx"
+#include "KoaAssembler.hxx"
+
+using namespace DecodeUtil;
 
 typedef unsigned int ems_u32;
 
@@ -60,6 +66,18 @@ char *inname;
 int inport;
 unsigned int inhostaddr;
 
+// ISes parsers used by the decoder
+static EmsIsInfo ISes[]={
+  {"scalor",parserty_scalor,1},
+  {"mxdc32",parserty_mxdc32,10},
+  {"time",parserty_time,100},
+  {"",parserty_invalid,static_cast<uint32_t>(-1)}
+};
+
+// decoder
+static Decoder* decoder=new Decoder();
+//
+static private_list* evtlist=new private_list();
 /******************************************************************************/
 static void
 printusage(char* argv0)
@@ -121,6 +139,16 @@ static void
 sigpipe(int num)
 {
     if (!quiet) printf("sigpipe received\n");
+}
+
+static void
+sigint(int num)
+{
+  decoder->Print();
+  decoder->Done();
+  delete evtlist;
+  delete decoder;
+  exit(1);
 }
 /******************************************************************************/
 static const char*
@@ -229,6 +257,14 @@ do_read(int pin, struct input_event_buffer* buf)
     if (buf->position<buf->event_buffer->size) return 0; /* try later */
 
     /* data are complete */
+    if(buf->head[1]==0x78563412){
+      n=SWAP_32(buf->head[0]);
+      ems_u32* b=reinterpret_cast<ems_u32*>(buf->event_buffer->data);
+      for(int i=n;n>=0;i--){
+        ems_u32 v=b[i];
+        b[i]=SWAP_32(v);
+      }
+    }
     buf->valid=1;
     return 0;
 }
@@ -303,6 +339,19 @@ main_loop()
     else
         insock=-1;
 
+    // decoder configuration
+    decoder->SetPrivateList(evtlist);
+    decoder->SetParsers(ISes);
+    //
+    KoaAssembler* assembler=new KoaAssembler();
+    decoder->SetAssembler(assembler);
+    //
+    KoaAnalyzer*  analyzer=new KoaSimpleAnalyzer("datacli.root",true,3);
+    decoder->SetAnalyzer(analyzer);
+    //
+    decoder->Init();
+
+    //
     while(1) {
         int nfds, res;
         struct timeval to, *timeout;
@@ -387,13 +436,18 @@ main_loop()
                 if (ibs.valid) {
                     // decode this cluster data
                     printf("receive one new cluster\n");
+                    ems_u32* b=reinterpret_cast<ems_u32*>(ibs.event_buffer->data);
+                    int s=static_cast<int>(ibs.event_buffer->size/4);
+                    decoder->DecodeCluster(b,s);
                     //
                     clear_new_event(&ibs);
                 }
             }
         }
     }
+
 }
+
 /******************************************************************************/
 static int
 portname2portnum(char* name)
@@ -417,6 +471,18 @@ portname2portnum(char* name)
 int
 main(int argc, char *argv[])
 {
+  loguru::g_stderr_verbosity = loguru::Verbosity_WARNING;
+  // loguru::g_flush_interval_ms=1;
+  // loguru::g_preamble = false;
+  // loguru::g_preamble_verbose = true;
+  // loguru::g_preamble_date = false;
+  loguru::g_preamble_thread = false;
+  loguru::g_preamble_uptime = false;
+
+  loguru::init(argc,argv);
+  // loguru::add_file("everything.log",loguru::Append, loguru::Verbosity_MAX);
+  // loguru::add_file("latest.log",loguru::Truncate, loguru::Verbosity_INFO);
+
     char *p;
 
     // arguments parsing
@@ -467,7 +533,8 @@ main(int argc, char *argv[])
 
     /*signal (SIGINT, *sigact);*/
     /*signal (SIGPIPE, SIG_IGN);*/
-    signal (SIGPIPE, sigpipe);
+    signal(SIGPIPE, sigpipe);
+    signal(SIGINT, sigint);
 
     // waiting establishing input & output connection and do the data receiving & distribution
     main_loop();
