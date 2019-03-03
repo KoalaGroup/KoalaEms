@@ -20,7 +20,7 @@
 #include <fcntl.h>
 #include "KoaLoguru.hxx"
 #include "KoaDecoder.hxx"
-#include "KoaSimpleAnalyzer.hxx"
+#include "KoaOnlineAnalyzer.hxx"
 #include "KoaAssembler.hxx"
 
 using namespace DecodeUtil;
@@ -353,7 +353,7 @@ main_loop()
     KoaAssembler* assembler=new KoaAssembler();
     decoder->SetAssembler(assembler);
     //
-    KoaAnalyzer*  analyzer=new KoaSimpleAnalyzer("datacli.root",true,3);
+    KoaAnalyzer*  analyzer=new KoaOnlineAnalyzer();
     decoder->SetAnalyzer(analyzer);
     //
     decoder->Init();
@@ -442,7 +442,7 @@ main_loop()
             } else {
                 if (ibs.valid) {
                     // decode this cluster data
-                    printf("receive one new cluster\n");
+                    // printf("receive one new cluster\n");
                     ems_u32* b=reinterpret_cast<ems_u32*>(ibs.event_buffer->data);
                     int s=static_cast<int>(ibs.event_buffer->size/4);
                     decoder->DecodeCluster(b,s);

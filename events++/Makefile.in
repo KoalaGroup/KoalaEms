@@ -64,9 +64,9 @@ LDFLAGS_TSM := $(LDFLAGS) -L$(apidir) -l$(apilib)
 LIBSUFFIX = @LIBSUFFIX@
 
 # ROOT environments
-ROOTLIBS  := $(shell root-config --libs)
-ROOTGLIBS := $(shell root-config --glibs)
-ROOTINC   := $(shell root-config --cflags)
+ROOTLIBS  := $(shell root-config --new --libs)
+ROOTGLIBS := $(shell root-config --new --glibs)
+ROOTINC   := $(shell root-config --new --cflags)
 
 # self-defined compiling configurations, sources, execs, libraries
 CPPFLAGS = @CPPFLAGS@ -I$(srcdir) -I. -I$(COMMON_INCLUDE)  \
@@ -86,7 +86,7 @@ LDLIBS =  -L$(SUPPORT_LIB) -lsupp.$(SUPPORTVER) \
 
 # srcs for executables
 SOURCES := test.cc datacli_koala.cc \
-           new_parser_koala.cc event_distributor.cc
+           new_parser_koala.cc event_distributor.cc online_koala.cc
 OBJS := $(SOURCES:.cc=.o)
 EXECS := $(SOURCES:.cc=)
 
@@ -94,6 +94,7 @@ EXECS := $(SOURCES:.cc=)
 LIBSOURCES := mxdc32_data.cc koala_data.cc ems_data.cc \
 							KoaParsers.cc decode_util.cc KoaDecoder.cc \
 							KoaRawData.cc KoaAnalyzer.cc  KoaSimpleAnalyzer.cc KoaAssembler.cc \
+						  KoaOnlineAnalyzer.cc \
 							KoaLoguru.cc
 LIBOBJS := $(LIBSOURCES:.cc=.o)
 LIBS    := libutils.$(SELFVER)$(LIBSUFFIX)
@@ -114,7 +115,10 @@ new_parser_koala: new_parser_koala.o $(LIBS)
 event_distributor: event_distributor.o
 	$(CXX) -o $@ $^ $(LDLIBS)
 
-datacli_koala: datacli_koala.o
+datacli_koala: datacli_koala.o $(LIBS)
+	$(CXX) -o $@ $^ $(LDLIBS)
+
+online_koala: online_koala.o
 	$(CXX) -o $@ $^ $(LDLIBS)
 
 # generate the rules for compiling the .o files.
