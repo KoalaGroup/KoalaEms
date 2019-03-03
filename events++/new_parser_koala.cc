@@ -12,9 +12,9 @@
 #include <fcntl.h>
 #include "global.hxx"
 #include "KoaLoguru.hxx"
-#include "decoder_koala.hxx"
+#include "KoaDecoder.hxx"
 #include "KoaAssembler.hxx"
-#include "KoaAnalyzer.hxx"
+#include "KoaSimpleAnalyzer.hxx"
 
 using namespace std;
 using namespace DecodeUtil;
@@ -270,8 +270,8 @@ main(int argc, char* argv[])
   loguru::g_preamble_uptime = false;
 
   loguru::init(argc,argv);
-  loguru::add_file("everything.log",loguru::Append, loguru::Verbosity_MAX);
-  loguru::add_file("latest.log",loguru::Truncate, loguru::Verbosity_INFO);
+  // loguru::add_file("everything.log",loguru::Append, loguru::Verbosity_MAX);
+  // loguru::add_file("latest.log",loguru::Truncate, loguru::Verbosity_INFO);
 
   //
   int res;
