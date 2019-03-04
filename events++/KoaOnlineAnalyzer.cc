@@ -239,9 +239,16 @@ namespace DecodeUtil
       fPSi1_Amplitude[47-i]=&fData[0][i];
     }
     // Si1 : Physical Position 16->1 ===> ADC2 1->16
-    // [TODO] ADC2 17->32: not used? or Si/Ge Rear Side
     for(int i=0;i<16;i++){
       fPSi1_Amplitude[15-i]=&fData[1][i];
+    }
+    // Recoil Detector Rear Side:
+    // Si#1 Rear: ADC2 17
+    // Si#2 Rear: ADC2 18
+    // Ge#1 Rear: ADC2 19
+    // Ge#2 Rear: ADC2 20
+    for(int i=0;i<4;i++){
+      fPRecRear_Amplitude[i]=&fData[1][16+i];
     }
     // Si2 : Physical Position 1->32 ===> ADC3 1->32
     for(int i=0;i<32;i++){
@@ -283,20 +290,22 @@ namespace DecodeUtil
     }
     // Si1 : Physical Position 48->17 ===> TDC2 1->32
     for(int i=0;i<32;i++){
-      fSi1_Timestamp[47-i]=fData[8][i]*time_resolution[fResolution[8]];
+      fSi1_Timestamp[47-i]=fData[8][i]*time_resolution[fResolution[8]-1];
     }
     // Si2 : Physical Position 1->16 ===> TDC1 17->32
     for(int i=0;i<16;i++){
-      fSi2_Timestamp[i]=fData[7][16+i]*time_resolution[fResolution[7]];
+      fSi2_Timestamp[i]=fData[7][16+i]*time_resolution[fResolution[7]-1];
     }
     // Si2 : Physical Position 17->24 ===> TDC1 9->16
     for(int i=0;i<8;i++){
-      fSi2_Timestamp[16+i]=fData[7][8+i]*time_resolution[fResolution[7]];
+      fSi2_Timestamp[16+i]=fData[7][8+i]*time_resolution[fResolution[7]-1];
     }
     // Fwd: 1-8 ===> TDC1 1->8
     for(int i=0;i<8;i++){
-      fFwd_Timestamp[i]=fData[7][i]*time_resolution[fResolution[7]];
+      fFwd_Timestamp[i]=fData[7][i]*time_resolution[fResolution[7]-1];
     }
+    fTrig_Timestamp[0]=(fData[7][32]*time_resolution[fResolution[7]-1]);
+    fTrig_Timestamp[1]=(fData[8][32]*time_resolution[fResolution[8]-1]);
 
     // Amplitudes
     // Si1 : Physical Position 48->17 ===> ADC1 1->32
@@ -304,9 +313,16 @@ namespace DecodeUtil
       fSi1_Amplitude[47-i]=fData[0][i];
     }
     // Si1 : Physical Position 16->1 ===> ADC2 1->16
-    // [TODO] ADC2 17->32: not used? or Si/Ge Rear Side
     for(int i=0;i<16;i++){
       fSi1_Amplitude[15-i]=fData[1][i];
+    }
+    // Recoil Detector Rear Side:
+    // Si#1 Rear: ADC2 17
+    // Si#2 Rear: ADC2 18
+    // Ge#1 Rear: ADC2 19
+    // Ge#2 Rear: ADC2 20
+    for(int i=0;i<4;i++){
+      fRecRear_Amplitude[i]=fData[1][16+i];
     }
     // Si2 : Physical Position 1->32 ===> ADC3 1->32
     for(int i=0;i<32;i++){
@@ -372,27 +388,116 @@ namespace DecodeUtil
   void
   KoaOnlineAnalyzer::InitHistograms()
   {
+    // Forward Detector
     for(int i=0;i<8;i++){
       hFwdAmp[i] = new TH1F(Form("hFwdAmp_%d",i+1),Form("Fwd Scintillator Amplitude: %d",i+1),QDC_MAXRANGE+11,-9.5, QDC_MAXRANGE+1.5);
       hFwdTime[i] = new TH1F(Form("hFwdTime_%d",i+1),Form("Fwd Scintillator Timestamp: %d",i+1),2050,-1.5,2048.5);
     }
+
+    // Trigger timestamp
+    for(int i=0;i<2;i++){
+      hTrigTime[i] = new TH1F(Form("hTrigTime_%d",i+1),Form("TDC%d: Trigger Time",i+1),2050,-1.5,2048.5);
+    }
+
+    // Recoil Detector Timestamp
+    // for(int i=0;i<32;i++){
+    //   hSi1Time[i] = new TH1F(Form("hSi1Time_%d",i+17),Form("Si#1_Strip#%d : Timestamp (ns)",i+17),2050,-1.5,2048.5);
+    // }
+    // for(int i=0;i<24;i++){
+    //   hSi2Time[i] = new TH1F(Form("hSi2Time_%d",i+1),Form("Si#2_Strip#%d : Timestamp (ns)",i+1),2050,-1.5,2048.5);
+    // }
+    hRecTime = new TH1F("hRecTime","Recoil Detector Time (ns): Accumulated",2050,-1.5,2048);
+
+    // Recoil Hits
+    hSi1Hits = new TH2F("hSi1Hits","Si#1 FrontSide: Hits Spectrum",48,0.5,48.5,ADC_MAXRANGE+2,-1.5,ADC_MAXRANGE+0.5);
+    hSi2Hits = new TH2F("hSi2Hits","Si#2 FrontSide: Hits Spectrum",64,0.5,64.5,ADC_MAXRANGE+2,-1.5,ADC_MAXRANGE+0.5);
+    hGe1Hits = new TH2F("hGe1Hits","Ge#1 FrontSide: Hits Spectrum",32,0.5,32.5,ADC_MAXRANGE+2,-1.5,ADC_MAXRANGE+0.5);
+    hGe2Hits = new TH2F("hGe2Hits","Ge#2 FrontSide: Hits Spectrum",32,0.5,32.5,ADC_MAXRANGE+2,-1.5,ADC_MAXRANGE+0.5);
+    
+    // Recoil Rear Amplitude
+    hSi1RearAmp = new TH1F("hSi1RearAmp","Si#1 RearSide: Amplitude",ADC_MAXRANGE+2,-1.5,ADC_MAXRANGE+0.5);
+    hSi2RearAmp = new TH1F("hSi2RearAmp","Si#2 RearSide: Amplitude",ADC_MAXRANGE+2,-1.5,ADC_MAXRANGE+0.5);
+    hGe1RearAmp = new TH1F("hGe1RearAmp","Ge#1 RearSide: Amplitude",ADC_MAXRANGE+2,-1.5,ADC_MAXRANGE+0.5);
+    hGe2RearAmp = new TH1F("hGe2RearAmp","Ge#2 RearSide: Amplitude",ADC_MAXRANGE+2,-1.5,ADC_MAXRANGE+0.5);
   }
   //
   void
   KoaOnlineAnalyzer::FillHistograms()
   {
+    // Forward Detector
     for(int i=0;i<8;i++){
       hFwdAmp[i]->Fill(fFwd_Amplitude[i]);
-      hFwdTime[i]->Fill(fFwd_Timestamp[i]);
+      if((*fPFwd_Timestamp[i])!=UNDER_THRESHOLD)
+        hFwdTime[i]->Fill(fFwd_Timestamp[i]);
     }
+
+    // Trigger Timestamp
+    for(int i=0;i<2;i++){
+      hTrigTime[i]->Fill(fTrig_Timestamp[i]);
+    }
+
+    // Recoil Timestamp
+    for(int i=0;i<32;i++){
+      if((*fPSi1_Timestamp[16+i])!=UNDER_THRESHOLD){
+        // hSi1Time[i]->Fill(fSi1_Timestamp[16+i]);
+        hRecTime->Fill(fSi1_Timestamp[16+i]);
+      }
+    }
+    for(int i=0;i<24;i++){
+      if((*fPSi2_Timestamp[i])!=UNDER_THRESHOLD){
+        // hSi2Time[i]->Fill(fSi2_Timestamp[i]);
+        hRecTime->Fill(fSi2_Timestamp[i]);
+      }
+    }
+
+    // Recoil Hits
+    for(int i=0;i<48;i++){
+      hSi1Hits->Fill(i+1,fSi1_Amplitude[i]);
+    }
+    for(int i=0;i<64;i++){
+      hSi2Hits->Fill(i+1,fSi2_Amplitude[i]);
+    }
+    for(int i=0;i<32;i++){
+      hGe1Hits->Fill(i+1,fGe1_Amplitude[i]);
+      hGe2Hits->Fill(i+1,fGe2_Amplitude[i]);
+    }
+
+    // Recoil Rear Amplitude
+    hSi1RearAmp->Fill(fRecRear_Amplitude[0]);
+    hSi2RearAmp->Fill(fRecRear_Amplitude[1]);
+    hGe1RearAmp->Fill(fRecRear_Amplitude[2]);
+    hGe2RearAmp->Fill(fRecRear_Amplitude[3]);
   }
   //
   void
   KoaOnlineAnalyzer::ResetHistograms()
   {
+    // Forward Detector
     for(int i=0;i<8;i++){
       hFwdTime[i]->Reset();
       hFwdAmp[i]->Reset();
     }
+    // Trigger timestamp
+    for(int i=0;i<2;i++){
+      hTrigTime[i]->Reset();
+    }
+    // Recoil Timestamp
+    // for(int i=0;i<32;i++){
+    //   hSi1Time[i]->Reset();
+    // }
+    // for(int i=0;i<24;i++){
+    //   hSi2Time[i]->Reset();
+    // }
+    hRecTime->Reset();
+    // Recoil Hits
+    hSi1Hits->Reset();
+    hSi2Hits->Reset();
+    hGe1Hits->Reset();
+    hGe2Hits->Reset();
+    // Recoil Rear Amplitude
+    hSi1RearAmp->Reset();
+    hSi2RearAmp->Reset();
+    hGe1RearAmp->Reset();
+    hGe2RearAmp->Reset();
   }
 }
