@@ -224,9 +224,14 @@ namespace DecodeUtil
     for(int i=0;i<16;i++){
       fPSi2_Timestamp[i]=&fData[7][16+i];
     }
-    // Si2 : Physical Position 17->24 ===> TDC1 9->16
-    for(int i=0;i<8;i++){
-      fPSi2_Timestamp[16+i]=&fData[7][8+i];
+    // Si2 : Physical Position 17->22 ===> TDC1 11->16
+    for(int i=0;i<6;i++){
+      fPSi2_Timestamp[16+i]=&fData[7][10+i];
+    }
+    // Si1 Rear Time : TDC1 9
+    // Si2 Rear Time : TDC1 10
+    for(int i=0;i<2;i++){
+      fPRecRear_Timestamp[i]=&fData[7][8+i];
     }
     // Fwd: 1-8 ===> TDC1 1->8
     for(int i=0;i<8;i++){
@@ -296,9 +301,14 @@ namespace DecodeUtil
     for(int i=0;i<16;i++){
       fSi2_Timestamp[i]=fData[7][16+i]*time_resolution[fResolution[7]-1];
     }
-    // Si2 : Physical Position 17->24 ===> TDC1 9->16
-    for(int i=0;i<8;i++){
-      fSi2_Timestamp[16+i]=fData[7][8+i]*time_resolution[fResolution[7]-1];
+    // Si2 : Physical Position 17->22 ===> TDC1 11->16
+    for(int i=0;i<6;i++){
+      fSi2_Timestamp[16+i]=fData[7][10+i]*time_resolution[fResolution[7]-1];
+    }
+    // Si1 Rear Time : TDC1 9
+    // Si2 Rear Time : TDC1 10
+    for(int i=0;i<2;i++){
+      fRecRear_Timestamp[i]=fData[7][8+i]*time_resolution[fResolution[7]-1];
     }
     // Fwd: 1-8 ===> TDC1 1->8
     for(int i=0;i<8;i++){
@@ -407,6 +417,8 @@ namespace DecodeUtil
     //   hSi2Time[i] = new TH1F(Form("hSi2Time_%d",i+1),Form("Si#2_Strip#%d : Timestamp (ns)",i+1),2050,-1.5,2048.5);
     // }
     hRecTime = new TH1F("hRecTime","Recoil Detector Time (ns): Accumulated",2050,-1.5,2048);
+    hRecRearTime[0] = new TH1F("hRecRearTime_1","Si#1 Rear Time (ns)",2050,-1.5,2048);
+    hRecRearTime[1] = new TH1F("hRecRearTime_2","Si#2 Rear Time (ns)",2050,-1.5,2048);
 
     // Recoil Hits
     hSi1Hits = new TH2F("hSi1Hits","Si#1 FrontSide: Hits Spectrum",48,0.5,48.5,ADC_MAXRANGE+2,-1.5,ADC_MAXRANGE+0.5);
@@ -443,10 +455,15 @@ namespace DecodeUtil
         hRecTime->Fill(fSi1_Timestamp[16+i]);
       }
     }
-    for(int i=0;i<24;i++){
+    for(int i=0;i<22;i++){
       if((*fPSi2_Timestamp[i])!=UNDER_THRESHOLD){
         // hSi2Time[i]->Fill(fSi2_Timestamp[i]);
         hRecTime->Fill(fSi2_Timestamp[i]);
+      }
+    }
+    for(int i=0;i<2;i++){
+      if((*fPRecRear_Timestamp[i])!=UNDER_THRESHOLD){
+        hRecRearTime[i]->Fill(fRecRear_Timestamp[i]);
       }
     }
 
@@ -489,6 +506,9 @@ namespace DecodeUtil
     //   hSi2Time[i]->Reset();
     // }
     hRecTime->Reset();
+    for(int i=0;i<2;i++){
+      hRecRearTime[i]->Reset();
+    }
     // Recoil Hits
     hSi1Hits->Reset();
     hSi2Hits->Reset();

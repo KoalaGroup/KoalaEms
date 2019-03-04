@@ -54,7 +54,8 @@ int histplot()
 	// cSi1Time->Modified();
 	// cSi1Time->Update();
 	TCanvas *cRecTime;
-	cRecTime = new TCanvas("cRecTime","Summed Recoil Timestamp (ns)", 2000,860, 800, 800);
+	cRecTime = new TCanvas("cRecTime","Recoil Timestamp (ns)", 2000,860, 1800, 600);
+  cRecTime->Divide(3,1);
 	cRecTime->Draw();
 	cRecTime->Modified();
 	cRecTime->Update();
@@ -90,6 +91,7 @@ int histplot()
   // TH1F     *hSi1Time[32]={nullptr};
   // TH1F     *hSi2Time[24]={nullptr};
   TH1F     *hRecTime=nullptr;
+  TH1F     *hRecRearTime[2]={nullptr};
 
   TH2F     *hSi1Hits=nullptr;
   TH2F     *hSi2Hits=nullptr;
@@ -126,6 +128,9 @@ int histplot()
     //   hSi2Time[i] = (TH1F*) mfile->Get(Form("hSi2Time_%d",i+1), hSi2Time[i]);
     // }
     hRecTime = (TH1F*) mfile->Get("hRecTime", hRecTime);
+    for(int i=0;i<2;i++){
+      hRecRearTime[i] = (TH1F*) mfile->Get(Form("hRecRearTime_%d",i+1), hRecRearTime[i]);
+    }
 
     // Recoil Hits
     hSi1Hits = (TH2F*) mfile->Get("hSi1Hits", hSi1Hits);
@@ -196,10 +201,16 @@ int histplot()
 		// cSi1Time->Modified();
 		// cSi1Time->Update();
 
-    cRecTime->cd();
+    cRecTime->cd(3);
     gPad->SetLogy();
     hRecTime->Draw();
     hTrigTime[0]->Draw("same");
+    for(int i=0;i<2;i++){
+      cRecTime->cd(i+1);
+      gPad->SetLogy();
+      hRecRearTime[i]->Draw();
+      hTrigTime[0]->Draw("same");
+    }
 		cRecTime->Modified();
 		cRecTime->Update();
 
