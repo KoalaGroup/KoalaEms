@@ -1,4 +1,10 @@
 #include "KoaSimpleAnalyzer.hxx"
+#include "TStyle.h"
+#include "TCanvas.h"
+#include <iostream>
+#include "THStack.h"
+
+using namespace std;
 
 namespace DecodeUtil{
   //

@@ -85,7 +85,7 @@ LDLIBS =  -L$(SUPPORT_LIB) -lsupp.$(SUPPORTVER) \
 		      -lpthread -ldl
 
 # srcs for executables
-SOURCES := test.cc datacli_koala.cc \
+SOURCES := datacli_koala.cc \
            new_parser_koala.cc event_distributor.cc online_koala.cc
 OBJS := $(SOURCES:.cc=.o)
 EXECS := $(SOURCES:.cc=)

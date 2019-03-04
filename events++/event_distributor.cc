@@ -400,7 +400,7 @@ accept_outsock(int outsock_l)
     ns=do_accept(outsock_l, &address, "outsocket");
     if (ns<0) return;
 
-    sock=malloc(sizeof(struct sock));
+    sock=static_cast<struct sock*>(malloc(sizeof(struct sock)));
     if (sock==0) {
         printf("malloc struct sock: %s\n", strerror(errno));
         close(ns);
@@ -413,7 +413,7 @@ accept_outsock(int outsock_l)
 
     if (num_socks==max_socks) {
         int i;
-        struct sock** help=malloc((max_socks+10)*sizeof(struct sock*));
+        struct sock** help=static_cast<struct sock**>(malloc((max_socks+10)*sizeof(struct sock*)));
         if (help==0) {
             printf("malloc %d sock_struct*: %s\n", max_socks+10, strerror(errno));
             close(sock->p);
