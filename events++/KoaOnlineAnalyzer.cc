@@ -8,6 +8,8 @@
 #define ADC_OVERFLOW 0x2000
 #define QDC_OVERFLOW 0x1000
 
+static Float_t g_invalidtime=-10;
+
 namespace DecodeUtil
 {
   //
@@ -57,6 +59,9 @@ namespace DecodeUtil
     //   }
     // }
 
+    // InitTrees();
+    // initialize detector mapping
+    InitMapping();
   }
   //
   int
@@ -67,10 +72,15 @@ namespace DecodeUtil
     while(koala_cur=fKoalaPrivate->drop_event()){
       // extract channel data
       Decode(koala_cur);
+      DetectorMapped();
+      // FillTrees();
+
       koala_cur->recycle();
+
       // fill histograms
       if(fCounter%30000==0)
         Reset();
+
       hadc->Fill(fData[0][0]);
       hqdc->Fill(fData[6][0]);
       htdc->Fill(fData[8][0]);
@@ -189,5 +199,172 @@ namespace DecodeUtil
           break;
         }
     }
+  }
+  //
+  void
+  KoaOnlineAnalyzer::InitMapping()
+  {
+    // Timestamps
+    for(int i=0;i<48;i++){
+      fPSi1_Timestamp[i]=reinterpret_cast<Int_t*>(&g_invalidtime);
+    }
+    for(int i=0;i<64;i++){
+      fPSi2_Timestamp[i]=reinterpret_cast<Int_t*>(&g_invalidtime);
+    }
+    for(int i=0;i<32;i++){
+      fPGe1_Timestamp[i]=reinterpret_cast<Int_t*>(&g_invalidtime);
+      fPGe2_Timestamp[i]=reinterpret_cast<Int_t*>(&g_invalidtime);
+    }
+    // Si1 : Physical Position 48->17 ===> TDC2 1->32
+    for(int i=0;i<32;i++){
+      fPSi1_Timestamp[47-i]=&fData[8][i];
+    }
+    // Si2 : Physical Position 1->16 ===> TDC1 17->32
+    for(int i=0;i<16;i++){
+      fPSi2_Timestamp[i]=&fData[7][16+i];
+    }
+    // Si2 : Physical Position 17->24 ===> TDC1 9->16
+    for(int i=0;i<8;i++){
+      fPSi2_Timestamp[16+i]=&fData[7][8+i];
+    }
+    // Fwd: 1-8 ===> TDC1 1->8
+    for(int i=0;i<8;i++){
+      fPFwd_Timestamp[i]=&fData[7][i];
+    }
+
+    // Amplitudes
+    // Si1 : Physical Position 48->17 ===> ADC1 1->32
+    for(int i=0;i<32;i++){
+      fPSi1_Amplitude[47-i]=&fData[0][i];
+    }
+    // Si1 : Physical Position 16->1 ===> ADC2 1->16
+    // [TODO] ADC2 17->32: not used? or Si/Ge Rear Side
+    for(int i=0;i<16;i++){
+      fPSi1_Amplitude[15-i]=&fData[1][i];
+    }
+    // Si2 : Physical Position 1->32 ===> ADC3 1->32
+    for(int i=0;i<32;i++){
+      fPSi2_Amplitude[i]=&fData[2][i];
+    }
+    // Si2 : Physical Position 33->64 ===> ADC4 1->32
+    for(int i=0;i<32;i++){
+      fPSi2_Amplitude[32+i]=&fData[3][i];
+    }
+    // Ge1 : Physical Position 1->32 ===> ADC5 32->1
+    for(int i=0;i<32;i++){
+      fPGe1_Amplitude[31-i]=&fData[4][i];
+    }
+    // Ge2 : Physical Position 1->32 ===> ADC6 1->32
+    for(int i=0;i<32;i++){
+      fPGe2_Amplitude[i]=&fData[5][i];
+    }
+    // Fwd: 1->8 ===> QDC 1->8
+    for(int i=0;i<8;i++){
+      fPFwd_Amplitude[i]=&fData[6][i];
+    }
+  }
+  //
+  void
+  KoaOnlineAnalyzer::DetectorMapped()
+  {
+    const Float_t time_resolution[9]={-1,1./256,2./256,4./256,8./256,16./256,32./256,64./256,128./256};
+
+    // Timestamps
+    for(int i=0;i<48;i++){
+      fSi1_Timestamp[i]=g_invalidtime;
+    }
+    for(int i=0;i<64;i++){
+      fSi2_Timestamp[i]=g_invalidtime;
+    }
+    for(int i=0;i<32;i++){
+      fGe1_Timestamp[i]=g_invalidtime;
+      fGe2_Timestamp[i]=g_invalidtime;
+    }
+    // Si1 : Physical Position 48->17 ===> TDC2 1->32
+    for(int i=0;i<32;i++){
+      fSi1_Timestamp[47-i]=fData[8][i]*time_resolution[fResolution[8]];
+    }
+    // Si2 : Physical Position 1->16 ===> TDC1 17->32
+    for(int i=0;i<16;i++){
+      fSi2_Timestamp[i]=fData[7][16+i]*time_resolution[fResolution[7]];
+    }
+    // Si2 : Physical Position 17->24 ===> TDC1 9->16
+    for(int i=0;i<8;i++){
+      fSi2_Timestamp[16+i]=fData[7][8+i]*time_resolution[fResolution[7]];
+    }
+    // Fwd: 1-8 ===> TDC1 1->8
+    for(int i=0;i<8;i++){
+      fFwd_Timestamp[i]=fData[7][i]*time_resolution[fResolution[7]];
+    }
+
+    // Amplitudes
+    // Si1 : Physical Position 48->17 ===> ADC1 1->32
+    for(int i=0;i<32;i++){
+      fSi1_Amplitude[47-i]=fData[0][i];
+    }
+    // Si1 : Physical Position 16->1 ===> ADC2 1->16
+    // [TODO] ADC2 17->32: not used? or Si/Ge Rear Side
+    for(int i=0;i<16;i++){
+      fSi1_Amplitude[15-i]=fData[1][i];
+    }
+    // Si2 : Physical Position 1->32 ===> ADC3 1->32
+    for(int i=0;i<32;i++){
+      fSi2_Amplitude[i]=fData[2][i];
+    }
+    // Si2 : Physical Position 33->64 ===> ADC4 1->32
+    for(int i=0;i<32;i++){
+      fSi2_Amplitude[32+i]=fData[3][i];
+    }
+    // Ge1 : Physical Position 1->32 ===> ADC5 32->1
+    for(int i=0;i<32;i++){
+      fGe1_Amplitude[31-i]=fData[4][i];
+    }
+    // Ge2 : Physical Position 1->32 ===> ADC6 1->32
+    for(int i=0;i<32;i++){
+      fGe2_Amplitude[i]=fData[5][i];
+    }
+    // Fwd: 1->8 ===> QDC 1->8
+    for(int i=0;i<8;i++){
+      fFwd_Amplitude[i]=fData[6][i];
+    }
+  }
+  //
+  void
+  KoaOnlineAnalyzer::InitTrees()
+  {
+    fSi1Tree = new TTree("Si1","Si1");
+    fSi1Tree->Branch("Amplitude",fSi1_Amplitude,"Amplitude[48]/I");
+    fSi1Tree->Branch("Time",fSi1_Timestamp,"Time[48]/F");
+    fSi1Tree->SetCircular(100);
+
+    fSi2Tree = new TTree("Si2","Si2");
+    fSi2Tree->Branch("Amplitude",fSi2_Amplitude,"Amplitude[64]/I");
+    fSi2Tree->Branch("Time",fSi2_Timestamp,"Time[64]/F");
+    fSi2Tree->SetCircular(100);
+
+    fGe1Tree = new TTree("Ge1","Ge1");
+    fGe1Tree->Branch("Amplitude",fGe1_Amplitude,"Amplitude[32]/I");
+    fGe1Tree->Branch("Time",fGe1_Timestamp,"Time[32]/F");
+    fGe1Tree->SetCircular(100);
+
+    fGe2Tree = new TTree("Ge2","Ge2");
+    fGe2Tree->Branch("Amplitude",fGe2_Amplitude,"Amplitude[32]/I");
+    fGe2Tree->Branch("Time",fGe2_Timestamp,"Time[32]/F");
+    fGe2Tree->SetCircular(100);
+
+    fFwdTree = new TTree("Fwd","Fwd");
+    fFwdTree->Branch("Amplitude",fFwd_Amplitude,"Amplitude[8]/I");
+    fFwdTree->Branch("Time",fFwd_Timestamp,"Time[8]/F");
+    fFwdTree->SetCircular(100);
+  }
+  //
+  void
+  KoaOnlineAnalyzer::FillTrees()
+  {
+    fSi1Tree->Fill();
+    fSi2Tree->Fill();
+    fGe1Tree->Fill();
+    fGe2Tree->Fill();
+    fFwdTree->Fill();
   }
 }
