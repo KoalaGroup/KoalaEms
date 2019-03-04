@@ -106,9 +106,6 @@ $(LIBS): $(LIBOBJS)
 	$(AR) cr $@ $(LIBOBJS)
 	$(RANLIB) $@
 
-test: test.o $(LIBS)
-	$(CXX) -o $@ $^ $(LDLIBS)
-
 new_parser_koala: new_parser_koala.o $(LIBS)
 	$(CXX) -o $@ $^ $(LDLIBS)
 
