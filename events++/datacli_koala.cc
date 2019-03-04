@@ -355,7 +355,7 @@ main_loop()
     decoder->SetAssembler(assembler);
     //
     KoaOnlineAnalyzer*  analyzer=new KoaOnlineAnalyzer();
-    analyzer->SetMaxEvents(50000);
+    analyzer->SetMaxEvents(60000);
     decoder->SetAnalyzer(analyzer);
     //
     decoder->Init();
