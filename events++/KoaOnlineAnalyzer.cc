@@ -500,4 +500,10 @@ namespace DecodeUtil
     hGe1RearAmp->Reset();
     hGe2RearAmp->Reset();
   }
+  //
+  void
+  KoaOnlineAnalyzer::SetMaxEvents(Int_t entries)
+  {
+    fMaxEvents = entries;
+  }
 }

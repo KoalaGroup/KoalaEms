@@ -19,6 +19,7 @@ namespace DecodeUtil{
     void SetDirectory(const char* dir);
     void SetMapAddress(Long_t address);
     void SetMapSize(Int_t size);
+    void SetMaxEvents(Int_t entries);
 
     virtual int Init();
     virtual int Analyze();
