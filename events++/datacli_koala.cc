@@ -1,8 +1,7 @@
 /*
- * event_distributor.c
+ * datacli_koala.cc
  * 
- * created before 2003
- * $ZEL: event_distributor.c,v 1.5 2013/01/14 16:48:49 wuestner Exp $
+ * $IKP-1: datacli_koala.cc,v 1.0 2019/01/15 16:48:49 Yong $
  */
 
 #define _GNU_SOURCE
@@ -19,6 +18,12 @@
 #include <sys/time.h>
 #include <signal.h>
 #include <fcntl.h>
+#include "KoaLoguru.hxx"
+#include "KoaDecoder.hxx"
+#include "KoaOnlineAnalyzer.hxx"
+#include "KoaAssembler.hxx"
+
+using namespace DecodeUtil;
 
 typedef unsigned int ems_u32;
 
@@ -31,7 +36,6 @@ typedef unsigned int ems_u32;
 struct event_buffer {
   size_t size; // size of the cluster, including the header
   char* data; // physical memory for buffering
-  int number_of_users; // number of users waiting for the data of this cluster
 };
 
 struct input_event_buffer {
@@ -41,21 +45,11 @@ struct input_event_buffer {
   int valid; // whether a full cluster has been read into the buffer
 };
 
-struct sock {
-  struct event_buffer* event_buffer; // the cluster buffer currently associated with this output socket
-  size_t position; // the pointer position for the next writing to the ouput socket in the buffer
-  struct sockaddr_in address; // the address associated with this output socket
-  int p; // the file descriptor associated with this output socket
-};
-
 // Three types of input stream are implemented.
 // 1) intype_connect: serving as a client, need hostname+portnum to connect to the input data stream server actively
-// 2) intype_accept: serving as a server, only need portnum to open a service in this host and waiting for the input data stream to connect passively
-// 3) intype_stdin: the input data stream coming from stdin (file descriptor = 0)
-typedef enum {intype_connect, intype_accept, intype_stdin} intypes;
+// 2) intype_stdin: the input data stream coming from stdin (file descriptor = 0)
+typedef enum {intype_connect, intype_stdin} intypes;
 typedef enum {swaptype_check, swaptype_always, swaptype_never} swaptypes;
-struct sock** socks; // array of the output sockets
-int num_socks, max_socks; // number of the current length of socks defined above
 
 // program options:
 // 1) quiet: serving as a verbose option, default is off
@@ -66,17 +60,34 @@ int num_socks, max_socks; // number of the current length of socks defined above
 int quiet, old, close_old;
 intypes intype;
 swaptypes swaptype;
+Long_t nr_clusters;
 
 // variables to store the in/out socket parameters.
-char *inname, *outname;
-int inport, outport;
+char *inname;
+int inport;
 unsigned int inhostaddr;
+
+// ISes parsers used by the decoder
+static EmsIsInfo ISes[]={
+  {"scalor",parserty_scalor,1},
+  {"mxdc32",parserty_mxdc32,10},
+  {"time",parserty_time,100},
+  {"",parserty_invalid,static_cast<uint32_t>(-1)}
+};
+
+// decoder
+static Decoder* decoder=new Decoder();
+//
+static private_list* evtlist=new private_list();
+
+// signal actions
+static struct sigaction sa_sigint_new, sa_sigint_old;
 
 /******************************************************************************/
 static void
 printusage(char* argv0)
 {
-    printf("usage: %s [-h] [-d] [-q] [-o] [-c] [-s 0|1] [inport [outport]]\n",
+    printf("usage: %s [-h] [-d] [-q] [-o] [-c] [-s 0|1] [inport]\n",
         basename(argv0));
     printf("  -h: this help\n");
     printf("  -q: quiet (no informational output)\n");
@@ -85,8 +96,6 @@ printusage(char* argv0)
     printf("  -s 0: swap never 1: swap always (old format only)\n");
     printf("  inport: [hostname:](portnum|portname) or '-' for stdin\n");
     printf("    default is \"evdistin\"\n");
-    printf("  outport: portnum|portname\n");
-    printf("    default is \"evdistout\"\n");
 }
 /******************************************************************************/
 static int
@@ -126,11 +135,6 @@ readargs(int argc, char* argv[])
         inname=argv[optind];
     else
         inname="evdistin";
-    optind++;
-    if (optind<argc)
-        outname=argv[optind];
-    else
-        outname="evdistout";
     return 0;
 }
 /******************************************************************************/
@@ -141,6 +145,19 @@ sigpipe(int num)
 {
     if (!quiet) printf("sigpipe received\n");
 }
+
+static void
+sigint(int num)
+{
+  decoder->Print();
+  decoder->Done();
+  delete evtlist;
+  delete decoder;
+
+  // 
+  exit(1);
+  // (*sa_sigint_old.sa_handler)(num);
+}
 /******************************************************************************/
 static const char*
 conn2string(struct sockaddr_in* addr)
@@ -150,31 +167,10 @@ conn2string(struct sockaddr_in* addr)
     return s;
 }
 /******************************************************************************/
-static int
-do_accept(int p, struct sockaddr_in* address, char *dir)
-{
-    unsigned int len;
-    int ns;
-
-    len=sizeof(struct sockaddr_in);
-    ns=accept(p, (struct sockaddr*)address, &len);
-    if (ns<0) {
-        printf("accept: %s\n", strerror(errno));
-        return -1;
-    }
-    if (!quiet) printf("%s accepted from %s\n", dir, conn2string(address));
-    if (fcntl(ns, F_SETFL, O_NDELAY)==-1) {
-        printf("fcntl O_NDELAY: %s\n", strerror(errno));
-        close(ns);
-        return -1;
-    }
-    return ns;
-}
-/******************************************************************************/
 static void
 clear_new_event(struct input_event_buffer* buf)
 {
-    if (buf->event_buffer && !buf->event_buffer->number_of_users) {
+    if (buf->event_buffer) {
         free(buf->event_buffer->data);
         free(buf->event_buffer);
     }
@@ -197,7 +193,6 @@ create_event_buffer(size_t size)
         free(buf);
         return 0;
     }
-    buf->number_of_users=0;
     return buf;
 }
 /******************************************************************************/
@@ -270,69 +265,16 @@ do_read(int pin, struct input_event_buffer* buf)
     if (buf->position<buf->event_buffer->size) return 0; /* try later */
 
     /* data are complete */
+    if(buf->head[1]==0x78563412){
+      n=SWAP_32(buf->head[0]);
+      ems_u32* b=reinterpret_cast<ems_u32*>(buf->event_buffer->data);
+      for(int i=n;n>=0;i--){
+        ems_u32 v=b[i];
+        b[i]=SWAP_32(v);
+      }
+    }
     buf->valid=1;
     return 0;
-}
-/******************************************************************************/
-static int
-do_write(struct sock* sock)
-{
-    int res;
-
-    res=write(sock->p, sock->event_buffer->data+sock->position,
-            sock->event_buffer->size-sock->position);
-    if (res<0) {
-        if (errno==EINTR) return 0; /* try later */
-        if (!quiet) printf("write to %s: %s\n", conn2string(&sock->address),
-                strerror(errno));
-        return -1; /* error, don't try again */
-    } else if (res==0) {
-        if (!quiet) printf("write to %s returns 0\n",
-                conn2string(&sock->address));
-        return -1; /* error, don't try again */
-    }
-    sock->position+=res;
-    if (sock->position<sock->event_buffer->size) return 0; /* try later */
-
-    /* all sent */
-
-    if (!--sock->event_buffer->number_of_users) {
-        free(sock->event_buffer->data);
-        free(sock->event_buffer);
-    }
-    sock->event_buffer=0;
-    return 0;
-}
-/******************************************************************************/
-static int
-create_listening_socket (int listening_port)
-{
-    int listening_socket;
-    struct sockaddr_in address;
-
-    if ((listening_socket = socket(AF_INET, SOCK_STREAM, 0))<0) {
-        printf("create listening_socket: %s\n", strerror(errno));
-        return -2;
-    }
-
-    bzero((void*)&address, sizeof(struct sockaddr_in));
-    address.sin_family=AF_INET;
-    address.sin_port=htons(listening_port);
-    address.sin_addr.s_addr=htonl(INADDR_ANY);
-
-    if ((bind(listening_socket, (struct sockaddr*)&address,
-                sizeof(struct sockaddr_in)))<0) {
-        printf("bind listening_socket: %s\n", strerror(errno));
-        return -3;
-    }
-
-    // only one connection request allowed? Both input and output?
-    if ((listen(listening_socket, 1))<0) {
-        printf("listen listening_socket: %s\n", strerror(errno));
-        return -4;
-    }
-
-    return listening_socket;
 }
 /******************************************************************************/
 static int
@@ -383,68 +325,10 @@ is_connected(int sock)
     return -1;
 }
 /******************************************************************************/
-static int
-accept_insock(int insock_l)
-{
-    struct sockaddr_in address;
-    return do_accept(insock_l, &address, "insocket");
-}
-/******************************************************************************/
 static void
-accept_outsock(int outsock_l)
+main_loop()
 {
-    struct sockaddr_in address;
-    int ns;
-    struct sock* sock;
-
-    ns=do_accept(outsock_l, &address, "outsocket");
-    if (ns<0) return;
-
-    sock=malloc(sizeof(struct sock));
-    if (sock==0) {
-        printf("malloc struct sock: %s\n", strerror(errno));
-        close(ns);
-        return;
-    }
-
-    sock->event_buffer=0;
-    sock->address=address;
-    sock->p=ns;
-
-    if (num_socks==max_socks) {
-        int i;
-        struct sock** help=malloc((max_socks+10)*sizeof(struct sock*));
-        if (help==0) {
-            printf("malloc %d sock_struct*: %s\n", max_socks+10, strerror(errno));
-            close(sock->p);
-            free(sock);
-            return;
-        }
-        for (i=0; i<num_socks; i++) help[i]=socks[i];
-        free(socks);
-        socks=help;
-    }
-    socks[num_socks++]=sock;
-}
-/******************************************************************************/
-static void
-delete_outsock(int idx)
-{
-    int i;
-
-    close(socks[idx]->p);
-    if (socks[idx]->event_buffer && !--socks[idx]->event_buffer->number_of_users) {
-        free(socks[idx]->event_buffer->data);
-        free(socks[idx]->event_buffer);
-    }
-    free(socks[idx]);
-    num_socks--;
-    for (i=idx; i<num_socks; i++) socks[i]=socks[i+1];
-}
-/******************************************************************************/
-static void
-main_loop(int insock_l, int outsock_l)
-{
+    int insock_l = -1;
     fd_set readfds, writefds;
 
     struct timeval last;
@@ -463,10 +347,22 @@ main_loop(int insock_l, int outsock_l)
     else
         insock=-1;
 
-    num_socks=0; max_socks=0; socks=0;
+    // decoder configuration
+    decoder->SetPrivateList(evtlist);
+    decoder->SetParsers(ISes);
+    //
+    KoaAssembler* assembler=new KoaAssembler();
+    decoder->SetAssembler(assembler);
+    //
+    KoaOnlineAnalyzer*  analyzer=new KoaOnlineAnalyzer();
+    analyzer->SetMaxEvents(60000);
+    decoder->SetAnalyzer(analyzer);
+    //
+    decoder->Init();
 
+    //
     while(1) {
-        int nfds, idx, need_data, res;
+        int nfds, res;
         struct timeval to, *timeout;
 
         ///////////////////////////////////////////////////////////////
@@ -478,46 +374,28 @@ main_loop(int insock_l, int outsock_l)
         FD_ZERO(&readfds);
         FD_ZERO(&writefds);
 
-        // always check whether new connection request is pending for the output socket and for the datain socket in the intype_accept mode
-        if (intype==intype_accept) {
-            FD_SET(insock_l, &readfds);
-            nfds=insock_l;
-        }
-        FD_SET(outsock_l, &readfds);
-        if (outsock_l>nfds) nfds=outsock_l;
-
         // Checking whether need new data or not:
         // First, check whether there're output sockets which has not finished transferring the current cluster
         // In this process, also check whether there is output socket finishing the transfering. If there exists any one of the output sockets which has finished transfering the current cluster, the flag "need_data" is set so that a new cluster will be read from the datain socket.
         // Second, in intyp_connect mode, if the input connection has not been established yet, the connection request is sent out in this step; if the the request has been sent, then set the flag to check whether the connection request has been accepted or not.
-        need_data=0;
-        for (idx=0; idx<num_socks; idx++) {
-            if (socks[idx]->event_buffer) { // if the associated buffer exists, then there is remaining data to be sent
-                FD_SET(socks[idx]->p, &writefds);
-                if (socks[idx]->p>nfds) nfds=socks[idx]->p;
-            } else {
-                need_data=1; // if any one output socket has finished tranfering one cluster, then new cluster should be requested from the datain socket.
-            }
+        if (insock>=0) {// valid input connection has already been established
+            FD_SET(insock, &readfds);
+            nfds=insock;
         }
-        if (need_data) {
-            if (insock>=0) {// valid input connection has already been established
-                FD_SET(insock, &readfds);
-                if (insock>nfds) nfds=insock;
-            } else if (intype==intype_connect) { // valid input connection does not exist and the mode is intype_connet
-                if (insock_l<0) { // the connection request has not been sent out
-                    struct timeval now;
-                    gettimeofday(&now, 0);
-                    if (now.tv_sec-last.tv_sec>60) { // send the connection request every 60s
-                        last=now;
-                        insock_l=create_connecting_socket(inhostaddr, inport);
-                    } else {
-                        to.tv_sec=10; to.tv_usec=0; timeout=&to; // if the connection request has been sent out, the block 10s to wait for the result of this request
-                    }
+        else{ // valid input connection does not exist and the mode is intype_connet
+            if (insock_l<0) { // the connection request has not been sent out
+                struct timeval now;
+                gettimeofday(&now, 0);
+                if (now.tv_sec-last.tv_sec>60) { // send the connection request every 60s
+                    last=now;
+                    insock_l=create_connecting_socket(inhostaddr, inport);
+                } else {
+                    to.tv_sec=10; to.tv_usec=0; timeout=&to; // if the connection request has been sent out, the block 10s to wait for the result of this request
                 }
-                if (insock_l>=0) { // the connection request has been sent out successfully
-                    FD_SET(insock_l, &writefds);
-                    if (insock_l>nfds) nfds=insock_l;
-                }
+            }
+            if (insock_l>=0) { // the connection request has been sent out successfully
+                FD_SET(insock_l, &writefds);
+                nfds=insock_l;
             }
         }
 
@@ -535,49 +413,17 @@ main_loop(int insock_l, int outsock_l)
         // Operations when the sockets have status change //
 
         /* Output realted operations */
-        for (idx=0; idx<num_socks; idx++) {
-            if (FD_ISSET(socks[idx]->p, &writefds)) {
-                if (do_write(socks[idx])<0) {
-                    delete_outsock(idx);
-                    idx--;
-                }
-            }
-        }
 
         /* Connections related operations*/
         if (insock_l>=0) {
-            if (intype==intype_accept) {
-              if (FD_ISSET(insock_l, &readfds)) { // check whether there exist connection request in intyp_accept mode
-                    int ns=accept_insock(insock_l);
-                    if (ns>=0) {
-                        if (insock<0) { // accept this socket as the datain socket if the connection has not been established before
-                            insock=ns;
-                        } else { // a connection has already existed
-                            if (close_old) { // if close_old flag is set, the previous connection will be replaced by this new connection. And the associated buffer will be cleaned as well.
-                                if (!quiet) printf("new insocket accepted.\n");
-                                clear_new_event(&ibs);
-                                close(insock);
-                                insock=ns;
-                            } else { // ignore the new connection, keep the original one
-                                if (!quiet) printf("insocket already connected.\n");
-                                close(ns);
-                            }
-                        }
-                    }
-                }
-            } else if (intype==intype_connect) { // check whether the connection request answer in intyp_connect mode
-                if (FD_ISSET(insock_l, &writefds)) {
-                    switch (is_connected(insock_l)) {
+            if (FD_ISSET(insock_l, &writefds)) {
+                switch (is_connected(insock_l)) {
                     case 1: insock=insock_l; insock_l=-1; break; // if connected, insock is updated with the valid socket discriptor and insock_l back to -1
                     case -1: close(insock_l); insock_l=-1;break;
                     /* default: still in progress */
-                    }
                 }
             }
         }
-        // Always accecpt new output socket connection.
-        // Once a new output socket connection is accepted and established, a new sock data structure will be created and the num_socks will increase by 1.
-        if (FD_ISSET(outsock_l, &readfds)) accept_outsock(outsock_l);
 
         /* Input related operations */
         // 1. If need_data is true, the new cluster data will be read from datain and stored in a new buffer at this step
@@ -597,21 +443,21 @@ main_loop(int insock_l, int outsock_l)
                 }
             } else {
                 if (ibs.valid) {
-                    for (idx=0; idx<num_socks; idx++) {
-                        if (!socks[idx]->event_buffer) {
-                            socks[idx]->event_buffer=ibs.event_buffer;
-                            socks[idx]->position=0;
-                            ibs.event_buffer->number_of_users++;
-                        }
-                    }
-                    if (!ibs.event_buffer->number_of_users)
-                            printf("new event_buffer unused!\n");
+                    // decode this cluster data
+                  nr_clusters++;
+                  printf("receive one new cluster: %ld\n",nr_clusters);
+                    ems_u32* b=reinterpret_cast<ems_u32*>(ibs.event_buffer->data);
+                    int s=static_cast<int>(ibs.event_buffer->size/4);
+                    decoder->DecodeCluster(b,s);
+                    //
                     clear_new_event(&ibs);
                 }
             }
         }
     }
+
 }
+
 /******************************************************************************/
 static int
 portname2portnum(char* name)
@@ -635,13 +481,25 @@ portname2portnum(char* name)
 int
 main(int argc, char *argv[])
 {
-    int insock_l, outsock_l;
+  loguru::g_stderr_verbosity = loguru::Verbosity_WARNING;
+  // loguru::g_flush_interval_ms=1;
+  // loguru::g_preamble = false;
+  // loguru::g_preamble_verbose = true;
+  // loguru::g_preamble_date = false;
+  loguru::g_preamble_thread = false;
+  loguru::g_preamble_uptime = false;
+
+  loguru::init(argc,argv);
+  // loguru::add_file("everything.log",loguru::Append, loguru::Verbosity_MAX);
+  // loguru::add_file("latest.log",loguru::Truncate, loguru::Verbosity_INFO);
+
     char *p;
+    nr_clusters=0;
 
     // arguments parsing
     if (readargs(argc, argv)) return 1;
 
-    printf("inname=%s; outname=%s\n", inname, outname);
+    printf("inname=%s;\n", inname);
 
     // determine the input stream type
     if (strcmp(inname, "-")==0) {
@@ -665,14 +523,11 @@ main(int argc, char *argv[])
             }
         }
     } else {
-        intype=intype_accept;
-        if ((inport=portname2portnum(inname))<0) return 1;
+        printf("unknown format, please specify the host as: hostname:portnum\n");
+        return 1;
     }
 
-    // get output stream server binding port
-    if ((outport=portname2portnum(outname))<0) return 1;
-
-    // verbose information about input & output stream
+    // verbose information about input stream
     if (!quiet) {
         printf("using ");
         switch (intype) {
@@ -684,33 +539,23 @@ main(int argc, char *argv[])
                     inhostaddr&0xff, (inhostaddr>>8)&0xff,
                     (inhostaddr>>16)&0xff, (inhostaddr>>24)&0xff, inport);
             break;
-        case intype_accept:
-            printf("port %d", inport);
-            break;
         }
-        printf(" for input and port %d for output\n", outport);
     }
 
     /*signal (SIGINT, *sigact);*/
     /*signal (SIGPIPE, SIG_IGN);*/
-    signal (SIGPIPE, sigpipe);
-
-    // setup binding port for input & output connection
-    if (intype==intype_accept) {
-        if ((insock_l=create_listening_socket(inport))<0) {
-            printf("create_listening_socket input: %s\n", strerror(errno));
-            return insock_l;
-        }
-    } else {
-        insock_l=-1;
-    }
-    if ((outsock_l = create_listening_socket(outport))<0) {
-        printf("create_listening_socket output: %s\n", strerror(errno));
-        return outsock_l;
-    }
+    signal(SIGPIPE, sigpipe);
+    //
+    // signal(SIGINT, sigint);
+    sa_sigint_new.sa_handler=sigint;
+    sigemptyset(&sa_sigint_new.sa_mask);
+    sa_sigint_new.sa_flags=0;
+    sigaction(SIGINT,NULL,&sa_sigint_old);
+    if(sa_sigint_old.sa_handler != SIG_IGN)
+      sigaction(SIGINT,&sa_sigint_new,NULL);
 
     // waiting establishing input & output connection and do the data receiving & distribution
-    main_loop (insock_l, outsock_l);
+    main_loop();
 
     return 0;
 }

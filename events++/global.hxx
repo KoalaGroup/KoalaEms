@@ -23,6 +23,20 @@ static const struct mesymodules mesymodules[]= {
   {0xB, mesytec_mtdc32, "TDC1"},
   {0xC, mesytec_mtdc32, "TDC2"},
 };
+
 static const int nr_mesymodules=sizeof(mesymodules)/sizeof(struct mesymodules);
+
+enum parser_types {
+  parserty_time,
+  parserty_scalor,
+  parserty_mxdc32,
+  parserty_invalid
+};
+
+struct EmsIsInfo {
+  char name[32];// user defined name for this IS
+  parser_types type;// type of the corresponding parser
+  uint32_t is_id;//should match this IS's id in the wad file
+};
 
 #endif

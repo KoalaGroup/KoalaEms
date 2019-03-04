@@ -1,10 +1,21 @@
 # $ZEL: Makefile.in,v 1.48 2016/07/20 16:29:00 wuestner Exp $
 
+# This Makefile is supposed to compile C++ project.
+# Adaption may be needed to be used to compile C code.
+
+# system variables
+# prefix, exec_prefix is passed from 'configure --prefix= --exec_prefix=' command option
+# BIN_DIR, INCLUDE_DIR, LIB_DIR: install directories for executables, libraries and headers
+# COMMONVER, SUPPORTVER, SELFVER are defined in 'patchlevel' file under src directory
+# SELFVER is the version number of this library
 prefix = @prefix@
 exec_prefix = @exec_prefix@
 BIN_DIR = $(exec_prefix)/bin
+INCLUDE_DIR = $(prefix)/include
+LIB_DIR = $(prefix)/lib
 COMMONVER    := @COMMONVER@
 SUPPORTVER   := @SUPPORTVER@
+SELFVER			 := @SELFVER@
 
 srcdir = @srcdir@
 VPATH = @srcdir@
@@ -16,69 +27,105 @@ apidir    := @apidir@
 apilib    := @apilib@
 sampledir := $(apidir)/sample
 
+# ems libraries
 COMMON_INCLUDE = @EMSCOMMON@
 COMMON_EX_INCLUDE = @EMSEXCOMMON@
 COMMON_LIB = @EMSCOMMONLIB@
 SUPPORT_INCLUDE = @EMSSUPPORT@
 SUPPORT_LIB = @EMSSUPPORTLIB@
 
+# make implicit variables:
+# The following variables may be used for make implicit rules for compiling .c/.cc files into .o files.
+# If no explicit rules are provided, then the implicit rules will be used.
+# For C files, the rule is: $(CC) $(CPPFLAGS) $(CFLAGS) -c
+# For C++ files, the rule is: $(CXX) $(CPPFLAGS) $(CXXFLAGS) -c
+
+# CC:  	c compiler, default: cc
+# CXX:  c++ compiler, default: g++
+# AR:   archive-maintaining program for creating static library, default: ar
+# CPPFLAGS: c/c++ common preprocesser flags, i.e. '-I' flags
+# CFLAGS:   specific c compiler flags, i.e. '-std=c99'
+# CXXFLAGS: specific c++ compiler flags, i.e. '-std=c++11' or '-Weffc++'
 CC = @CC@
 CFLAGS := @CFLAGS@
 CXX = @CXX@
 CXXFLAGS = @CXXFLAGS@
+
+# system default compiler configurations
+# INSTALL, INSTALL_DATA: copy and set correct permission of the binaries(executables and libraries) and header files
+# RANLIB: generate archive index for static library
+# LDFLAGS:
+# LIBSUFFIX:
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 RANLIB = @RANLIB@
-LDFLAGS=
+LDFLAGS= @LDFLAGS@
 LDFLAGS_TSM := $(LDFLAGS) -L$(apidir) -l$(apilib)
 LIBSUFFIX = @LIBSUFFIX@
 
-ROOTLIBS  := $(shell root-config --libs)
-ROOTGLIBS := $(shell root-config --glibs)
-ROOTINC   := $(shell root-config --cflags)
+# ROOT environments
+ROOTLIBS  := $(shell root-config --new --libs)
+ROOTGLIBS := $(shell root-config --new --glibs)
+ROOTINC   := $(shell root-config --new --cflags)
 
+# self-defined compiling configurations, sources, execs, libraries
 CPPFLAGS = @CPPFLAGS@ -I$(srcdir) -I. -I$(COMMON_INCLUDE)  \
         -I$(COMMON_EX_INCLUDE)  \
         -I$(SUPPORT_INCLUDE)  \
         -I$(sampledir)  \
         $(ROOTINC)   \
+				-DLOGURU_WITH_STREAMS=1 \
         -DTSMDIR=$(badir)  \
         -DHAVE_CONFIG_H
 
-LIBS =  -L$(SUPPORT_LIB) -lsupp.$(SUPPORTVER) -L$(COMMON_LIB)  \
-        -lcommon.$(COMMONVER) $(ROOTLIBS)
+LDLIBS =  -L$(SUPPORT_LIB) -lsupp.$(SUPPORTVER) \
+          -L$(COMMON_LIB)  -lcommon.$(COMMONVER) \
+          -L.  -lutils.$(SELFVER) \
+          $(ROOTGLIBS) \
+		      -lpthread -ldl
 
-CCSOURCES := parse_koala.cc
+# srcs for executables
+SOURCES := datacli_koala.cc \
+           new_parser_koala.cc event_distributor.cc online_koala.cc
+OBJS := $(SOURCES:.cc=.o)
+EXECS := $(SOURCES:.cc=)
 
-SOURCES := $(CCSOURCES)
-
-EXECS := $(SOURCES:.cc=) $(OSOURCES:.cc=)
+# srcs for libraries
+LIBSOURCES := mxdc32_data.cc koala_data.cc ems_data.cc \
+							KoaParsers.cc decode_util.cc KoaDecoder.cc \
+							KoaRawData.cc KoaAnalyzer.cc  KoaSimpleAnalyzer.cc KoaAssembler.cc \
+						  KoaOnlineAnalyzer.cc \
+							KoaLoguru.cc
+LIBOBJS := $(LIBSOURCES:.cc=.o)
+LIBS    := libutils.$(SELFVER)$(LIBSUFFIX)
 
 .PHONY: all
-all: $(EXECS)
+all: $(EXECS) $(LIBS)
 
-parse_koala: parse_koala.o use_koala.o  KoaRawData.o
-	$(CXX) -o $@ $^ $(LIBS)
+$(LIBS): $(LIBOBJS)
+	$(AR) cr $@ $(LIBOBJS)
+	$(RANLIB) $@
 
-use_koala.o: use_koala.cc
-	$(CXX) $(CPPFLAGS) -o $@ -c $^
+new_parser_koala: new_parser_koala.o $(LIBS)
+	$(CXX) -o $@ $^ $(LDLIBS)
 
-parse_koala.o: parse_koala.cc
-	$(CXX) $(CPPFLAGS) -o $@ -c $^
+event_distributor: event_distributor.o
+	$(CXX) -o $@ $^ $(LDLIBS)
 
-KoaRawData.o: KoaRawData.cc
-	$(CXX) $(CPPFLAGS) -o $@ -c $^
+datacli_koala: datacli_koala.o $(LIBS)
+	$(CXX) -o $@ $^ $(LDLIBS)
 
+online_koala: online_koala.o
+	$(CXX) -o $@ $^ $(LDLIBS)
+
+# generate the rules for compiling the .o files.
+# Specifically, this will generate the dependency on the header files in the src directory.
 depend: sed.in
 	cp Makefile Makefile.bak
 	sed -e '/^# DO NOT DELETE THIS LINE/,$$d' < Makefile.bak > Makefile
 	echo '# DO NOT DELETE THIS LINE' >> Makefile
 	echo ' ' >> Makefile
-	for i in $(CSOURCES); do \
-	  echo checking $$i ; \
-	  $(CC) -MM -MG $(CPPFLAGS) $(srcdir)/$$i|sed -f sed.in>> Makefile ; \
-	done
-	for i in $(DSOURCES) ; do \
+	for i in $(SOURCES) $(LIBSOURCES); do \
 	  echo checking $$i ; \
 	  $(CXX) -MM -MG $(CPPFLAGS) $(CXXFLAGS) $(srcdir)/$$i|sed -f sed.in>> Makefile ; \
 	done
@@ -89,14 +136,26 @@ sed.in:
 	echo '/^ *\\ *$$/d' >>sed.in
 
 clean:
-	rm -f *.o $(EXECS) core sed.in
+	rm -f *.o $(EXECS) *.a *.so sed.in
 
 realclean: clean
 
 distclean: realclean
 	rm -f Makefile Makefile.bak config.cache config.log config.status config.h
 
-install: all
+install: install_binaries install_libs install_headers
+
+install_binaries: all
 	for i in $(EXECS) ; do \
 		$(INSTALL) $$i $(BIN_DIR)/$$i ; \
 	done
+
+install_libraries: all
+	for i in $(LIBS) ; do \
+		$(INSTALL_DATA) $$i $(LIB_DIR)/$$i ; \
+	done
+
+install_headers:
+	# for i in $(HEADERS) ; do \
+	# 	$(INSTALL_DATA) $(srcdir)/$$i $(INCLUDE_DIR)/$$I ; \
+	# done
