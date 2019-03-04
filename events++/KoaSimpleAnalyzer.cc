@@ -42,7 +42,7 @@ namespace DecodeUtil{
 
     strcpy(rootfile,outputbase);
     strcpy(pdffile,outputbase);
-    strcat(rootfile,".root");
+    strcat(rootfile,"_new.root");
     strcat(pdffile,"_check.pdf");
     
   }
@@ -214,18 +214,18 @@ namespace DecodeUtil{
 
     // printing
     if(unsync){
-      printf("unsync event (%l): ",fKoalaPrivate->get_statist_events());
+      printf("unsync event (%ld): ",fKoalaPrivate->get_statist_events());
       for (int mod=0; mod<nr_mesymodules; mod++) {
         event=koala->modules[mod];
-        printf("%l\t",event->timestamp);
+        printf("%ld\t",event->timestamp);
       }
       printf("\n");
       unsync=false;
     } else if(print){
-      printf("after unsync event (%l): ",fKoalaPrivate->get_statist_events());
+      printf("after unsync event (%ld): ",fKoalaPrivate->get_statist_events());
       for (int mod=0; mod<nr_mesymodules; mod++) {
         event=koala->modules[mod];
-        printf("%l\t",event->timestamp);
+        printf("%ld\t",event->timestamp);
       }
       printf("\n");
       print=false;

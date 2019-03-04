@@ -60,6 +60,7 @@ typedef enum {swaptype_check, swaptype_always, swaptype_never} swaptypes;
 int quiet, old, close_old;
 intypes intype;
 swaptypes swaptype;
+Long_t nr_clusters;
 
 // variables to store the in/out socket parameters.
 char *inname;
@@ -353,7 +354,7 @@ main_loop()
     KoaAssembler* assembler=new KoaAssembler();
     decoder->SetAssembler(assembler);
     //
-    KoaAnalyzer*  analyzer=new KoaOnlineAnalyzer();
+    KoaOnlineAnalyzer*  analyzer=new KoaOnlineAnalyzer();
     decoder->SetAnalyzer(analyzer);
     //
     decoder->Init();
@@ -442,7 +443,8 @@ main_loop()
             } else {
                 if (ibs.valid) {
                     // decode this cluster data
-                    // printf("receive one new cluster\n");
+                  nr_clusters++;
+                  printf("receive one new cluster: %ld\n",nr_clusters);
                     ems_u32* b=reinterpret_cast<ems_u32*>(ibs.event_buffer->data);
                     int s=static_cast<int>(ibs.event_buffer->size/4);
                     decoder->DecodeCluster(b,s);
@@ -491,6 +493,7 @@ main(int argc, char *argv[])
   // loguru::add_file("latest.log",loguru::Truncate, loguru::Verbosity_INFO);
 
     char *p;
+    nr_clusters=0;
 
     // arguments parsing
     if (readargs(argc, argv)) return 1;

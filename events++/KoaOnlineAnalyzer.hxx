@@ -12,10 +12,12 @@ namespace DecodeUtil{
   class KoaOnlineAnalyzer: public KoaAnalyzer
   {
   public:
-    KoaOnlineAnalyzer(const char* dir="/var/tmp",Long_t address=0x7fd3b6ad9000, Int_t size=1e8);
+    KoaOnlineAnalyzer(const char* dir="/var/tmp",Long_t address=0x7fd3b6ad9000, Int_t size=1e8, Int_t entries=100000);
     virtual ~KoaOnlineAnalyzer();
 
     void SetDirectory(const char* dir);
+    void SetMapAddress(Long_t address);
+    void SetMapSize(Int_t size);
 
     virtual int Init();
     virtual int Analyze();
@@ -31,6 +33,9 @@ namespace DecodeUtil{
     void DetectorMapped();
     void InitTrees();
     void FillTrees();
+    void InitHistograms();
+    void FillHistograms();
+    void ResetHistograms();
 
   private:
     TMapFile *fMapFile;
@@ -38,6 +43,7 @@ namespace DecodeUtil{
     Int_t     fMapSize;
     TString   fFileName;
     Long_t    fCounter;
+    Int_t     fMaxEvents;
 
     // electronics mapped
     UChar_t *fModuleId;
@@ -75,9 +81,8 @@ namespace DecodeUtil{
     TTree    *fGe2Tree;
     TTree    *fFwdTree;
 
-    TH1F     *hadc;
-    TH1F     *hqdc;
-    TH1F     *htdc;
+    TH1F*     hFwdAmp[8];
+    TH1F*     hFwdTime[8];
   };
 }
 #endif

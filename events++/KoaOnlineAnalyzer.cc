@@ -13,7 +13,7 @@ static Float_t g_invalidtime=-10;
 namespace DecodeUtil
 {
   //
-  KoaOnlineAnalyzer::KoaOnlineAnalyzer(const char* dir, Long_t address, Int_t size) : fMapAddress(address), fMapSize(size)
+  KoaOnlineAnalyzer::KoaOnlineAnalyzer(const char* dir, Long_t address, Int_t size, Int_t entries) : fMapAddress(address), fMapSize(size), fMaxEvents(entries)
   {
     SetDirectory(dir);
   }
@@ -29,6 +29,17 @@ namespace DecodeUtil
     fFileName.Form("%s/koala_online.map",dir);
   }
   //
+  void
+  KoaOnlineAnalyzer::SetMapAddress(Long_t address)
+  {
+    fMapAddress=address;
+  }
+  void
+  KoaOnlineAnalyzer::SetMapSize(Int_t size)
+  {
+    fMapSize = size;
+  }
+  //
   int
   KoaOnlineAnalyzer::Init()
   {
@@ -37,10 +48,10 @@ namespace DecodeUtil
     fMapFile = TMapFile::Create(fFileName.Data(),"RECREATE",fMapSize,"KOALA_Online_NEW");
 
     // create histograms
-    hadc = new TH1F("hadc","hadc",ADC_MAXRANGE+2,-1.5,ADC_MAXRANGE+0.5);
-    hqdc = new TH1F("hqdc","hqdc",QDC_MAXRANGE+11,-9.5, QDC_MAXRANGE+1.5);
-    htdc = new TH1F("htdc","htdc",TDC_MAXRANGE+2,-1.5,TDC_MAXRANGE+0.5);
+    InitHistograms();
 
+    fMapFile->Update();
+    fMapFile->ls();
     // create trees
     fModuleId = new UChar_t[nr_mesymodules];
     fResolution = new Char_t[nr_mesymodules];
@@ -73,23 +84,19 @@ namespace DecodeUtil
       // extract channel data
       Decode(koala_cur);
       DetectorMapped();
-      // FillTrees();
-
       koala_cur->recycle();
 
       // fill histograms
-      if(fCounter%30000==0)
-        Reset();
+      // FillTrees();
+      FillHistograms();
 
-      hadc->Fill(fData[0][0]);
-      hqdc->Fill(fData[6][0]);
-      htdc->Fill(fData[8][0]);
       // update mapfile
+      fCounter++;
       if(fCounter%100==0){
         fMapFile->Update();
-        if(!fCounter) fMapFile->ls();
       }
-      fCounter++;
+      if(fCounter%fMaxEvents==0)
+        Reset();
     }
 
     //
@@ -105,19 +112,13 @@ namespace DecodeUtil
     if(fNrWords)    delete [] fNrWords;
     if(fTimestamp)  delete [] fTimestamp;
     if(fData)       delete [] fData;
-    //
-    if(hadc) delete hadc;
-    if(hqdc) delete hqdc;
-    if(htdc) delete htdc;
   }
   //
   void
   KoaOnlineAnalyzer::Reset()
   {
     // fCounter=0;
-    hadc->Reset();
-    hqdc->Reset();
-    htdc->Reset();
+    ResetHistograms();
   }
   //
   void
@@ -366,5 +367,32 @@ namespace DecodeUtil
     fGe1Tree->Fill();
     fGe2Tree->Fill();
     fFwdTree->Fill();
+  }
+  //
+  void
+  KoaOnlineAnalyzer::InitHistograms()
+  {
+    for(int i=0;i<8;i++){
+      hFwdAmp[i] = new TH1F(Form("hFwdAmp_%d",i+1),Form("Fwd Scintillator Amplitude: %d",i+1),QDC_MAXRANGE+11,-9.5, QDC_MAXRANGE+1.5);
+      hFwdTime[i] = new TH1F(Form("hFwdTime_%d",i+1),Form("Fwd Scintillator Timestamp: %d",i+1),2050,-1.5,2048.5);
+    }
+  }
+  //
+  void
+  KoaOnlineAnalyzer::FillHistograms()
+  {
+    for(int i=0;i<8;i++){
+      hFwdAmp[i]->Fill(fFwd_Amplitude[i]);
+      hFwdTime[i]->Fill(fFwd_Timestamp[i]);
+    }
+  }
+  //
+  void
+  KoaOnlineAnalyzer::ResetHistograms()
+  {
+    for(int i=0;i<8;i++){
+      hFwdTime[i]->Reset();
+      hFwdAmp[i]->Reset();
+    }
   }
 }
