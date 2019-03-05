@@ -215,18 +215,18 @@ int histplot()
 		cRecTime->Update();
 
     // Recoil Hits
-    cRecHits->cd(1); hGe1Hits->Draw("colz");
+    cRecHits->cd(1); hSi2Hits->Draw("colz");
     cRecHits->cd(2); hGe2Hits->Draw("colz");
     cRecHits->cd(3); hSi1Hits->Draw("colz");
-    cRecHits->cd(4); hSi2Hits->Draw("colz");
+    cRecHits->cd(4); hGe1Hits->Draw("colz");
 		cRecHits->Modified();
 		cRecHits->Update();
 
     // Recoil RearSide Amplitude
-    cRecRearAmp->cd(1); gPad->SetLogy(); hGe1RearAmp->Draw();
+    cRecRearAmp->cd(1); gPad->SetLogy(); hSi2RearAmp->Draw();
     cRecRearAmp->cd(2); gPad->SetLogy(); hGe2RearAmp->Draw();
     cRecRearAmp->cd(3); gPad->SetLogy(); hSi1RearAmp->Draw();
-    cRecRearAmp->cd(4); gPad->SetLogy(); hSi2RearAmp->Draw();
+    cRecRearAmp->cd(4); gPad->SetLogy(); hGe1RearAmp->Draw();
 		cRecRearAmp->Modified();
 		cRecRearAmp->Update();
 
