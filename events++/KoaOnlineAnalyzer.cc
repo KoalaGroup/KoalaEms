@@ -505,9 +505,9 @@ namespace DecodeUtil
     // for(int i=0;i<24;i++){
     //   hSi2Time[i]->Reset();
     // }
-    hRecTime->Reset();
+    // hRecTime->Reset();
     for(int i=0;i<2;i++){
-      hRecRearTime[i]->Reset();
+      // hRecRearTime[i]->Reset();
     }
     // Recoil Hits
     hSi1Hits->Reset();
