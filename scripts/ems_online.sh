@@ -11,8 +11,10 @@ fi
 # kill existing
 # pkill has a maximum charactor limit
 pkill datacli_koala
-nohup ./datacli_koala localhost:5555 &>/dev/null &
+# nohup ./datacli_koala localhost:5555 &>/dev/null &
+gnome-terminal --tab "data client" -e "./datacli_koala localhost:5555"
 
 
 pkill online_koala
-nohup ./online_koala &>/dev/null &
+# nohup ./online_koala &>/dev/null &
+gnome-terminal --tab "online koala" -e "./online_koala"
