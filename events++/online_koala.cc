@@ -76,6 +76,12 @@ int histplot()
 	cRecRearAmp->Modified();
 	cRecRearAmp->Update();
   
+	// TCanvas *c2RecRearAmpVsTime;
+	// cRecRearAmp = new TCanvas("cRecRearAmp","Recoil RearSide Amplitudes", 2000,1500, 800, 800);
+  // cRecRearAmp->Divide(2,2);
+	// cRecRearAmp->Draw();
+	// cRecRearAmp->Modified();
+	// cRecRearAmp->Update();
   ///////////////////////////////////////////
 	TMapFile *mfile = 0;
 	mfile = TMapFile::Create("/var/tmp/koala_online.map");

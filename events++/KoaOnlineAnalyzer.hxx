@@ -104,6 +104,10 @@ namespace DecodeUtil{
     TH1F*     hGe1RearAmp;
     TH1F*     hSi2RearAmp;
     TH1F*     hGe2RearAmp;
+
+    //
+    TH2F*     h2RecRearAmpVsTime[4];
+    // TH2F*     h2Si1RearAmpVsTime;
   };
 }
 #endif

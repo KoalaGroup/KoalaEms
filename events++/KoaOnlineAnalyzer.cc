@@ -401,12 +401,12 @@ namespace DecodeUtil
     // Forward Detector
     for(int i=0;i<8;i++){
       hFwdAmp[i] = new TH1F(Form("hFwdAmp_%d",i+1),Form("Fwd Scintillator Amplitude: %d",i+1),QDC_MAXRANGE+11,-9.5, QDC_MAXRANGE+1.5);
-      hFwdTime[i] = new TH1F(Form("hFwdTime_%d",i+1),Form("Fwd Scintillator Timestamp: %d",i+1),2050,-1.5,2048.5);
+      hFwdTime[i] = new TH1F(Form("hFwdTime_%d",i+1),Form("Fwd Scintillator Timestamp: %d",i+1),2098,-1.5,2096.5);
     }
 
     // Trigger timestamp
     for(int i=0;i<2;i++){
-      hTrigTime[i] = new TH1F(Form("hTrigTime_%d",i+1),Form("TDC%d: Trigger Time",i+1),2050,-1.5,2048.5);
+      hTrigTime[i] = new TH1F(Form("hTrigTime_%d",i+1),Form("TDC%d: Trigger Time",i+1),2098,-1.5,2096.5);
     }
 
     // Recoil Detector Timestamp
@@ -416,9 +416,9 @@ namespace DecodeUtil
     // for(int i=0;i<24;i++){
     //   hSi2Time[i] = new TH1F(Form("hSi2Time_%d",i+1),Form("Si#2_Strip#%d : Timestamp (ns)",i+1),2050,-1.5,2048.5);
     // }
-    hRecTime = new TH1F("hRecTime","Recoil Detector Time (ns): Accumulated",2050,-1.5,2048);
-    hRecRearTime[0] = new TH1F("hRecRearTime_1","Si#1 Rear Time (ns)",2050,-1.5,2048);
-    hRecRearTime[1] = new TH1F("hRecRearTime_2","Si#2 Rear Time (ns)",2050,-1.5,2048);
+    hRecTime = new TH1F("hRecTime","Recoil Detector Time (ns): Accumulated",2098,-1.5,2096.5);
+    hRecRearTime[0] = new TH1F("hRecRearTime_1","Si#1 Rear Time (ns)",2098,-1.5,2096.5);
+    hRecRearTime[1] = new TH1F("hRecRearTime_2","Si#2 Rear Time (ns)",2098,-1.5,2096.5);
 
     // Recoil Hits
     hSi1Hits = new TH2F("hSi1Hits","Si#1 FrontSide: Hits Spectrum",48,0.5,48.5,ADC_MAXRANGE+2,-1.5,ADC_MAXRANGE+0.5);
@@ -431,6 +431,15 @@ namespace DecodeUtil
     hSi2RearAmp = new TH1F("hSi2RearAmp","Si#2 RearSide: Amplitude",ADC_MAXRANGE+2,-1.5,ADC_MAXRANGE+0.5);
     hGe1RearAmp = new TH1F("hGe1RearAmp","Ge#1 RearSide: Amplitude",ADC_MAXRANGE+2,-1.5,ADC_MAXRANGE+0.5);
     hGe2RearAmp = new TH1F("hGe2RearAmp","Ge#2 RearSide: Amplitude",ADC_MAXRANGE+2,-1.5,ADC_MAXRANGE+0.5);
+
+
+    // Si1 Correlation
+    for(int i=0;i<2;i++){
+      h2RecRearAmpVsTime[i]=new TH2F(Form("h2RecRearAmpVsTime_%d",i+1),Form("Si#%d Rear: Amplitude VS Time",i+1),ADC_MAXRANGE+2,-1.5,ADC_MAXRANGE+0.5,2098,-1.5,2096.5);
+    }
+    for(int i=0;i<2;i++){
+      h2RecRearAmpVsTime[i+2]=new TH2F(Form("h2RecRearAmpVsTime_%d",i+3),Form("Ge#%d Rear: Amplitude VS Time",i+1),ADC_MAXRANGE+2,-1.5,ADC_MAXRANGE+0.5,2098,-1.5,2096.5);
+    }
   }
   //
   void
@@ -484,6 +493,14 @@ namespace DecodeUtil
     hSi2RearAmp->Fill(fRecRear_Amplitude[1]);
     hGe1RearAmp->Fill(fRecRear_Amplitude[2]);
     hGe2RearAmp->Fill(fRecRear_Amplitude[3]);
+
+
+    // Correlation
+    for(int i=0;i<2;i++){
+      if((*fPRecRear_Timestamp[i])!=UNDER_THRESHOLD){
+        h2RecRearAmpVsTime[i]->Fill(fRecRear_Amplitude[i],fRecRear_Timestamp[i]);
+      }
+    }
   }
   //
   void
@@ -519,6 +536,11 @@ namespace DecodeUtil
     hSi2RearAmp->Reset();
     hGe1RearAmp->Reset();
     hGe2RearAmp->Reset();
+
+    // Correlation
+    // for(int i=0;i<4;i++){
+    //   h2RecRearAmpVsTime[i]->Reset();
+    // }
   }
   //
   void
