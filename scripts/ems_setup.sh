@@ -1,10 +1,10 @@
 # commu in the background
-pkill commu
+pkill -9 commu
 commu
 
 # event distributor in the background
 # pkill has a maximum charactor limit
-pkill event_distr
+pkill -9 event_distr
 nohup event_distributor &>/dev/null &
 
 # server in the background
@@ -24,5 +24,5 @@ fi
 
 # kill existing
 # pkill has a maximum charactor limit
-pkill server.cc_simpl
+pkill -9 server.cc_simpl
 nohup ./server.cc_simple -l:vmep=/dev/sis1100_00\;sis3100 -w $LOGFILE &>/dev/null &
