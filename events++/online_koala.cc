@@ -227,7 +227,7 @@ int histplot()
     gMHitRateFwd->RecursiveRemove(gHitRateCommonOr);
     // gMHitRateRec->RecursiveRemove(gHitRateCommonOr);
     gMHitRateFwd->RecursiveRemove(gEventRate);
-    gMHitRateRec->RecursiveRemove(gEventRate);
+    // gMHitRateRec->RecursiveRemove(gEventRate);
 
     for(int i=0;i<2;i++){
       gMHitRateGeOverlap->RecursiveRemove(gHitRateGeOverlap[i]);
@@ -373,8 +373,8 @@ int histplot()
     }
     // gMHitRateRec->Add(gHitRateCommonOr,"*L");
     // legendHitRateRec->AddEntry(gHitRateCommonOr,"Trigger Rate","l");
-    gMHitRateRec->Add(gEventRate,"*L");
-    legendHitRateRec->AddEntry(gEventRate,"DAQ Event Rate","l");
+    // gMHitRateRec->Add(gEventRate,"*L");
+    // legendHitRateRec->AddEntry(gEventRate,"DAQ Event Rate","l");
     if(gHitRateRec[0]->GetN()){
       gMHitRateRec->Draw("AL");
       gPad->Update();
@@ -422,12 +422,14 @@ int histplot()
 		cHitRateSiRear->Update();
 
     cDaqEfficiency->cd();
-    gDaqEfficiency->Draw("A*L");
-    gPad->Update();
-    gDaqEfficiency->GetXaxis()->SetTimeDisplay(1);
-    gDaqEfficiency->GetXaxis()->SetLabelOffset(0.03);
-    gDaqEfficiency->GetXaxis()->SetNdivisions(-503);
-    gDaqEfficiency->GetXaxis()->SetTimeFormat("#splitline{%H:%M:%S}{%d\/%m}");
+    if(gDaqEfficiency->GetN()){
+      gDaqEfficiency->Draw("A*L");
+      gPad->Update();
+      gDaqEfficiency->GetXaxis()->SetTimeDisplay(1);
+      gDaqEfficiency->GetXaxis()->SetLabelOffset(0.03);
+      gDaqEfficiency->GetXaxis()->SetNdivisions(-503);
+      gDaqEfficiency->GetXaxis()->SetTimeFormat("#splitline{%H:%M:%S}{%d\/%m}");
+    }
 		cDaqEfficiency->Modified();
 		cDaqEfficiency->Update();
 

@@ -19,8 +19,8 @@ namespace DecodeUtil
     fEmsTimeSecond=time(0);
     fKoalaCounter=0;
     fEmsCounter=0;
-    fScalerResetInterval=1000;
-    fScalerUpdateInterval=2;
+    fScalerResetInterval=1200;
+    fScalerUpdateInterval=5;
     fEventNr = 0;
   }
   //
@@ -134,9 +134,9 @@ namespace DecodeUtil
       if(ems_cur->tv_valid && ems_cur->scaler_valid){
         cur_time_second=ems_cur->tv.tv_sec;
         diff_time=difftime(cur_time_second,fEmsTimeSecond);
-        diff_time += (cur_time_usecond-fEmsTimeUSecond)*1e-6;
 
         if(diff_time<fScalerUpdateInterval) break;
+        diff_time += (cur_time_usecond-fEmsTimeUSecond)*1e-6;
 
         cur_time_usecond=ems_cur->tv.tv_usec;
         cur_events=fKoalaPrivate->get_statist_events();
