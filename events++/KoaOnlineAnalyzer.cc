@@ -20,7 +20,8 @@ namespace DecodeUtil
   //
   KoaOnlineAnalyzer::~KoaOnlineAnalyzer()
   {
-    
+    DeleteHistograms();
+    DeleteScalerGraphs();
   }
   //
   void
@@ -49,6 +50,7 @@ namespace DecodeUtil
 
     // create histograms
     InitHistograms();
+    InitScalerGraphs();
 
     fMapFile->Update();
     fMapFile->ls();
@@ -58,6 +60,10 @@ namespace DecodeUtil
     fNrWords  =  new Short_t[nr_mesymodules];
     fTimestamp = new Long64_t[nr_mesymodules];
     fData = new Int_t[nr_mesymodules][34];
+
+    fScaler = new UInt_t[34];
+    fScalerDiff = new UInt_t[34];
+    fHitRate = new Double_t[34];
     // for(int mod=0;mod<nr_mesymodules;mod++){
     //   fTree[mod]=new TTree(mesymodules[mod].label,mesymodules[mod].label);
 
@@ -78,6 +84,9 @@ namespace DecodeUtil
   int
   KoaOnlineAnalyzer::Analyze()
   {
+    if(fCounter==0){
+          
+    }
     // process koala event
     koala_event* koala_cur=nullptr;
     while(koala_cur=fKoalaPrivate->drop_event()){
@@ -100,18 +109,45 @@ namespace DecodeUtil
     }
 
     //
-    RecycleEmsEvents();
+    ems_event* ems_cur=nullptr;
+    time_t cur_time;
+    double diff_time;
+    while(ems_cur=fEmsPrivate->drop_event()){
+      if(ems_cur->tv_valid && ems_cur->scaler_valid){
+        cur_time=ems_cur->tv.tv_sec;
+        diff_time=difftime(cur_time,fEmsTimeSecond);
+        if(diff_time<5) break;
+
+        for(int i=0;i<34;i++){
+          fScalerDiff[i]=ems_cur->scaler[i]-fScaler[i];
+          fScaler[i]=ems_cur->scaler[i];
+          fHitRate[i]=fScalerDiff[i]/diff_time;
+        }
+        fEmsTimeSecond=ems_cur->tv.tv_sec;
+        fEmsTimeUSecond=ems_cur->tv.tv_usec;
+        //
+        FillScaler();
+      }
+      //
+      ems_cur->recycle();
+    }
     return 0;
   }
   //
   int
   KoaOnlineAnalyzer::Done()
   {
+    //
     if(fModuleId)   delete [] fModuleId;
     if(fResolution) delete [] fResolution;
     if(fNrWords)    delete [] fNrWords;
     if(fTimestamp)  delete [] fTimestamp;
     if(fData)       delete [] fData;
+    //
+    if(fScaler)     delete [] fScaler;
+    if(fScalerDiff) delete [] fScalerDiff;
+    if(fHitRate)    delete [] fHitRate;
+    //
   }
   //
   void
@@ -274,6 +310,31 @@ namespace DecodeUtil
     // Fwd: 1->8 ===> QDC 1->8
     for(int i=0;i<8;i++){
       fPFwd_Amplitude[i]=&fData[6][i];
+    }
+
+    //////////////////// Scaler ///////////////////
+    // Recoil Detector 
+    for(int i=0;i<4;i++){
+      fPScalerRec[i]=fScaler+i;
+      fPHitRateRec[i]=fHitRate+i;
+    }
+    // Fwd Detector
+    for(int i=0;i<4;i++){
+      fPScalerFwd[i]=fScaler+i+8;
+      fPHitRateFwd[i]=fHitRate+i+8;
+    }
+    // Common OR
+    fPScalerCommonOr=fScaler+4;
+    fPHitRateCommonOr=fHitRate+4;
+    // Ge1 and Ge2 Overlapping area (5 strips)
+    for(int i=0;i<2;i++){
+      fPScalerGeOverlap[i]=fScaler+6+i;
+      fPHitRateGeOverlap[i]=fHitRate+6+i;
+    }
+    // Si1 Si2 Rear Side
+    for(int i=0;i<2;i++){
+      fPScalerSiRear=fScaler+24+i;
+      fPHitRateSiRear=fHitRate+24+i;
     }
   }
   //
@@ -541,6 +602,175 @@ namespace DecodeUtil
     // for(int i=0;i<4;i++){
     //   h2RecRearAmpVsTime[i]->Reset();
     // }
+  }
+  //
+  void
+  KoaOnlineAnalyzer::DeleteHistograms()
+  {
+    //
+    for(int i=0;i<2;i++){
+      if(hTrigTime[i]) delete hTrigTime[i];
+    }
+    //
+    for(int i=0;i<8;i++){
+      if(hFwdAmp[i]) delete hFwdAmp[i];
+      if(hFwdTime[i]) delete hFwdTime[i];
+    }
+    //
+    if(hRecTime) delete hRecTime;
+    for(int i=0;i<2;i++){
+      if(hRecRearTime[i]) delete hRecRearTime[i];
+    }
+    //
+    if(hSi1Hits) delete hSi1Hits;
+    if(hSi2Hits) delete hSi2Hits;
+    if(hGe1Hits) delete hGe1Hits;
+    if(hGe2Hits) delete hGe2Hits;
+
+    if(hSi1RearAmp) delete hSi1RearAmp;
+    if(hSi2RearAmp) delete hSi2RearAmp;
+    if(hGe1RearAmp) delete hGe1RearAmp;
+    if(hGe2RearAmp) delete hGe2RearAmp;
+    //
+    for(int i=0;i<4;i++){
+      if(h2RecRearAmpVsTime[i]) delete h2RecRearAmpVsTime[i];
+    }
+  }
+  //
+  void
+  KoaOnlineAnalyzer::InitScalerGraphs()
+  {
+    TString RecName[4]={"Si#1","Si#2","Ge#1","Ge#2"};
+    TString FwdName[4]={"Fwd#Out","Fwd#In","Fwd#Up","Fwd#Down"};
+    //
+    for(int i=0;i<4;i++){
+      gScalerRec[i] = new TGraph();
+      gScalerRec[i]->SetNameTitle(Form("gScalerRec_%d",i+1),Form("%s : Scaler Counts",RecName[i].Data()));
+    }
+    for(int i=0;i<4;i++){
+      gScalerFwd[i] = new TGraph();
+      gScalerFwd[i]->SetNameTitle(Form("gScalerFwd_%d",i+1),Form("%s : Scaler Counts",FwdName[i].Data()));
+    }
+    gScalerCommonOr = new TGraph();
+    gScalerCommonOr->SetNameTitle("gScalerCommonOr","Trigger Scaler Counts");
+    //
+    for(int i=0;i<2;i++){
+      gScalerGeOverlap[i] = new TGraph();
+      gScalerGeOverlap[i]->SetNameTitle(Form("gScalerGeOverlap_%d",i+1),Form("%s OverlapArea (5 strips): Scaler Counts",RecName[i+2].Data()));
+    }
+    for(int i=0;i<2;i++){
+      gScalerSiRear[i] = new TGraph();
+      gScalerSiRear[i]->SetNameTitle(Form("gScalerSiRear_%d",i+1),Form("%s RearSide: Scaler Counts",RecName[i].Data()));
+    }
+    //
+    for(int i=0;i<4;i++){
+      gHitRateRec[i] = new TGraph();
+      gHitRateRec[i]->SetNameTitle(Form("gHitRateRec_%d",i+1),Form("%s : Hit Rate",RecName[i].Data()));
+    }
+    for(int i=0;i<4;i++){
+      gHitRateFwd[i] = new TGraph();
+      gHitRateFwd[i]->SetNameTitle(Form("gHitRateFwd_%d",i+1),Form("%s : Hit Rate",FwdName[i].Data()));
+    }
+    gHitRateCommonOr = new TGraph();
+    gHitRateCommonOr->SetNameTitle("gHitRateCommonOr","Trigger Rate");
+    //
+    for(int i=0;i<2;i++){
+      gHitRateGeOverlap[i] = new TGraph();
+      gHitRateGeOverlap[i]->SetNameTitle(Form("gHitRateGeOverlap_%d",i+1),Form("%s OverlapArea (5 strips): Hit Rate",RecName[i+2].Data()));
+    }
+    for(int i=0;i<2;i++){
+      gHitRateSiRear[i] = new TGraph();
+      gHitRateSiRear[i]->SetNameTitle(Form("gHitRateSiRear_%d",i+1),Form("%s RearSide: Hit Rate",RecName[i].Data()));
+    }
+  }
+  //
+  void
+  KoaOnlineAnalyzer::FillScalerGraphs()
+  {
+    Int_t npoints;
+    //
+    for(int i=0;i<4;i++){
+      npoints=gScalerRec[i]->GetN();
+      gScalerRec[i]->SetPoint(npoints,fEmsTimeSecond,*fPScalerRec[i]);
+      npoints=gHitRateRec[i]->GetN();
+      gHitRateRec[i]->SetPoint(npoints,fEmsTimeSecond,*fPHitRateRec[i]);
+    }
+    //
+    for(int i=0;i<4;i++){
+      npoints=gFwdHits[i]->GetN();
+      gScalerFwd[i]->SetPoint(npoints,fEmsTimeSecond,*fPScalerFwd[i]);
+      npoints=gHitRateFwd[i]->GetN();
+      gHitRateFwd[i]->SetPoint(npoints,fEmsTimeSecond,*fPHitRateFwd[i]);
+    }
+    //
+    npoints=gScalerCommonOr->GetN();
+    gScalerCommonOr->SetPoint(npoints,fEmsTimeSecond,*fPScalerCommonOr);
+    npoints=gHitRateCommonOr->GetN();
+    gHitRateCommonOr->SetPoint(npoints,fEmsTimeSecond,*fPHitRateCommonOr);
+    //
+    for(int i=0;i<2;i++){
+      npoints=gScalerGeOverlap[i]->GetN();
+      gScalerGeOverlap[i]->SetPoint(npoints,fEmsTimeSecond,*fPScalerGeOverlap[i]);
+      npoints=gHitRateGeOverlap[i]->GetN();
+      gHitRateGeOverlap[i]->SetPoint(npoints,fEmsTimeSecond,*fPHitRateGeOverlap[i]);
+    }
+    //
+    for(int i=0;i<2;i++){
+      npoints=gScalerSiRear[i]->GetN();
+      gScalerSiRear[i]->SetPoint(npoints,fEmsTimeSecond,*fPScalerSiRear[i]);
+      npoints=gHitRateSiRear[i]->GetN();
+      gHitRateSiRear[i]->SetPoint(npoints,fEmsTimeSecond,*fPHitRateSiRear[i]);
+    }
+  }
+  //
+  void
+  KoaOnlineAnalyzer::ResetScalerGraphs()
+  {
+    Int_t npoints=gScalerCommonOr->GetN();
+    if(npoints>10000){
+      for(int i=0;i<4;i++){
+        gScalerRec[i]->Set(0);
+        gHitRateRec[i]->Set(0);
+      }
+      for(int i=0;i<4;i++){
+        gScalerFwd[i]->Set(0);
+        gHitRateFwd[i]->Set(0);
+      }
+      gScalerCommonOr->Set(0);
+      gHitRateCommonOr->Set(0);
+      for(int i=0;i<2;i++){
+        gScalerGeOverlap[i]->Set(0);
+        gHitRateGeOverlap[i]->Set(0);
+      }
+      for(int i=0;i<2;i++){
+        gScalerSiRear[i]->Set(0);
+        gHitRateSiRear[i]->Set(0);
+      }
+    }
+  }
+  //
+  void
+  KoaOnlineAnalyzer::DeleteScalerGraphs()
+  {
+    for(int i=0;i<4;i++){
+      if(gScalerRec[i]) delete gScalerRec[i];
+      if(gHitRateRec[i]) delete gHitRateRec[i];
+    }
+    for(int i=0;i<4;i++){
+      if(gScalerFwd[i]) delete gScalerFwd[i];
+      if(gHitRateFwd[i]) delete gHitRateFwd[i];
+    }
+    if(gScalerCommonOr) delete gScalerCommonOr;
+    if(gHitRateCommonOr) delete gHitRateCommonOr;
+    //
+    for(int i=0;i<2;i++){
+      if(gScalerGeOverlap[i]) delete gScalerGeOverlap[i];
+      if(gHitRateGeOverlap[i]) delete gHitRateGeOverlap[i];
+    }
+    for(int i=0;i<2;i++){
+      if(gScalerSiRear[i]) delete gScalerSiRear[i];
+      if(gHitRateSiRear[i]) delete gHitRateSiRear[i];
+    }
   }
   //
   void

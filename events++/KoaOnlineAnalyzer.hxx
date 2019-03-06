@@ -8,6 +8,8 @@
 #include "TH1F.h"
 #include "TH2F.h"
 #include "TMapFile.h"
+#include "TGraph.h"
+#include <ctime>
 
 namespace DecodeUtil{
   class KoaOnlineAnalyzer: public KoaAnalyzer
@@ -28,16 +30,23 @@ namespace DecodeUtil{
     void Reset();
 
   private:
-    // void book_hist();
-    // void delete_hist();
     void Decode(koala_event* koala);
     void InitMapping();
-    void DetectorMapped();
+
     void InitTrees();
     void FillTrees();
+
+    void DetectorMapped();
+
     void InitHistograms();
     void FillHistograms();
     void ResetHistograms();
+    void DeleteHistograms();
+
+    void InitScalerGraphs();
+    void FillScalerGraphs();
+    void ResetScalerGraphs();
+    void DeleteScalerGraphs();
 
   private:
     TMapFile *fMapFile;
@@ -59,7 +68,7 @@ namespace DecodeUtil{
     Int_t     *fPSi1_Amplitude[48];
     Int_t   *fPSi1_Timestamp[48];
     Int_t     *fPSi2_Amplitude[64];
-    Int_t   *fPSi2_Timestamp[64];
+    tInt_t   *fPSi2_Timestamp[64];
     Int_t     *fPGe1_Amplitude[32];
     Int_t   *fPGe1_Timestamp[32];
     Int_t     *fPGe2_Amplitude[32];
@@ -81,6 +90,37 @@ namespace DecodeUtil{
     Float_t   fFwd_Timestamp[8];// unit: ns
     Float_t   fTrig_Timestamp[2];
     
+    // scaler
+    UInt_t  *fScaler;
+    UInt_t  *fScalerDiff;
+    Double_t *fHitRate;
+    time_t  fEmsTimeSecond;
+    UInt_t  fEmsTimeUSecond;
+
+    UInt_t  *fPScalerRec[4];// 0-->Si#1, 2-->Si#2, 3->Ge#1, 4-->Ge#2
+    UInt_t  *fPScalerFwd[4];// 0-->1&2, 1-->3&4, 2-->5&6, 3-->7&8
+    UInt_t  *fPScalerCommonOr;
+    UInt_t  *fPScalerGeOverlap[2];
+    UInt_t  *fPScalerSiRear[2];
+
+    Double_t *fPHitRateRec[4];// 0-->Si#1, 2-->Si#2, 3->Ge#1, 4-->Ge#2
+    Double_t  *fPHitRateFwd[4];// 0-->1&2, 1-->3&4, 2-->5&6, 3-->7&8
+    Double_t  *fPHitRateCommonOr;
+    Double_t  *fPHitRateGeOverlap[2];
+    Double_t  *fPHitRateSiRear[2];
+
+    TGraph  *gScalerRec[4];
+    TGraph  *gScalerFwd[4];
+    TGraph  *gScalerCommonOr;
+    TGraph  *gScalerGeOverlap[2];
+    TGraph  *gScalerSiRear[2];
+
+    TGraph  *gHitRateRec[4];
+    TGraph  *gHitRateFwd[4];
+    TGraph  *gHitRateCommonOr;
+    TGraph  *gHitRateGeOverlap[2];
+    TGraph  *gHitRateSiRear[2];
+
     // objects saved into map file
     TTree    *fSi1Tree;
     TTree    *fSi2Tree;

@@ -4,6 +4,8 @@
 #include "KoaLoguru.hxx"
 #include "decode_util.hxx"
 
+#define TIMESTR "%Y-%m-%d %H:%M:%S %Z"
+
 namespace DecodeUtil
 {
   const char*
