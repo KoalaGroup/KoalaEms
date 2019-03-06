@@ -22,6 +22,8 @@ namespace DecodeUtil{
     void SetMapAddress(Long_t address);
     void SetMapSize(Int_t size);
     void SetMaxEvents(Int_t entries);
+    void SetScalerUpdateInterval(Int_t second);
+    void SetScalerResetInterval(Int_t second);
 
     virtual int Init();
     virtual int Analyze();
@@ -96,7 +98,9 @@ namespace DecodeUtil{
     UInt_t  *fScalerDiff;
     Double_t *fHitRate;
     time_t  fEmsTimeSecond;
-    UInt_t  fEmsTimeUSecond;
+    Long_t  fEmsTimeUSecond;
+    Int_t   fScalerUpdateInterval;// unit: s
+    Int_t   fScalerResetInterval;// unit:s
 
     UInt_t  *fPScalerRec[4];// 0-->Si#1, 2-->Si#2, 3->Ge#1, 4-->Ge#2
     UInt_t  *fPScalerFwd[4];// 0-->1&2, 1-->3&4, 2-->5&6, 3-->7&8

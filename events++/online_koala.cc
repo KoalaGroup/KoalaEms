@@ -10,6 +10,9 @@
 #include <TMapFile.h>
 #include <TTree.h>
 #include "TGraph.h"
+#include "TMultiGraph.h"
+#include "TLegend.h"
+#include <ctime>
 
 using namespace std;
 
@@ -24,6 +27,8 @@ int histplot()
 	gStyle->SetOptStat();
   gStyle->SetTimeOffset(0);
 
+  time_t cur_time=time(nullptr);
+  Double_t xlimit=cur_time;
 	//Create 2 new canvas and 4 pads for each
   // Forward Detector
 	TCanvas *cFwdAmp;
@@ -78,12 +83,30 @@ int histplot()
 	cRecRearAmp->Modified();
 	cRecRearAmp->Update();
   
-	TCanvas *cHitRate;
-	cHitRate = new TCanvas("cHitRate","Hit Rates", 2000,1500, 1600, 800);
-  // cHitRate->Divide(2,2);
-	cHitRate->Draw();
-	cHitRate->Modified();
-	cHitRate->Update();
+	TCanvas *cHitRateFwd;
+	cHitRateFwd = new TCanvas("cHitRateFwd","Forward Hit Rates", 2000,1500, 2000, 800);
+	cHitRateFwd->Draw();
+	cHitRateFwd->Modified();
+	cHitRateFwd->Update();
+
+	TCanvas *cHitRateRec;
+	cHitRateRec = new TCanvas("cHitRateRec","Recoil Hit Rates", 2000,1500, 2000, 800);
+	cHitRateRec->Draw();
+	cHitRateRec->Modified();
+	cHitRateRec->Update();
+
+	TCanvas *cHitRateGeOverlap;
+	cHitRateGeOverlap = new TCanvas("cHitRateGeOverlap","Ge1 & Ge2 Overlapping Hit Rates", 2000,1500, 2000, 800);
+	cHitRateGeOverlap->Draw();
+	cHitRateGeOverlap->Modified();
+	cHitRateGeOverlap->Update();
+
+	TCanvas *cHitRateSiRear;
+	cHitRateSiRear = new TCanvas("cHitRateSiRear","Si1 and Si2 Rear Side Hit Rates", 2000,1500, 2000, 800);
+	cHitRateSiRear->Draw();
+	cHitRateSiRear->Modified();
+	cHitRateSiRear->Update();
+
   ///////////////////////////////////////////
 	TMapFile *mfile = 0;
 	mfile = TMapFile::Create("/var/tmp/koala_online.map");
@@ -122,6 +145,16 @@ int histplot()
   TGraph  *gHitRateCommonOr=nullptr;
   TGraph  *gHitRateGeOverlap[2]={nullptr};
   TGraph  *gHitRateSiRear[2]={nullptr};
+
+  TMultiGraph *gMHitRateFwd = new TMultiGraph();
+  TMultiGraph *gMHitRateRec = new TMultiGraph();
+  TLegend  *legendHitRateFwd=new TLegend(0.1,0.7,0.2,0.9);
+  TLegend  *legendHitRateRec=new TLegend(0.1,0.7,0.2,0.9);
+
+  TMultiGraph *gMHitRateGeOverlap = new TMultiGraph();
+  TMultiGraph *gMHitRateSiRear = new TMultiGraph();
+  TLegend  *legendHitRateGeOverlap=new TLegend(0.1,0.7,0.4,0.9);
+  TLegend  *legendHitRateSiRear=new TLegend(0.1,0.7,0.4,0.9);
 	//loop displaying the histograms, Once the producer stops this script will break out of the loop
 	Double_t oldentries = 0;
 	while(1) 
@@ -166,17 +199,45 @@ int histplot()
     // Graphs
     TString RecName[4]={"Si#1","Si#2","Ge#1","Ge#2"};
     TString FwdName[4]={"Fwd#Out","Fwd#In","Fwd#Up","Fwd#Down"};
+
+    // clean up first
+    legendHitRateFwd->Clear();
+    legendHitRateFwd->SetHeader("Forward Hit Rates");
+    legendHitRateRec->Clear();
+    legendHitRateRec->SetHeader("Recoil Hit Rates");
+    legendHitRateGeOverlap->Clear();
+    legendHitRateGeOverlap->SetHeader("Ge1 & Ge2 Overlap Hit Rates");
+    legendHitRateSiRear->Clear();
+    legendHitRateSiRear->SetHeader("Si1 & Si2 Rear Side Hit Rates");
+
     for(int i=0;i<4;i++){
-      gScalerRec[i]= (TGraph*) mfile->Get(Form("gScalerRec_%d",i+1), gScalerRec[i]);
+      gMHitRateFwd->RecursiveRemove(gHitRateFwd[i]);
+      gMHitRateRec->RecursiveRemove(gHitRateRec[i]);
     }
-    for(int i=0;i<4;i++){
-      gScalerFwd[i]= (TGraph*) mfile->Get(Form("gScalerFwd_%d",i+1), gScalerFwd[i]);
+    gMHitRateFwd->RecursiveRemove(gHitRateCommonOr);
+    // gMHitRateRec->RecursiveRemove(gHitRateCommonOr);
+
+    for(int i=0;i<2;i++){
+      gMHitRateGeOverlap->RecursiveRemove(gHitRateGeOverlap[i]);
+      gMHitRateSiRear->RecursiveRemove(gHitRateSiRear[i]);
     }
+    
+    // get the latest results
     for(int i=0;i<4;i++){
       gHitRateRec[i]= (TGraph*) mfile->Get(Form("gHitRateRec_%d",i+1), gHitRateRec[i]);
-    }
-    for(int i=0;i<4;i++){
       gHitRateFwd[i]= (TGraph*) mfile->Get(Form("gHitRateFwd_%d",i+1), gHitRateFwd[i]);
+
+      gScalerRec[i]= (TGraph*) mfile->Get(Form("gScalerRec_%d",i+1), gScalerRec[i]);
+      gScalerFwd[i]= (TGraph*) mfile->Get(Form("gScalerFwd_%d",i+1), gScalerFwd[i]);
+    }
+    gHitRateCommonOr = (TGraph*) mfile->Get("gHitRateCommonOr", gHitRateCommonOr);
+    gScalerCommonOr = (TGraph*) mfile->Get("gScalerCommonOr", gScalerCommonOr);
+    for(int i=0;i<2;i++){
+      gHitRateGeOverlap[i]= (TGraph*) mfile->Get(Form("gHitRateGeOverlap_%d",i+1), gHitRateGeOverlap[i]);
+      gScalerGeOverlap[i]= (TGraph*) mfile->Get(Form("gScalerGeOverlap_%d",i+1), gScalerGeOverlap[i]);
+
+      gHitRateSiRear[i]= (TGraph*) mfile->Get(Form("gHitRateSiRear_%d",i+1), gHitRateSiRear[i]);
+      gScalerSiRear[i]= (TGraph*) mfile->Get(Form("gScalerSiRear_%d",i+1), gScalerSiRear[i]);
     }
 
     /////////////////////////////////////////
@@ -266,22 +327,82 @@ int histplot()
 		cRecRearAmp->Update();
 
     // Graph
-    cHitRate->cd();
-    gHitRateFwd[0]->SetLineWidth(2);
-    gHitRateFwd[0]->SetLineColor(kBlue);
-    if(gHitRateFwd[0]->GetN()){
-      gHitRateFwd[0]->Draw("AL*");
-      gHitRateFwd[0]->GetXaxis()->SetTimeDisplay(1);
-      gHitRateFwd[0]->GetXaxis()->SetLabelOffset(0.03);
-      gHitRateFwd[0]->GetXaxis()->SetNdivisions(-503);
-      gHitRateFwd[0]->GetXaxis()->SetTimeFormat("#splitline{%H:%M:%S}{%d\/%m}");
+    cHitRateFwd->cd();
+    for(int i=0;i<4;i++){
+      gMHitRateFwd->Add(gHitRateFwd[i],"*L");
+      legendHitRateFwd->AddEntry(gHitRateFwd[i],FwdName[i].Data(),"l");
     }
-		cHitRate->Modified();
-		cHitRate->Update();
+    gMHitRateFwd->Add(gHitRateCommonOr,"*L");
+    legendHitRateFwd->AddEntry(gHitRateCommonOr,"Trigger Rate","l");
+    if(gHitRateFwd[0]->GetN()){
+      gMHitRateFwd->Draw("AL");
+      gPad->Update();
+      // gMHitRateFwd->GetXaxis()->SetLimits(xlimit,xlimit+1000);
+      gMHitRateFwd->GetXaxis()->SetTimeDisplay(1);
+      gMHitRateFwd->GetXaxis()->SetLabelOffset(0.03);
+      gMHitRateFwd->GetXaxis()->SetNdivisions(-503);
+      gMHitRateFwd->GetXaxis()->SetTimeFormat("#splitline{%H:%M:%S}{%d\/%m}");
+    }
+    legendHitRateFwd->Draw();
+    // cHitRateFwd->BuildLegend();
+		cHitRateFwd->Modified();
+		cHitRateFwd->Update();
+    
+    cHitRateRec->cd();
+    for(int i=0;i<4;i++){
+      gMHitRateRec->Add(gHitRateRec[i],"*L");
+      legendHitRateRec->AddEntry(gHitRateRec[i],RecName[i].Data(),"l");
+    }
+    // gMHitRateRec->Add(gHitRateCommonOr,"*L");
+    // legendHitRateRec->AddEntry(gHitRateCommonOr,"Trigger Rate","l");
+    if(gHitRateRec[0]->GetN()){
+      gMHitRateRec->Draw("AL");
+      gPad->Update();
+      gMHitRateRec->GetXaxis()->SetTimeDisplay(1);
+      gMHitRateRec->GetXaxis()->SetLabelOffset(0.03);
+      gMHitRateRec->GetXaxis()->SetNdivisions(-503);
+      gMHitRateRec->GetXaxis()->SetTimeFormat("#splitline{%H:%M:%S}{%d\/%m}");
+    }
+    legendHitRateRec->Draw();
+		cHitRateRec->Modified();
+		cHitRateRec->Update();
+
+    cHitRateGeOverlap->cd();
+    for(int i=0;i<2;i++){
+      gMHitRateGeOverlap->Add(gHitRateGeOverlap[i],"*L");
+      legendHitRateGeOverlap->AddEntry(gHitRateGeOverlap[i],RecName[i+2].Data(),"l");
+    }
+    if(gHitRateGeOverlap[0]->GetN()){
+      gMHitRateGeOverlap->Draw("AL");
+      gPad->Update();
+      gMHitRateGeOverlap->GetXaxis()->SetTimeDisplay(1);
+      gMHitRateGeOverlap->GetXaxis()->SetLabelOffset(0.03);
+      gMHitRateGeOverlap->GetXaxis()->SetNdivisions(-503);
+      gMHitRateGeOverlap->GetXaxis()->SetTimeFormat("#splitline{%H:%M:%S}{%d\/%m}");
+    }
+    legendHitRateGeOverlap->Draw();
+		cHitRateGeOverlap->Modified();
+		cHitRateGeOverlap->Update();
+
+    cHitRateSiRear->cd();
+    for(int i=0;i<2;i++){
+      gMHitRateSiRear->Add(gHitRateSiRear[i],"*L");
+      legendHitRateSiRear->AddEntry(gHitRateSiRear[i],RecName[i].Data(),"l");
+    }
+    if(gHitRateSiRear[0]->GetN()){
+      gMHitRateSiRear->Draw("AL");
+      gPad->Update();
+      gMHitRateSiRear->GetXaxis()->SetTimeDisplay(1);
+      gMHitRateSiRear->GetXaxis()->SetLabelOffset(0.03);
+      gMHitRateSiRear->GetXaxis()->SetNdivisions(-503);
+      gMHitRateSiRear->GetXaxis()->SetTimeFormat("#splitline{%H:%M:%S}{%d\/%m}");
+    }
+    legendHitRateSiRear->Draw();
+		cHitRateSiRear->Modified();
+		cHitRateSiRear->Update();
     //
 		gSystem->Sleep(50);
 		if(gSystem->ProcessEvents()) break; //Giving the interrup flag
-
 	}
 
 	return 0;
