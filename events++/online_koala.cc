@@ -9,6 +9,7 @@
 #include <iostream>
 #include <TMapFile.h>
 #include <TTree.h>
+#include "TGraph.h"
 
 using namespace std;
 
@@ -21,6 +22,7 @@ int histplot()
 	gStyle->SetCanvasBorderMode(1);
 	gStyle->SetCanvasColor(10);
 	gStyle->SetOptStat();
+  gStyle->SetTimeOffset(0);
 
 	//Create 2 new canvas and 4 pads for each
   // Forward Detector
@@ -76,12 +78,12 @@ int histplot()
 	cRecRearAmp->Modified();
 	cRecRearAmp->Update();
   
-	// TCanvas *c2RecRearAmpVsTime;
-	// cRecRearAmp = new TCanvas("cRecRearAmp","Recoil RearSide Amplitudes", 2000,1500, 800, 800);
-  // cRecRearAmp->Divide(2,2);
-	// cRecRearAmp->Draw();
-	// cRecRearAmp->Modified();
-	// cRecRearAmp->Update();
+	TCanvas *cHitRate;
+	cHitRate = new TCanvas("cHitRate","Hit Rates", 2000,1500, 1600, 800);
+  // cHitRate->Divide(2,2);
+	cHitRate->Draw();
+	cHitRate->Modified();
+	cHitRate->Update();
   ///////////////////////////////////////////
 	TMapFile *mfile = 0;
 	mfile = TMapFile::Create("/var/tmp/koala_online.map");
@@ -109,6 +111,17 @@ int histplot()
   TH1F     *hGe1RearAmp=nullptr;
   TH1F     *hGe2RearAmp=nullptr;
 
+  TGraph  *gScalerRec[4]={nullptr};
+  TGraph  *gScalerFwd[4]={nullptr};
+  TGraph  *gScalerCommonOr=nullptr;
+  TGraph  *gScalerGeOverlap[2]={nullptr};
+  TGraph  *gScalerSiRear[2]={nullptr};
+
+  TGraph  *gHitRateRec[4]={nullptr};
+  TGraph  *gHitRateFwd[4]={nullptr};
+  TGraph  *gHitRateCommonOr=nullptr;
+  TGraph  *gHitRateGeOverlap[2]={nullptr};
+  TGraph  *gHitRateSiRear[2]={nullptr};
 	//loop displaying the histograms, Once the producer stops this script will break out of the loop
 	Double_t oldentries = 0;
 	while(1) 
@@ -149,6 +162,22 @@ int histplot()
     hSi2RearAmp = (TH1F*) mfile->Get("hSi2RearAmp", hSi2RearAmp);
     hGe1RearAmp = (TH1F*) mfile->Get("hGe1RearAmp", hGe1RearAmp);
     hGe2RearAmp = (TH1F*) mfile->Get("hGe2RearAmp", hGe2RearAmp);
+
+    // Graphs
+    TString RecName[4]={"Si#1","Si#2","Ge#1","Ge#2"};
+    TString FwdName[4]={"Fwd#Out","Fwd#In","Fwd#Up","Fwd#Down"};
+    for(int i=0;i<4;i++){
+      gScalerRec[i]= (TGraph*) mfile->Get(Form("gScalerRec_%d",i+1), gScalerRec[i]);
+    }
+    for(int i=0;i<4;i++){
+      gScalerFwd[i]= (TGraph*) mfile->Get(Form("gScalerFwd_%d",i+1), gScalerFwd[i]);
+    }
+    for(int i=0;i<4;i++){
+      gHitRateRec[i]= (TGraph*) mfile->Get(Form("gHitRateRec_%d",i+1), gHitRateRec[i]);
+    }
+    for(int i=0;i<4;i++){
+      gHitRateFwd[i]= (TGraph*) mfile->Get(Form("gHitRateFwd_%d",i+1), gHitRateFwd[i]);
+    }
 
     /////////////////////////////////////////
 		cout<<" --- - ---"<<endl;
@@ -236,6 +265,19 @@ int histplot()
 		cRecRearAmp->Modified();
 		cRecRearAmp->Update();
 
+    // Graph
+    cHitRate->cd();
+    gHitRateFwd[0]->SetLineWidth(2);
+    gHitRateFwd[0]->SetLineColor(kBlue);
+    if(gHitRateFwd[0]->GetN()){
+      gHitRateFwd[0]->Draw("AL*");
+      gHitRateFwd[0]->GetXaxis()->SetTimeDisplay(1);
+      gHitRateFwd[0]->GetXaxis()->SetLabelOffset(0.03);
+      gHitRateFwd[0]->GetXaxis()->SetNdivisions(-503);
+      gHitRateFwd[0]->GetXaxis()->SetTimeFormat("#splitline{%H:%M:%S}{%d\/%m}");
+    }
+		cHitRate->Modified();
+		cHitRate->Update();
     //
 		gSystem->Sleep(50);
 		if(gSystem->ProcessEvents()) break; //Giving the interrup flag

@@ -15,7 +15,7 @@ namespace DecodeUtil{
   class KoaOnlineAnalyzer: public KoaAnalyzer
   {
   public:
-    KoaOnlineAnalyzer(const char* dir="/var/tmp",Long_t address=0x7fd3b6ad9000, Int_t size=1e8, Int_t entries=100000);
+    KoaOnlineAnalyzer(const char* dir="/var/tmp",Long_t address=0x7fd3b6ad9000, Int_t size=1e9, Int_t entries=100000);
     virtual ~KoaOnlineAnalyzer();
 
     void SetDirectory(const char* dir);
@@ -53,7 +53,8 @@ namespace DecodeUtil{
     Long_t    fMapAddress;
     Int_t     fMapSize;
     TString   fFileName;
-    Long_t    fCounter;
+    Long_t    fKoalaCounter;
+    Long_t    fEmsCounter;
     Int_t     fMaxEvents;
 
     // electronics mapped
@@ -68,7 +69,7 @@ namespace DecodeUtil{
     Int_t     *fPSi1_Amplitude[48];
     Int_t   *fPSi1_Timestamp[48];
     Int_t     *fPSi2_Amplitude[64];
-    tInt_t   *fPSi2_Timestamp[64];
+    Int_t   *fPSi2_Timestamp[64];
     Int_t     *fPGe1_Amplitude[32];
     Int_t   *fPGe1_Timestamp[32];
     Int_t     *fPGe2_Amplitude[32];

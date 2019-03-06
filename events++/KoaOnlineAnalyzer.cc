@@ -16,6 +16,9 @@ namespace DecodeUtil
   KoaOnlineAnalyzer::KoaOnlineAnalyzer(const char* dir, Long_t address, Int_t size, Int_t entries) : fMapAddress(address), fMapSize(size), fMaxEvents(entries)
   {
     SetDirectory(dir);
+    fEmsTimeSecond=time(0);
+    fKoalaCounter=0;
+    fEmsCounter=0;
   }
   //
   KoaOnlineAnalyzer::~KoaOnlineAnalyzer()
@@ -84,9 +87,6 @@ namespace DecodeUtil
   int
   KoaOnlineAnalyzer::Analyze()
   {
-    if(fCounter==0){
-          
-    }
     // process koala event
     koala_event* koala_cur=nullptr;
     while(koala_cur=fKoalaPrivate->drop_event()){
@@ -100,24 +100,33 @@ namespace DecodeUtil
       FillHistograms();
 
       // update mapfile
-      fCounter++;
-      if(fCounter%100==0){
+      fKoalaCounter++;
+      if(fKoalaCounter%100==0){
         fMapFile->Update();
       }
-      if(fCounter%fMaxEvents==0)
+      if(fKoalaCounter%fMaxEvents==0)
         Reset();
     }
 
     //
     ems_event* ems_cur=nullptr;
-    time_t cur_time;
+    time_t cur_time_second;
+    UInt_t cur_time_usecond;
     double diff_time;
     while(ems_cur=fEmsPrivate->drop_event()){
       if(ems_cur->tv_valid && ems_cur->scaler_valid){
-        cur_time=ems_cur->tv.tv_sec;
-        diff_time=difftime(cur_time,fEmsTimeSecond);
-        if(diff_time<5) break;
+        cur_time_second=ems_cur->tv.tv_sec;
+        cur_time_usecond=ems_cur->tv.tv_usec;
+        // diff_time=difftime(cur_time,fEmsTimeSecond);
+        diff_time = cur_time_second - fEmsTimeSecond;
+        if(diff_time<2) break;
 
+        if(cur_time_usecond<fEmsTimeUSecond){
+          diff_time += (cur_time_usecond-fEmsTimeUSecond+1e6)*1e-6;
+        }
+        else{
+          diff_time += (cur_time_usecond-fEmsTimeUSecond)*1e-6;
+        }
         for(int i=0;i<34;i++){
           fScalerDiff[i]=ems_cur->scaler[i]-fScaler[i];
           fScaler[i]=ems_cur->scaler[i];
@@ -126,7 +135,10 @@ namespace DecodeUtil
         fEmsTimeSecond=ems_cur->tv.tv_sec;
         fEmsTimeUSecond=ems_cur->tv.tv_usec;
         //
-        FillScaler();
+        if(fEmsCounter)
+          FillScalerGraphs();
+        //
+        fEmsCounter++;
       }
       //
       ems_cur->recycle();
@@ -153,8 +165,8 @@ namespace DecodeUtil
   void
   KoaOnlineAnalyzer::Reset()
   {
-    // fCounter=0;
     ResetHistograms();
+    ResetScalerGraphs();
   }
   //
   void
@@ -333,8 +345,8 @@ namespace DecodeUtil
     }
     // Si1 Si2 Rear Side
     for(int i=0;i<2;i++){
-      fPScalerSiRear=fScaler+24+i;
-      fPHitRateSiRear=fHitRate+24+i;
+      fPScalerSiRear[i]=fScaler+24+i;
+      fPHitRateSiRear[i]=fHitRate+24+i;
     }
   }
   //
@@ -646,41 +658,51 @@ namespace DecodeUtil
     for(int i=0;i<4;i++){
       gScalerRec[i] = new TGraph();
       gScalerRec[i]->SetNameTitle(Form("gScalerRec_%d",i+1),Form("%s : Scaler Counts",RecName[i].Data()));
+      fMapFile->Add(gScalerRec[i]);
     }
     for(int i=0;i<4;i++){
       gScalerFwd[i] = new TGraph();
       gScalerFwd[i]->SetNameTitle(Form("gScalerFwd_%d",i+1),Form("%s : Scaler Counts",FwdName[i].Data()));
+      fMapFile->Add(gScalerFwd[i]);
     }
     gScalerCommonOr = new TGraph();
     gScalerCommonOr->SetNameTitle("gScalerCommonOr","Trigger Scaler Counts");
+    fMapFile->Add(gScalerCommonOr);
     //
     for(int i=0;i<2;i++){
       gScalerGeOverlap[i] = new TGraph();
       gScalerGeOverlap[i]->SetNameTitle(Form("gScalerGeOverlap_%d",i+1),Form("%s OverlapArea (5 strips): Scaler Counts",RecName[i+2].Data()));
+      fMapFile->Add(gScalerGeOverlap[i]);
     }
     for(int i=0;i<2;i++){
       gScalerSiRear[i] = new TGraph();
       gScalerSiRear[i]->SetNameTitle(Form("gScalerSiRear_%d",i+1),Form("%s RearSide: Scaler Counts",RecName[i].Data()));
+      fMapFile->Add(gScalerSiRear[i]);
     }
     //
     for(int i=0;i<4;i++){
       gHitRateRec[i] = new TGraph();
       gHitRateRec[i]->SetNameTitle(Form("gHitRateRec_%d",i+1),Form("%s : Hit Rate",RecName[i].Data()));
+      fMapFile->Add(gHitRateRec[i]);
     }
     for(int i=0;i<4;i++){
       gHitRateFwd[i] = new TGraph();
       gHitRateFwd[i]->SetNameTitle(Form("gHitRateFwd_%d",i+1),Form("%s : Hit Rate",FwdName[i].Data()));
+      fMapFile->Add(gHitRateFwd[i]);
     }
     gHitRateCommonOr = new TGraph();
     gHitRateCommonOr->SetNameTitle("gHitRateCommonOr","Trigger Rate");
+    fMapFile->Add(gHitRateCommonOr);
     //
     for(int i=0;i<2;i++){
       gHitRateGeOverlap[i] = new TGraph();
       gHitRateGeOverlap[i]->SetNameTitle(Form("gHitRateGeOverlap_%d",i+1),Form("%s OverlapArea (5 strips): Hit Rate",RecName[i+2].Data()));
+      fMapFile->Add(gHitRateGeOverlap[i]);
     }
     for(int i=0;i<2;i++){
       gHitRateSiRear[i] = new TGraph();
       gHitRateSiRear[i]->SetNameTitle(Form("gHitRateSiRear_%d",i+1),Form("%s RearSide: Hit Rate",RecName[i].Data()));
+      fMapFile->Add(gHitRateSiRear[i]);
     }
   }
   //
@@ -697,7 +719,7 @@ namespace DecodeUtil
     }
     //
     for(int i=0;i<4;i++){
-      npoints=gFwdHits[i]->GetN();
+      npoints=gScalerFwd[i]->GetN();
       gScalerFwd[i]->SetPoint(npoints,fEmsTimeSecond,*fPScalerFwd[i]);
       npoints=gHitRateFwd[i]->GetN();
       gHitRateFwd[i]->SetPoint(npoints,fEmsTimeSecond,*fPHitRateFwd[i]);
