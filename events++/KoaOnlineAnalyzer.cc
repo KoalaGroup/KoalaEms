@@ -21,6 +21,7 @@ namespace DecodeUtil
     fEmsCounter=0;
     fScalerResetInterval=1000;
     fScalerUpdateInterval=2;
+    fEventNr = 0;
   }
   //
   KoaOnlineAnalyzer::~KoaOnlineAnalyzer()
@@ -128,15 +129,17 @@ namespace DecodeUtil
     time_t cur_time_second;
     Long_t cur_time_usecond;
     double diff_time;
+    UInt_t cur_events;
     while(ems_cur=fEmsPrivate->drop_event()){
       if(ems_cur->tv_valid && ems_cur->scaler_valid){
         cur_time_second=ems_cur->tv.tv_sec;
         diff_time=difftime(cur_time_second,fEmsTimeSecond);
+        diff_time += (cur_time_usecond-fEmsTimeUSecond)*1e-6;
+
         if(diff_time<fScalerUpdateInterval) break;
 
         cur_time_usecond=ems_cur->tv.tv_usec;
-        diff_time += (cur_time_usecond-fEmsTimeUSecond)*1e-6;
-
+        cur_events=fKoalaPrivate->get_statist_events();
         for(int i=0;i<34;i++){
           fScalerDiff[i]=ems_cur->scaler[i]-fScaler[i];
           fScaler[i]=ems_cur->scaler[i];
@@ -144,6 +147,9 @@ namespace DecodeUtil
         }
         fEmsTimeSecond=cur_time_second;
         fEmsTimeUSecond=cur_time_usecond;
+        fEventRate=(cur_events-fEventNr)/diff_time;
+        fDaqEfficiency=(cur_events-fEventNr)/(Double_t)fScalerDiff[4];
+        fEventNr=cur_events;
         //
         if(fEmsCounter)
           FillScalerGraphs();
@@ -153,6 +159,7 @@ namespace DecodeUtil
       //
       ems_cur->recycle();
     }
+
     return 0;
   }
   //
@@ -745,6 +752,27 @@ namespace DecodeUtil
       gHitRateSiRear[i]->SetMarkerColor(1+i);
       fMapFile->Add(gHitRateSiRear[i]);
     }
+    //
+    gEventNr = new TGraph();
+    gEventNr->SetNameTitle("gEventNr","Total Events Accepted by DAQ");
+    gEventNr->SetLineWidth(2);
+    gEventNr->SetLineColor(9);
+    gEventNr->SetMarkerColor(9);
+    fMapFile->Add(gEventNr);
+
+    gEventRate = new TGraph();
+    gEventRate->SetNameTitle("gEventRate","DAQ Event Rates");
+    gEventRate->SetLineWidth(2);
+    gEventRate->SetLineColor(9);
+    gEventRate->SetMarkerColor(9);
+    fMapFile->Add(gEventRate);
+
+    gDaqEfficiency = new TGraph();
+    gDaqEfficiency->SetNameTitle("gDaqEfficiency","DAQ Efficiency");
+    gDaqEfficiency->SetLineWidth(2);
+    gDaqEfficiency->SetLineColor(9);
+    gDaqEfficiency->SetMarkerColor(9);
+    fMapFile->Add(gDaqEfficiency);
   }
   //
   void
@@ -784,6 +812,15 @@ namespace DecodeUtil
       npoints=gHitRateSiRear[i]->GetN();
       gHitRateSiRear[i]->SetPoint(npoints,fEmsTimeSecond,*fPHitRateSiRear[i]);
     }
+    //
+    npoints=gEventNr->GetN();
+    gEventNr->SetPoint(npoints,fEmsTimeSecond,fEventNr);
+
+    npoints=gEventRate->GetN();
+    gEventRate->SetPoint(npoints,fEmsTimeSecond,fEventRate);
+
+    npoints=gDaqEfficiency->GetN();
+    gDaqEfficiency->SetPoint(npoints,fEmsTimeSecond,fDaqEfficiency);
   }
   //
   void
@@ -810,6 +847,10 @@ namespace DecodeUtil
         gScalerSiRear[i]->Set(0);
         gHitRateSiRear[i]->Set(0);
       }
+
+      gEventRate->Set(0);
+      gEventNr->Set(0);
+      gDaqEfficiency->Set(0);
     }
   }
   //
@@ -835,6 +876,10 @@ namespace DecodeUtil
       if(gScalerSiRear[i]) delete gScalerSiRear[i];
       if(gHitRateSiRear[i]) delete gHitRateSiRear[i];
     }
+
+    if(gEventNr) delete gEventNr;
+    if(gEventRate) delete gEventRate;
+    if(gDaqEfficiency) delete gDaqEfficiency;
   }
   //
   void

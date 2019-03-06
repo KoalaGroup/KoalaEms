@@ -107,6 +107,12 @@ int histplot()
 	cHitRateSiRear->Modified();
 	cHitRateSiRear->Update();
 
+	TCanvas *cDaqEfficiency;
+	cDaqEfficiency = new TCanvas("cDaqEfficiency","DAQ Efficiency", 2000,1500, 2000, 800);
+	cDaqEfficiency->Draw();
+	cDaqEfficiency->Modified();
+	cDaqEfficiency->Update();
+
   ///////////////////////////////////////////
 	TMapFile *mfile = 0;
 	mfile = TMapFile::Create("/var/tmp/koala_online.map");
@@ -146,6 +152,10 @@ int histplot()
   TGraph  *gHitRateGeOverlap[2]={nullptr};
   TGraph  *gHitRateSiRear[2]={nullptr};
 
+  TGraph  *gEventNr=nullptr;
+  TGraph  *gEventRate=nullptr;
+  TGraph  *gDaqEfficiency=nullptr;
+  
   TMultiGraph *gMHitRateFwd = new TMultiGraph();
   TMultiGraph *gMHitRateRec = new TMultiGraph();
   TLegend  *legendHitRateFwd=new TLegend(0.1,0.7,0.2,0.9);
@@ -216,6 +226,8 @@ int histplot()
     }
     gMHitRateFwd->RecursiveRemove(gHitRateCommonOr);
     // gMHitRateRec->RecursiveRemove(gHitRateCommonOr);
+    gMHitRateFwd->RecursiveRemove(gEventRate);
+    gMHitRateRec->RecursiveRemove(gEventRate);
 
     for(int i=0;i<2;i++){
       gMHitRateGeOverlap->RecursiveRemove(gHitRateGeOverlap[i]);
@@ -239,6 +251,10 @@ int histplot()
       gHitRateSiRear[i]= (TGraph*) mfile->Get(Form("gHitRateSiRear_%d",i+1), gHitRateSiRear[i]);
       gScalerSiRear[i]= (TGraph*) mfile->Get(Form("gScalerSiRear_%d",i+1), gScalerSiRear[i]);
     }
+
+    gEventRate = (TGraph*) mfile->Get("gEventRate", gEventRate);
+    gEventNr = (TGraph*) mfile->Get("gEventNr", gEventNr);
+    gDaqEfficiency = (TGraph*) mfile->Get("gDaqEfficiency", gDaqEfficiency);
 
     /////////////////////////////////////////
 		cout<<" --- - ---"<<endl;
@@ -334,6 +350,8 @@ int histplot()
     }
     gMHitRateFwd->Add(gHitRateCommonOr,"*L");
     legendHitRateFwd->AddEntry(gHitRateCommonOr,"Trigger Rate","l");
+    gMHitRateFwd->Add(gEventRate,"*L");
+    legendHitRateFwd->AddEntry(gEventRate,"DAQ Event Rate","l");
     if(gHitRateFwd[0]->GetN()){
       gMHitRateFwd->Draw("AL");
       gPad->Update();
@@ -355,6 +373,8 @@ int histplot()
     }
     // gMHitRateRec->Add(gHitRateCommonOr,"*L");
     // legendHitRateRec->AddEntry(gHitRateCommonOr,"Trigger Rate","l");
+    gMHitRateRec->Add(gEventRate,"*L");
+    legendHitRateRec->AddEntry(gEventRate,"DAQ Event Rate","l");
     if(gHitRateRec[0]->GetN()){
       gMHitRateRec->Draw("AL");
       gPad->Update();
@@ -400,6 +420,17 @@ int histplot()
     legendHitRateSiRear->Draw();
 		cHitRateSiRear->Modified();
 		cHitRateSiRear->Update();
+
+    cDaqEfficiency->cd();
+    gDaqEfficiency->Draw("A*L");
+    gPad->Update();
+    gDaqEfficiency->GetXaxis()->SetTimeDisplay(1);
+    gDaqEfficiency->GetXaxis()->SetLabelOffset(0.03);
+    gDaqEfficiency->GetXaxis()->SetNdivisions(-503);
+    gDaqEfficiency->GetXaxis()->SetTimeFormat("#splitline{%H:%M:%S}{%d\/%m}");
+		cDaqEfficiency->Modified();
+		cDaqEfficiency->Update();
+
     //
 		gSystem->Sleep(50);
 		if(gSystem->ProcessEvents()) break; //Giving the interrup flag
