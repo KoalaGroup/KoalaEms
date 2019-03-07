@@ -95,6 +95,7 @@ LIBSOURCES := mxdc32_data.cc koala_data.cc ems_data.cc \
 							KoaParsers.cc decode_util.cc KoaDecoder.cc \
 							KoaRawData.cc KoaAnalyzer.cc  KoaSimpleAnalyzer.cc KoaAssembler.cc \
 						  KoaOnlineAnalyzer.cc \
+						  KoaTimestampAssembler.cc \
 							KoaLoguru.cc
 LIBOBJS := $(LIBSOURCES:.cc=.o)
 LIBS    := libutils.$(SELFVER)$(LIBSUFFIX)

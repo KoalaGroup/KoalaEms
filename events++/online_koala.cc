@@ -327,10 +327,10 @@ int histplot()
 		cRecTime->Update();
 
     // Recoil Hits
-    cRecHits->cd(1); hSi2Hits->Draw("colz");
-    cRecHits->cd(2); hGe2Hits->Draw("colz");
-    cRecHits->cd(3); hSi1Hits->Draw("colz");
-    cRecHits->cd(4); hGe1Hits->Draw("colz");
+    cRecHits->cd(1); gPad->SetLogz(); hSi2Hits->Draw("colz");
+    cRecHits->cd(2); gPad->SetLogz(); hGe2Hits->Draw("colz");
+    cRecHits->cd(3); gPad->SetLogz(); hSi1Hits->Draw("colz");
+    cRecHits->cd(4); gPad->SetLogz(); hGe1Hits->Draw("colz");
 		cRecHits->Modified();
 		cRecHits->Update();
 

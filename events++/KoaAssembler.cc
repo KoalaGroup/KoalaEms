@@ -1,5 +1,4 @@
 #include "KoaAssembler.hxx"
-#include "KoaLoguru.hxx"
 #include "global.hxx"
 
 namespace DecodeUtil
@@ -7,9 +6,6 @@ namespace DecodeUtil
   int
   KoaAssembler::Assemble()
   {
-    CHECK_NOTNULL_F(fKoalaPrivate,"Set Koala Event Private List first!");
-    CHECK_NOTNULL_F(fEmsPrivate,"Set Ems Event Private List first!");
-    CHECK_NOTNULL_F(fMxdc32Private,"Set Mxdc32 Event Private List first!");
     //
     bool notfull=false;
     mxdc32_event *event=nullptr;
