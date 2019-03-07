@@ -16,11 +16,13 @@ namespace DecodeUtil
     {
       fCurrentTS = new int64_t[nr_mesymodules];
       fEventBuffer = new mxdc32_event*[nr_mesymodules];
+      fUnsyncStat = new uint32_t[nr_mesymodules]();
     }
 
     virtual ~KoaTimestampAssembler()
     {
       if(fCurrentTS) delete fCurrentTS;
+      if(fUnsyncStat) delete fUnsyncStat;
     }
 
     void SetRefModuleIndex(int index){
@@ -35,6 +37,7 @@ namespace DecodeUtil
 
   public:
     int  Assemble();
+    void Print();
 
   private:
     bool  IsSameTS(int64_t first, int64_t second);
@@ -51,7 +54,7 @@ namespace DecodeUtil
     int64_t  *fCurrentTS;
     std::vector<int>  fToBeCheckedList;
     mxdc32_event **fEventBuffer;
-
+    uint32_t *fUnsyncStat;
   };
 }
 

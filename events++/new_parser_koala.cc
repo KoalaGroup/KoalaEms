@@ -15,6 +15,7 @@
 #include "KoaDecoder.hxx"
 #include "KoaAssembler.hxx"
 #include "KoaSimpleAnalyzer.hxx"
+#include "KoaTimestampAssembler.hxx"
 
 using namespace std;
 using namespace DecodeUtil;
@@ -151,7 +152,9 @@ parse_file(int p)
   decoder->SetParsers(ISes);
 
   //
-  KoaAssembler* assembler=new KoaAssembler();
+  // KoaAssembler* assembler=new KoaAssembler();
+  KoaTimestampAssembler* assembler=new KoaTimestampAssembler();
+  assembler->SetQdcMaxDiff(max_tsdiff);
   decoder->SetAssembler(assembler);
 
   //

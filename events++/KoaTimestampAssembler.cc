@@ -65,6 +65,7 @@ namespace DecodeUtil
         if(!IsSameTS(fCurrentTS[i],fCurrentTS[fRefModuleIndex])){
           fToBeCheckedList.push_back(i);
           fEventBuffer[i]->recycle();
+          fUnsyncStat[i]++;
         }
       }
     }
@@ -104,6 +105,7 @@ namespace DecodeUtil
         }
         else{
           fEventBuffer[index]->recycle();
+          fUnsyncStat[index]++;
         }
       }
       //
@@ -118,5 +120,15 @@ namespace DecodeUtil
       return false;
     }
     return true;
+}
+void
+KoaTimestampAssembler::Print()
+{
+  printf("############################################\n");
+  printf("Unsync events:\n");
+  for(int i=0;i<nr_mesymodules;i++){
+    printf("%ld\t",fUnsyncStat[i]);
+  }
+  printf("\n");
 }
 }
