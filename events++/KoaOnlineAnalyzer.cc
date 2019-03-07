@@ -143,25 +143,25 @@ namespace DecodeUtil
           for(int i=0;i<4;i++){
             for(int j=0;j<nr;j++){
               npoints=gHitRateRec[i]->GetN();
-              gHitRateRec[i]->SetPoint(npoints,cur_time_second-(j+1)*5,0);
+              gHitRateRec[i]->SetPoint(npoints,cur_time_second-(nr-j)*5,0);
             }
             for(int j=0;j<nr;j++){
               npoints=gHitRateFwd[i]->GetN();
-              gHitRateFwd[i]->SetPoint(npoints,cur_time_second-(j+1)*5,0);
+              gHitRateFwd[i]->SetPoint(npoints,cur_time_second-(nr-j)*5,0);
             }
           }
           for(int j=0;j<nr;j++){
             npoints=gHitRateCommonOr->GetN();
-            gHitRateCommonOr->SetPoint(npoints,cur_time_second-(j+1)*5,0);
+            gHitRateCommonOr->SetPoint(npoints,cur_time_second-(nr-j)*5,0);
             npoints=gEventRate->GetN();
-            gEventRate->SetPoint(npoints,cur_time_second-(j+1)*5,0);
+            gEventRate->SetPoint(npoints,cur_time_second-(nr-j)*5,0);
           }
           for(int i=0;i<2;i++){
             for(int j=0;j<nr;j++){
               npoints=gHitRateGeOverlap[i]->GetN();
-              gHitRateGeOverlap[i]->SetPoint(npoints,cur_time_second-(j+1)*5,0);
+              gHitRateGeOverlap[i]->SetPoint(npoints,cur_time_second-(nr-j)*5,0);
               npoints=gHitRateSiRear[i]->GetN();
-              gHitRateSiRear[i]->SetPoint(npoints,cur_time_second-(j+1)*5,0);
+              gHitRateSiRear[i]->SetPoint(npoints,cur_time_second-(nr-j)*5,0);
             }
           }
           
