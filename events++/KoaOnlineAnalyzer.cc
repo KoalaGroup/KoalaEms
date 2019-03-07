@@ -138,7 +138,8 @@ namespace DecodeUtil
         if(diff_time<fScalerUpdateInterval) break;
 
         if(diff_time>30){
-          int nr=difftime/5;
+          int nr=diff_time/5.0;
+          Int_t npoints;
           for(int i=0;i<4;i++){
             for(int j=0;j<nr;j++){
               npoints=gHitRateRec[i]->GetN();
