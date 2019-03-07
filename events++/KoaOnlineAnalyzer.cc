@@ -136,9 +136,38 @@ namespace DecodeUtil
         diff_time=difftime(cur_time_second,fEmsTimeSecond);
 
         if(diff_time<fScalerUpdateInterval) break;
-        diff_time += (cur_time_usecond-fEmsTimeUSecond)*1e-6;
+
+        if(diff_time>30){
+          int nr=difftime/5;
+          for(int i=0;i<4;i++){
+            for(int j=0;j<nr;j++){
+              npoints=gHitRateRec[i]->GetN();
+              gHitRateRec[i]->SetPoint(npoints,cur_time_second-(j+1)*5,0);
+            }
+            for(int j=0;j<nr;j++){
+              npoints=gHitRateFwd[i]->GetN();
+              gHitRateFwd[i]->SetPoint(npoints,cur_time_second-(j+1)*5,0);
+            }
+          }
+          for(int j=0;j<nr;j++){
+            npoints=gHitRateCommonOr->GetN();
+            gHitRateCommonOr->SetPoint(npoints,cur_time_second-(j+1)*5,0);
+            npoints=gEventRate->GetN();
+            gEventRate->SetPoint(npoints,cur_time_second-(j+1)*5,0);
+          }
+          for(int i=0;i<2;i++){
+            for(int j=0;j<nr;j++){
+              npoints=gHitRateGeOverlap[i]->GetN();
+              gHitRateGeOverlap[i]->SetPoint(npoints,cur_time_second-(j+1)*5,0);
+              npoints=gHitRateSiRear[i]->GetN();
+              gHitRateSiRear[i]->SetPoint(npoints,cur_time_second-(j+1)*5,0);
+            }
+          }
+          
+        }
 
         cur_time_usecond=ems_cur->tv.tv_usec;
+        diff_time += (cur_time_usecond-fEmsTimeUSecond)*1e-6;
         cur_events=fKoalaPrivate->get_statist_events();
         for(int i=0;i<34;i++){
           fScalerDiff[i]=ems_cur->scaler[i]-fScaler[i];
