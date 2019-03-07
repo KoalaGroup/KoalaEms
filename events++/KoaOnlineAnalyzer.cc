@@ -120,8 +120,6 @@ namespace DecodeUtil
       if(fKoalaCounter%100==0){
         fMapFile->Update();
       }
-      if(fKoalaCounter%fMaxEvents==0)
-        Reset();
     }
 
     //
@@ -190,6 +188,8 @@ namespace DecodeUtil
       ems_cur->recycle();
     }
 
+    //
+    Reset();
     return 0;
   }
   //
@@ -626,41 +626,45 @@ namespace DecodeUtil
   void
   KoaOnlineAnalyzer::ResetHistograms()
   {
-    // Forward Detector
-    for(int i=0;i<8;i++){
-      hFwdTime[i]->Reset();
-      hFwdAmp[i]->Reset();
-    }
-    // Trigger timestamp
-    for(int i=0;i<2;i++){
-      hTrigTime[i]->Reset();
-    }
-    // Recoil Timestamp
-    // for(int i=0;i<32;i++){
-    //   hSi1Time[i]->Reset();
-    // }
-    // for(int i=0;i<24;i++){
-    //   hSi2Time[i]->Reset();
-    // }
-    // hRecTime->Reset();
-    for(int i=0;i<2;i++){
-      // hRecRearTime[i]->Reset();
-    }
-    // Recoil Hits
-    hSi1Hits->Reset();
-    hSi2Hits->Reset();
-    hGe1Hits->Reset();
-    hGe2Hits->Reset();
-    // Recoil Rear Amplitude
-    hSi1RearAmp->Reset();
-    hSi2RearAmp->Reset();
-    hGe1RearAmp->Reset();
-    hGe2RearAmp->Reset();
+    if(fKoalaCounter==fMaxEvents){
+      // Forward Detector
+      for(int i=0;i<8;i++){
+        hFwdTime[i]->Reset();
+        hFwdAmp[i]->Reset();
+      }
+      // Trigger timestamp
+      for(int i=0;i<2;i++){
+        hTrigTime[i]->Reset();
+      }
+      // Recoil Timestamp
+      // for(int i=0;i<32;i++){
+      //   hSi1Time[i]->Reset();
+      // }
+      // for(int i=0;i<24;i++){
+      //   hSi2Time[i]->Reset();
+      // }
+      // hRecTime->Reset();
+      for(int i=0;i<2;i++){
+        // hRecRearTime[i]->Reset();
+      }
+      // Recoil Hits
+      hSi1Hits->Reset();
+      hSi2Hits->Reset();
+      hGe1Hits->Reset();
+      hGe2Hits->Reset();
+      // Recoil Rear Amplitude
+      hSi1RearAmp->Reset();
+      hSi2RearAmp->Reset();
+      hGe1RearAmp->Reset();
+      hGe2RearAmp->Reset();
 
-    // Correlation
-    // for(int i=0;i<4;i++){
-    //   h2RecRearAmpVsTime[i]->Reset();
-    // }
+      // Correlation
+      // for(int i=0;i<4;i++){
+      //   h2RecRearAmpVsTime[i]->Reset();
+      // }
+      //
+      fKoalaCounter=0;
+    }
   }
   //
   void

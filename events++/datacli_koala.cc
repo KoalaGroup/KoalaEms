@@ -452,6 +452,7 @@ main_loop()
                     ems_u32* b=reinterpret_cast<ems_u32*>(ibs.event_buffer->data);
                     int s=static_cast<int>(ibs.event_buffer->size/4);
                     decoder->DecodeCluster(b,s);
+                    assembler->Print();
                     //
                     clear_new_event(&ibs);
                 }
