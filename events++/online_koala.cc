@@ -251,7 +251,7 @@ int histplot()
       h2RecHitsCut[i] = (TH2F*) mfile->Get(Form("h2RecHitsCut_%d",i+1), h2RecHitsCut[i]);
 
       hRecRearAmp[i] = (TH1F*) mfile->Get(Form("hRecRearAmp_%d",i+1),hRecRearAmp[i] );
-      hRecRearAmpCut[i] = (TH1F*) mfile->Get(Form("hRecRearAmpCut_%d",i+1),hRecRearAmp[i] );
+      hRecRearAmpCut[i] = (TH1F*) mfile->Get(Form("hRecRearAmpCut_%d",i+1),hRecRearAmpCut[i] );
     }
     //
     for(int i=0;i<2;i++){
