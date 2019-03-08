@@ -521,6 +521,9 @@ namespace DecodeUtil
   void
   KoaOnlineAnalyzer::InitHistograms()
   {
+    TString RecName[4]={"Si#1","Si#2","Ge#1","Ge#2"};
+    TString FwdName[4]={"Fwd#Out","Fwd#In","Fwd#Up","Fwd#Down"};
+    Int_t   chnum[4]={48,64,32,32};
     // Forward Detector
     for(int i=0;i<8;i++){
       hFwdAmp[i] = new TH1F(Form("hFwdAmp_%d",i+1),Form("Fwd Scintillator Amplitude: %d",i+1),QDC_MAXRANGE+11,-9.5, QDC_MAXRANGE+1.5);
@@ -544,24 +547,24 @@ namespace DecodeUtil
     hRecRearTime[1] = new TH1F("hRecRearTime_2","Si#2 Rear Time (ns)",2098,-1.5,2096.5);
 
     // Recoil Hits
-    hSi1Hits = new TH2F("hSi1Hits","Si#1 FrontSide: Hits Spectrum",48,0.5,48.5,ADC_MAXRANGE+2,-1.5,ADC_MAXRANGE+0.5);
-    hSi2Hits = new TH2F("hSi2Hits","Si#2 FrontSide: Hits Spectrum",64,0.5,64.5,ADC_MAXRANGE+2,-1.5,ADC_MAXRANGE+0.5);
-    hGe1Hits = new TH2F("hGe1Hits","Ge#1 FrontSide: Hits Spectrum",32,0.5,32.5,ADC_MAXRANGE+2,-1.5,ADC_MAXRANGE+0.5);
-    hGe2Hits = new TH2F("hGe2Hits","Ge#2 FrontSide: Hits Spectrum",32,0.5,32.5,ADC_MAXRANGE+2,-1.5,ADC_MAXRANGE+0.5);
+    for(int i=0;i<4;i++){
+      h2RecHits[i] = new TH2F(Form("h2RecHits_%d",i+1),Form("%s FrontSide: Hits Spectrum",RecName[i].Data()),chnum[i],0.5,chnum[i]+0.5,ADC_MAXRANGE+2,-1.5,ADC_MAXRANGE+0.5);
+      h2RecHitsCut[i] = new TH2F(Form("h2RecHitsCut_%d",i+1),Form("%s FrontSide: Hits Spectrum (After Fwd Amplitude Cuts)",RecName[i].Data()),chnum[i],0.5,chnum[i]+0.5,ADC_MAXRANGE+2,-1.5,ADC_MAXRANGE+0.5);
+      hRecRearAmp[i]=new TH1F(Form("hRecRearAmp_%d",i+1),Form("$s RearSide: Amplitude",RecName[i].Data()),ADC_MAXRANGE+2,-1.5,ADC_MAXRANGE+0.5);
+      hRecRearAmpCut[i]=new TH1F(Form("hRecRearAmpCut_%d",i+1),Form("$s RearSide: Amplitude (After Fwd Amplitude Cuts)",RecName[i].Data()),ADC_MAXRANGE+2,-1.5,ADC_MAXRANGE+0.5);
+    }
     
-    // Recoil Rear Amplitude
-    hSi1RearAmp = new TH1F("hSi1RearAmp","Si#1 RearSide: Amplitude",ADC_MAXRANGE+2,-1.5,ADC_MAXRANGE+0.5);
-    hSi2RearAmp = new TH1F("hSi2RearAmp","Si#2 RearSide: Amplitude",ADC_MAXRANGE+2,-1.5,ADC_MAXRANGE+0.5);
-    hGe1RearAmp = new TH1F("hGe1RearAmp","Ge#1 RearSide: Amplitude",ADC_MAXRANGE+2,-1.5,ADC_MAXRANGE+0.5);
-    hGe2RearAmp = new TH1F("hGe2RearAmp","Ge#2 RearSide: Amplitude",ADC_MAXRANGE+2,-1.5,ADC_MAXRANGE+0.5);
-
 
     // Si1 Correlation
     for(int i=0;i<2;i++){
-      h2RecRearAmpVsTime[i]=new TH2F(Form("h2RecRearAmpVsTime_%d",i+1),Form("Si#%d Rear: Amplitude VS Time",i+1),ADC_MAXRANGE+2,-1.5,ADC_MAXRANGE+0.5,2098,-1.5,2096.5);
-    }
-    for(int i=0;i<2;i++){
-      h2RecRearAmpVsTime[i+2]=new TH2F(Form("h2RecRearAmpVsTime_%d",i+3),Form("Ge#%d Rear: Amplitude VS Time",i+1),ADC_MAXRANGE+2,-1.5,ADC_MAXRANGE+0.5,2098,-1.5,2096.5);
+    //   h2RecRearAmpVsTime[i]=new TH2F(Form("h2RecRearAmpVsTime_%d",i+1),Form("Si#%d Rear: Amplitude VS Time",i+1),ADC_MAXRANGE+2,-1.5,ADC_MAXRANGE+0.5,2098,-1.5,2096.5);
+    // }
+    // for(int i=0;i<2;i++){
+    //   h2RecRearAmpVsTime[i+2]=new TH2F(Form("h2RecRearAmpVsTime_%d",i+3),Form("Ge#%d Rear: Amplitude VS Time",i+1),ADC_MAXRANGE+2,-1.5,ADC_MAXRANGE+0.5,2098,-1.5,2096.5);
+      h2FwdTimeVSAmp[i]=new TH2F(Form("h2FwdTimeVSAmp_%d",i+1),Form("Fwd%d : Time VS Amplitude",i+1),2098,-1.5,2096.5,QDC_MAXRANGE+11,-9.5, QDC_MAXRANGE+1.5);
+      h2FwdTimeVSRecAmp[i]=new TH2F(Form("h2FwdTimeVSRecAmp_%d",i+1),Form("Fwd1_Time VS Si%d_Amplitude",i+1),2098,-1.5,2096.5,ADC_MAXRANGE+11,-9.5, ADC_MAXRANGE+1.5);
+      h2FwdAmpVSRecAmp[i]=new TH2F(Form("h2FwdAmpVSRecAmp_%d",i+1),Form("Fwd1_Amp VS Si%d_Amplitude",i+1),QDC_MAXRANGE+11,-9.5, QDC_MAXRANGE+1.5,ADC_MAXRANGE+11,-9.5, ADC_MAXRANGE+1.5);
+      hRecRearTimeDiff[i]=new TH1F(Form("hRecRearTimeDiff_%d",i+1),Form("Si%dRear_Time - Fwd1_Time",i+1),2000,-1000,1000);
     }
   }
   //
@@ -601,28 +604,44 @@ namespace DecodeUtil
 
     // Recoil Hits
     for(int i=0;i<48;i++){
-      hSi1Hits->Fill(i+1,fSi1_Amplitude[i]);
+      h2RecHits[0]->Fill(i+1,fSi1_Amplitude[i]);
+      if(fFwd_Amplitude[0]>1000)
+        h2RecHitsCut[0]->Fill(i+1,fSi1_Amplitude[i]);
     }
     for(int i=0;i<64;i++){
-      hSi2Hits->Fill(i+1,fSi2_Amplitude[i]);
+      h2RecHits[1]->Fill(i+1,fSi2_Amplitude[i]);
+      if(fFwd_Amplitude[0]>1000)
+        h2RecHitsCut[1]->Fill(i+1,fSi2_Amplitude[i]);
     }
     for(int i=0;i<32;i++){
-      hGe1Hits->Fill(i+1,fGe1_Amplitude[i]);
-      hGe2Hits->Fill(i+1,fGe2_Amplitude[i]);
+      h2RecHits[2]->Fill(i+1,fGe1_Amplitude[i]);
+      if(fFwd_Amplitude[0]>1000)
+        h2RecHitsCut[2]->Fill(i+1,fGe1_Amplitude[i]);
+
+      h2RecHits[3]->Fill(i+1,fGe2_Amplitude[i]);
+      if(fFwd_Amplitude[0]>1000)
+        h2RecHitsCut[3]->Fill(i+1,fGe2_Amplitude[i]);
     }
 
     // Recoil Rear Amplitude
-    hSi1RearAmp->Fill(fRecRear_Amplitude[0]);
-    hSi2RearAmp->Fill(fRecRear_Amplitude[1]);
-    hGe1RearAmp->Fill(fRecRear_Amplitude[2]);
-    hGe2RearAmp->Fill(fRecRear_Amplitude[3]);
-
+    for(int i=0;i<4;i++){
+      hRecRearAmp[i]->Fill(fRecRear_Amplitude[i]);
+      if(fFwd_Amplitude[0]>1000)
+        hRecRearAmpCut[i]->Fill(fRecRear_Amplitude[i]);
+    }
 
     // Correlation
     for(int i=0;i<2;i++){
-      if((*fPRecRear_Timestamp[i])!=UNDER_THRESHOLD){
-        h2RecRearAmpVsTime[i]->Fill(fRecRear_Amplitude[i],fRecRear_Timestamp[i]);
+      if((*fPFwd_Timestamp[i])!=UNDER_THRESHOLD){
+        h2FwdTimeVSAmp[i]->Fill(fFwd_Timestamp[i],fFwd_Amplitude[i]);
+        if(*fPRecRear_Timestamp[i]!=UNDER_THRESHOLD){
+          hRecRearTimeDiff[i]->Fill(fRecRear_Timestamp[i]-fFwd_Timestamp[0]);
+        }
       }
+    }
+    for(int i=0;i<2;i++){
+      h2FwdTimeVSRecAmp[i]->Fill(fFwd_Timestamp[0],fRecRear_Amplitude[i]);
+      h2FwdAmpVSRecAmp[i]->Fill(fFwd_Amplitude[0],fRecRear_Amplitude[i]);
     }
   }
   //
@@ -651,21 +670,22 @@ namespace DecodeUtil
         // hRecRearTime[i]->Reset();
       }
       // Recoil Hits
-      hSi1Hits->Reset();
-      hSi2Hits->Reset();
-      hGe1Hits->Reset();
-      hGe2Hits->Reset();
       // Recoil Rear Amplitude
-      hSi1RearAmp->Reset();
-      hSi2RearAmp->Reset();
-      hGe1RearAmp->Reset();
-      hGe2RearAmp->Reset();
+      for(int i=0;i<4;i++){
+        h2RecHits[i]->Reset();
+        h2RecHitsCut[i]->Reset();
+        hRecRearAmp[i]->Reset();
+        hRecRearAmpCut[i]->Reset();
+      }
 
       // Correlation
-      // for(int i=0;i<4;i++){
-      //   h2RecRearAmpVsTime[i]->Reset();
-      // }
-      //
+      for(int i=0;i<2;i++){
+        h2FwdAmpVSRecAmp[i]->Reset();
+        h2FwdTimeVSAmp[i]->Reset();
+        h2FwdTimeVSRecAmp[i]->Reset();
+        hRecRearTimeDiff[i]->Reset();
+      }
+      
       fKoalaCounter=0;
     }
   }
@@ -688,18 +708,18 @@ namespace DecodeUtil
       if(hRecRearTime[i]) delete hRecRearTime[i];
     }
     //
-    if(hSi1Hits) delete hSi1Hits;
-    if(hSi2Hits) delete hSi2Hits;
-    if(hGe1Hits) delete hGe1Hits;
-    if(hGe2Hits) delete hGe2Hits;
-
-    if(hSi1RearAmp) delete hSi1RearAmp;
-    if(hSi2RearAmp) delete hSi2RearAmp;
-    if(hGe1RearAmp) delete hGe1RearAmp;
-    if(hGe2RearAmp) delete hGe2RearAmp;
-    //
     for(int i=0;i<4;i++){
-      if(h2RecRearAmpVsTime[i]) delete h2RecRearAmpVsTime[i];
+      if(h2RecHits[i]) delete h2RecHits[i];
+      if(h2RecHitsCut[i]) delete h2RecHitsCut[i];
+      if(hRecRearAmp[i]) delete hRecRearAmp[i];
+      if(hRecRearAmpCut[i]) delete hRecRearAmpCut[i];
+    }
+    //
+    for(int i=0;i<2;i++){
+      if(h2FwdTimeVSAmp[i]) delete h2FwdTimeVSAmp[i];
+      if(h2FwdTimeVSRecAmp[i]) delete h2FwdTimeVSRecAmp[i];
+      if(h2FwdAmpVSRecAmp[i]) delete h2FwdAmpVSRecAmp[i];
+      if(hRecRearTimeDiff[i]) delete hRecRearTimeDiff[i];
     }
   }
   //
@@ -709,47 +729,47 @@ namespace DecodeUtil
     TString RecName[4]={"Si#1","Si#2","Ge#1","Ge#2"};
     TString FwdName[4]={"Fwd#Out","Fwd#In","Fwd#Up","Fwd#Down"};
     //
-    for(int i=0;i<4;i++){
-      gScalerRec[i] = new TGraph();
-      gScalerRec[i]->SetNameTitle(Form("gScalerRec_%d",i+1),Form("%s : Scaler Counts",RecName[i].Data()));
-      gScalerRec[i]->SetLineWidth(2);
-      gScalerRec[i]->SetLineColor(1+i);
-      gScalerRec[i]->SetMarkerColor(1+i);
-      fMapFile->Add(gScalerRec[i]);
-    }
-    for(int i=0;i<4;i++){
-      gScalerFwd[i] = new TGraph();
-      gScalerFwd[i]->SetNameTitle(Form("gScalerFwd_%d",i+1),Form("%s : Scaler Counts",FwdName[i].Data()));
-      gScalerFwd[i]->SetLineWidth(2);
-      gScalerFwd[i]->SetLineColor(1+i);
-      gScalerFwd[i]->SetMarkerColor(1+i);
-      fMapFile->Add(gScalerFwd[i]);
-    }
+    // for(int i=0;i<4;i++){
+    //   gScalerRec[i] = new TGraph();
+    //   gScalerRec[i]->SetNameTitle(Form("gScalerRec_%d",i+1),Form("%s : Scaler Counts",RecName[i].Data()));
+    //   gScalerRec[i]->SetLineWidth(2);
+    //   gScalerRec[i]->SetLineColor(1+i);
+    //   gScalerRec[i]->SetMarkerColor(1+i);
+    //   fMapFile->Add(gScalerRec[i]);
+    // }
+    // for(int i=0;i<4;i++){
+    //   gScalerFwd[i] = new TGraph();
+    //   gScalerFwd[i]->SetNameTitle(Form("gScalerFwd_%d",i+1),Form("%s : Scaler Counts",FwdName[i].Data()));
+    //   gScalerFwd[i]->SetLineWidth(2);
+    //   gScalerFwd[i]->SetLineColor(1+i);
+    //   gScalerFwd[i]->SetMarkerColor(1+i);
+    //   fMapFile->Add(gScalerFwd[i]);
+    // }
 
-    gScalerCommonOr = new TGraph();
-    gScalerCommonOr->SetNameTitle("gScalerCommonOr","Trigger Scaler Counts");
-    gScalerCommonOr->SetLineWidth(2);
-    gScalerCommonOr->SetLineColor(6);
-    gScalerCommonOr->SetMarkerColor(6);
-    fMapFile->Add(gScalerCommonOr);
-    //
-    for(int i=0;i<2;i++){
-      gScalerGeOverlap[i] = new TGraph();
-      gScalerGeOverlap[i]->SetNameTitle(Form("gScalerGeOverlap_%d",i+1),Form("%s OverlapArea (5 strips): Scaler Counts",RecName[i+2].Data()));
-      gScalerGeOverlap[i]->SetLineWidth(2);
-      gScalerGeOverlap[i]->SetLineColor(1+i);
-      gScalerGeOverlap[i]->SetMarkerColor(1+i);
-      fMapFile->Add(gScalerGeOverlap[i]);
-    }
-    for(int i=0;i<2;i++){
-      gScalerSiRear[i] = new TGraph();
-      gScalerSiRear[i]->SetNameTitle(Form("gScalerSiRear_%d",i+1),Form("%s RearSide: Scaler Counts",RecName[i].Data()));
-      gScalerSiRear[i]->SetLineWidth(2);
-      gScalerSiRear[i]->SetLineColor(1+i);
-      gScalerSiRear[i]->SetMarkerColor(1+i);
-      fMapFile->Add(gScalerSiRear[i]);
-    }
-    //
+    // gScalerCommonOr = new TGraph();
+    // gScalerCommonOr->SetNameTitle("gScalerCommonOr","Trigger Scaler Counts");
+    // gScalerCommonOr->SetLineWidth(2);
+    // gScalerCommonOr->SetLineColor(6);
+    // gScalerCommonOr->SetMarkerColor(6);
+    // fMapFile->Add(gScalerCommonOr);
+    // //
+    // for(int i=0;i<2;i++){
+    //   gScalerGeOverlap[i] = new TGraph();
+    //   gScalerGeOverlap[i]->SetNameTitle(Form("gScalerGeOverlap_%d",i+1),Form("%s OverlapArea (5 strips): Scaler Counts",RecName[i+2].Data()));
+    //   gScalerGeOverlap[i]->SetLineWidth(2);
+    //   gScalerGeOverlap[i]->SetLineColor(1+i);
+    //   gScalerGeOverlap[i]->SetMarkerColor(1+i);
+    //   fMapFile->Add(gScalerGeOverlap[i]);
+    // }
+    // for(int i=0;i<2;i++){
+    //   gScalerSiRear[i] = new TGraph();
+    //   gScalerSiRear[i]->SetNameTitle(Form("gScalerSiRear_%d",i+1),Form("%s RearSide: Scaler Counts",RecName[i].Data()));
+    //   gScalerSiRear[i]->SetLineWidth(2);
+    //   gScalerSiRear[i]->SetLineColor(1+i);
+    //   gScalerSiRear[i]->SetMarkerColor(1+i);
+    //   fMapFile->Add(gScalerSiRear[i]);
+    // }
+    // //
     for(int i=0;i<4;i++){
       gHitRateRec[i] = new TGraph();
       gHitRateRec[i]->SetNameTitle(Form("gHitRateRec_%d",i+1),Form("%s : Hit Rate",RecName[i].Data()));
@@ -790,12 +810,10 @@ namespace DecodeUtil
       fMapFile->Add(gHitRateSiRear[i]);
     }
     //
-    gEventNr = new TGraph();
-    gEventNr->SetNameTitle("gEventNr","Total Events Accepted by DAQ");
-    gEventNr->SetLineWidth(2);
-    gEventNr->SetLineColor(9);
-    gEventNr->SetMarkerColor(9);
-    fMapFile->Add(gEventNr);
+    // gEventNr->SetLineWidth(2);
+    // gEventNr->SetLineColor(9);
+    // gEventNr->SetMarkerColor(9);
+    // fMapFile->Add(gEventNr);
 
     gEventRate = new TGraph();
     gEventRate->SetNameTitle("gEventRate","DAQ Event Rates");
@@ -818,40 +836,40 @@ namespace DecodeUtil
     Int_t npoints;
     //
     for(int i=0;i<4;i++){
-      npoints=gScalerRec[i]->GetN();
-      gScalerRec[i]->SetPoint(npoints,fEmsTimeSecond,*fPScalerRec[i]);
+      // npoints=gScalerRec[i]->GetN();
+      // gScalerRec[i]->SetPoint(npoints,fEmsTimeSecond,*fPScalerRec[i]);
       npoints=gHitRateRec[i]->GetN();
       gHitRateRec[i]->SetPoint(npoints,fEmsTimeSecond,*fPHitRateRec[i]);
     }
     //
     for(int i=0;i<4;i++){
-      npoints=gScalerFwd[i]->GetN();
-      gScalerFwd[i]->SetPoint(npoints,fEmsTimeSecond,*fPScalerFwd[i]);
+      // npoints=gScalerFwd[i]->GetN();
+      // gScalerFwd[i]->SetPoint(npoints,fEmsTimeSecond,*fPScalerFwd[i]);
       npoints=gHitRateFwd[i]->GetN();
       gHitRateFwd[i]->SetPoint(npoints,fEmsTimeSecond,*fPHitRateFwd[i]);
     }
     //
-    npoints=gScalerCommonOr->GetN();
-    gScalerCommonOr->SetPoint(npoints,fEmsTimeSecond,*fPScalerCommonOr);
+    // npoints=gScalerCommonOr->GetN();
+    // gScalerCommonOr->SetPoint(npoints,fEmsTimeSecond,*fPScalerCommonOr);
     npoints=gHitRateCommonOr->GetN();
     gHitRateCommonOr->SetPoint(npoints,fEmsTimeSecond,*fPHitRateCommonOr);
     //
     for(int i=0;i<2;i++){
-      npoints=gScalerGeOverlap[i]->GetN();
-      gScalerGeOverlap[i]->SetPoint(npoints,fEmsTimeSecond,*fPScalerGeOverlap[i]);
+      // npoints=gScalerGeOverlap[i]->GetN();
+      // gScalerGeOverlap[i]->SetPoint(npoints,fEmsTimeSecond,*fPScalerGeOverlap[i]);
       npoints=gHitRateGeOverlap[i]->GetN();
       gHitRateGeOverlap[i]->SetPoint(npoints,fEmsTimeSecond,*fPHitRateGeOverlap[i]);
     }
     //
     for(int i=0;i<2;i++){
-      npoints=gScalerSiRear[i]->GetN();
-      gScalerSiRear[i]->SetPoint(npoints,fEmsTimeSecond,*fPScalerSiRear[i]);
+      // npoints=gScalerSiRear[i]->GetN();
+      // gScalerSiRear[i]->SetPoint(npoints,fEmsTimeSecond,*fPScalerSiRear[i]);
       npoints=gHitRateSiRear[i]->GetN();
       gHitRateSiRear[i]->SetPoint(npoints,fEmsTimeSecond,*fPHitRateSiRear[i]);
     }
     //
-    npoints=gEventNr->GetN();
-    gEventNr->SetPoint(npoints,fEmsTimeSecond,fEventNr);
+    // npoints=gEventNr->GetN();
+    // gEventNr->SetPoint(npoints,fEmsTimeSecond,fEventNr);
 
     npoints=gEventRate->GetN();
     gEventRate->SetPoint(npoints,fEmsTimeSecond,fEventRate);
@@ -863,30 +881,30 @@ namespace DecodeUtil
   void
   KoaOnlineAnalyzer::ResetScalerGraphs()
   {
-    Int_t npoints=gScalerCommonOr->GetN();
+    Int_t npoints=gHitRateCommonOr->GetN();
     Int_t nr=fScalerResetInterval/fScalerUpdateInterval;
     if(npoints>nr){
       for(int i=0;i<4;i++){
-        gScalerRec[i]->Set(0);
+        // gScalerRec[i]->Set(0);
         gHitRateRec[i]->Set(0);
       }
       for(int i=0;i<4;i++){
-        gScalerFwd[i]->Set(0);
+        // gScalerFwd[i]->Set(0);
         gHitRateFwd[i]->Set(0);
       }
-      gScalerCommonOr->Set(0);
+      // gScalerCommonOr->Set(0);
       gHitRateCommonOr->Set(0);
       for(int i=0;i<2;i++){
-        gScalerGeOverlap[i]->Set(0);
+        // gScalerGeOverlap[i]->Set(0);
         gHitRateGeOverlap[i]->Set(0);
       }
       for(int i=0;i<2;i++){
-        gScalerSiRear[i]->Set(0);
+        // gScalerSiRear[i]->Set(0);
         gHitRateSiRear[i]->Set(0);
       }
 
       gEventRate->Set(0);
-      gEventNr->Set(0);
+      // gEventNr->Set(0);
       gDaqEfficiency->Set(0);
     }
   }
@@ -895,26 +913,26 @@ namespace DecodeUtil
   KoaOnlineAnalyzer::DeleteScalerGraphs()
   {
     for(int i=0;i<4;i++){
-      if(gScalerRec[i]) delete gScalerRec[i];
+      // if(gScalerRec[i]) delete gScalerRec[i];
       if(gHitRateRec[i]) delete gHitRateRec[i];
     }
     for(int i=0;i<4;i++){
-      if(gScalerFwd[i]) delete gScalerFwd[i];
+      // if(gScalerFwd[i]) delete gScalerFwd[i];
       if(gHitRateFwd[i]) delete gHitRateFwd[i];
     }
-    if(gScalerCommonOr) delete gScalerCommonOr;
+    // if(gScalerCommonOr) delete gScalerCommonOr;
     if(gHitRateCommonOr) delete gHitRateCommonOr;
     //
     for(int i=0;i<2;i++){
-      if(gScalerGeOverlap[i]) delete gScalerGeOverlap[i];
+      // if(gScalerGeOverlap[i]) delete gScalerGeOverlap[i];
       if(gHitRateGeOverlap[i]) delete gHitRateGeOverlap[i];
     }
     for(int i=0;i<2;i++){
-      if(gScalerSiRear[i]) delete gScalerSiRear[i];
+      // if(gScalerSiRear[i]) delete gScalerSiRear[i];
       if(gHitRateSiRear[i]) delete gHitRateSiRear[i];
     }
 
-    if(gEventNr) delete gEventNr;
+    // if(gEventNr) delete gEventNr;
     if(gEventRate) delete gEventRate;
     if(gDaqEfficiency) delete gDaqEfficiency;
   }

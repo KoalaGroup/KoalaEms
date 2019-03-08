@@ -124,11 +124,11 @@ namespace DecodeUtil{
     Double_t  *fPHitRateGeOverlap[2];
     Double_t  *fPHitRateSiRear[2];
 
-    TGraph  *gScalerRec[4];
-    TGraph  *gScalerFwd[4];
-    TGraph  *gScalerCommonOr;
-    TGraph  *gScalerGeOverlap[2];
-    TGraph  *gScalerSiRear[2];
+    // TGraph  *gScalerRec[4];
+    // TGraph  *gScalerFwd[4];
+    // TGraph  *gScalerCommonOr;
+    // TGraph  *gScalerGeOverlap[2];
+    // TGraph  *gScalerSiRear[2];
 
     TGraph  *gHitRateRec[4];
     TGraph  *gHitRateFwd[4];
@@ -136,7 +136,7 @@ namespace DecodeUtil{
     TGraph  *gHitRateGeOverlap[2];
     TGraph  *gHitRateSiRear[2];
 
-    TGraph  *gEventNr;
+    // TGraph  *gEventNr;
     TGraph  *gEventRate;
     TGraph  *gDaqEfficiency;
 
@@ -148,17 +148,15 @@ namespace DecodeUtil{
     TH1F*     hRecTime;
     TH1F*     hRecRearTime[2];
 
-    TH2F*     hSi1Hits;
-    TH2F*     hSi2Hits;
-    TH2F*     hGe1Hits;
-    TH2F*     hGe2Hits;
-    TH1F*     hSi1RearAmp;
-    TH1F*     hGe1RearAmp;
-    TH1F*     hSi2RearAmp;
-    TH1F*     hGe2RearAmp;
-
+    TH2F*     h2RecHits[4];
+    TH2F*     h2RecHitsCut[4];
+    TH1F*     hRecRearAmp[4];
+    TH1F*     hRecRearAmpCut[4];
     //
-    TH2F*     h2RecRearAmpVsTime[4];
+    TH2F*     h2FwdTimeVSAmp[2];
+    TH2F*     h2FwdTimeVSRecAmp[2];
+    TH2F*     h2FwdAmpVSRecAmp[2];
+    TH1F*     hRecRearTimeDiff[2];
     // TH2F*     h2Si1RearAmpVsTime;
   };
 }

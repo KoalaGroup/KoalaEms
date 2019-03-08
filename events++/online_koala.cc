@@ -12,10 +12,48 @@
 #include "TGraph.h"
 #include "TMultiGraph.h"
 #include "TLegend.h"
+#include "TString.h"
 #include <ctime>
+#include <string.h>
 
 using namespace std;
 
+static char mf_name[256]="koala_online.map";
+/*******************************************/
+static void
+printusage(char* argv0)
+{
+  printf("usage: %s [-m mapfile]\n",
+         basename(argv0));
+  printf("  -h: this help\n");
+  printf("  -s mapfile: the mapfile to shown\n");
+  printf("    default is \"koala_online.map\"\n");
+}
+/*******************************************/
+static int
+readargs(int argc, char* argv[])
+{
+  int c, err;
+  //struct servent* service;
+
+  err=0;
+  while (!err && ((c=getopt(argc, argv, "m:")) != -1)) {
+    switch (c) {
+    case 'h': printusage(argv[0]); return 1;
+    case 'm': {
+      strcpy(mf_name,optarg);
+      break;
+    }
+    default: err=1;
+    }
+  }
+  if (err) {
+    printusage(argv[0]);
+    return -1;
+  }
+
+  return 0;
+}
 /******************************************************************************************************/
 int histplot()
 {
@@ -75,6 +113,13 @@ int histplot()
 	cRecHits->Modified();
 	cRecHits->Update();
 
+	TCanvas *cRecHitsCut;
+	cRecHitsCut = new TCanvas("cRecHitsCut","Recoil FrontSide Hits (Fwd Amplitude Cut)", 2000,1200, 1200, 1200);
+  cRecHitsCut->Divide(2,2);
+	cRecHitsCut->Draw();
+	cRecHitsCut->Modified();
+	cRecHitsCut->Update();
+
   // Recoil RearSide Amplitudes
 	TCanvas *cRecRearAmp;
 	cRecRearAmp = new TCanvas("cRecRearAmp","Recoil RearSide Amplitudes", 2000,1500, 800, 800);
@@ -113,9 +158,15 @@ int histplot()
 	cDaqEfficiency->Modified();
 	cDaqEfficiency->Update();
 
+	TCanvas *cCorrelation;
+	cCorrelation = new TCanvas("cCorrelation","Correlation Graphs", 20,15, 2000, 1000);
+  cCorrelation->Divide(4,2);
+	cCorrelation->Draw();
+	cCorrelation->Modified();
+	cCorrelation->Update();
   ///////////////////////////////////////////
 	TMapFile *mfile = 0;
-	mfile = TMapFile::Create("/var/tmp/koala_online.map");
+	mfile = TMapFile::Create(Form("/var/tmp/%s",mf_name));
 	mfile->Print();
 	mfile->ls();
 
@@ -130,21 +181,21 @@ int histplot()
   TH1F     *hRecTime=nullptr;
   TH1F     *hRecRearTime[2]={nullptr};
 
-  TH2F     *hSi1Hits=nullptr;
-  TH2F     *hSi2Hits=nullptr;
-  TH2F     *hGe1Hits=nullptr;
-  TH2F     *hGe2Hits=nullptr;
+  TH2F     *h2RecHits[4]={nullptr};
+  TH2F     *h2RecHitsCut[4]={nullptr};
+  TH1F     *hRecRearAmp[4]={nullptr};
+  TH1F     *hRecRearAmpCut[4]={nullptr};
 
-  TH1F     *hSi1RearAmp=nullptr;
-  TH1F     *hSi2RearAmp=nullptr;
-  TH1F     *hGe1RearAmp=nullptr;
-  TH1F     *hGe2RearAmp=nullptr;
-
-  TGraph  *gScalerRec[4]={nullptr};
-  TGraph  *gScalerFwd[4]={nullptr};
-  TGraph  *gScalerCommonOr=nullptr;
-  TGraph  *gScalerGeOverlap[2]={nullptr};
-  TGraph  *gScalerSiRear[2]={nullptr};
+  TH2F*     h2FwdTimeVSAmp[2]={nullptr};
+  TH2F*     h2FwdTimeVSRecAmp[2]={nullptr};
+  TH2F*     h2FwdAmpVSRecAmp[2]={nullptr};
+  TH1F*     hRecRearTimeDiff[2]={nullptr};
+   
+  // TGraph  *gScalerRec[4]={nullptr};
+  // TGraph  *gScalerFwd[4]={nullptr};
+  // TGraph  *gScalerCommonOr=nullptr;
+  // TGraph  *gScalerGeOverlap[2]={nullptr};
+  // TGraph  *gScalerSiRear[2]={nullptr};
 
   TGraph  *gHitRateRec[4]={nullptr};
   TGraph  *gHitRateFwd[4]={nullptr};
@@ -195,16 +246,20 @@ int histplot()
     }
 
     // Recoil Hits
-    hSi1Hits = (TH2F*) mfile->Get("hSi1Hits", hSi1Hits);
-    hSi2Hits = (TH2F*) mfile->Get("hSi2Hits", hSi2Hits);
-    hGe1Hits = (TH2F*) mfile->Get("hGe1Hits", hGe1Hits);
-    hGe2Hits = (TH2F*) mfile->Get("hGe2Hits", hGe2Hits);
+    for(int i=0;i<4;i++){
+      h2RecHits[i] = (TH2F*) mfile->Get(Form("h2RecHits_%d",i+1),h2RecHits[i]);
+      h2RecHitsCut[i] = (TH2F*) mfile->Get(Form("h2RecHitsCut_%d",i+1), h2RecHitsCut[i]);
 
-    // Recoil RearSide Amplitude
-    hSi1RearAmp = (TH1F*) mfile->Get("hSi1RearAmp", hSi1RearAmp);
-    hSi2RearAmp = (TH1F*) mfile->Get("hSi2RearAmp", hSi2RearAmp);
-    hGe1RearAmp = (TH1F*) mfile->Get("hGe1RearAmp", hGe1RearAmp);
-    hGe2RearAmp = (TH1F*) mfile->Get("hGe2RearAmp", hGe2RearAmp);
+      hRecRearAmp[i] = (TH1F*) mfile->Get(Form("hRecRearAmp_%d",i+1),hRecRearAmp[i] );
+      hRecRearAmpCut[i] = (TH1F*) mfile->Get(Form("hRecRearAmpCut_%d",i+1),hRecRearAmp[i] );
+    }
+    //
+    for(int i=0;i<2;i++){
+      h2FwdTimeVSAmp[i] = (TH2F*) mfile->Get(Form("h2FwdTimeVSAmp_%d",i+1),h2FwdTimeVSAmp[i] );
+      h2FwdTimeVSRecAmp[i] = (TH2F*) mfile->Get(Form("h2FwdTimeVSRecAmp_%d",i+1),h2FwdTimeVSRecAmp[i] );
+      h2FwdAmpVSRecAmp[i] = (TH2F*) mfile->Get(Form("h2FwdAmpVSRecAmp_%d",i+1),h2FwdAmpVSRecAmp[i] );
+      hRecRearTimeDiff[i] = (TH1F*) mfile->Get(Form("hRecRearTimeDiff_%d",i+1),hRecRearTimeDiff[i] );
+    }
 
     // Graphs
     TString RecName[4]={"Si#1","Si#2","Ge#1","Ge#2"};
@@ -239,17 +294,17 @@ int histplot()
       gHitRateRec[i]= (TGraph*) mfile->Get(Form("gHitRateRec_%d",i+1), gHitRateRec[i]);
       gHitRateFwd[i]= (TGraph*) mfile->Get(Form("gHitRateFwd_%d",i+1), gHitRateFwd[i]);
 
-      gScalerRec[i]= (TGraph*) mfile->Get(Form("gScalerRec_%d",i+1), gScalerRec[i]);
-      gScalerFwd[i]= (TGraph*) mfile->Get(Form("gScalerFwd_%d",i+1), gScalerFwd[i]);
+      // gScalerRec[i]= (TGraph*) mfile->Get(Form("gScalerRec_%d",i+1), gScalerRec[i]);
+      // gScalerFwd[i]= (TGraph*) mfile->Get(Form("gScalerFwd_%d",i+1), gScalerFwd[i]);
     }
     gHitRateCommonOr = (TGraph*) mfile->Get("gHitRateCommonOr", gHitRateCommonOr);
-    gScalerCommonOr = (TGraph*) mfile->Get("gScalerCommonOr", gScalerCommonOr);
+    // gScalerCommonOr = (TGraph*) mfile->Get("gScalerCommonOr", gScalerCommonOr);
     for(int i=0;i<2;i++){
       gHitRateGeOverlap[i]= (TGraph*) mfile->Get(Form("gHitRateGeOverlap_%d",i+1), gHitRateGeOverlap[i]);
-      gScalerGeOverlap[i]= (TGraph*) mfile->Get(Form("gScalerGeOverlap_%d",i+1), gScalerGeOverlap[i]);
+      // gScalerGeOverlap[i]= (TGraph*) mfile->Get(Form("gScalerGeOverlap_%d",i+1), gScalerGeOverlap[i]);
 
       gHitRateSiRear[i]= (TGraph*) mfile->Get(Form("gHitRateSiRear_%d",i+1), gHitRateSiRear[i]);
-      gScalerSiRear[i]= (TGraph*) mfile->Get(Form("gScalerSiRear_%d",i+1), gScalerSiRear[i]);
+      // gScalerSiRear[i]= (TGraph*) mfile->Get(Form("gScalerSiRear_%d",i+1), gScalerSiRear[i]);
     }
 
     gEventRate = (TGraph*) mfile->Get("gEventRate", gEventRate);
@@ -327,20 +382,45 @@ int histplot()
 		cRecTime->Update();
 
     // Recoil Hits
-    cRecHits->cd(1); gPad->SetLogz(); hSi2Hits->Draw("colz");
-    cRecHits->cd(2); gPad->SetLogz(); hGe2Hits->Draw("colz");
-    cRecHits->cd(3); gPad->SetLogz(); hSi1Hits->Draw("colz");
-    cRecHits->cd(4); gPad->SetLogz(); hGe1Hits->Draw("colz");
+    int order[4]={1,3,0,2};
+    for(int i=0;i<4;i++){
+      cRecHits->cd(i+1); gPad->SetLogz(); h2RecHits[order[i]]->Draw("colz");
+      
+    }
 		cRecHits->Modified();
 		cRecHits->Update();
 
+    for(int i=0;i<4;i++){
+      cRecHitsCut->cd(i+1); gPad->SetLogz(); h2RecHitsCut[order[i]]->Draw("colz");
+      
+    }
+		cRecHitsCut->Modified();
+		cRecHitsCut->Update();
+
     // Recoil RearSide Amplitude
-    cRecRearAmp->cd(1); gPad->SetLogy(); hSi2RearAmp->Draw();
-    cRecRearAmp->cd(2); gPad->SetLogy(); hGe2RearAmp->Draw();
-    cRecRearAmp->cd(3); gPad->SetLogy(); hSi1RearAmp->Draw();
-    cRecRearAmp->cd(4); gPad->SetLogy(); hGe1RearAmp->Draw();
+    for(int i=0;i<4;i++){
+      cRecRearAmp->cd(i+1); gPad->SetLogy();
+      hRecRearAmp[order[i]]->Draw();
+      hRecRearAmpCut[order[i]]->SetLineColor(kRed);
+      hRecRearAmpCut[order[i]]->Draw("same");
+    }
 		cRecRearAmp->Modified();
 		cRecRearAmp->Update();
+
+    cCorrelation->cd(1); h2FwdTimeVSAmp[0]->Draw("colz");
+    cCorrelation->cd(5); h2FwdTimeVSAmp[1]->Draw("colz");
+
+    cCorrelation->cd(2); h2FwdAmpVSRecAmp[0]->Draw("colz");
+    cCorrelation->cd(6); h2FwdAmpVSRecAmp[1]->Draw("colz");
+
+    cCorrelation->cd(3); h2FwdTimeVSRecAmp[0]->Draw("colz");
+    cCorrelation->cd(7); h2FwdTimeVSRecAmp[1]->Draw("colz");
+
+    cCorrelation->cd(4); hRecRearTimeDiff[0]->Draw();
+    cCorrelation->cd(8); hRecRearTimeDiff[1]->Draw();
+		cCorrelation->Modified();
+		cCorrelation->Update();
+
 
     // Graph
     cHitRateFwd->cd();
@@ -443,8 +523,9 @@ int histplot()
 }
 
 /*****************************************************************************************************************************/
-int main()
+int main(int argc, char** argv)
 {
+  readargs(argc,argv);
 	TApplication app("app",0, 0);
 	histplot();
 	app.Run();

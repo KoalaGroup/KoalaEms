@@ -86,7 +86,7 @@ LDLIBS =  -L$(SUPPORT_LIB) -lsupp.$(SUPPORTVER) \
 		      -lpthread -ldl
 
 # srcs for executables
-SOURCES := datacli_koala.cc \
+SOURCES := datacli_koala.cc replay_koala.cc \
            new_parser_koala.cc event_distributor.cc online_koala.cc
 OBJS := $(SOURCES:.cc=.o)
 EXECS := $(SOURCES:.cc=)
@@ -121,6 +121,9 @@ $(LIBS): $(LIBOBJS) $(EVTLIB)
 	$(RANLIB) $@
 
 new_parser_koala: new_parser_koala.o $(LIBS)
+	$(CXX) -o $@ $^ $(LDLIBS) -l$(EVTLIB)
+
+replay_koala: replay_koala.o $(LIBS)
 	$(CXX) -o $@ $^ $(LDLIBS) -l$(EVTLIB)
 
 event_distributor: event_distributor.o
