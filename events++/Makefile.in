@@ -67,6 +67,7 @@ LIBSUFFIX = @LIBSUFFIX@
 ROOTLIBS  := $(shell root-config --new --libs)
 ROOTGLIBS := $(shell root-config --new --glibs)
 ROOTINC   := $(shell root-config --new --cflags)
+ROOTCLING := rootcling
 
 # self-defined compiling configurations, sources, execs, libraries
 CPPFLAGS = @CPPFLAGS@ -I$(srcdir) -I. -I$(COMMON_INCLUDE)  \
@@ -93,31 +94,43 @@ EXECS := $(SOURCES:.cc=)
 # srcs for libraries
 LIBSOURCES := mxdc32_data.cc koala_data.cc ems_data.cc \
 							KoaParsers.cc decode_util.cc KoaDecoder.cc \
-							KoaRawData.cc KoaAnalyzer.cc  KoaSimpleAnalyzer.cc KoaAssembler.cc \
-						  KoaOnlineAnalyzer.cc \
-						  KoaTimestampAssembler.cc \
-							KoaLoguru.cc
+							KoaAnalyzer.cc  KoaSimpleAnalyzer.cc KoaOnlineAnalyzer.cc \
+							KoaAssembler.cc KoaTimestampAssembler.cc \
+							KoaRaw.cc KoaRawSimple.cc KoaRawSophisticated.cc \
+							KoaLoguru.cc 
 LIBOBJS := $(LIBSOURCES:.cc=.o)
 LIBS    := libutils.$(SELFVER)$(LIBSUFFIX)
 
-.PHONY: all
-all: $(EXECS) $(LIBS)
+# srcs for libevents.so
+EVTSOURCES := KoaRawEvent.cc KoaEmsEvent.cc
+EVTHEADERS := $(EVTSOURCES:.cc=.hxx)
+EVTOBJS    := $(EVTSOURCES:.cc=.o) KoaEvtDict.o
+EVTLIB     := KoaEvt
 
-$(LIBS): $(LIBOBJS)
+.PHONY: all
+all: $(EXECS) $(LIBS) $(EVTLIB)
+
+$(EVTLIB): KoaEvtDict.cc $(EVTSOURCES)
+	$(CXX) -shared -fPIC -o lib$(EVTLIB).so $(CPPFLAGS) $(ROOTLIBS) $^
+
+KoaEvtDict.cc: $(EVTHEADERS) LinkDef.h
+	$(ROOTCLING) -f $@ $^
+
+$(LIBS): $(LIBOBJS) $(EVTLIB)
 	$(AR) cr $@ $(LIBOBJS)
 	$(RANLIB) $@
 
 new_parser_koala: new_parser_koala.o $(LIBS)
-	$(CXX) -o $@ $^ $(LDLIBS)
+	$(CXX) -o $@ $^ $(LDLIBS) -l$(EVTLIB)
 
 event_distributor: event_distributor.o
 	$(CXX) -o $@ $^ $(LDLIBS)
 
 datacli_koala: datacli_koala.o $(LIBS)
-	$(CXX) -o $@ $^ $(LDLIBS)
+	$(CXX) -o $@ $^ $(LDLIBS) -l$(EVTLIB)
 
 online_koala: online_koala.o
-	$(CXX) -o $@ $^ $(LDLIBS)
+	$(CXX) -o $@ $^ $(LDLIBS) 
 
 # generate the rules for compiling the .o files.
 # Specifically, this will generate the dependency on the header files in the src directory.
@@ -126,7 +139,7 @@ depend: sed.in
 	sed -e '/^# DO NOT DELETE THIS LINE/,$$d' < Makefile.bak > Makefile
 	echo '# DO NOT DELETE THIS LINE' >> Makefile
 	echo ' ' >> Makefile
-	for i in $(SOURCES) $(LIBSOURCES); do \
+	for i in $(SOURCES) $(LIBSOURCES) $(EVTSOURCES); do \
 	  echo checking $$i ; \
 	  $(CXX) -MM -MG $(CPPFLAGS) $(CXXFLAGS) $(srcdir)/$$i|sed -f sed.in>> Makefile ; \
 	done
@@ -137,7 +150,7 @@ sed.in:
 	echo '/^ *\\ *$$/d' >>sed.in
 
 clean:
-	rm -f *.o $(EXECS) *.a *.so sed.in
+	rm -f *.o $(EXECS) *.a *.so sed.in *.pcm KoaEvtDict.cc
 
 realclean: clean
 

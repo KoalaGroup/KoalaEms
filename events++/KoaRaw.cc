@@ -1,7 +1,10 @@
-#include "KoaRawData.hxx"
+#include "KoaRaw.hxx"
+#include "global.hxx"
+
 #define UNDER_THRESHOLD -5
 #define ADC_OVERFLOW 0x2000
 #define QDC_OVERFLOW 0x1000
+
 
 namespace DecodeUtil
 {
@@ -12,6 +15,8 @@ namespace DecodeUtil
     if(fNrWords)    delete [] fNrWords;
     if(fTimestamp)  delete [] fTimestamp;
     if(fData)       delete [] fData;
+
+    if(fScaler)     delete [] fScaler;
   }
 
   void KoaRaw::Init()
@@ -28,14 +33,23 @@ namespace DecodeUtil
     fNrWords  =  new Short_t[nr_mesymodules];
     fTimestamp = new Long64_t[nr_mesymodules];
     fData      = new Int_t[nr_mesymodules][34];
+    fScaler = new UInt_t[34];
 
     InitImp();
   }
 
-  void KoaRaw::Fill(koala_event* koala)
+  void KoaRaw::FillKoala(koala_event* koala)
   {
-    Decode(koala);
-    FillImp();
+    DecodeKoala(koala);
+    FillKoalaImp();
+  }
+
+  void KoaRaw::FillEms(ems_event* ems)
+  {
+    if(ems->tv_valid && ems->scaler_valid){
+      DecodeEms(ems);
+      FillEmsImp();
+    }
   }
 
   void KoaRaw::Done()
@@ -45,7 +59,7 @@ namespace DecodeUtil
   }
 
 
-  void KoaRaw::Decode(koala_event* koala)
+  void KoaRaw::DecodeKoala(koala_event* koala)
   {
     mxdc32_event *event;
     for(int mod=0;mod<nr_mesymodules;mod++){
@@ -125,45 +139,13 @@ namespace DecodeUtil
     }
   }
 
-  //---------------------------------------------------------------------------//
-  KoaRawSimple::~KoaRawSimple()
+  void KoaRaw::DecodeEms(ems_event* ems)
   {
-    if(fTree){
-      for(int mod=0;mod<nr_mesymodules;mod++){
-        if(fTree[mod]) delete fTree[mod];
-      }
-      delete [] fTree;
+    for(int i=0;i<34;i++){
+      fScaler[i]=ems->scaler[i];
     }
-  }
-
-  void KoaRawSimple::InitImp()
-  {
-    fTree = new TTree*[nr_mesymodules];
-
-    for(int mod=0;mod<nr_mesymodules;mod++){
-      fTree[mod]=new TTree(mesymodules[mod].label,mesymodules[mod].label);
-
-      fTree[mod]->Branch("ModuleId",fModuleId+mod,"ModuleId/b");
-      fTree[mod]->Branch("NrWords",fNrWords+mod,"NrWords/S");
-      fTree[mod]->Branch("Timestamp",fTimestamp+mod,"Timestamp/L");
-      fTree[mod]->Branch("Data",fData+mod,"Data[34]/I");
-      if(mesymodules[mod].mesytype != mesytec_mqdc32){
-        fTree[mod]->Branch("Resolution",fResolution+mod,"Resolution/B");
-      }
-    }
-  }
-
-  void KoaRawSimple::FillImp()
-  {
-    for(int mod=0;mod<nr_mesymodules;mod++){
-      fTree[mod]->Fill();
-    }
-  }
-
-  void KoaRawSimple::DoneImp()
-  {
-    for(int mod=0;mod<nr_mesymodules;mod++){
-      fTree[mod]->Write();
-    }
+    //
+    fEmsTimeSecond=ems->tv.tv_sec;
+    fEmsTimeUSecond=ems->tv.tv_usec;
   }
 }

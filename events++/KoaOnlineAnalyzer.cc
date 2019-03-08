@@ -13,7 +13,10 @@ static Float_t g_invalidtime=-10;
 namespace DecodeUtil
 {
   //
-  KoaOnlineAnalyzer::KoaOnlineAnalyzer(const char* dir, Long_t address, Int_t size, Int_t entries) : fMapAddress(address), fMapSize(size), fMaxEvents(entries)
+  KoaOnlineAnalyzer::KoaOnlineAnalyzer(const char* dir, Long_t address, Int_t size, Int_t entries, Int_t circular_event) : fMapAddress(address),
+                                                                                                                           fMapSize(size),
+                                                                                                                           fMaxEvents(entries),
+                                                                                                                           fCircularSize(circular_event)
   {
     SetDirectory(dir);
     fEmsTimeSecond=time(0);
@@ -33,7 +36,8 @@ namespace DecodeUtil
   void
   KoaOnlineAnalyzer::SetDirectory(const char* dir)
   {
-    fFileName.Form("%s/koala_online.map",dir);
+    fMapFileName.Form("%s/koala_online.map",dir);
+    fRootFileName.Form("%s/koala_online.root",dir);
   }
   //
   void
@@ -46,6 +50,12 @@ namespace DecodeUtil
   KoaOnlineAnalyzer::SetMapSize(Int_t size)
   {
     fMapSize = size;
+  }
+  //
+  void
+  KoaOnlineAnalyzer::SetCircularSize(Int_t circular_event)
+  {
+    fCircularSize = circular_event;
   }
   //
   void
@@ -63,17 +73,7 @@ namespace DecodeUtil
   int
   KoaOnlineAnalyzer::Init()
   {
-    // create memory mapped file
-		TMapFile::SetMapAddress(fMapAddress);
-    fMapFile = TMapFile::Create(fFileName.Data(),"RECREATE",fMapSize,"KOALA_Online_NEW");
-
-    // create histograms
-    InitHistograms();
-    InitScalerGraphs();
-
-    fMapFile->Update();
-    fMapFile->ls();
-    // create trees
+    // Raw Data
     fModuleId = new UChar_t[nr_mesymodules];
     fResolution = new Char_t[nr_mesymodules];
     fNrWords  =  new Short_t[nr_mesymodules];
@@ -83,21 +83,24 @@ namespace DecodeUtil
     fScaler = new UInt_t[34];
     fScalerDiff = new UInt_t[34];
     fHitRate = new Double_t[34];
-    // for(int mod=0;mod<nr_mesymodules;mod++){
-    //   fTree[mod]=new TTree(mesymodules[mod].label,mesymodules[mod].label);
 
-    //   fTree[mod]->Branch("ModuleId",fModuleId+mod,"ModuleId/b");
-    //   fTree[mod]->Branch("NrWords",fNrWords+mod,"NrWords/S");
-    //   fTree[mod]->Branch("Timestamp",fTimestamp+mod,"Timestamp/L");
-    //   fTree[mod]->Branch("Data",fData+mod,"Data[34]/I");
-    //   if(mesymodules[mod].mesytype != mesytec_mqdc32){
-    //     fTree[mod]->Branch("Resolution",fResolution+mod,"Resolution/B");
-    //   }
-    // }
-
-    // InitTrees();
     // initialize detector mapping
     InitMapping();
+
+    // create memory mapped file
+		TMapFile::SetMapAddress(fMapAddress);
+    fMapFile = TMapFile::Create(fMapFileName.Data(),"RECREATE",fMapSize,"KOALA_Online_NEW");
+
+    // Histograms and Graphs in the map file
+    InitHistograms();
+    InitScalerGraphs();
+
+    fMapFile->Update();
+    fMapFile->ls();
+
+    // Event structure to be saved into root file
+    fRootFile = new TFile(fRootFileName,"recreate");
+    InitTrees();
   }
   //
   int
@@ -479,40 +482,40 @@ namespace DecodeUtil
   void
   KoaOnlineAnalyzer::InitTrees()
   {
-    fSi1Tree = new TTree("Si1","Si1");
-    fSi1Tree->Branch("Amplitude",fSi1_Amplitude,"Amplitude[48]/I");
-    fSi1Tree->Branch("Time",fSi1_Timestamp,"Time[48]/F");
-    fSi1Tree->SetCircular(100);
+    // fSi1Tree = new TTree("Si1","Si1");
+    // fSi1Tree->Branch("Amplitude",fSi1_Amplitude,"Amplitude[48]/I");
+    // fSi1Tree->Branch("Time",fSi1_Timestamp,"Time[48]/F");
+    // fSi1Tree->SetCircular(100);
 
-    fSi2Tree = new TTree("Si2","Si2");
-    fSi2Tree->Branch("Amplitude",fSi2_Amplitude,"Amplitude[64]/I");
-    fSi2Tree->Branch("Time",fSi2_Timestamp,"Time[64]/F");
-    fSi2Tree->SetCircular(100);
+    // fSi2Tree = new TTree("Si2","Si2");
+    // fSi2Tree->Branch("Amplitude",fSi2_Amplitude,"Amplitude[64]/I");
+    // fSi2Tree->Branch("Time",fSi2_Timestamp,"Time[64]/F");
+    // fSi2Tree->SetCircular(100);
 
-    fGe1Tree = new TTree("Ge1","Ge1");
-    fGe1Tree->Branch("Amplitude",fGe1_Amplitude,"Amplitude[32]/I");
-    fGe1Tree->Branch("Time",fGe1_Timestamp,"Time[32]/F");
-    fGe1Tree->SetCircular(100);
+    // fGe1Tree = new TTree("Ge1","Ge1");
+    // fGe1Tree->Branch("Amplitude",fGe1_Amplitude,"Amplitude[32]/I");
+    // fGe1Tree->Branch("Time",fGe1_Timestamp,"Time[32]/F");
+    // fGe1Tree->SetCircular(100);
 
-    fGe2Tree = new TTree("Ge2","Ge2");
-    fGe2Tree->Branch("Amplitude",fGe2_Amplitude,"Amplitude[32]/I");
-    fGe2Tree->Branch("Time",fGe2_Timestamp,"Time[32]/F");
-    fGe2Tree->SetCircular(100);
+    // fGe2Tree = new TTree("Ge2","Ge2");
+    // fGe2Tree->Branch("Amplitude",fGe2_Amplitude,"Amplitude[32]/I");
+    // fGe2Tree->Branch("Time",fGe2_Timestamp,"Time[32]/F");
+    // fGe2Tree->SetCircular(100);
 
-    fFwdTree = new TTree("Fwd","Fwd");
-    fFwdTree->Branch("Amplitude",fFwd_Amplitude,"Amplitude[8]/I");
-    fFwdTree->Branch("Time",fFwd_Timestamp,"Time[8]/F");
-    fFwdTree->SetCircular(100);
+    // fFwdTree = new TTree("Fwd","Fwd");
+    // fFwdTree->Branch("Amplitude",fFwd_Amplitude,"Amplitude[8]/I");
+    // fFwdTree->Branch("Time",fFwd_Timestamp,"Time[8]/F");
+    // fFwdTree->SetCircular(100);
   }
   //
   void
   KoaOnlineAnalyzer::FillTrees()
   {
-    fSi1Tree->Fill();
-    fSi2Tree->Fill();
-    fGe1Tree->Fill();
-    fGe2Tree->Fill();
-    fFwdTree->Fill();
+    // fSi1Tree->Fill();
+    // fSi2Tree->Fill();
+    // fGe1Tree->Fill();
+    // fGe2Tree->Fill();
+    // fFwdTree->Fill();
   }
   //
   void

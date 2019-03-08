@@ -3,7 +3,7 @@
 #include "KoaAnalyzer.hxx"
 #include "TFile.h"
 #include "TH1F.h"
-#include "KoaRawData.hxx"
+#include "KoaRaw.hxx"
 
 namespace DecodeUtil{
   //
@@ -48,7 +48,7 @@ namespace DecodeUtil{
     TFile* rfile;
     TH1F* h_timediff[nr_mesymodules];
     TH1F* hwords[nr_mesymodules];
-    KoaRawSimple* koala_raw;
+    KoaRaw* koala_raw;
     timestamp_statist timestamp_statist;
   };
 }

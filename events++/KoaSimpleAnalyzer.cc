@@ -3,6 +3,8 @@
 #include "TCanvas.h"
 #include <iostream>
 #include "THStack.h"
+#include "KoaRawSimple.hxx"
+#include "KoaRawSophisticated.hxx"
 
 using namespace std;
 
@@ -54,7 +56,7 @@ namespace DecodeUtil{
     if(flag)
       koala_raw=new KoaRawSimple();
     else{
-      //[TODO]
+      koala_raw=new KoaRawSophisticated();
     }
   }
 
@@ -235,16 +237,19 @@ namespace DecodeUtil{
   //
   int KoaSimpleAnalyzer::Analyze()
   {
+    ems_event*  ems_cur=nullptr;
+    while(ems_cur=fEmsPrivate->drop_event()){
+      koala_raw->FillEms(ems_cur);
+      ems_cur->recycle();
+    }
+    //
     koala_event* koala_cur=nullptr;
     while(koala_cur=fKoalaPrivate->drop_event()){
       check_timestamp(koala_cur);
       fill_hist(koala_cur);
-      koala_raw->Fill(koala_cur);
+      koala_raw->FillKoala(koala_cur);
       koala_cur->recycle();
     }
-
-    //
-    RecycleEmsEvents();
   }
 
   //

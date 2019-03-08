@@ -15,13 +15,14 @@ namespace DecodeUtil{
   class KoaOnlineAnalyzer: public KoaAnalyzer
   {
   public:
-    KoaOnlineAnalyzer(const char* dir="/var/tmp",Long_t address=0x7fd3b6ad9000, Int_t size=1e9, Int_t entries=100000);
+    KoaOnlineAnalyzer(const char* mapdir="/var/tmp",Long_t address=0x7fd3b6ad9000, Int_t size=1e9, Int_t reset_events=100000, Int_t circular_event=5e6);
     virtual ~KoaOnlineAnalyzer();
 
     void SetDirectory(const char* dir);
     void SetMapAddress(Long_t address);
     void SetMapSize(Int_t size);
     void SetMaxEvents(Int_t entries);
+    void SetCircularSize(Int_t circular_event);
     void SetScalerUpdateInterval(Int_t second);
     void SetScalerResetInterval(Int_t second);
 
@@ -54,10 +55,15 @@ namespace DecodeUtil{
     TMapFile *fMapFile;
     Long_t    fMapAddress;
     Int_t     fMapSize;
-    TString   fFileName;
+    TString   fMapFileName;
     Long_t    fKoalaCounter;
     Long_t    fEmsCounter;
     Int_t     fMaxEvents;
+
+    TFile    *fRootFile;
+    TString   fRootFileName;
+    Int_t     fCircularSize;
+    TTree    *fTree;
 
     // electronics mapped
     UChar_t *fModuleId;
@@ -133,12 +139,6 @@ namespace DecodeUtil{
     TGraph  *gEventNr;
     TGraph  *gEventRate;
     TGraph  *gDaqEfficiency;
-    // objects saved into map file
-    TTree    *fSi1Tree;
-    TTree    *fSi2Tree;
-    TTree    *fGe1Tree;
-    TTree    *fGe2Tree;
-    TTree    *fFwdTree;
 
     TH1F*     hTrigTime[2];
     TH1F*     hFwdAmp[8];
