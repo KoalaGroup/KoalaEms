@@ -22,8 +22,8 @@ namespace DecodeUtil
     fTreeKoaRaw->Branch("KoalaEvent",&fKoaRawEvent);
     
     fEmsEvent = new KoaEmsEvent();
-    fTreeEms=new TTree("EmsEvent","Ems Event Data");
-    fTreeKoaRaw->Branch("EmsEvent",&fEmsEvent);
+    fTreeEms=new TTree("EmsEvent","Ems Mapped Data");
+    fTreeEms->Branch("EmsEvent",&fEmsEvent);
   }
 
   void KoaRawSophisticated::FillKoalaImp()
@@ -97,7 +97,7 @@ namespace DecodeUtil
     }
     // Fwd: 1-8 ===> TDC1 1->8
     for(int i=0;i<8;i++){
-      fKoaRawEvent->fFwdTime[i]=fData[7][i];
+      fKoaRawEvent->fFwdTime[i]=fData[7][i]*time_resolution[fResolution[7]-1];
     }
     //
     fKoaRawEvent->fTriggerTime[0]=(fData[7][32]*time_resolution[fResolution[7]-1]);
@@ -143,6 +143,6 @@ namespace DecodeUtil
   void KoaRawSophisticated::DoneImp()
   {
     fTreeKoaRaw->Write();
-    fEmsEvent->Write();
+    fTreeEms->Write();
   }
 }

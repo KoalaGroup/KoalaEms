@@ -24,9 +24,6 @@ namespace DecodeUtil{
       delete koala_raw;
     if(rfile)
       delete rfile;
-
-    //
-    // delete_hist();
   }
 
   //
@@ -46,7 +43,6 @@ namespace DecodeUtil{
     strcpy(pdffile,outputbase);
     strcat(rootfile,"_new.root");
     strcat(pdffile,"_check.pdf");
-    
   }
 
   //

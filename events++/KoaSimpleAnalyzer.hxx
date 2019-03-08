@@ -1,5 +1,6 @@
 #ifndef _koa_simple_analyzer_hxx_
 #define _koa_simple_analyzer_hxx_
+
 #include "KoaAnalyzer.hxx"
 #include "TFile.h"
 #include "TH1F.h"
