@@ -400,6 +400,7 @@ int histplot()
     // Recoil RearSide Amplitude
     for(int i=0;i<4;i++){
       cRecRearAmp->cd(i+1); gPad->SetLogy();
+      hRecRearAmp[order[i]]->SetLineColor(kBlack);
       hRecRearAmp[order[i]]->Draw();
       hRecRearAmpCut[order[i]]->SetLineColor(kRed);
       hRecRearAmpCut[order[i]]->Draw("same");
@@ -407,17 +408,17 @@ int histplot()
 		cRecRearAmp->Modified();
 		cRecRearAmp->Update();
 
-    cCorrelation->cd(1); h2FwdTimeVSAmp[0]->Draw("colz");
-    cCorrelation->cd(5); h2FwdTimeVSAmp[1]->Draw("colz");
+    cCorrelation->cd(1); gPad->SetLogz(); h2FwdTimeVSAmp[0]->Draw("colz");
+    cCorrelation->cd(5); gPad->SetLogz();h2FwdTimeVSAmp[1]->Draw("colz");
 
-    cCorrelation->cd(2); h2FwdAmpVSRecAmp[0]->Draw("colz");
-    cCorrelation->cd(6); h2FwdAmpVSRecAmp[1]->Draw("colz");
+    cCorrelation->cd(2); gPad->SetLogz();h2FwdAmpVSRecAmp[0]->Draw("colz");
+    cCorrelation->cd(6); gPad->SetLogz();h2FwdAmpVSRecAmp[1]->Draw("colz");
 
-    cCorrelation->cd(3); h2FwdTimeVSRecAmp[0]->Draw("colz");
-    cCorrelation->cd(7); h2FwdTimeVSRecAmp[1]->Draw("colz");
+    cCorrelation->cd(3); gPad->SetLogz();h2FwdTimeVSRecAmp[0]->Draw("colz");
+    cCorrelation->cd(7); gPad->SetLogz();h2FwdTimeVSRecAmp[1]->Draw("colz");
 
-    cCorrelation->cd(4); hRecRearTimeDiff[0]->Draw();
-    cCorrelation->cd(8); hRecRearTimeDiff[1]->Draw();
+    cCorrelation->cd(4); gPad->SetLogy();hRecRearTimeDiff[0]->Draw();
+    cCorrelation->cd(8); gPad->SetLogy();hRecRearTimeDiff[1]->Draw();
 		cCorrelation->Modified();
 		cCorrelation->Update();
 

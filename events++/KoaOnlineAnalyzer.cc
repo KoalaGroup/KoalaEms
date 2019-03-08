@@ -550,8 +550,8 @@ namespace DecodeUtil
     for(int i=0;i<4;i++){
       h2RecHits[i] = new TH2F(Form("h2RecHits_%d",i+1),Form("%s FrontSide: Hits Spectrum",RecName[i].Data()),chnum[i],0.5,chnum[i]+0.5,ADC_MAXRANGE+2,-1.5,ADC_MAXRANGE+0.5);
       h2RecHitsCut[i] = new TH2F(Form("h2RecHitsCut_%d",i+1),Form("%s FrontSide: Hits Spectrum (After Fwd Amplitude Cuts)",RecName[i].Data()),chnum[i],0.5,chnum[i]+0.5,ADC_MAXRANGE+2,-1.5,ADC_MAXRANGE+0.5);
-      hRecRearAmp[i]=new TH1F(Form("hRecRearAmp_%d",i+1),Form("$s RearSide: Amplitude",RecName[i].Data()),ADC_MAXRANGE+2,-1.5,ADC_MAXRANGE+0.5);
-      hRecRearAmpCut[i]=new TH1F(Form("hRecRearAmpCut_%d",i+1),Form("$s RearSide: Amplitude (After Fwd Amplitude Cuts)",RecName[i].Data()),ADC_MAXRANGE+2,-1.5,ADC_MAXRANGE+0.5);
+      hRecRearAmp[i]=new TH1F(Form("hRecRearAmp_%d",i+1),Form("%s RearSide: Amplitude",RecName[i].Data()),ADC_MAXRANGE+2,-1.5,ADC_MAXRANGE+0.5);
+      hRecRearAmpCut[i]=new TH1F(Form("hRecRearAmpCut_%d",i+1),Form("%s RearSide: Amplitude (After Fwd Amplitude Cuts)",RecName[i].Data()),ADC_MAXRANGE+2,-1.5,ADC_MAXRANGE+0.5);
     }
     
 
