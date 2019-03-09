@@ -171,7 +171,7 @@ parse_file(int p)
 
     num=read_cluster(p, &buf);
     if (num<=0)  { /* no buf allocated */
-      res=-1;
+      res=num;
       break;
     }
 
