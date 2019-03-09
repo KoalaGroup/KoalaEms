@@ -10,7 +10,7 @@ namespace DecodeUtil{
   {
   public:
     KoaRaw() : fFile(nullptr){}
-    KoaRaw(TFile* file) : fFile(file){}
+    KoaRaw(TFile* file) : fFile(file), fEventNr(0) {}
     virtual ~KoaRaw();
 
     virtual void Setup(TFile* file) { fFile=file; }
@@ -18,6 +18,9 @@ namespace DecodeUtil{
     virtual void FillKoala(koala_event* event);
     virtual void FillEms(ems_event* event);
     virtual void Done();
+
+    UInt_t GetCurrentEventNr() { return fEventNr; }
+    Long_t GetCurrentEmsTime() { return fEmsTimeSecond; }
 
   private:
     void DecodeKoala(koala_event* event);
@@ -45,7 +48,7 @@ namespace DecodeUtil{
     // Ems Timestamp
     Long_t  fEmsTimeSecond;
     Long_t  fEmsTimeUSecond;
-    // UInt_t   fEventNr; [TODO]
+    UInt_t  fEventNr; 
   };
 }
 #endif

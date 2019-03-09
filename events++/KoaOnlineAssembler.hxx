@@ -1,5 +1,5 @@
-#ifndef _koa_timestamp_assembler_hxx_
-#define _koa_timestamp_assembler_hxx_
+#ifndef _koa_online_assembler_hxx_
+#define _koa_online_assembler_hxx_
 
 #include "KoaAssembler.hxx"
 #include "KoaLoguru.hxx"
@@ -7,19 +7,19 @@
 
 namespace DecodeUtil
 {
-  class KoaTimestampAssembler : public KoaAssembler
+  class KoaOnlineAssembler : public KoaAssembler
   {
   public:
-    KoaTimestampAssembler(): fRefModuleIndex(0),
-                             fQdcMaxDiff(3),
-                             fCheckRange(3)
+    KoaOnlineAssembler(): fQdcMaxDiff(3),
+                          fCheckRange(3)
     {
+      SetRefModuleIndex(0);
       fCurrentTS = new int64_t[nr_mesymodules];
       fEventBuffer = new mxdc32_event*[nr_mesymodules];
       fUnsyncStat = new uint32_t[nr_mesymodules]();
     }
 
-    virtual ~KoaTimestampAssembler()
+    virtual ~KoaOnlineAssembler()
     {
       if(fCurrentTS) delete fCurrentTS;
       if(fUnsyncStat) delete fUnsyncStat;

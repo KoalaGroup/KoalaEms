@@ -38,6 +38,10 @@ namespace DecodeUtil
     }
 
   protected:
+    static bool IsSameTS(int64_t fisrt, int64_t second);
+    bool ToBeAssembled();
+     
+  protected:
     koala_private*  fKoalaPrivate;
     mxdc32_private* fMxdc32Private;
     ems_private*    fEmsPrivate; // TODO: EmsPrivate not used in this class

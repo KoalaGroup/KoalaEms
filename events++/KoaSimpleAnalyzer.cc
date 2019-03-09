@@ -245,6 +245,10 @@ namespace DecodeUtil{
       fill_hist(koala_cur);
       koala_raw->FillKoala(koala_cur);
       koala_cur->recycle();
+
+      if(koala_raw->GetCurrentEventNr()==1){
+        fStartTime=koala_raw->GetCurrentEmsTime();
+      }
     }
   }
 
@@ -253,10 +257,13 @@ namespace DecodeUtil{
   {
     uint64_t total_events=fKoalaPrivate->get_statist_events();
 
+    fStopTime=koala_raw->GetCurrentEmsTime();
+    fEventRate= total_events/static_cast<Float_t>(fStopTime-fStartTime);
+
     //
     cout<<endl;
     cout<<"**********************************************"<<endl;
-    cout<<"    koala_events   : "<<setw(8)<<total_events<<endl;
+    cout<<"    koala_events (rate = "<< fEventRate<<" )  : "<<setw(8)<<total_events<<endl;
 
     cout<<"**********************************************"<<endl;
     cout<<"    sync_events   : ";

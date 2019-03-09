@@ -95,7 +95,7 @@ EXECS := $(SOURCES:.cc=)
 LIBSOURCES := mxdc32_data.cc koala_data.cc ems_data.cc \
 							KoaParsers.cc decode_util.cc KoaDecoder.cc \
 							KoaAnalyzer.cc  KoaSimpleAnalyzer.cc KoaOnlineAnalyzer.cc \
-							KoaAssembler.cc KoaTimestampAssembler.cc \
+							KoaAssembler.cc KoaTimestampAssembler.cc KoaOnlineAssembler.cc \
 							KoaRaw.cc KoaRawSimple.cc KoaRawSophisticated.cc \
 							KoaLoguru.cc 
 LIBOBJS := $(LIBSOURCES:.cc=.o)

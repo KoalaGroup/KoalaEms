@@ -522,6 +522,11 @@ int histplot()
       gMDaqRate->Add(gEventRate,"*L");
       legendDaqRate->AddEntry(gEventRate,"DAQ Event Rate","l");
       gMDaqRate->Draw("AL");
+      gMDaqRate->GetXaxis()->SetTimeDisplay(1);
+      gMDaqRate->GetXaxis()->SetLabelOffset(0.03);
+      gMDaqRate->GetXaxis()->SetNdivisions(-503);
+      gMDaqRate->GetXaxis()->SetTimeFormat("#splitline{%H:%M:%S}{%d\/%m}");
+      legendDaqRate->Draw();
 
       cDaqEfficiency->cd(2);
       gDaqEfficiency->Draw("A*L");

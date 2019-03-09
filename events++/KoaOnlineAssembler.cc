@@ -1,27 +1,23 @@
-#include "KoaTimestampAssembler.hxx"
+#include "KoaOnlineAssembler.hxx"
 #include "koala_data.hxx"
 
-#define TS_RANGE 0x40000000
 
 namespace DecodeUtil
 {
   //
   int
-  KoaTimestampAssembler::Assemble()
+  KoaOnlineAssembler::Assemble()
   {
     // if not empty, pop out the next event
     while(ToBeAssembled()){
-      // Is there remaining modules to be checked from previous cluster
-      if(!fToBeCheckedList.empty()){
-        if(!ProcessUnsyncModules())
-          break;
-      }
       // check all modules sync or not
       if(IsSync()){
         StoreEvent();
+        LOG_F(INFO,"one more sync events: %d",fKoalaPrivate->statist.events);
       }
       else if(!ProcessUnsyncModules()){
         // if not, iterate every unsync module to find the next sync event
+        LOG_F(INFO,"Unsync: end of this EMS Event");
         break;
       }
     }
@@ -30,28 +26,34 @@ namespace DecodeUtil
   }
   //
   bool
-  KoaTimestampAssembler::IsSync()
+  KoaOnlineAssembler::IsSync()
   {
     CHECK_F(fToBeCheckedList.empty(),"There are remaining modules to be processed from previous cluster");
     //
     fEventBuffer[fRefModuleIndex]=fMxdc32Private[fRefModuleIndex].drop_event();
     fCurrentTS[fRefModuleIndex]=fEventBuffer[fRefModuleIndex]->timestamp;
+    if(mesymodules[fRefModuleIndex].mesytype == mesytec_mqdc32)
+      fCurrentTS[fRefModuleIndex]-=fQdcMaxDiff;
+
     for(int i=0;i<nr_mesymodules;i++){
       if(i!=fRefModuleIndex){
         fEventBuffer[i]=fMxdc32Private[i].drop_event();
         fCurrentTS[i]=fEventBuffer[i]->timestamp;
+        if(mesymodules[i].mesytype == mesytec_mqdc32)
+          fCurrentTS[i]-=fQdcMaxDiff;
         if(!IsSameTS(fCurrentTS[i],fCurrentTS[fRefModuleIndex])){
           fToBeCheckedList.push_back(i);
           fEventBuffer[i]->recycle();
           fUnsyncStat[i]++;
         }
       }
+      LOG_F(INFO,"module %d time: %ld",i,fCurrentTS[i]);
     }
     return fToBeCheckedList.empty();
   }
   //
   void
-  KoaTimestampAssembler::StoreEvent()
+  KoaOnlineAssembler::StoreEvent()
   {
     koala_event *koala_cur=nullptr;
     koala_cur=fKoalaPrivate->prepare_event();
@@ -64,18 +66,23 @@ namespace DecodeUtil
   }
   //
   bool
-  KoaTimestampAssembler::ProcessUnsyncModules()
+  KoaOnlineAssembler::ProcessUnsyncModules()
   {
     int index;
     bool found_new;
+    bool offset=0;
     // if not empty, pop out next event in the unsync module and check sync or not
     while(!fToBeCheckedList.empty()){
       index=fToBeCheckedList.back();
       found_new=false;
+      if(mesymodules[index].mesytype==mesytec_mqdc32)
+        offset=fQdcMaxDiff;
+      else
+        offset=0;
       //
       while(!fMxdc32Private[index].is_empty()){
         fEventBuffer[index]=fMxdc32Private[index].drop_event();
-        fCurrentTS[index]=fEventBuffer[index]->timestamp;
+        fCurrentTS[index]=fEventBuffer[index]->timestamp-offset;
         if(IsSameTS(fCurrentTS[fRefModuleIndex],fCurrentTS[index])){
           fToBeCheckedList.pop_back();
           found_new=true;
@@ -95,12 +102,14 @@ namespace DecodeUtil
       StoreEvent();
     }
     else{
+      fToBeCheckedList.clear();
       return false;
     }
     return true;
-}
+  }
+  //
 void
-KoaTimestampAssembler::Print()
+KoaOnlineAssembler::Print()
 {
   printf("############################################\n");
   printf("Unsync events:\n");

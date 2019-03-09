@@ -51,6 +51,9 @@ namespace DecodeUtil{
     TH1F* hwords[nr_mesymodules];
     KoaRaw* koala_raw;
     timestamp_statist timestamp_statist;
+    Long_t  fStartTime;
+    Long_t  fStopTime;
+    Float_t fEventRate;
   };
 }
 

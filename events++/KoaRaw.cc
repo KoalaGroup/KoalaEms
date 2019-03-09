@@ -35,11 +35,14 @@ namespace DecodeUtil
     fData      = new Int_t[nr_mesymodules][34];
     fScaler = new UInt_t[34];
 
+    fEventNr=0;
+
     InitImp();
   }
 
   void KoaRaw::FillKoala(koala_event* koala)
   {
+    fEventNr++;
     DecodeKoala(koala);
     FillKoalaImp();
   }
