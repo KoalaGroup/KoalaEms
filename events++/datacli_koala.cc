@@ -23,6 +23,7 @@
 #include "KoaOnlineAnalyzer.hxx"
 #include "KoaAssembler.hxx"
 #include "KoaTimestampAssembler.hxx"
+#include "KoaOnlineAssembler.hxx"
 
 using namespace DecodeUtil;
 
@@ -352,9 +353,10 @@ main_loop()
     decoder->SetPrivateList(evtlist);
     decoder->SetParsers(ISes);
     //
-    // KoaAssembler* assembler=new KoaAssembler();
-    KoaTimestampAssembler* assembler=new KoaTimestampAssembler();
-    assembler->SetQdcMaxDiff(3);
+    KoaAssembler* assembler=new KoaAssembler();
+    // KoaTimestampAssembler* assembler=new KoaTimestampAssembler();
+    // KoaOnlineAssembler* assembler=new KoaOnlineAssembler();
+    // assembler->SetQdcMaxDiff(3);
     decoder->SetAssembler(assembler);
     //
     KoaOnlineAnalyzer*  analyzer=new KoaOnlineAnalyzer();

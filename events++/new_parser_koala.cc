@@ -31,6 +31,7 @@ static bool use_simplestructure;
 static const char* outputfile;
 static int max_tsdiff;
 static char* const *files;
+static int ref_module;
 
 static EmsIsInfo ISes[]={
   {"scalor",parserty_scalor,1},
@@ -155,6 +156,7 @@ parse_file(int p)
   // KoaAssembler* assembler=new KoaAssembler();
   KoaTimestampAssembler* assembler=new KoaTimestampAssembler();
   assembler->SetQdcMaxDiff(max_tsdiff);
+  assembler->SetRefModuleIndex(ref_module);
   decoder->SetAssembler(assembler);
 
   //
@@ -221,7 +223,7 @@ readargs(int argc, char* argv[])
   int c;
   bool err=false;
 
-  while (!err && ((c=getopt(argc, argv, "hsm:o:")) != -1)) {
+  while (!err && ((c=getopt(argc, argv, "hsm:o:r:")) != -1)) {
     switch (c) {
     case 'h':
       printusage(argv[0]);
@@ -236,6 +238,9 @@ readargs(int argc, char* argv[])
       }
     case 'o':
       outputfile=optarg;
+      break;
+    case 'r':
+      ref_module = atoi(optarg);
       break;
     default:
       err=true;
@@ -258,6 +263,7 @@ prepare_globals()
   use_simplestructure=false;
   outputfile="koala_data";
   max_tsdiff=2;
+  ref_module=0;
 }
 
 //---------------------------------------------------------------------------//

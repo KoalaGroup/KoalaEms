@@ -154,9 +154,11 @@ int histplot()
 
 	TCanvas *cDaqEfficiency;
 	cDaqEfficiency = new TCanvas("cDaqEfficiency","DAQ Efficiency", 2000,1500, 2000, 800);
+  cDaqEfficiency->Divide(2,1);
 	cDaqEfficiency->Draw();
 	cDaqEfficiency->Modified();
 	cDaqEfficiency->Update();
+  
 
 	TCanvas *cCorrelation;
 	cCorrelation = new TCanvas("cCorrelation","Correlation Graphs", 20,15, 2000, 1000);
@@ -216,6 +218,9 @@ int histplot()
   TMultiGraph *gMHitRateSiRear = new TMultiGraph();
   TLegend  *legendHitRateGeOverlap=new TLegend(0.1,0.7,0.4,0.9);
   TLegend  *legendHitRateSiRear=new TLegend(0.1,0.7,0.4,0.9);
+
+  TMultiGraph *gMDaqRate = new TMultiGraph();
+  TLegend  *legendDaqRate=new TLegend(0.1,0.7,0.4,0.9);
 	//loop displaying the histograms, Once the producer stops this script will break out of the loop
 	Double_t oldentries = 0;
 	while(1) 
@@ -274,21 +279,25 @@ int histplot()
     legendHitRateGeOverlap->SetHeader("Ge1 & Ge2 Overlap Hit Rates");
     legendHitRateSiRear->Clear();
     legendHitRateSiRear->SetHeader("Si1 & Si2 Rear Side Hit Rates");
+    legendDaqRate->Clear();
+    legendDaqRate->SetHeader("DAQ Rates");
 
     for(int i=0;i<4;i++){
       gMHitRateFwd->RecursiveRemove(gHitRateFwd[i]);
       gMHitRateRec->RecursiveRemove(gHitRateRec[i]);
     }
     gMHitRateFwd->RecursiveRemove(gHitRateCommonOr);
-    // gMHitRateRec->RecursiveRemove(gHitRateCommonOr);
+    gMHitRateRec->RecursiveRemove(gHitRateCommonOr);
     gMHitRateFwd->RecursiveRemove(gEventRate);
-    // gMHitRateRec->RecursiveRemove(gEventRate);
+    gMHitRateRec->RecursiveRemove(gEventRate);
 
     for(int i=0;i<2;i++){
       gMHitRateGeOverlap->RecursiveRemove(gHitRateGeOverlap[i]);
       gMHitRateSiRear->RecursiveRemove(gHitRateSiRear[i]);
     }
     
+    gMDaqRate->RecursiveRemove(gHitRateCommonOr);
+    gMDaqRate->RecursiveRemove(gEventRate);
     // get the latest results
     for(int i=0;i<4;i++){
       gHitRateRec[i]= (TGraph*) mfile->Get(Form("gHitRateRec_%d",i+1), gHitRateRec[i]);
@@ -425,6 +434,7 @@ int histplot()
 
     // Graph
     cHitRateFwd->cd();
+    gPad->SetLogy();
     for(int i=0;i<4;i++){
       gMHitRateFwd->Add(gHitRateFwd[i],"*L");
       legendHitRateFwd->AddEntry(gHitRateFwd[i],FwdName[i].Data(),"l");
@@ -434,9 +444,11 @@ int histplot()
     gMHitRateFwd->Add(gEventRate,"*L");
     legendHitRateFwd->AddEntry(gEventRate,"DAQ Event Rate","l");
     if(gHitRateFwd[0]->GetN()){
+      // gMHitRateFwd->GetXaxis()->SetLimits(xlimit,xlimit+1000);
+      // gMHitRateFwd->GetHistogram()->SetMaximum(8000);
+      // gMHitRateFwd->GetHistogram()->SetMinimum(0);
       gMHitRateFwd->Draw("AL");
       gPad->Update();
-      // gMHitRateFwd->GetXaxis()->SetLimits(xlimit,xlimit+1000);
       gMHitRateFwd->GetXaxis()->SetTimeDisplay(1);
       gMHitRateFwd->GetXaxis()->SetLabelOffset(0.03);
       gMHitRateFwd->GetXaxis()->SetNdivisions(-503);
@@ -448,14 +460,15 @@ int histplot()
 		cHitRateFwd->Update();
     
     cHitRateRec->cd();
+    gPad->SetLogy();
     for(int i=0;i<4;i++){
       gMHitRateRec->Add(gHitRateRec[i],"*L");
       legendHitRateRec->AddEntry(gHitRateRec[i],RecName[i].Data(),"l");
     }
-    // gMHitRateRec->Add(gHitRateCommonOr,"*L");
-    // legendHitRateRec->AddEntry(gHitRateCommonOr,"Trigger Rate","l");
-    // gMHitRateRec->Add(gEventRate,"*L");
-    // legendHitRateRec->AddEntry(gEventRate,"DAQ Event Rate","l");
+    gMHitRateRec->Add(gHitRateCommonOr,"*L");
+    legendHitRateRec->AddEntry(gHitRateCommonOr,"Trigger Rate","l");
+    gMHitRateRec->Add(gEventRate,"*L");
+    legendHitRateRec->AddEntry(gEventRate,"DAQ Event Rate","l");
     if(gHitRateRec[0]->GetN()){
       gMHitRateRec->Draw("AL");
       gPad->Update();
@@ -502,8 +515,15 @@ int histplot()
 		cHitRateSiRear->Modified();
 		cHitRateSiRear->Update();
 
-    cDaqEfficiency->cd();
     if(gDaqEfficiency->GetN()){
+      cDaqEfficiency->cd(1);
+      gMDaqRate->Add(gHitRateCommonOr,"*L");
+      legendDaqRate->AddEntry(gHitRateCommonOr,"Trigger Rate","l");
+      gMDaqRate->Add(gEventRate,"*L");
+      legendDaqRate->AddEntry(gEventRate,"DAQ Event Rate","l");
+      gMDaqRate->Draw("AL");
+
+      cDaqEfficiency->cd(2);
       gDaqEfficiency->Draw("A*L");
       gPad->Update();
       gDaqEfficiency->GetXaxis()->SetTimeDisplay(1);
