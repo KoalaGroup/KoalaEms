@@ -22,7 +22,10 @@ public:
   UInt_t  fScalerSiRear[2];
   UInt_t  fScalerFwdCh[8];
 
-  ClassDef(KoaEmsEvent,1);// initial version for bt2019 march
+  //
+  UInt_t  fEventNr;
+
+  ClassDef(KoaEmsEvent,2);// initial version for bt2019 march
 };
 
 #endif

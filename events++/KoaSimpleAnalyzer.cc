@@ -233,12 +233,7 @@ namespace DecodeUtil{
   //
   int KoaSimpleAnalyzer::Analyze()
   {
-    ems_event*  ems_cur=nullptr;
-    while(ems_cur=fEmsPrivate->drop_event()){
-      koala_raw->FillEms(ems_cur);
-      ems_cur->recycle();
-    }
-    //
+    // decode koala data first, to get the latest events
     koala_event* koala_cur=nullptr;
     while(koala_cur=fKoalaPrivate->drop_event()){
       check_timestamp(koala_cur);
@@ -249,6 +244,12 @@ namespace DecodeUtil{
       if(koala_raw->GetCurrentEventNr()==1){
         fStartTime=koala_raw->GetCurrentEmsTime();
       }
+    }
+    //
+    ems_event*  ems_cur=nullptr;
+    while(ems_cur=fEmsPrivate->drop_event()){
+      koala_raw->FillEms(ems_cur);
+      ems_cur->recycle();
     }
   }
 

@@ -16,15 +16,18 @@ public:
 
   ems_event* next;
   // From data frame, event index of this ems event
+  // can be used to check the continuity of the data flow in online mode
   uint32_t event_nr; 
   bool evnr_valid;
   // From Timestamp subevent(or IS)
+  // can be used to calculate the hit rates and event rates
   struct timeval tv;
   bool tv_valid;
   // From Scalor subevent(or IS)
   uint32_t scaler[32];
   bool scaler_valid;
   // Beam counter?
+  // Not used currently
   float bct[8];
   bool bct_valid;
 

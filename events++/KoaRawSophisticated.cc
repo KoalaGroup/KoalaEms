@@ -136,6 +136,8 @@ namespace DecodeUtil
       fEmsEvent->fScalerFwdCh[i]=fScaler[16+i];
     }
 
+    // total decoded events at this readout time
+    fEmsEvent->fEventNr=fEventNr;
     //
     fTreeEms->Fill();
   }
