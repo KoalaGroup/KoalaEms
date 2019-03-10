@@ -92,6 +92,7 @@ public:
   void store_event(void);
   ems_event* drop_event(void);
   bool  is_empty();
+  ems_event* head();
 
 private:
   ems_depot *fDepot;

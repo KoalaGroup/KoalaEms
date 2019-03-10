@@ -87,6 +87,7 @@ public:
   void store_event(void);
   mxdc32_event* drop_event(void);
   bool is_empty();
+  mxdc32_event* head();
 
   uint64_t get_statist_events()
   {

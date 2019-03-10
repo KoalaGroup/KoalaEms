@@ -122,6 +122,12 @@ mxdc32_private::is_empty()
 }
 
 //---------------------------------------------------------------------------//
+mxdc32_event* mxdc32_private::head()
+{
+  return first;
+}
+
+//---------------------------------------------------------------------------//
 mxdc32_depot* mxdc32_depot::fInstance=nullptr;
 Mxdc32DepotDestroyer mxdc32_depot::fDestroyer;
 

@@ -177,3 +177,10 @@ koala_private::is_empty()
 
   return false;
 }
+
+//
+koala_event*
+koala_private::head()
+{
+  return first;
+}

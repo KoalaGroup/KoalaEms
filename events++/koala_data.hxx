@@ -84,6 +84,7 @@ public:
   void store_event();
   koala_event* drop_event();
   bool  is_empty();
+  koala_event* head();
 
   uint32_t get_statist_events()
   {

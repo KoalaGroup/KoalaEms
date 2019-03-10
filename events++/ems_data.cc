@@ -178,3 +178,10 @@ ems_private::is_empty()
 
   return false;
 }
+
+//---------------------------------------------------------------------------//
+ems_event*
+ems_private::head()
+{
+  return first;
+}
