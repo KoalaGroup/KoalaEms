@@ -44,6 +44,10 @@ namespace DecodeUtil
     void  StoreEvent();
     bool  ProcessUnsyncModules();
 
+    bool  IsContinuous(); // check if the new EMS event is continuous with the previous one
+    void  MoveToNewStartInOrder();
+    void  MoveToNewStartOutOfOrder();
+
   private:
     int   fRefModuleIndex; // the reference module as starting point
                            // normally, it should be the first ADC
@@ -53,6 +57,8 @@ namespace DecodeUtil
     std::vector<int>  fToBeCheckedList;
     mxdc32_event **fEventBuffer;
     uint32_t *fUnsyncStat;
+
+    uint32_t fCurrentEmsEventNr;
   };
 }
 

@@ -8,6 +8,16 @@ namespace DecodeUtil
   int
   KoaOnlineAssembler::Assemble()
   {
+    // First,  move to the first synchronized events
+    if(IsContinuous())
+      MoveToNewStartInOrder();
+    else{
+      fToBeCheckedList.clear();
+      MoveToNewStartOutOfOrder();
+    }
+    StoreEvent();
+
+    // Second, use the reference module to find the synchronized events
     // if not empty, pop out the next event
     while(ToBeAssembled()){
       // check all modules sync or not
@@ -15,7 +25,10 @@ namespace DecodeUtil
         StoreEvent();
         LOG_F(INFO,"one more sync events: %d",fKoalaPrivate->statist.events);
       }
-      else if(!ProcessUnsyncModules()){
+      else if(ProcessUnsyncModules()){
+        StoreEvent();
+      }
+      else{
         // if not, iterate every unsync module to find the next sync event
         LOG_F(INFO,"Unsync: end of this EMS Event");
         break;
@@ -98,24 +111,46 @@ namespace DecodeUtil
         break;
     }
     //
-    if(fToBeCheckedList.empty()){
-      StoreEvent();
-    }
-    else{
-      fToBeCheckedList.clear();
-      return false;
-    }
-    return true;
+    return fToBeCheckedList.empty();
   }
   //
-void
-KoaOnlineAssembler::Print()
-{
-  printf("############################################\n");
-  printf("Unsync events:\n");
-  for(int i=0;i<nr_mesymodules;i++){
-    printf("%ld\t",fUnsyncStat[i]);
+  bool KoaOnlineAssembler::IsContinuous()
+  {
+    ems_event* ems_cur=fEmsPrivate->head();
+    CHECK_NOTNULL_F(ems_cur,"Ems event does not exist!");
+
+    uint32_t old=fCurrentEmsEventNr;
+    fCurrentEmsEventNr=ems_cur->event_nr;
+    if(fCurrentEmsEventNr == (old+1))
+      return true;
+    else
+      return false;
   }
-  printf("\n");
-}
+  //
+  void
+  KoaOnlineAssembler::MoveToNewStartInOrder()
+  {
+    if(!fToBeCheckedList.empty()){
+      ProcessUnsyncModules();
+    }
+    return;
+  }
+  //
+  void
+  KoaOnlineAssembler::MoveToNewStartOutOfOrder()
+  {
+    fToBeCheckedList.clear();
+    
+  }
+  //
+  void
+  KoaOnlineAssembler::Print()
+  {
+    printf("############################################\n");
+    printf("Unsync events:\n");
+    for(int i=0;i<nr_mesymodules;i++){
+      printf("%ld\t",fUnsyncStat[i]);
+    }
+    printf("\n");
+  }
 }
