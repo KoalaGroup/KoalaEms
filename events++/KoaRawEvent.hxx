@@ -33,7 +33,7 @@ public:
   Float_t   fRecRearTime[2];// unit: ns
   Float_t   fFwdTime[8];// unit: ns
 
-  Float_t   fTriggerTime[2];
+  Float_t   fTriggerTime[3];
 
   ClassDef(KoaRawEvent,1); //initial version for bt2019
 };

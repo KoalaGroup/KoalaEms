@@ -78,30 +78,39 @@ namespace DecodeUtil
       fKoaRawEvent->fGe1Time[i]=g_invalidtime;
       fKoaRawEvent->fGe2Time[i]=g_invalidtime;
     }
-    // Si1 : Physical Position 48->17 ===> TDC2 1->32
+    // Si1 : Physical Position 48->17 ===> TDC1 1->32
     for(int i=0;i<32;i++){
-      fKoaRawEvent->fSi1Time[47-i]=fData[8][i]*time_resolution[fResolution[8]-1];
+      fKoaRawEvent->fSi1Time[47-i]=fData[7][i]*time_resolution[fResolution[7]-1];
     }
-    // Si2 : Physical Position 1->16 ===> TDC1 17->32
+    // Si1 : Physical Position 16->1 ===> TDC2 1->16
     for(int i=0;i<16;i++){
-      fKoaRawEvent->fSi2Time[i]=fData[7][16+i]*time_resolution[fResolution[7]-1];
+      fKoaRawEvent->fSi1Time[15-i]=fData[8][i]*time_resolution[fResolution[8]-1];
     }
-    // Si2 : Physical Position 17->22 ===> TDC1 11->16
+    // Si2 : Physical Position 1->16 ===> TDC2 17->32
+    for(int i=0;i<16;i++){
+      fKoaRawEvent->fSi2Time[i]=fData[8][16+i]*time_resolution[fResolution[8]-1];
+    }
+    // Si2 : Physical Position 17->32 ===> TDC3 1->16
+    for(int i=0;i<16;i++){
+      fKoaRawEvent->fSi2Time[16+i]=fData[9][i]*time_resolution[fResolution[9]-1];
+    }
+    // Si2 : Physical Position 33->38 ===> TDC3 27->32
     for(int i=0;i<6;i++){
-      fKoaRawEvent->fSi2Time[16+i]=fData[7][10+i]*time_resolution[fResolution[7]-1];
+      fKoaRawEvent->fSi2Time[32+i]=fData[9][26+i]*time_resolution[fResolution[9]-1];
     }
-    // Si1 Rear Time : TDC1 9
-    // Si2 Rear Time : TDC1 10
+    // Si1 Rear Time : TDC3 9
+    // Si2 Rear Time : TDC3 10
     for(int i=0;i<2;i++){
-      fKoaRawEvent->fRecRearTime[i]=fData[7][8+i]*time_resolution[fResolution[7]-1];
+      fKoaRawEvent->fRecRearTime[i]=fData[9][8+i]*time_resolution[fResolution[9]-1];
     }
-    // Fwd: 1-8 ===> TDC1 1->8
+    // Fwd: 1-8 ===> TDC3 1->8
     for(int i=0;i<8;i++){
-      fKoaRawEvent->fFwdTime[i]=fData[7][i]*time_resolution[fResolution[7]-1];
+      fKoaRawEvent->fFwdTime[i]=fData[9][i]*time_resolution[fResolution[9]-1];
     }
     //
     fKoaRawEvent->fTriggerTime[0]=(fData[7][32]*time_resolution[fResolution[7]-1]);
     fKoaRawEvent->fTriggerTime[1]=(fData[8][32]*time_resolution[fResolution[8]-1]);
+    fKoaRawEvent->fTriggerTime[2]=(fData[9][32]*time_resolution[fResolution[9]-1]);
 
     //
     fTreeKoaRaw->Fill();
@@ -126,6 +135,10 @@ namespace DecodeUtil
     // Ge1 and Ge2 Overlapping area (5 strips)
     for(int i=0;i<2;i++){
       fEmsEvent->fScalerGeOverlap[i]=fScaler[6+i];
+    }
+    // Si1 Si2 RearSide && FwdOutside
+    for(int i=0;i<2;i++){
+      fEmsEvent->fScalerSiFwdOutsideCon[i]=fScaler[12+i];
     }
     // Si1 Si2 Rear Side
     for(int i=0;i<2;i++){
