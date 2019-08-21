@@ -314,26 +314,34 @@ namespace DecodeUtil
       fPGe1_Timestamp[i]=reinterpret_cast<Int_t*>(&g_invalidtime);
       fPGe2_Timestamp[i]=reinterpret_cast<Int_t*>(&g_invalidtime);
     }
-    // Si1 : Physical Position 48->17 ===> TDC2 1->32
+    // Si1 : Physical Position 48->17 ===> TDC1 1->32
     for(int i=0;i<32;i++){
-      fPSi1_Timestamp[47-i]=&fData[8][i];
+      fPSi1_Timestamp[47-i]=&fData[7][i];
     }
-    // Si2 : Physical Position 1->16 ===> TDC1 17->32
+    // Si1 : Physical Position 16->1 ===> TDC2 1->16
     for(int i=0;i<16;i++){
-      fPSi2_Timestamp[i]=&fData[7][16+i];
+      fPSi1_Timestamp[15-i]=&fData[8][i];
     }
-    // Si2 : Physical Position 17->22 ===> TDC1 11->16
+    // Si2 : Physical Position 1->16 ===> TDC2 17->32
+    for(int i=0;i<16;i++){
+      fPSi2_Timestamp[i]=&fData[8][16+i];
+    }
+    // Si2 : Physical Position 17->32 ===> TDC3 1->16
+    for(int i=0;i<16;i++){
+      fPSi2_Timestamp[16+i]=&fData[9][i];
+    }
+    // Si2 : Physical Position 33->38 ===> TDC3 27->32
     for(int i=0;i<6;i++){
-      fPSi2_Timestamp[16+i]=&fData[7][10+i];
+      fPSi2_Timestamp[32+i]=&fData[9][26+i];
     }
-    // Si1 Rear Time : TDC1 9
-    // Si2 Rear Time : TDC1 10
+    // Si1 Rear Time : TDC3 25
+    // Si2 Rear Time : TDC3 26
     for(int i=0;i<2;i++){
-      fPRecRear_Timestamp[i]=&fData[7][8+i];
+      fPRecRear_Timestamp[i]=&fData[9][24+i];
     }
-    // Fwd: 1-8 ===> TDC1 1->8
+    // Fwd: 1-8 ===> TDC3 17->24
     for(int i=0;i<8;i++){
-      fPFwd_Timestamp[i]=&fData[7][i];
+      fPFwd_Timestamp[i]=&fData[9][16+i];
     }
 
     // Amplitudes
@@ -416,29 +424,38 @@ namespace DecodeUtil
       fGe1_Timestamp[i]=g_invalidtime;
       fGe2_Timestamp[i]=g_invalidtime;
     }
-    // Si1 : Physical Position 48->17 ===> TDC2 1->32
+    // Si1 : Physical Position 48->17 ===> TDC1 1->32
     for(int i=0;i<32;i++){
-      fSi1_Timestamp[47-i]=fData[8][i]*time_resolution[fResolution[8]-1];
+      fSi1_Timestamp[47-i]=fData[7][i]*time_resolution[fResolution[7]-1];
     }
-    // Si2 : Physical Position 1->16 ===> TDC1 17->32
+    // Si1 : Physical Position 16->1 ===> TDC2 1->16
     for(int i=0;i<16;i++){
-      fSi2_Timestamp[i]=fData[7][16+i]*time_resolution[fResolution[7]-1];
+      fSi1_Timestamp[15-i]=fData[8][i]*time_resolution[fResolution[8]-1];
     }
-    // Si2 : Physical Position 17->22 ===> TDC1 11->16
+    // Si2 : Physical Position 1->16 ===> TDC2 17->32
+    for(int i=0;i<16;i++){
+      fSi2_Timestamp[i]=fData[8][16+i]*time_resolution[fResolution[8]-1];
+    }
+    // Si2 : Physical Position 17->32 ===> TDC3 1->16
+    for(int i=0;i<16;i++){
+      fSi2_Timestamp[16+i]=fData[9][i]*time_resolution[fResolution[9]-1];
+    }
+    // Si2 : Physical Position 33->38 ===> TDC3 27->32
     for(int i=0;i<6;i++){
-      fSi2_Timestamp[16+i]=fData[7][10+i]*time_resolution[fResolution[7]-1];
+      fSi2_Timestamp[32+i]=fData[9][26+i]*time_resolution[fResolution[9]-1];
     }
-    // Si1 Rear Time : TDC1 9
-    // Si2 Rear Time : TDC1 10
+    // Si1 Rear Time : TDC3 25
+    // Si2 Rear Time : TDC3 26
     for(int i=0;i<2;i++){
-      fRecRear_Timestamp[i]=fData[7][8+i]*time_resolution[fResolution[7]-1];
+      fRecRear_Timestamp[i]=fData[9][24+i]*time_resolution[fResolution[9]-1];
     }
-    // Fwd: 1-8 ===> TDC1 1->8
+    // Fwd: 1-8 ===> TDC3 1->8
     for(int i=0;i<8;i++){
-      fFwd_Timestamp[i]=fData[7][i]*time_resolution[fResolution[7]-1];
+      fFwd_Timestamp[i]=fData[9][16+i]*time_resolution[fResolution[9]-1];
     }
     fTrig_Timestamp[0]=(fData[7][32]*time_resolution[fResolution[7]-1]);
     fTrig_Timestamp[1]=(fData[8][32]*time_resolution[fResolution[8]-1]);
+    fTrig_Timestamp[2]=(fData[9][32]*time_resolution[fResolution[9]-1]);
 
     // Amplitudes
     // Si1 : Physical Position 48->17 ===> ADC1 1->32

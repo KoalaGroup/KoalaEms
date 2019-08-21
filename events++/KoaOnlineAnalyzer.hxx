@@ -97,7 +97,7 @@ namespace DecodeUtil{
     Float_t   fGe2_Timestamp[32];// unit: ns
     Int_t     fFwd_Amplitude[8];
     Float_t   fFwd_Timestamp[8];// unit: ns
-    Float_t   fTrig_Timestamp[2];
+    Float_t   fTrig_Timestamp[3];
     
     // scaler
     UInt_t  *fScaler;

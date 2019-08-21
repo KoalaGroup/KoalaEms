@@ -98,14 +98,14 @@ namespace DecodeUtil
     for(int i=0;i<6;i++){
       fKoaRawEvent->fSi2Time[32+i]=fData[9][26+i]*time_resolution[fResolution[9]-1];
     }
-    // Si1 Rear Time : TDC3 9
-    // Si2 Rear Time : TDC3 10
+    // Si1 Rear Time : TDC3 25
+    // Si2 Rear Time : TDC3 26
     for(int i=0;i<2;i++){
-      fKoaRawEvent->fRecRearTime[i]=fData[9][8+i]*time_resolution[fResolution[9]-1];
+      fKoaRawEvent->fRecRearTime[i]=fData[9][24+i]*time_resolution[fResolution[9]-1];
     }
-    // Fwd: 1-8 ===> TDC3 1->8
+    // Fwd: 1-8 ===> TDC3 17->24
     for(int i=0;i<8;i++){
-      fKoaRawEvent->fFwdTime[i]=fData[9][i]*time_resolution[fResolution[9]-1];
+      fKoaRawEvent->fFwdTime[i]=fData[9][16+i]*time_resolution[fResolution[9]-1];
     }
     //
     fKoaRawEvent->fTriggerTime[0]=(fData[7][32]*time_resolution[fResolution[7]-1]);

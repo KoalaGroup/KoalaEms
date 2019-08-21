@@ -14,7 +14,7 @@ namespace DecodeUtil{
     KoaSimpleAnalyzer(const char* outputfile="koala_raw.root", bool use_simplestructure=true,  int max_diff=0);
     virtual ~KoaSimpleAnalyzer();
 
-    void SetOutputFile(const char* outputfile);
+    void SetOutputFile(const char* outputfile, bool use_simplestructure);
     void SetSimpleStructure(bool);
     void SetMaxDiff(int);
 

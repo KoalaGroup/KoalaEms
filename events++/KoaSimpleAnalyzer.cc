@@ -12,7 +12,7 @@ namespace DecodeUtil{
   //
   KoaSimpleAnalyzer::KoaSimpleAnalyzer(const char* outputfile, bool use_simplestructure,  int max_diff) : rfile(nullptr), koala_raw(nullptr)
   {
-    SetOutputFile(outputfile);
+    SetOutputFile(outputfile, use_simplestructure);
     SetSimpleStructure(use_simplestructure);
     SetMaxDiff(max_diff);
   }
@@ -28,7 +28,7 @@ namespace DecodeUtil{
 
   //
   void
-  KoaSimpleAnalyzer::SetOutputFile(const char* outputfile)
+  KoaSimpleAnalyzer::SetOutputFile(const char* outputfile, bool use_simplestructure)
   {
     const char* p;
     if((p = strrchr(outputfile,'.')) != NULL){
@@ -41,7 +41,12 @@ namespace DecodeUtil{
 
     strcpy(rootfile,outputbase);
     strcpy(pdffile,outputbase);
-    strcat(rootfile,"_new.root");
+    if(use_simplestructure){
+      strcat(rootfile,"_simple.root");
+    }
+    else{
+      strcat(rootfile,"_new.root");
+    }
     strcat(pdffile,"_check.pdf");
   }
 
