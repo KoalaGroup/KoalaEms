@@ -67,7 +67,7 @@ LIBSUFFIX = @LIBSUFFIX@
 ROOTLIBS  := $(shell root-config --new --libs)
 ROOTGLIBS := $(shell root-config --new --glibs)
 ROOTINC   := $(shell root-config --new --cflags)
-ROOTCLING := rootcling
+ROOTCLING := rootcint
 
 # self-defined compiling configurations, sources, execs, libraries
 CPPFLAGS = @CPPFLAGS@ -I$(srcdir) -I. -I$(COMMON_INCLUDE)  \
@@ -110,29 +110,32 @@ EVTLIB     := KoaEvt
 .PHONY: all
 all: $(EXECS) $(LIBS) $(EVTLIB)
 
-$(EVTLIB): KoaEvtDict.cc $(EVTSOURCES)
+$(EVTLIB): KoaEvtDict.o $(EVTSOURCES)
 	$(CXX) -shared -fPIC -o lib$(EVTLIB).so $(CPPFLAGS) $(ROOTLIBS) $^
 
+KoaEvtDict.o: KoaEvtDict.cc KoaEvtDict.h
+	$(CXX) -shared -fPIC -c $^ $(CPPFLAGS)
+
 KoaEvtDict.cc: $(EVTHEADERS) LinkDef.h
-	$(ROOTCLING) -f $@ $^
+	$(ROOTCLING) -f $@ -c $^
 
 $(LIBS): $(LIBOBJS) $(EVTLIB)
 	$(AR) cr $@ $(LIBOBJS)
 	$(RANLIB) $@
 
 new_parser_koala: new_parser_koala.o $(LIBS)
-	$(CXX) -o $@ $^ $(LDLIBS) -l$(EVTLIB)
+	$(CXX) -o $@ $^ $(LDLIBS) -L. -l$(EVTLIB)
 
 replay_koala: replay_koala.o $(LIBS)
-	$(CXX) -o $@ $^ $(LDLIBS) -l$(EVTLIB)
+	$(CXX) -o $@ $^ $(LDLIBS) -L. -l$(EVTLIB)
 
 event_distributor: event_distributor.o
 	$(CXX) -o $@ $^ $(LDLIBS)
 
 datacli_koala: datacli_koala.o $(LIBS)
-	$(CXX) -o $@ $^ $(LDLIBS) -l$(EVTLIB)
+	$(CXX) -o $@ $^ $(LDLIBS) -L. -l$(EVTLIB)
 
-online_koala: online_koala.o
+online_koala: online_koala.o $(LIBS)
 	$(CXX) -o $@ $^ $(LDLIBS) 
 
 # generate the rules for compiling the .o files.
