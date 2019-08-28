@@ -622,21 +622,37 @@ namespace DecodeUtil
     // Recoil Hits
     for(int i=0;i<48;i++){
       h2RecHits[0]->Fill(i+1,fSi1_Amplitude[i]);
-      if(fFwd_Amplitude[0]>1000)
+      if(fFwd_Amplitude[0]>1000 && fFwd_Amplitude[1]>1000
+         && fSi1_Timestamp[i]>0
+         && -10<(fFwd_Timestamp[0]-fFwd_Timestamp[1])
+         && (fFwd_Timestamp[0]-fFwd_Timestamp[1])<10 )
+      {
         h2RecHitsCut[0]->Fill(i+1,fSi1_Amplitude[i]);
+      }
     }
     for(int i=0;i<64;i++){
       h2RecHits[1]->Fill(i+1,fSi2_Amplitude[i]);
-      if(fFwd_Amplitude[0]>1000)
+      if(fFwd_Amplitude[0]>1000 && fFwd_Amplitude[1]>1000
+         && fSi2_Timestamp[i]>0
+         && -10<(fFwd_Timestamp[0]-fFwd_Timestamp[1])
+         && (fFwd_Timestamp[0]-fFwd_Timestamp[1])<10 )
+      {
         h2RecHitsCut[1]->Fill(i+1,fSi2_Amplitude[i]);
+      }
     }
     for(int i=0;i<32;i++){
       h2RecHits[2]->Fill(i+1,fGe1_Amplitude[i]);
-      if(fFwd_Amplitude[0]>1000)
+      if(fFwd_Amplitude[0]>1000 && fFwd_Amplitude[1]>1000
+         && fGe1_Timestamp[i]>0
+         && -10<(fFwd_Timestamp[0]-fFwd_Timestamp[1])
+         && (fFwd_Timestamp[0]-fFwd_Timestamp[1])<10 )
         h2RecHitsCut[2]->Fill(i+1,fGe1_Amplitude[i]);
 
       h2RecHits[3]->Fill(i+1,fGe2_Amplitude[i]);
-      if(fFwd_Amplitude[0]>1000)
+      if(fFwd_Amplitude[0]>1000 && fFwd_Amplitude[1]>1000
+         && fGe2_Timestamp[i]>0
+         && -10<(fFwd_Timestamp[0]-fFwd_Timestamp[1])
+         && (fFwd_Timestamp[0]-fFwd_Timestamp[1])<10 )
         h2RecHitsCut[3]->Fill(i+1,fGe2_Amplitude[i]);
     }
 

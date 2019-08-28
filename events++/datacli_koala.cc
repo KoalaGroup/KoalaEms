@@ -353,10 +353,10 @@ main_loop()
     decoder->SetPrivateList(evtlist);
     decoder->SetParsers(ISes);
     //
-    KoaAssembler* assembler=new KoaAssembler();
+    // KoaAssembler* assembler=new KoaAssembler();
     // KoaTimestampAssembler* assembler=new KoaTimestampAssembler();
-    // KoaOnlineAssembler* assembler=new KoaOnlineAssembler();
-    // assembler->SetQdcMaxDiff(3);
+    KoaOnlineAssembler* assembler=new KoaOnlineAssembler();
+    assembler->SetQdcMaxDiff(3);
     decoder->SetAssembler(assembler);
     //
     KoaOnlineAnalyzer*  analyzer=new KoaOnlineAnalyzer();
