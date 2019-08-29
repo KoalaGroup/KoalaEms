@@ -908,7 +908,7 @@ namespace DecodeUtil
     // gEventNr->SetPoint(npoints,fEmsTimeSecond,fEventNr);
 
     npoints=gEventRate->GetN();
-    gEventRate->SetPoint(npoints,fEmsTimeSecond,fPScalerEvtGate);
+    gEventRate->SetPoint(npoints,fEmsTimeSecond,*fPScalerEvtGate);
 
     npoints=gDaqEfficiency->GetN();
     gDaqEfficiency->SetPoint(npoints,fEmsTimeSecond,fDaqEfficiency);
