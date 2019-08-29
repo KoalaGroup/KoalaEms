@@ -115,12 +115,14 @@ namespace DecodeUtil{
     UInt_t  *fPScalerRec[4];// 0-->Si#1, 2-->Si#2, 3->Ge#1, 4-->Ge#2
     UInt_t  *fPScalerFwd[4];// 0-->1&2, 1-->3&4, 2-->5&6, 3-->7&8
     UInt_t  *fPScalerCommonOr;
+    UInt_t  *fPScalerEvtGate;
     UInt_t  *fPScalerGeOverlap[2];
     UInt_t  *fPScalerSiRear[2];
 
     Double_t *fPHitRateRec[4];// 0-->Si#1, 2-->Si#2, 3->Ge#1, 4-->Ge#2
     Double_t  *fPHitRateFwd[4];// 0-->1&2, 1-->3&4, 2-->5&6, 3-->7&8
     Double_t  *fPHitRateCommonOr;
+    Double_t  *fPHitRateEvtGate;
     Double_t  *fPHitRateGeOverlap[2];
     Double_t  *fPHitRateSiRear[2];
 

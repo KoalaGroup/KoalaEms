@@ -179,7 +179,7 @@ namespace DecodeUtil
         fEmsTimeSecond=cur_time_second;
         fEmsTimeUSecond=cur_time_usecond;
         fEventRate=(cur_events-fEventNr)/diff_time;
-        fDaqEfficiency=(cur_events-fEventNr)/(Double_t)fScalerDiff[4];
+        fDaqEfficiency=(fScalerDiff[5])/(Double_t)fScalerDiff[4];
         fEventNr=cur_events;
         //
         if(fEmsCounter)
@@ -396,6 +396,9 @@ namespace DecodeUtil
     // Common OR
     fPScalerCommonOr=fScaler+4;
     fPHitRateCommonOr=fHitRate+4;
+    // Evt gate
+    fPScalerEvtGate=fScaler+5;
+    fPHitRateEvtGate=fHitRate+5;
     // Ge1 and Ge2 Overlapping area (5 strips)
     for(int i=0;i<2;i++){
       fPScalerGeOverlap[i]=fScaler+6+i;
@@ -905,7 +908,7 @@ namespace DecodeUtil
     // gEventNr->SetPoint(npoints,fEmsTimeSecond,fEventNr);
 
     npoints=gEventRate->GetN();
-    gEventRate->SetPoint(npoints,fEmsTimeSecond,fEventRate);
+    gEventRate->SetPoint(npoints,fEmsTimeSecond,fPScalerEvtGate);
 
     npoints=gDaqEfficiency->GetN();
     gDaqEfficiency->SetPoint(npoints,fEmsTimeSecond,fDaqEfficiency);
