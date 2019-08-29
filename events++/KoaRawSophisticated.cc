@@ -132,6 +132,8 @@ namespace DecodeUtil
     }
     // Common OR
     fEmsEvent->fScalerCommonOr=fScaler[4];
+    // Event Gate
+    fEmsEvent->fScalerEvtGate=fScaler[5];
     // Ge1 and Ge2 Overlapping area (5 strips)
     for(int i=0;i<2;i++){
       fEmsEvent->fScalerGeOverlap[i]=fScaler[6+i];

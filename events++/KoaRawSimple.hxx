@@ -3,8 +3,6 @@
 #include "global.hxx"
 #include "TTree.h"
 #include "KoaRaw.hxx"
-#include "KoaRawEvent.hxx"
-#include "KoaEmsEvent.hxx"
 
 namespace DecodeUtil{
   class KoaRawSimple : public KoaRaw

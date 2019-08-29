@@ -18,15 +18,16 @@ public:
   UInt_t  fScalerRec[4];// 0-->Si#1, 2-->Si#2, 3->Ge#1, 4-->Ge#2
   UInt_t  fScalerFwd[4];// 0-->1&2, 1-->3&4, 2-->5&6, 3-->7&8
   UInt_t  fScalerCommonOr;
+  UInt_t  fScalerEvtGate;
   UInt_t  fScalerGeOverlap[2];
   UInt_t  fScalerSiFwdOutsideCon[2]; // coincidence between Si and FwdOutside
-  UInt_t  fScalerSiRear[2];
   UInt_t  fScalerFwdCh[8];
+  UInt_t  fScalerSiRear[2];
 
   //
   UInt_t  fEventNr;
 
-  ClassDef(KoaEmsEvent,2);// initial version for bt2019 march
+  ClassDef(KoaEmsEvent,3);// initial version for bt2019 march
 };
 
 #endif
