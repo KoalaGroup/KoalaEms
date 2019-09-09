@@ -356,7 +356,7 @@ main_loop()
     KoaAssembler* assembler=new KoaAssembler();
     // KoaTimestampAssembler* assembler=new KoaTimestampAssembler();
     // KoaOnlineAssembler* assembler=new KoaOnlineAssembler();
-    // assembler->SetQdcMaxDiff(3);
+    // assembler->SetQdcTimeDiff(3);
     decoder->SetAssembler(assembler);
     //
     KoaOnlineAnalyzer*  analyzer=new KoaOnlineAnalyzer();

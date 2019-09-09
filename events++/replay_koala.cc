@@ -156,7 +156,7 @@ parse_file(int p)
   //
   // KoaAssembler* assembler=new KoaAssembler();
   KoaTimestampAssembler* assembler=new KoaTimestampAssembler();
-  assembler->SetQdcMaxDiff(max_tsdiff);
+  assembler->SetQdcTimeDiff(max_tsdiff);
   decoder->SetAssembler(assembler);
 
   //

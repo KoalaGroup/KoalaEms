@@ -29,6 +29,7 @@ using namespace DecodeUtil;
 
 static bool use_simplestructure;
 static const char* outputfile;
+static int qdc_tsdiff;
 static int max_tsdiff;
 static char* const *files;
 static int ref_module;
@@ -155,12 +156,13 @@ parse_file(int p)
   //
   // KoaAssembler* assembler=new KoaAssembler();
   KoaTimestampAssembler* assembler=new KoaTimestampAssembler();
-  assembler->SetQdcMaxDiff(max_tsdiff);
+  assembler->SetQdcTimeDiff(qdc_tsdiff);
+  assembler->SetMaxTimeDiff(max_tsdiff);
   assembler->SetRefModuleIndex(ref_module);
   decoder->SetAssembler(assembler);
 
   //
-  KoaAnalyzer*  analyzer=new KoaSimpleAnalyzer(outputfile,use_simplestructure,max_tsdiff);
+  KoaAnalyzer*  analyzer=new KoaSimpleAnalyzer(outputfile,use_simplestructure,qdc_tsdiff);
   decoder->SetAnalyzer(analyzer);
 
   //
@@ -210,7 +212,8 @@ printusage(const char* argv0)
   fprintf(stderr, "       -h: print this help and exit\n");
   fprintf(stderr, "       -v: verbosity\n");
   fprintf(stderr, "       -s: output simple flat tree structure\n");
-  fprintf(stderr, "       -m: QDC included in the DAQ, and max_tsdiff is the max timestamp diff between QDC and other modules (which should be the master gate width/clock width)");
+  fprintf(stderr, "       -m: max_tsdiff is the maximum allowed timestamp difference between modules");
+  fprintf(stderr, "       -q: QDC included in the DAQ, and qdc_tsdiff is the timestamp diff between QDC and other modules (which should be the master gate width/clock width)");
   fprintf(stderr, "       outputfile: the basename of the output files when the data input is stdin");
   fprintf(stderr, "       file ...: one or more ems cluster file(s)\n");
   fprintf(stderr, "            data input may also come from stdin\n");
@@ -223,7 +226,7 @@ readargs(int argc, char* argv[])
   int c;
   bool err=false;
 
-  while (!err && ((c=getopt(argc, argv, "hsm:o:r:")) != -1)) {
+  while (!err && ((c=getopt(argc, argv, "hsm:o:r:q:")) != -1)) {
     switch (c) {
     case 'h':
       printusage(argv[0]);
@@ -236,6 +239,11 @@ readargs(int argc, char* argv[])
         max_tsdiff = atoi(optarg);
         break;
       }
+    case 'q':
+      {
+        qdc_tsdiff = atoi(optarg);
+        break;
+      }
     case 'o':
       outputfile=optarg;
       break;
@@ -244,9 +252,10 @@ readargs(int argc, char* argv[])
       break;
     default:
       err=true;
+      break;
     }
   }
-  if (err || optind == 1) {
+  if (err && optind == 0) {
     printusage(argv[0]);
     return -1;
   }
@@ -262,7 +271,8 @@ prepare_globals()
 {
   use_simplestructure=false;
   outputfile="koala_data";
-  max_tsdiff=2;
+  qdc_tsdiff=3;
+  max_tsdiff=4;
   ref_module=0;
 }
 

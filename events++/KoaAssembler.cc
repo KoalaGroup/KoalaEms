@@ -46,7 +46,7 @@ namespace DecodeUtil
     if(delta_t > TS_RANGE/2) delta_t-=TS_RANGE;
     if(delta_t < -TS_RANGE/2) delta_t+=TS_RANGE;
 
-    if(delta_t>3 || delta_t<-3){
+    if(delta_t>fMaxTimeDiff || delta_t<-fMaxTimeDiff){
       LOG_F(INFO,"%ld != %d",first,second);
       return false;
     }

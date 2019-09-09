@@ -12,7 +12,9 @@ namespace DecodeUtil
   class KoaAssembler
   {
   public:
-    KoaAssembler() : fKoalaPrivate(nullptr), fMxdc32Private(nullptr), fEmsPrivate(nullptr) {}
+    KoaAssembler() : fKoalaPrivate(nullptr), fMxdc32Private(nullptr), fEmsPrivate(nullptr)
+                   , fQdcTimeDiff(3), fMaxTimeDiff(4)
+    {}
     virtual ~KoaAssembler() {}
     virtual int Init() {
       CHECK_NOTNULL_F(fKoalaPrivate,"Set Koala Event Private List first!");
@@ -37,14 +39,25 @@ namespace DecodeUtil
       fEmsPrivate = pri;
     }
 
+    void SetQdcTimeDiff(int diff){
+      fQdcTimeDiff=diff;
+    }
+    void SetMaxTimeDiff(int diff){
+      fMaxTimeDiff = diff;
+    }
+
+
   protected:
-    static bool IsSameTS(int64_t fisrt, int64_t second);
+    bool IsSameTS(int64_t fisrt, int64_t second);
     bool ToBeAssembled();
      
   protected:
     koala_private*  fKoalaPrivate;
     mxdc32_private* fMxdc32Private;
     ems_private*    fEmsPrivate; // TODO: EmsPrivate not used in this class
+
+    int   fQdcTimeDiff; // the width of QDC gate in 62.5ns
+    int   fMaxTimeDiff; // the maximum difference of timestamps
   };
 }
 

@@ -33,14 +33,14 @@ namespace DecodeUtil
     fEventBuffer[fRefModuleIndex]=fMxdc32Private[fRefModuleIndex].drop_event();
     fCurrentTS[fRefModuleIndex]=fEventBuffer[fRefModuleIndex]->timestamp;
     if(mesymodules[fRefModuleIndex].mesytype == mesytec_mqdc32)
-      fCurrentTS[fRefModuleIndex]-=fQdcMaxDiff;
+      fCurrentTS[fRefModuleIndex]-=fQdcTimeDiff;
 
     for(int i=0;i<nr_mesymodules;i++){
       if(i!=fRefModuleIndex){
         fEventBuffer[i]=fMxdc32Private[i].drop_event();
         fCurrentTS[i]=fEventBuffer[i]->timestamp;
         if(mesymodules[i].mesytype == mesytec_mqdc32)
-          fCurrentTS[i]-=fQdcMaxDiff;
+          fCurrentTS[i]-=fQdcTimeDiff;
         if(!IsSameTS(fCurrentTS[i],fCurrentTS[fRefModuleIndex])){
           fToBeCheckedList.push_back(i);
           fEventBuffer[i]->recycle();
@@ -76,7 +76,7 @@ namespace DecodeUtil
       index=fToBeCheckedList.back();
       found_new=false;
       if(mesymodules[index].mesytype==mesytec_mqdc32)
-        offset=fQdcMaxDiff;
+        offset=fQdcTimeDiff;
       else
         offset=0;
       //

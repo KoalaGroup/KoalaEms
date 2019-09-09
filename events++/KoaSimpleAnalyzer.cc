@@ -202,7 +202,7 @@ namespace DecodeUtil{
       //fill hist
       h_timediff[mod]->Fill(delta_t+mod*100);
 
-      if(abs(delta_t) > 3){
+      if(abs(delta_t) > 4){
         unsync=true;
         print=true;
         //
