@@ -1,0 +1,92 @@
+# Makefile for compiling KoalaEms event classes without external dependency
+# This Makefile shows nicely how to compile and link applications
+# using the ROOT libraries on all supported platforms.
+# It does not have dependency on other componenet in KoalaEms and only depends on ROOT installation.
+#
+# To compile it:
+# 1. Copy all event classes related files: KoaEmsEvent.hxx KoaEmsEvent.cxx KoaRawEvent.hxx KoaRawEvent.cxx LinkDef.h to the new build directory
+# 2. Copy this makefile to the new build directory and rename it to Makefile
+# 3. Under the new build directory: run 'make'
+#
+# Or you can do the in-source compiling by run thsi makefile in the source directory directly.
+#
+#
+# Author: Yong Zhou, 09/09/2019
+
+RC     := root-config
+ifeq ($(findstring $(MAKECMDTARGET),clean),)
+ifeq ($(shell which $(RC) 2>&1 | sed -ne "s@.*/$(RC)@$(RC)@p"),$(RC))
+MKARCH := $(wildcard $(shell $(RC) --etcdir)/Makefile.arch)
+RCONFIG := $(wildcard $(shell $(RC) --incdir)/RConfigure.h)
+endif
+ifneq ($(MKARCH),)
+include $(MKARCH)
+else
+ifeq ($(ROOTSYS),)
+ROOTSYS = ..
+endif
+include $(ROOTSYS)/etc/Makefile.arch
+endif
+endif
+#------------------------------------------------------------------------------
+
+EVENTO        = KoaEmsEvent.$(ObjSuf) KoaRawEvent.$(ObjSuf) KoaEvtDict.$(ObjSuf)
+EVENTS        = KoaEmsEvent.$(SrcSuf) KoaRawEvent.$(SrcSuf) KoaEvtDict.$(SrcSuf)
+EVENTSO       = libKoaEvt.$(DllSuf)
+
+ifeq ($(PLATFORM),win32)
+EVENTLIB      = libKoaEvt.lib
+else
+EVENTLIB      = $(shell pwd)/$(EVENTSO)
+endif
+
+ifeq ($(ARCH),aix5)
+MAKESHARED    = /usr/vacpp/bin/makeC++SharedLib
+endif
+
+#------------------------------------------------------------------------------
+
+.SUFFIXES: .$(SrcSuf) .$(ObjSuf) .$(DllSuf)
+.PHONY:    all
+
+all:            $(EVENTSO)
+
+$(EVENTSO):     $(EVENTO)
+ifeq ($(ARCH),aix5)
+		$(MAKESHARED) $(OutPutOpt) $@ $(LIBS) -p 0 $^
+else
+ifeq ($(PLATFORM),macosx)
+		$(LD) $(SOFLAGS)$@ $(LDFLAGS) $^ $(OutPutOpt) $@ $(EXPLLINKLIBS)
+else
+ifeq ($(PLATFORM),win32)
+		bindexplib $* $^ > $*.def
+		lib -nologo -MACHINE:IX86 $^ -def:$*.def \
+		   $(OutPutOpt)$(EVENTLIB)
+		$(LD) $(SOFLAGS) $(LDFLAGS) $^ $*.exp $(LIBS) \
+		   $(OutPutOpt)$@
+		$(MT_DLL)
+else
+		$(LD) $(SOFLAGS) $(LDFLAGS) $^ $(OutPutOpt) $@ $(EXPLLINKLIBS)
+endif
+endif
+endif
+		@echo "$@ done"
+
+KoaEmsEvent.$(ObjSuf): KoaEmsEvent.hxx
+
+KoaRawEvent.$(ObjSuf): KoaRawEvent.hxx
+
+KoaEvtDict.$(SrcSuf): KoaEmsEvent.hxx KoaRawEvent.hxx LinkDef.h
+	@echo "Generating dictionary $@..."
+	$(ROOTCLING) -f $@ -c $^
+
+clean:
+		@rm -f $(EVENTO) *Dict.*
+
+distclean:      clean
+		@rm -f $(EVENTSO) $(EVENTLIB) *Dict.* 
+
+###
+.SUFFIXES: .$(SrcSuf)
+.$(SrcSuf).$(ObjSuf):
+	$(CXX)  $(CXXFLAGS) -c $<
