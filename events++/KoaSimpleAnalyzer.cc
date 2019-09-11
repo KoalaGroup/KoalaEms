@@ -2,6 +2,7 @@
 #include "TStyle.h"
 #include "TCanvas.h"
 #include <iostream>
+#include <iomanip>
 #include "THStack.h"
 #include "KoaRawSimple.hxx"
 #include "KoaRawSophisticated.hxx"
